@@ -1,0 +1,158 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/logo";
+import { useAccount } from "@/contexts/account-context";
+import {
+  LayoutGrid,
+  Settings,
+  BarChart3,
+  CreditCard,
+  FileText,
+  Mail,
+  LogOut,
+  ExternalLink,
+  LucideIcon,
+} from "lucide-react";
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  external?: boolean;
+}
+
+interface NavGroup {
+  items: NavItem[];
+}
+
+// Navigation groups matching Cursor's structure
+const navGroups: NavGroup[] = [
+  {
+    items: [
+      { label: "Overview", href: "/dashboard", icon: LayoutGrid },
+      { label: "Settings", href: "/dashboard/account", icon: Settings },
+    ],
+  },
+  {
+    items: [
+      { label: "Usage", href: "/dashboard/usage", icon: BarChart3 },
+      { label: "Billing & Invoices", href: "/dashboard/account/billing", icon: CreditCard },
+    ],
+  },
+  {
+    items: [
+      { label: "Docs", href: "https://docs.serotonin.to", icon: FileText, external: true },
+      { label: "Contact Us", href: "mailto:support@serotonin.to", icon: Mail, external: true },
+    ],
+  },
+];
+
+// Display names for tiers
+const TIER_DISPLAY_NAMES: Record<string, string> = {
+  free: "Free",
+  pro: "Pro",
+  max: "Max",
+  enterprise: "Enterprise",
+};
+
+export function Sidebar() {
+  const pathname = usePathname();
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const { account } = useAccount();
+
+  const tierName = account?.tier ? TIER_DISPLAY_NAMES[account.tier] || "Free" : "Free";
+
+  return (
+    <aside className="fixed left-0 top-0 h-screen w-60 flex flex-col bg-[var(--background)] border-r border-[var(--border)] z-50">
+      {/* Logo */}
+      <div className="h-14 flex items-center px-5">
+        <Link href="/dashboard">
+          <Logo size={22} />
+        </Link>
+      </div>
+
+      {/* User Info - At Top like Cursor */}
+      {user && (
+        <div className="px-5 pb-5">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">
+              {user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0]}
+            </span>
+            <ExternalLink className="w-3 h-3 text-[var(--muted-foreground)]" />
+          </div>
+          <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">
+            {tierName} Plan · {user.primaryEmailAddress?.emailAddress}
+          </p>
+        </div>
+      )}
+
+      {/* Navigation Groups */}
+      <nav className="flex-1 px-3 overflow-y-auto">
+        {navGroups.map((group, groupIndex) => (
+          <div key={groupIndex}>
+            {/* Divider before each group (except first) */}
+            {groupIndex > 0 && (
+              <div className="h-px bg-[var(--border)] mx-2 my-2" />
+            )}
+
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isExternal = item.external === true;
+                const isActive = !isExternal && pathname === item.href;
+
+                if (isExternal) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors"
+                    >
+                      <Icon className="w-4 h-4" strokeWidth={1.5} />
+                      <span>{item.label}</span>
+                    </a>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 h-10 px-3 rounded-lg text-sm transition-colors",
+                      isActive
+                        ? "bg-[var(--secondary)] text-[var(--foreground)]"
+                        : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
+                    )}
+                  >
+                    <Icon className="w-4 h-4" strokeWidth={1.5} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* Sign Out */}
+      <div className="px-3 py-4">
+        <div className="h-px bg-[var(--border)] mx-2 mb-2" />
+        <button
+          onClick={() => signOut({ redirectUrl: "/sign-in" })}
+          className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors w-full"
+        >
+          <LogOut className="w-4 h-4" strokeWidth={1.5} />
+          <span>Sign out</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
