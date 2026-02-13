@@ -2,7 +2,7 @@
   "name": "serotonin-dashboard",
   "version": "0.7.0",
   "private": true,
-  "description": "Dashboard for Serotonin AI Desktop Agent",
+  "description": "Dashboard for NexusCRM — AI Desktop Agent",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

@@ -26,7 +26,7 @@ const tierConfig: Record<
 > = {
   free: {
     name: "Free",
-    description: "Perfect for trying out Serotonin",
+    description: "Perfect for trying out NexusCRM",
     features: [
       "1M tokens per month",
       "Basic AI assistance",

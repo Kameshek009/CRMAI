@@ -80,7 +80,7 @@ function getReasonDescription(reason: UpgradeReason): string {
     case "weekly_cap_exceeded":
       return "You've used your weekly token allocation. Upgrade for more tokens or wait until next week.";
     case "monthly_cap_exceeded":
-      return "You've used all your tokens for this month. Upgrade to continue using Serotonin.";
+      return "You've used all your tokens for this month. Upgrade to continue using NexusCRM.";
     case "insufficient_credits":
       return "Your token credits have run out. Purchase more credits to continue.";
     case "approaching_limit":

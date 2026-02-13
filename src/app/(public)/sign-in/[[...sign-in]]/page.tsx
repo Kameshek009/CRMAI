@@ -1,12 +1,5 @@
-import { SignIn } from "@clerk/nextjs";
+import { AuthPageWithModal } from "@/components/auth-page-with-modal";
 
 export default function SignInPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-      <SignIn
-        afterSignInUrl="/dashboard"
-        signUpUrl="/sign-up"
-      />
-    </div>
-  );
+  return <AuthPageWithModal variant="signin" />;
 }

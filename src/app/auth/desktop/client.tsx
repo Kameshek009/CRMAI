@@ -96,7 +96,7 @@ export default function DesktopAuthClient({
 
           {/* Device */}
           <div className="text-center text-sm text-neutral-600 dark:text-neutral-400 mb-6">
-            {deviceName || "Serotonin Desktop"} · {platformDisplay}
+            {deviceName || "NexusCRM Desktop"} · {platformDisplay}
           </div>
 
           {/* Error */}

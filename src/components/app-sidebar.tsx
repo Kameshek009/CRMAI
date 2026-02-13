@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useAccount } from "@/contexts/account-context";
 import { Logo } from "@/components/ui/logo";
+import { NexusBrandSidebar } from "@/components/nexus-brand";
 import {
   Sidebar,
   SidebarContent,
@@ -169,12 +170,12 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
+              <Link href="/dashboard" className="group">
                 <div className="flex aspect-square size-8 items-center justify-center">
                   <Logo size={20} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Serotonin</span>
+                  <NexusBrandSidebar />
                   <span className="truncate text-xs text-muted-foreground">Dashboard</span>
                 </div>
               </Link>

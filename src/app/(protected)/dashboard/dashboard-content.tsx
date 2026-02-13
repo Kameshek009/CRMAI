@@ -63,7 +63,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
     <PageContainer>
       <PageHeader
         title={`Welcome back, ${userName}`}
-        description="Here's an overview of your Serotonin usage"
+        description="Here's an overview of your NexusCRM usage"
       />
 
       {/* Stats Grid */}
@@ -164,7 +164,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   </p>
                   <p className="text-muted-foreground">
                     {isExceeded
-                      ? "Upgrade to continue using Serotonin without interruption."
+                      ? "Upgrade to continue using NexusCRM without interruption."
                       : `You've used ${Math.round(usage?.percentUsed || 0)}% of your monthly tokens.`}
                   </p>
                 </div>
