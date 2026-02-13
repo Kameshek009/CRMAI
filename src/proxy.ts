@@ -4,7 +4,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/api/billing/webhook",
+  "/api/billing_disabled/webhook",
   // Desktop app auth endpoints (use their own JWT validation)
   "/api/auth/desktop/(.*)",
   // Desktop sync endpoints (use their own JWT validation)
