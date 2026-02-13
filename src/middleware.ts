@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
@@ -17,23 +18,28 @@ const isPublicRoute = createRouteMatcher([
 const isApiRoute = createRouteMatcher(["/api/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
-  // Allow public routes
-  if (isPublicRoute(request)) {
-    return;
-  }
-
-  // For API routes, check for Bearer token (desktop app auth)
-  if (isApiRoute(request)) {
-    const authHeader = request.headers.get("Authorization");
-
-    // If there's a Bearer token, let the API route handle validation
-    if (authHeader?.startsWith("Bearer ")) {
+  try {
+    // Allow public routes
+    if (isPublicRoute(request)) {
       return;
     }
-  }
 
-  // Protect all other routes
-  await auth.protect();
+    // For API routes, check for Bearer token (desktop app auth)
+    if (isApiRoute(request)) {
+      const authHeader = request.headers.get("Authorization");
+
+      // If there's a Bearer token, let the API route handle validation
+      if (authHeader?.startsWith("Bearer ")) {
+        return;
+      }
+    }
+
+    // Protect all other routes
+    await auth.protect();
+  } catch {
+    // Prevent MIDDLEWARE_INVOCATION_FAILED - redirect to sign-in on errors
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
 });
 
 export const config = {
