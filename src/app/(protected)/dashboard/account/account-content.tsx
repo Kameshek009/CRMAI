@@ -10,7 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { CustomerBillingCard, InvoiceHistory } from "@/components/billing";
-import { Check, Loader2, Crown, Settings, CreditCard, AlertTriangle, ArrowRight } from "lucide-react";
+import { Check, Loader2, Crown, Settings, CreditCard, AlertTriangle, ArrowRight, Palette } from "lucide-react";
+import { ThemeToggleSlider } from "@/components/theme-toggle-slider";
 import type { Account, UsageStats } from "@/types";
 import type { CustomerBillingInfoData, InvoiceInfo } from "@/components/billing";
 
@@ -107,6 +108,30 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
               <p className="text-lg font-medium">{name}</p>
               <p className="text-sm text-muted-foreground">{email}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Appearance Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Palette className="size-4" />
+            Appearance
+          </CardTitle>
+          <CardDescription>
+            Customize how NexusCRM looks for you
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Theme</p>
+              <p className="text-sm text-muted-foreground">
+                Switch between light and dark mode
+              </p>
+            </div>
+            <ThemeToggleSlider />
           </div>
         </CardContent>
       </Card>

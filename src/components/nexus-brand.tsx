@@ -18,8 +18,7 @@ export function NexusBrandHeader() {
         className="inline-block rounded-xl px-2 py-1.5 -ml-2 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <span
-          className="text-lg font-semibold tracking-tight transition-all duration-500 ease-out text-foreground group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-500 group-hover:via-violet-500 group-hover:to-fuchsia-500 group-hover:drop-shadow-[0_0_12px_rgba(139,92,246,0.4)]"
-          style={{ WebkitBackgroundClip: "text", backgroundClip: "text" }}
+          className="text-lg font-semibold tracking-tight text-foreground"
         >
           {brandName}
         </span>
@@ -31,8 +30,7 @@ export function NexusBrandHeader() {
 export function NexusBrandSidebar() {
   return (
     <span
-      className="truncate font-semibold text-foreground group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-500 group-hover:via-violet-500 group-hover:to-fuchsia-500 transition-all duration-500"
-      style={{ WebkitBackgroundClip: "text", backgroundClip: "text" }}
+      className="truncate font-semibold text-foreground"
     >
       {brandName}
     </span>

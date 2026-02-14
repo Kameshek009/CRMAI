@@ -31,7 +31,7 @@ export function ThemeToggleSlider() {
         className="absolute top-0.5 h-7 w-8 rounded-full bg-background border border-border shadow-sm"
         initial={false}
         animate={{ left: `${activeIndex * 32 + 2}px` }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        transition={{ type: "spring", stiffness: 260, damping: 22 }}
       />
 
       {/* Light */}

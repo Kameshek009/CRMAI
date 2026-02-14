@@ -17,7 +17,7 @@ export function AuthPageWithModal({ variant }: { variant: "signin" | "signup" })
           footerLinkHref="/sign-up"
         >
           <SignIn
-            afterSignInUrl="/dashboard"
+            forceRedirectUrl="/dashboard"
             signUpUrl="/sign-up"
             appearance={{ elements: { footer: { display: "none" } } }}
           />
@@ -31,7 +31,7 @@ export function AuthPageWithModal({ variant }: { variant: "signin" | "signup" })
           footerLinkHref="/sign-in"
         >
           <SignUp
-            afterSignUpUrl="/dashboard"
+            forceRedirectUrl="/dashboard"
             signInUrl="/sign-in"
             appearance={{ elements: { footer: { display: "none" } } }}
           />
