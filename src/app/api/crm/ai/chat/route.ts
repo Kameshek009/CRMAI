@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Call Groq with CRM tools
     const completion = await groq.chat.completions.create({
       messages,
-      model: "moonshotai/kimi-k2-instruct",
+      model: "llama-3.3-70b-versatile",
       temperature: 0.3,
       max_completion_tokens: 2048,
       tools: CRM_TOOLS,
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
           choice.message,
           ...toolMessages,
         ],
-        model: "moonshotai/kimi-k2-instruct",
+        model: "llama-3.3-70b-versatile",
         temperature: 0.3,
         max_completion_tokens: 1024,
         stream: false,

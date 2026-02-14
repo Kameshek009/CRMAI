@@ -110,6 +110,7 @@ export const createTaskSchema = z.object({
   deal_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
   is_ai_generated: z.boolean().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -122,6 +123,7 @@ export const updateTaskSchema = z.object({
   contact_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // ============================================================================

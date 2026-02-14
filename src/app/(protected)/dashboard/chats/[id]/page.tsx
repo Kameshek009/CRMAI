@@ -195,10 +195,14 @@ export default function ChatDetailPage() {
 
       // For chat mode: call CRM AI and store response
       if (chat?.mode === 'chat') {
-        const recentMessages = messages.slice(-10).map((m) => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        }));
+        // Build history from previous messages (exclude current one to avoid duplicate)
+        const recentMessages = messages
+          .filter((m) => !m.id.startsWith('temp-'))
+          .slice(-10)
+          .map((m) => ({
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+          }));
 
         const aiRes = await fetch('/api/crm/ai/chat', {
           method: 'POST',
