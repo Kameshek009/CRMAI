@@ -153,7 +153,6 @@ export default function ChatDetailPage() {
     setIsSending(true);
 
     // Generate a unique local_id for deduplication
-    // This ensures realtime subscription can identify this message
     const localId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     // Optimistic update
@@ -165,7 +164,7 @@ export default function ChatDetailPage() {
       metadata: {},
       message_type: 'text',
       tokens_used: 0,
-      local_id: localId, // Use local_id for deduplication
+      local_id: localId,
       device_origin: 'web',
       created_at: new Date().toISOString(),
     };
@@ -173,7 +172,7 @@ export default function ChatDetailPage() {
     setMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      // Use API route instead of direct Supabase (server-side auth)
+      // Store user message
       const response = await fetch(`/api/chats/${chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -189,14 +188,51 @@ export default function ChatDetailPage() {
         throw new Error(result.error || 'Failed to send message');
       }
 
-      // Replace optimistic with real - match by local_id for reliability
+      // Replace optimistic with real
       setMessages((prev) =>
         prev.map((m) => (m.local_id === localId ? result.message : m))
       );
+
+      // For chat mode: call CRM AI and store response
+      if (chat?.mode === 'chat') {
+        const recentMessages = messages.slice(-10).map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        }));
+
+        const aiRes = await fetch('/api/crm/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: content,
+            history: recentMessages,
+          }),
+        });
+        const aiJson = await aiRes.json();
+
+        const aiContent = aiJson.success
+          ? aiJson.data.response
+          : 'Sorry, something went wrong. Please try again.';
+
+        // Store AI response as a message
+        const aiMsgRes = await fetch(`/api/chats/${chatId}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            role: 'assistant',
+            content: aiContent,
+            message_type: 'text',
+          }),
+        });
+        const aiMsgResult = await aiMsgRes.json();
+
+        if (aiMsgResult.success) {
+          setMessages((prev) => [...prev, aiMsgResult.message]);
+        }
+      }
     } catch (err) {
       console.error('Error sending message:', err);
       toast.error('Failed to send message');
-      // Remove optimistic message by local_id for consistency
       setMessages((prev) => prev.filter((m) => m.local_id !== localId));
     } finally {
       setIsSending(false);
@@ -344,9 +380,13 @@ export default function ChatDetailPage() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <Bot className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-            <h3 className="text-base sm:text-lg font-medium mb-2">Start a conversation</h3>
+            <h3 className="text-base sm:text-lg font-medium mb-2">
+              {chat?.mode === 'chat' ? 'CRM AI Assistant' : 'Start a conversation'}
+            </h3>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-sm">
-              Send a message to chat or describe a task for the agent to complete on your desktop.
+              {chat?.mode === 'chat'
+                ? 'Try: "Add contact John Smith" or "Show pipeline summary"'
+                : 'Describe a task for the agent to complete on your desktop.'}
             </p>
           </div>
         ) : (
@@ -448,9 +488,11 @@ export default function ChatDetailPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
-              !isAgentOnline
+              chat?.mode === 'chat'
+                ? 'Ask CRM AI anything...'
+                : !isAgentOnline
                 ? 'Agent offline - message will be queued...'
-                : chat.mode === 'agent'
+                : chat?.mode === 'agent'
                 ? 'Describe a task for the agent...'
                 : 'Send a message...'
             }

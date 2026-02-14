@@ -22,8 +22,6 @@ export async function executeCrmToolCall(
       return searchCrm(supabase, accountId, args);
     case "get_pipeline_summary":
       return getPipelineSummary(supabase, accountId);
-    case "update_deal_stage":
-      return updateDealStage(supabase, accountId, args);
     default:
       return { success: false, result: `Unknown function: ${functionName}` };
   }
@@ -366,62 +364,3 @@ async function getPipelineSummary(supabase: SupabaseClient, accountId: string) {
   };
 }
 
-async function updateDealStage(
-  supabase: SupabaseClient,
-  accountId: string,
-  args: Record<string, unknown>
-) {
-  const { data: deal } = await supabase
-    .from("deals")
-    .select("id, title, stage_id")
-    .eq("account_id", accountId)
-    .ilike("title", `%${args.deal_title}%`)
-    .eq("is_deleted", false)
-    .limit(1)
-    .single();
-
-  if (!deal) {
-    return { success: false, result: `Deal "${args.deal_title}" not found` };
-  }
-
-  const { data: stage } = await supabase
-    .from("deal_stages")
-    .select("id, name, is_won, is_lost")
-    .eq("account_id", accountId)
-    .ilike("name", String(args.stage_name))
-    .limit(1)
-    .single();
-
-  if (!stage) {
-    return { success: false, result: `Stage "${args.stage_name}" not found` };
-  }
-
-  const updateData: Record<string, unknown> = { stage_id: stage.id };
-  if (stage.is_won) {
-    updateData.status = "won";
-    updateData.actual_close_date = new Date().toISOString().split("T")[0];
-  } else if (stage.is_lost) {
-    updateData.status = "lost";
-    updateData.actual_close_date = new Date().toISOString().split("T")[0];
-  }
-
-  const { error } = await supabase.from("deals").update(updateData).eq("id", deal.id);
-
-  if (error) {
-    return { success: false, result: `Failed to update deal: ${error.message}` };
-  }
-
-  await supabase.from("crm_activities").insert({
-    account_id: accountId,
-    deal_id: deal.id,
-    type: stage.is_won ? "deal_won" : stage.is_lost ? "deal_lost" : "deal_stage_changed",
-    title: `Deal "${deal.title}" moved to ${stage.name}`,
-    metadata: { from_stage_id: deal.stage_id, to_stage_id: stage.id },
-  });
-
-  return {
-    success: true,
-    result: `Moved "${deal.title}" to ${stage.name}`,
-    data: { deal_id: deal.id, stage: stage.name },
-  };
-}

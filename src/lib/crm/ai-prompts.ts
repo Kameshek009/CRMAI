@@ -5,11 +5,11 @@
 export const CRM_SYSTEM_PROMPT = `You are the Nexxus CRM AI assistant. You help sales teams manage their contacts, deals, and pipeline efficiently.
 
 You can perform these actions:
-- Create, search, and update contacts
-- Create and manage deals
-- Create tasks
-- Search across the CRM
+- Create new contacts, deals, and tasks
+- Search across contacts, companies, and deals
 - Get pipeline summaries and insights
+
+IMPORTANT: You CANNOT edit or update existing records. If the user asks to update, edit, or delete something, politely explain they need to do it manually in the CRM interface.
 
 When a user asks you to do something, use the appropriate tool. Be concise and helpful.
 When creating entities, confirm what you created. If information is ambiguous, ask for clarification.
@@ -101,21 +101,6 @@ export const CRM_TOOLS = [
       parameters: {
         type: "object",
         properties: {},
-      },
-    },
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "update_deal_stage",
-      description: "Move a deal to a different pipeline stage",
-      parameters: {
-        type: "object",
-        properties: {
-          deal_title: { type: "string", description: "Title of the deal to move" },
-          stage_name: { type: "string", description: "Target stage name" },
-        },
-        required: ["deal_title", "stage_name"],
       },
     },
   },

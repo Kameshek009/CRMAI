@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,12 +54,13 @@ interface TaskData {
   is_ai_generated: boolean;
 }
 
+type FormMode = { type: "closed" } | { type: "create" } | { type: "edit"; task: TaskData };
+
 export function TasksContent() {
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<TaskData | null>(null);
+  const [formMode, setFormMode] = useState<FormMode>({ type: "closed" });
   const [total, setTotal] = useState(0);
 
   const fetchTasks = useCallback(async () => {
@@ -112,57 +113,61 @@ export function TasksContent() {
     }
   };
 
-  const handleEdit = (id: string) => {
-    const task = tasks.find((t) => t.id === id);
-    if (task) {
-      setEditingTask(task);
-    }
-  };
-
-  const handleUpdate = async (values: Record<string, string>) => {
-    if (!editingTask) return;
+  const handleSubmit = async (values: Record<string, string>) => {
     const filtered = Object.fromEntries(
       Object.entries(values).filter(([, v]) => v !== "")
     );
-    const res = await fetch(`/api/crm/tasks/${editingTask.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(filtered),
-    });
-    const json = await res.json();
-    if (json.success) {
-      toast.success("Task updated");
-      fetchTasks();
+
+    if (formMode.type === "edit") {
+      const res = await fetch(`/api/crm/tasks/${formMode.task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(filtered),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Task updated");
+        fetchTasks();
+      } else {
+        toast.error(json.error || "Failed to update task");
+        throw new Error(json.error);
+      }
     } else {
-      toast.error(json.error || "Failed to update task");
-      throw new Error(json.error);
+      const res = await fetch("/api/crm/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(filtered),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Task created");
+        fetchTasks();
+      } else {
+        toast.error(json.error || "Failed");
+        throw new Error(json.error);
+      }
     }
   };
 
-  const handleCreate = async (values: Record<string, string>) => {
-    // Filter out empty strings so Zod enum validation doesn't fail on unselected fields
-    const filtered = Object.fromEntries(
-      Object.entries(values).filter(([, v]) => v !== "")
-    );
-    const res = await fetch("/api/crm/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(filtered),
-    });
-    const json = await res.json();
-    if (json.success) {
-      toast.success("Task created");
-      fetchTasks();
-    } else {
-      toast.error(json.error || "Failed");
-      throw new Error(json.error);
+  const isEditing = formMode.type === "edit";
+
+  const formInitialValues = useMemo((): Record<string, string> => {
+    if (formMode.type === "edit") {
+      return {
+        title: formMode.task.title,
+        description: formMode.task.description || "",
+        type: formMode.task.type || "",
+        priority: formMode.task.priority || "",
+        due_date: formMode.task.due_date || "",
+      };
     }
-  };
+    return {};
+  }, [formMode]);
 
   return (
     <PageContainer>
       <PageHeader title="Tasks" description={`${total} task${total !== 1 ? "s" : ""}`}>
-        <Button size="sm" onClick={() => setShowForm(true)}>
+        <Button size="sm" onClick={() => setFormMode({ type: "create" })}>
           <Plus className="size-4 mr-1" />
           New Task
         </Button>
@@ -192,8 +197,6 @@ export function TasksContent() {
           icon={CheckSquare}
           title="No tasks"
           description="Create a task to stay on top of your follow-ups."
-          actionLabel="Add Task"
-          onAction={() => setShowForm(true)}
         />
       ) : (
         <div className="space-y-2">
@@ -208,7 +211,10 @@ export function TasksContent() {
               dueDate={task.due_date}
               isAiGenerated={task.is_ai_generated}
               onToggle={handleToggle}
-              onEdit={handleEdit}
+              onEdit={(id) => {
+                const t = tasks.find((x) => x.id === id);
+                if (t) setFormMode({ type: "edit", task: t });
+              }}
               onDelete={handleDelete}
             />
           ))}
@@ -216,27 +222,13 @@ export function TasksContent() {
       )}
 
       <EntityForm
-        open={showForm}
-        onOpenChange={setShowForm}
-        title="New Task"
+        open={formMode.type !== "closed"}
+        onOpenChange={(open) => { if (!open) setFormMode({ type: "closed" }); }}
+        title={isEditing ? "Edit Task" : "New Task"}
         fields={taskFields}
-        onSubmit={handleCreate}
-      />
-
-      <EntityForm
-        open={!!editingTask}
-        onOpenChange={(open) => { if (!open) setEditingTask(null); }}
-        title="Edit Task"
-        fields={taskFields}
-        initialValues={editingTask ? {
-          title: editingTask.title,
-          description: editingTask.description || "",
-          type: editingTask.type || "",
-          priority: editingTask.priority || "",
-          due_date: editingTask.due_date || "",
-        } : {}}
-        onSubmit={handleUpdate}
-        submitLabel="Save"
+        initialValues={formInitialValues}
+        onSubmit={handleSubmit}
+        submitLabel={isEditing ? "Save" : "Create"}
       />
     </PageContainer>
   );
