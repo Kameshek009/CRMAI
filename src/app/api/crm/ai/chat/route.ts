@@ -35,11 +35,20 @@ export async function POST(request: NextRequest) {
     // Check usage limits before calling AI
     const usageCheck = checkUsageAllowed(account, 500); // estimate ~500 tokens
     if (!usageCheck.allowed) {
+      // Calculate when daily limit resets (24h from day start)
+      const dayStart = new Date(account.weekStartDate);
+      const resetsAt = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000).toISOString();
+
       return NextResponse.json(
         {
           success: false,
           error: "Token limit exceeded",
           reason: usageCheck.reason,
+          resetsAt,
+          dailyUsed: usageCheck.weeklyUsed,
+          dailyLimit: usageCheck.weeklyLimit,
+          monthlyUsed: usageCheck.monthlyUsed,
+          monthlyLimit: usageCheck.monthlyLimit,
           upgradeOptions: usageCheck.upgradeOptions,
         },
         { status: 429 }

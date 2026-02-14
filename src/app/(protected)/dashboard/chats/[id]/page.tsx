@@ -21,6 +21,7 @@ import {
   Edit2,
   AlertCircle,
   CheckCircle,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,8 +52,46 @@ export default function ChatDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [input, setInput] = useState('');
+  const [rateLimitResetsAt, setRateLimitResetsAt] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Live countdown timer for daily limit reset
+  useEffect(() => {
+    if (!rateLimitResetsAt) {
+      setCountdown('');
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      const resetTime = new Date(rateLimitResetsAt).getTime();
+      const diff = resetTime - now;
+
+      if (diff <= 0) {
+        setRateLimitResetsAt(null);
+        setCountdown('');
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (hours > 0) {
+        setCountdown(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
+        setCountdown(`${minutes}m ${seconds}s`);
+      } else {
+        setCountdown(`${seconds}s`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [rateLimitResetsAt]);
 
   // Scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -224,8 +263,14 @@ export default function ChatDetailPage() {
             const formatT = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}K` : String(n);
             aiContent += `\n\n---\n*Tokens: -${formatT(tokensUsed)} | Remaining: ${formatT(remaining)} / ${formatT(accountTokenLimit)}*`;
           }
+          // Clear any previous rate limit
+          setRateLimitResetsAt(null);
         } else if (aiJson.reason === 'weekly_cap_exceeded' || aiJson.reason === 'monthly_cap_exceeded') {
-          aiContent = 'Your token limit has been reached. Please upgrade your plan or wait for the limit to reset.';
+          // Set timer for countdown
+          if (aiJson.resetsAt) {
+            setRateLimitResetsAt(aiJson.resetsAt);
+          }
+          aiContent = 'Daily token limit reached. The limit will reset automatically — see the timer below.';
         } else {
           aiContent = 'Sorry, something went wrong. Please try again.';
         }
@@ -489,6 +534,23 @@ export default function ChatDetailPage() {
 
       {/* Composer */}
       <div className="px-3 sm:px-6 py-3 sm:py-4 border-t">
+        {/* Daily limit countdown */}
+        {rateLimitResetsAt && countdown && (
+          <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <Clock className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-xs sm:text-sm text-destructive">
+                Daily limit reached. Resets in <span className="font-mono font-semibold">{countdown}</span>
+              </p>
+            </div>
+            <a
+              href="/dashboard/upgrade"
+              className="text-xs font-medium text-destructive hover:underline shrink-0"
+            >
+              Upgrade
+            </a>
+          </div>
+        )}
         {/* Offline warning */}
         {!isAgentOnline && (
           <div className="flex items-center gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-warning/10 border border-warning/30">
