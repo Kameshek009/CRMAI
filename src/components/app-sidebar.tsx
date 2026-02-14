@@ -42,6 +42,7 @@ import {
   Kanban,
   CheckSquare,
   TrendingUp,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -78,6 +79,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Settings", href: "/dashboard/account", icon: Settings },
       { label: "Usage", href: "/dashboard/usage", icon: BarChart3 },
+      { label: "Upgrade", href: "/dashboard/upgrade", icon: Sparkles },
       { label: "Billing", href: "/dashboard/account/billing", icon: CreditCard },
     ],
   },
