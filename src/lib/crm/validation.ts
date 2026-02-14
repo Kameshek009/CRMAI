@@ -202,3 +202,7 @@ export const bulkTasksSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("delete"), ids: bulkIds }),
   z.object({ action: z.literal("update_status"), ids: bulkIds, status: z.enum(["todo", "in_progress", "done", "cancelled"]) }),
 ]);
+
+export const bulkCompaniesSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("delete"), ids: bulkIds }),
+]);

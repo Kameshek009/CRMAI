@@ -4,10 +4,14 @@ import { useState, useEffect, useCallback } from "react";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompanyCard } from "@/components/crm/company-card";
 import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { EmptyState } from "@/components/crm/empty-state";
+import { BulkActionBar } from "@/components/crm/bulk-action-bar";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { useMultiSelect } from "@/hooks/use-multi-select";
 import { Plus, Search, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,6 +48,10 @@ export function CompaniesContent() {
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [total, setTotal] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isBulkLoading, setIsBulkLoading] = useState(false);
+
+  const { selectedIds, toggle, selectAll, deselectAll, isSelected, isAllSelected, count } = useMultiSelect();
 
   const fetchCompanies = useCallback(async () => {
     setIsLoading(true);
@@ -66,6 +74,11 @@ export function CompaniesContent() {
     fetchCompanies();
   }, [fetchCompanies]);
 
+  // Reset selection when filters change
+  useEffect(() => {
+    deselectAll();
+  }, [search, deselectAll]);
+
   const handleCreate = async (values: Record<string, string>) => {
     const res = await fetch("/api/crm/companies", {
       method: "POST",
@@ -81,6 +94,31 @@ export function CompaniesContent() {
       throw new Error(json.error);
     }
   };
+
+  const handleBulkDelete = async () => {
+    setIsBulkLoading(true);
+    try {
+      const res = await fetch("/api/crm/companies/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", ids: selectedIds }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Deleted ${selectedIds.length} compan${selectedIds.length !== 1 ? "ies" : "y"}`);
+        deselectAll();
+        fetchCompanies();
+      } else {
+        toast.error(json.error || "Failed to delete companies");
+      }
+    } finally {
+      setIsBulkLoading(false);
+      setConfirmDelete(false);
+    }
+  };
+
+  const visibleIds = companies.map((c) => c.id);
+  const allSelected = isAllSelected(visibleIds);
 
   return (
     <PageContainer>
@@ -116,18 +154,32 @@ export function CompaniesContent() {
           onAction={() => setShowForm(true)}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {companies.map((company) => (
-            <CompanyCard
-              key={company.id}
-              id={company.id}
-              name={company.name}
-              industry={company.industry}
-              size={company.size}
-              domain={company.domain}
-              aiHealthScore={company.ai_health_score}
+        <div className="space-y-2">
+          {/* Select All */}
+          <div className="flex items-center gap-2 px-4 py-1">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={() => allSelected ? deselectAll() : selectAll(visibleIds)}
+              className="size-5"
             />
-          ))}
+            <span className="text-sm text-muted-foreground">Select all</span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {companies.map((company) => (
+              <CompanyCard
+                key={company.id}
+                id={company.id}
+                name={company.name}
+                industry={company.industry}
+                size={company.size}
+                domain={company.domain}
+                aiHealthScore={company.ai_health_score}
+                selectable
+                selected={isSelected(company.id)}
+                onSelectToggle={toggle}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -137,6 +189,29 @@ export function CompaniesContent() {
         title="New Company"
         fields={companyFields}
         onSubmit={handleCreate}
+      />
+
+      <BulkActionBar
+        selectedCount={count}
+        onDeselectAll={deselectAll}
+        actions={[
+          {
+            label: "Delete",
+            variant: "destructive",
+            onClick: () => setConfirmDelete(true),
+          },
+        ]}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete companies"
+        description={`Are you sure you want to delete ${count} compan${count !== 1 ? "ies" : "y"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        isLoading={isBulkLoading}
+        onConfirm={handleBulkDelete}
       />
     </PageContainer>
   );
