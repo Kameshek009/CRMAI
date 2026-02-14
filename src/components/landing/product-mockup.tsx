@@ -39,17 +39,15 @@ const statusIcon = (status: string) => {
 export function ProductMockup() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, rotateY: -8 }}
-      animate={{ opacity: 1, y: 0, rotateY: 0 }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 200, damping: 30, delay: 0.3 }}
-      className="relative w-full max-w-[540px]"
-      style={{ perspective: "1200px" }}
+      className="relative w-full max-w-[700px]"
     >
       <motion.div
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         className="rounded-2xl border border-border bg-card shadow-2xl overflow-hidden"
-        style={{ transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)" }}
       >
         {/* Title bar */}
         <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/50">
