@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Calendar, Pencil, Trash2 } from "lucide-react";
+import { Sparkles, Calendar, Pencil, Trash2, Clock } from "lucide-react";
 
 interface TaskItemProps {
   id: string;
@@ -39,12 +39,14 @@ export function TaskItem({
   onDelete,
 }: TaskItemProps) {
   const isDone = status === "done";
+  const isInProgress = status === "in_progress";
   const isOverdue = dueDate && new Date(dueDate) < new Date() && !isDone;
 
   return (
     <div className={cn(
       "flex items-center gap-3 rounded-lg border p-3 transition-colors",
       isDone && "opacity-60",
+      isInProgress && "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/10",
       isOverdue && "border-red-200 bg-red-50/50 dark:bg-red-950/10"
     )}>
       <Checkbox
@@ -55,6 +57,12 @@ export function TaskItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className={cn("text-sm font-medium", isDone && "line-through")}>{title}</span>
+          {isInProgress && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-blue-500/10 text-blue-600 border-blue-200">
+              <Clock className="size-2.5 mr-0.5" />
+              In Progress
+            </Badge>
+          )}
           {isAiGenerated && (
             <Sparkles className="size-3 text-purple-500" />
           )}

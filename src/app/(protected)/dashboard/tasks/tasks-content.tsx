@@ -1,14 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { TaskItem } from "@/components/crm/task-item";
-import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { EmptyState } from "@/components/crm/empty-state";
-import { Plus, CheckSquare } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Plus, CheckSquare, Loader2, Phone, Mail, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 const statusFilters = [
@@ -16,31 +24,6 @@ const statusFilters = [
   { label: "To Do", value: "todo" },
   { label: "In Progress", value: "in_progress" },
   { label: "Done", value: "done" },
-];
-
-const taskFields: FormField[] = [
-  { name: "title", label: "Title", type: "text", required: true, placeholder: "Follow up with..." },
-  { name: "description", label: "Description", type: "textarea", placeholder: "Details..." },
-  {
-    name: "type", label: "Type", type: "select",
-    options: [
-      { label: "Call", value: "call" },
-      { label: "Email", value: "email" },
-      { label: "Meeting", value: "meeting" },
-      { label: "Follow Up", value: "follow_up" },
-      { label: "Other", value: "other" },
-    ],
-  },
-  {
-    name: "priority", label: "Priority", type: "select",
-    options: [
-      { label: "Low", value: "low" },
-      { label: "Medium", value: "medium" },
-      { label: "High", value: "high" },
-      { label: "Urgent", value: "urgent" },
-    ],
-  },
-  { name: "due_date", label: "Due Date", type: "date" },
 ];
 
 interface TaskData {
@@ -52,9 +35,18 @@ interface TaskData {
   status: string;
   due_date: string | null;
   is_ai_generated: boolean;
+  metadata: Record<string, unknown> | null;
 }
 
 type FormMode = { type: "closed" } | { type: "create" } | { type: "edit"; task: TaskData };
+
+const contextFields: Record<string, { name: string; label: string; inputType: string; icon: typeof Phone; placeholder: string }> = {
+  call: { name: "phone_number", label: "Phone Number", inputType: "tel", icon: Phone, placeholder: "+1 (555) 000-0000" },
+  email: { name: "email_address", label: "Email Address", inputType: "email", icon: Mail, placeholder: "email@example.com" },
+  meeting: { name: "location", label: "Location", inputType: "text", icon: MapPin, placeholder: "Office, Zoom link, etc." },
+};
+
+const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 export function TasksContent() {
   const [tasks, setTasks] = useState<TaskData[]>([]);
@@ -63,12 +55,14 @@ export function TasksContent() {
   const [formMode, setFormMode] = useState<FormMode>({ type: "closed" });
   const [total, setTotal] = useState(0);
 
+  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const fetchTasks = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams({ limit: "100" });
       if (statusFilter) params.set("status", statusFilter);
-
       const res = await fetch(`/api/crm/tasks?${params}`);
       const json = await res.json();
       if (json.success) {
@@ -80,20 +74,39 @@ export function TasksContent() {
     }
   }, [statusFilter]);
 
+  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+
+  // Initialize form values when mode changes
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    if (formMode.type === "edit") {
+      const meta = (formMode.task.metadata || {}) as Record<string, string>;
+      setFormValues({
+        title: formMode.task.title,
+        description: formMode.task.description || "",
+        type: formMode.task.type || "",
+        priority: formMode.task.priority || "",
+        status: formMode.task.status || "todo",
+        due_date: formMode.task.due_date ? formMode.task.due_date.split("T")[0] : "",
+        phone_number: meta.phone_number || "",
+        email_address: meta.email_address || "",
+        location: meta.location || "",
+      });
+    } else if (formMode.type === "create") {
+      setFormValues({});
+    }
+  }, [formMode]);
+
+  const set = (name: string, value: string) =>
+    setFormValues((prev) => ({ ...prev, [name]: value }));
 
   const handleToggle = async (id: string, done: boolean) => {
     const newStatus = done ? "done" : "todo";
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)));
-
     const res = await fetch(`/api/crm/tasks/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
     });
-
     if (!res.ok) {
       toast.error("Failed to update task");
       fetchTasks();
@@ -113,56 +126,53 @@ export function TasksContent() {
     }
   };
 
-  const handleSubmit = async (values: Record<string, string>) => {
-    const filtered = Object.fromEntries(
-      Object.entries(values).filter(([, v]) => v !== "")
-    );
-
-    if (formMode.type === "edit") {
-      const res = await fetch(`/api/crm/tasks/${formMode.task.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(filtered),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success("Task updated");
-        fetchTasks();
-      } else {
-        toast.error(json.error || "Failed to update task");
-        throw new Error(json.error);
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      // Build metadata from contextual fields
+      const metadata: Record<string, string> = {};
+      const metaKeys = ["phone_number", "email_address", "location"];
+      for (const key of metaKeys) {
+        if (formValues[key]) metadata[key] = formValues[key];
       }
-    } else {
-      const res = await fetch("/api/crm/tasks", {
-        method: "POST",
+
+      // Build payload, filtering empty strings
+      const payload: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(formValues)) {
+        if (metaKeys.includes(key)) continue;
+        if (val !== "") payload[key] = val;
+      }
+      if (Object.keys(metadata).length > 0) {
+        payload.metadata = metadata;
+      }
+
+      const isEdit = formMode.type === "edit";
+      const url = isEdit ? `/api/crm/tasks/${formMode.task.id}` : "/api/crm/tasks";
+      const method = isEdit ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(filtered),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
+
       if (json.success) {
-        toast.success("Task created");
+        toast.success(isEdit ? "Task updated" : "Task created");
         fetchTasks();
+        setFormMode({ type: "closed" });
       } else {
         toast.error(json.error || "Failed");
-        throw new Error(json.error);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const isEditing = formMode.type === "edit";
-
-  const formInitialValues = useMemo((): Record<string, string> => {
-    if (formMode.type === "edit") {
-      return {
-        title: formMode.task.title,
-        description: formMode.task.description || "",
-        type: formMode.task.type || "",
-        priority: formMode.task.priority || "",
-        due_date: formMode.task.due_date || "",
-      };
-    }
-    return {};
-  }, [formMode]);
+  const isEdit = formMode.type === "edit";
+  const selectedType = formValues.type || "";
+  const ctxField = contextFields[selectedType];
 
   return (
     <PageContainer>
@@ -221,15 +231,120 @@ export function TasksContent() {
         </div>
       )}
 
-      <EntityForm
+      {/* Task form dialog */}
+      <Dialog
         open={formMode.type !== "closed"}
         onOpenChange={(open) => { if (!open) setFormMode({ type: "closed" }); }}
-        title={isEditing ? "Edit Task" : "New Task"}
-        fields={taskFields}
-        initialValues={formInitialValues}
-        onSubmit={handleSubmit}
-        submitLabel={isEditing ? "Save" : "Create"}
-      />
+      >
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{isEdit ? "Edit Task" : "New Task"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Title</label>
+              <Input
+                value={formValues.title || ""}
+                onChange={(e) => set("title", e.target.value)}
+                placeholder="Follow up with..."
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                value={formValues.description || ""}
+                onChange={(e) => set("description", e.target.value)}
+                placeholder="Details..."
+                rows={3}
+              />
+            </div>
+
+            {/* Status — only in edit mode */}
+            {isEdit && (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Status</label>
+                <select
+                  value={formValues.status || "todo"}
+                  onChange={(e) => set("status", e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="todo">To Do</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="done">Done</option>
+                </select>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Type</label>
+              <select
+                value={formValues.type || ""}
+                onChange={(e) => set("type", e.target.value)}
+                className={selectClass}
+              >
+                <option value="">Select...</option>
+                <option value="call">Call</option>
+                <option value="email">Email</option>
+                <option value="meeting">Meeting</option>
+                <option value="follow_up">Follow Up</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            {/* Contextual field: phone for call, email for email, location for meeting */}
+            {ctxField && (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium flex items-center gap-1.5">
+                  <ctxField.icon className="size-3.5" />
+                  {ctxField.label}
+                </label>
+                <Input
+                  type={ctxField.inputType}
+                  value={formValues[ctxField.name] || ""}
+                  onChange={(e) => set(ctxField.name, e.target.value)}
+                  placeholder={ctxField.placeholder}
+                />
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Priority</label>
+              <select
+                value={formValues.priority || ""}
+                onChange={(e) => set("priority", e.target.value)}
+                className={selectClass}
+              >
+                <option value="">Select...</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Due Date</label>
+              <Input
+                type="date"
+                value={formValues.due_date || ""}
+                onChange={(e) => set("due_date", e.target.value)}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setFormMode({ type: "closed" })}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="size-4 mr-2 animate-spin" />}
+                {isEdit ? "Save" : "Create"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
