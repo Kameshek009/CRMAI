@@ -214,9 +214,21 @@ export default function ChatDetailPage() {
         });
         const aiJson = await aiRes.json();
 
-        const aiContent = aiJson.success
-          ? aiJson.data.response
-          : 'Sorry, something went wrong. Please try again.';
+        let aiContent: string;
+        if (aiJson.success) {
+          aiContent = aiJson.data.response;
+          // Append token usage info
+          if (aiJson.data.usage) {
+            const { tokensUsed, accountTokensUsed, accountTokenLimit } = aiJson.data.usage;
+            const remaining = Math.max(0, accountTokenLimit - accountTokensUsed);
+            const formatT = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}K` : String(n);
+            aiContent += `\n\n---\n*Tokens: -${formatT(tokensUsed)} | Remaining: ${formatT(remaining)} / ${formatT(accountTokenLimit)}*`;
+          }
+        } else if (aiJson.reason === 'weekly_cap_exceeded' || aiJson.reason === 'monthly_cap_exceeded') {
+          aiContent = 'Your token limit has been reached. Please upgrade your plan or wait for the limit to reset.';
+        } else {
+          aiContent = 'Sorry, something went wrong. Please try again.';
+        }
 
         // Store AI response as a message
         const aiMsgRes = await fetch(`/api/chats/${chatId}/messages`, {
