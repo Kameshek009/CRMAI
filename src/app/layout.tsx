@@ -6,12 +6,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "NexusCRM Dashboard",
-    template: "%s | NexusCRM",
+    default: "Nexxus CRM",
+    template: "%s | Nexxus CRM",
   },
-  description: "Dashboard for NexusCRM — AI Desktop Agent",
-  keywords: ["nexuscrm", "crm", "ai", "desktop", "agent", "automation"],
-  authors: [{ name: "NexusCRM" }],
+  description: "Nexxus CRM — AI-Powered CRM for Growing Teams",
+  keywords: ["nexxus", "crm", "ai", "sales", "pipeline", "contacts", "deals"],
+  authors: [{ name: "Nexxus CRM" }],
   icons: {
     icon: "/favicon.ico",
   },

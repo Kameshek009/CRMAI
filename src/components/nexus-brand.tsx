@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-const brandName = "NexusCRM";
+const brandName = "Nexxus CRM";
 
 export function NexusBrandHeader() {
   return (

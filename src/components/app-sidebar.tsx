@@ -33,12 +33,14 @@ import {
   Settings,
   BarChart3,
   CreditCard,
-  FileText,
-  Mail,
   LogOut,
   ChevronsUpDown,
-  ExternalLink,
   MessageSquare,
+  Users,
+  Building2,
+  Kanban,
+  CheckSquare,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 
@@ -58,20 +60,24 @@ const navGroups: NavGroup[] = [
   {
     items: [
       { label: "Overview", href: "/dashboard", icon: LayoutGrid },
-      { label: "Chats", href: "/dashboard/chats", icon: MessageSquare },
-      { label: "Settings", href: "/dashboard/account", icon: Settings },
+      { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "CRM",
+    items: [
+      { label: "Contacts", href: "/dashboard/contacts", icon: Users },
+      { label: "Companies", href: "/dashboard/companies", icon: Building2 },
+      { label: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
+      { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
+      { label: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
     ],
   },
   {
     items: [
+      { label: "Settings", href: "/dashboard/account", icon: Settings },
       { label: "Usage", href: "/dashboard/usage", icon: BarChart3 },
       { label: "Billing", href: "/dashboard/account/billing", icon: CreditCard },
-    ],
-  },
-  {
-    items: [
-      { label: "Docs", href: "https://docs.serotonin.to", icon: FileText, external: true },
-      { label: "Contact", href: "mailto:support@serotonin.to", icon: Mail, external: true },
     ],
   },
 ];
@@ -188,29 +194,19 @@ export function AppSidebar() {
       <SidebarContent>
         {navGroups.map((group, groupIndex) => (
           <SidebarGroup key={groupIndex}>
+            {group.label && (
+              <div className="px-3 py-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </span>
+              </div>
+            )}
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = !item.external && pathname === item.href;
-
-                  if (item.external) {
-                    return (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton asChild tooltip={item.label}>
-                          <a
-                            href={item.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Icon />
-                            <span>{item.label}</span>
-                            <ExternalLink className="ml-auto size-3 opacity-50" />
-                          </a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  }
+                  const isActive = pathname === item.href ||
+                    (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
                   return (
                     <SidebarMenuItem key={item.href}>

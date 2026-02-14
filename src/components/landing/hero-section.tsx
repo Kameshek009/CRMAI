@@ -6,10 +6,10 @@ import { Check, Star, ArrowRight } from "lucide-react";
 import { ProductMockup } from "./product-mockup";
 
 const features = [
-  "AI-powered lead scoring & insights",
-  "Unified inbox for all channels",
-  "Visual deal pipeline with drag & drop",
-  "Automations that save hours daily",
+  "AI-powered lead scoring & deal insights",
+  "Visual drag & drop sales pipeline",
+  "Smart contact management with engagement tracking",
+  "Natural language CRM commands via AI assistant",
 ];
 
 const container = {

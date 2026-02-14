@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AccountProvider } from "@/contexts/account-context";
+import { CrmOverlays } from "@/components/crm/crm-overlays";
 
 export default async function DashboardLayout({
   children,
@@ -26,6 +27,7 @@ export default async function DashboardLayout({
             {children}
           </main>
         </SidebarInset>
+        <CrmOverlays />
       </SidebarProvider>
     </AccountProvider>
   );
