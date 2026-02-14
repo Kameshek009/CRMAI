@@ -11,7 +11,7 @@ import type { SubscriptionTier } from "@/types";
  * Token limits per tier (monthly)
  */
 export const TIER_TOKEN_LIMITS: Record<SubscriptionTier, number> = {
-  free: 100_000,
+  free: 50_000,
   pro: 10_000_000,
   max: 100_000_000,
   enterprise: 0, // Credit-based, no monthly limit

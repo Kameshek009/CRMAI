@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAccountId } from "@/lib/crm/helpers";
+import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { CRM_SYSTEM_PROMPT, CRM_TOOLS } from "@/lib/crm/ai-prompts";
 import { executeCrmToolCall } from "@/lib/crm/ai-executor";
+import { checkUsageAllowed } from "@/lib/usage/check";
+import { transformAccountRow } from "@/types";
 import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -10,6 +13,38 @@ export async function POST(request: NextRequest) {
   try {
     const { accountId, error } = await getAccountId();
     if (error) return error;
+
+    const supabase = createSupabaseAdmin();
+
+    // Fetch account for quota check
+    const { data: accountRow, error: accountError } = await supabase
+      .from("accounts")
+      .select("*")
+      .eq("id", accountId)
+      .single();
+
+    if (accountError || !accountRow) {
+      return NextResponse.json(
+        { success: false, error: "Account not found" },
+        { status: 404 }
+      );
+    }
+
+    const account = transformAccountRow(accountRow);
+
+    // Check usage limits before calling AI
+    const usageCheck = checkUsageAllowed(account, 500); // estimate ~500 tokens
+    if (!usageCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Token limit exceeded",
+          reason: usageCheck.reason,
+          upgradeOptions: usageCheck.upgradeOptions,
+        },
+        { status: 429 }
+      );
+    }
 
     const body = await request.json();
     const { message, history = [] } = body as {
@@ -28,6 +63,8 @@ export async function POST(request: NextRequest) {
       { role: "user" as const, content: message },
     ];
 
+    let totalTokensUsed = 0;
+
     // Call Groq with CRM tools
     const completion = await groq.chat.completions.create({
       messages,
@@ -38,13 +75,16 @@ export async function POST(request: NextRequest) {
       stream: false,
     });
 
+    totalTokensUsed += completion.usage?.total_tokens || 0;
+
     const choice = completion.choices[0];
     const toolCalls = choice?.message?.tool_calls;
 
+    let responseContent: string;
+    let toolResults: { name: string; result: string; data?: unknown }[] = [];
+
     // If there are tool calls, execute them
     if (toolCalls && toolCalls.length > 0) {
-      const toolResults: { name: string; result: string; data?: unknown }[] = [];
-
       for (const tc of toolCalls) {
         const args = JSON.parse(tc.function.arguments);
         const result = await executeCrmToolCall(accountId, tc.function.name, args);
@@ -71,23 +111,50 @@ export async function POST(request: NextRequest) {
         stream: false,
       });
 
-      const finalContent = finalCompletion.choices[0]?.message?.content || "";
+      totalTokensUsed += finalCompletion.usage?.total_tokens || 0;
+      responseContent = finalCompletion.choices[0]?.message?.content || "";
+    } else {
+      responseContent = choice?.message?.content || "";
+    }
 
-      return NextResponse.json({
-        success: true,
-        data: {
-          response: finalContent,
-          toolResults,
+    // Deduct tokens from account
+    if (totalTokensUsed > 0) {
+      const newTokensUsed = account.tokensUsed + totalTokensUsed;
+      const newWeeklyTokensUsed = account.weeklyTokensUsed + totalTokensUsed;
+
+      // Update account
+      await supabase
+        .from("accounts")
+        .update({
+          tokens_used: newTokensUsed,
+          weekly_tokens_used: newWeeklyTokensUsed,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", accountId);
+
+      // Record in usage_records
+      await supabase.from("usage_records").insert({
+        account_id: accountId,
+        tokens_consumed: totalTokensUsed,
+        action_type: "crm_ai_chat",
+        metadata: {
+          model: "llama-3.3-70b-versatile",
+          has_tool_calls: toolResults.length > 0,
+          tool_count: toolResults.length,
         },
       });
     }
 
-    // No tool calls, return direct response
     return NextResponse.json({
       success: true,
       data: {
-        response: choice?.message?.content || "",
-        toolResults: [],
+        response: responseContent,
+        toolResults,
+        usage: {
+          tokensUsed: totalTokensUsed,
+          accountTokensUsed: account.tokensUsed + totalTokensUsed,
+          accountTokenLimit: account.tokenLimit,
+        },
       },
     });
   } catch (err) {
