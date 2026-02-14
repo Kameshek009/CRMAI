@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         .insert({
           clerk_user_id: userId,
           tier: "free",
-          token_limit: 10000,
+          token_limit: 50000,
           tokens_used: 0,
           billing_cycle_start: new Date().toISOString(),
         })

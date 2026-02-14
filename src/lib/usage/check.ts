@@ -48,7 +48,8 @@ function checkWeeklyCap(
   account: Account,
   tokensNeeded: number
 ): UsageCheckResult {
-  const monthlyLimit = account.tokenLimit || TIER_TOKEN_LIMITS[account.tier] || TIER_TOKEN_LIMITS.free;
+  const tierLimit = TIER_TOKEN_LIMITS[account.tier] || TIER_TOKEN_LIMITS.free;
+  const monthlyLimit = Math.max(account.tokenLimit, tierLimit);
   const weeklyLimit = Math.floor(monthlyLimit / 4);
 
   // Check if week has rolled over (more than 7 days since week_start_date)
@@ -136,7 +137,8 @@ function getUpgradeOptions(currentTier: SubscriptionTier): string[] {
  */
 export function calculateUsageStats(account: Account) {
   const isEnterprise = account.tier === "enterprise";
-  const monthlyLimit = account.tokenLimit || TIER_TOKEN_LIMITS[account.tier] || 0;
+  const tierLimit = TIER_TOKEN_LIMITS[account.tier] || 0;
+  const monthlyLimit = Math.max(account.tokenLimit, tierLimit);
   const weeklyLimit = Math.floor(monthlyLimit / 4);
 
   // Calculate billing cycle end
