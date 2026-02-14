@@ -18,13 +18,13 @@ export const TIER_TOKEN_LIMITS: Record<SubscriptionTier, number> = {
 };
 
 /**
- * Weekly token limits (monthly / 4)
+ * Daily token limits (resets every 24h)
  */
 export const TIER_WEEKLY_LIMITS: Record<SubscriptionTier, number> = {
   free: 10_000,
   pro: 500_000,
   max: 2_500_000,
-  enterprise: 0, // No weekly cap for credits
+  enterprise: 0, // No daily cap for credits
 };
 
 /**

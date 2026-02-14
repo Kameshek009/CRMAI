@@ -15,7 +15,7 @@
  */
 
 import type { Account, UsageCheckResult, SubscriptionTier } from "@/types";
-import { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
+import { TIER_TOKEN_LIMITS, TIER_WEEKLY_LIMITS } from "@/lib/constants/tiers";
 
 /**
  * Check if a user is allowed to use tokens based on their tier and usage.
@@ -50,42 +50,41 @@ function checkWeeklyCap(
 ): UsageCheckResult {
   const tierLimit = TIER_TOKEN_LIMITS[account.tier] || TIER_TOKEN_LIMITS.free;
   const monthlyLimit = Math.max(account.tokenLimit, tierLimit);
-  const weeklyLimit = Math.floor(monthlyLimit / 4);
+  // Daily limit from tier config (stored in weeklyTokenLimit field)
+  const dailyLimit = TIER_WEEKLY_LIMITS[account.tier] || TIER_WEEKLY_LIMITS.free;
 
-  // Check if week has rolled over (more than 7 days since week_start_date)
-  const weekStartDate = new Date(account.weekStartDate);
+  // Check if day has rolled over (more than 24h since week_start_date)
+  const dayStartDate = new Date(account.weekStartDate);
   const now = new Date();
-  const daysSinceWeekStart = Math.floor(
-    (now.getTime() - weekStartDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const hoursSinceDayStart =
+    (now.getTime() - dayStartDate.getTime()) / (1000 * 60 * 60);
 
-  // If a new week has started, weekly usage should be 0
-  // (This is normally handled by the database trigger, but we check here too)
-  let effectiveWeeklyUsed = account.weeklyTokensUsed;
-  if (daysSinceWeekStart >= 7) {
-    effectiveWeeklyUsed = 0;
+  // If 24+ hours have passed, daily usage should be 0
+  let effectiveDailyUsed = account.weeklyTokensUsed;
+  if (hoursSinceDayStart >= 24) {
+    effectiveDailyUsed = 0;
   }
 
-  // Check if adding tokensNeeded would exceed weekly limit
-  if (effectiveWeeklyUsed + tokensNeeded > weeklyLimit) {
+  // Check daily limit
+  if (effectiveDailyUsed + tokensNeeded > dailyLimit) {
     return {
       allowed: false,
       reason: "weekly_cap_exceeded",
-      weeklyUsed: effectiveWeeklyUsed,
-      weeklyLimit,
+      weeklyUsed: effectiveDailyUsed,
+      weeklyLimit: dailyLimit,
       monthlyUsed: account.tokensUsed,
       monthlyLimit,
       upgradeOptions: getUpgradeOptions(account.tier),
     };
   }
 
-  // Also check monthly limit (shouldn't hit this if weekly cap is working)
+  // Also check monthly limit
   if (account.tokensUsed + tokensNeeded > monthlyLimit) {
     return {
       allowed: false,
       reason: "monthly_cap_exceeded",
-      weeklyUsed: effectiveWeeklyUsed,
-      weeklyLimit,
+      weeklyUsed: effectiveDailyUsed,
+      weeklyLimit: dailyLimit,
       monthlyUsed: account.tokensUsed,
       monthlyLimit,
       upgradeOptions: getUpgradeOptions(account.tier),
@@ -139,7 +138,7 @@ export function calculateUsageStats(account: Account) {
   const isEnterprise = account.tier === "enterprise";
   const tierLimit = TIER_TOKEN_LIMITS[account.tier] || 0;
   const monthlyLimit = Math.max(account.tokenLimit, tierLimit);
-  const weeklyLimit = Math.floor(monthlyLimit / 4);
+  const dailyLimit = TIER_WEEKLY_LIMITS[account.tier] || TIER_WEEKLY_LIMITS.free;
 
   // Calculate billing cycle end
   const billingCycleStart = new Date(account.billingCycleStart);
@@ -151,19 +150,21 @@ export function calculateUsageStats(account: Account) {
   const msRemaining = billingCycleEnd.getTime() - now.getTime();
   const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
 
-  // Calculate days into current week
-  const weekStartDate = new Date(account.weekStartDate);
-  const daysIntoWeek = Math.floor(
-    (now.getTime() - weekStartDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  // Calculate hours into current day period (24h cycle)
+  const dayStartDate = new Date(account.weekStartDate);
+  const hoursSinceDayStart =
+    (now.getTime() - dayStartDate.getTime()) / (1000 * 60 * 60);
+
+  // If 24h+ passed, effective daily usage is 0
+  const effectiveDailyUsed = hoursSinceDayStart >= 24 ? 0 : account.weeklyTokensUsed;
 
   // Calculate percentages
   const percentUsed = monthlyLimit > 0
     ? Math.min(100, (account.tokensUsed / monthlyLimit) * 100)
     : 0;
 
-  const weeklyPercentUsed = weeklyLimit > 0
-    ? Math.min(100, (account.weeklyTokensUsed / weeklyLimit) * 100)
+  const weeklyPercentUsed = dailyLimit > 0
+    ? Math.min(100, (effectiveDailyUsed / dailyLimit) * 100)
     : 0;
 
   return {
@@ -171,11 +172,11 @@ export function calculateUsageStats(account: Account) {
     tokenLimit: monthlyLimit,
     percentUsed,
     tokensRemaining: Math.max(0, monthlyLimit - account.tokensUsed),
-    weeklyTokensUsed: account.weeklyTokensUsed,
-    weeklyTokenLimit: weeklyLimit,
+    weeklyTokensUsed: effectiveDailyUsed,
+    weeklyTokenLimit: dailyLimit,
     weeklyPercentUsed,
     daysRemaining,
-    daysIntoWeek: Math.min(daysIntoWeek, 7),
+    daysIntoWeek: Math.min(Math.floor(hoursSinceDayStart), 24),
     billingCycleStart,
     billingCycleEnd,
     tokenCredits: account.tokenCredits || 0,

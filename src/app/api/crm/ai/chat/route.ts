@@ -120,15 +120,34 @@ export async function POST(request: NextRequest) {
     // Deduct tokens from account
     if (totalTokensUsed > 0) {
       const newTokensUsed = account.tokensUsed + totalTokensUsed;
-      const newWeeklyTokensUsed = account.weeklyTokensUsed + totalTokensUsed;
+
+      // Check if 24h has passed since daily period start — reset daily counter
+      const dayStart = new Date(account.weekStartDate);
+      const now = new Date();
+      const hoursSinceDayStart =
+        (now.getTime() - dayStart.getTime()) / (1000 * 60 * 60);
+
+      let newDailyTokensUsed: number;
+      let newDayStartDate: string;
+
+      if (hoursSinceDayStart >= 24) {
+        // 24h passed — reset daily usage to just this request
+        newDailyTokensUsed = totalTokensUsed;
+        newDayStartDate = now.toISOString();
+      } else {
+        // Same day — add to existing daily usage
+        newDailyTokensUsed = account.weeklyTokensUsed + totalTokensUsed;
+        newDayStartDate = new Date(account.weekStartDate).toISOString();
+      }
 
       // Update account
       await supabase
         .from("accounts")
         .update({
           tokens_used: newTokensUsed,
-          weekly_tokens_used: newWeeklyTokensUsed,
-          updated_at: new Date().toISOString(),
+          weekly_tokens_used: newDailyTokensUsed,
+          week_start_date: newDayStartDate,
+          updated_at: now.toISOString(),
         })
         .eq("id", accountId);
 
