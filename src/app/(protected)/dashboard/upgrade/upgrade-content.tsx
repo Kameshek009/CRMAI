@@ -281,7 +281,7 @@ export function UpgradeContent() {
                   <span className="text-3xl font-bold">{formatPrice(plan.tier)}</span>
                   {plan.tier !== "enterprise" && (
                     <span className="text-muted-foreground text-sm">
-                      {limits.priceMonthly ? "/month" : "forever"}
+                      {limits.priceMonthly ? "/user/mo" : "forever"}
                     </span>
                   )}
                 </div>

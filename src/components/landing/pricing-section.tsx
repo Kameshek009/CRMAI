@@ -22,7 +22,7 @@ const plans: PlanCard[] = [
   {
     name: "Free",
     price: "$0",
-    priceSuffix: "/ month",
+    priceSuffix: "/ user / month",
     cta: "Get Started",
     ctaHref: "/sign-up",
     features: [
@@ -41,7 +41,7 @@ const plans: PlanCard[] = [
   {
     name: "Pro",
     price: "$20",
-    priceSuffix: "/ month",
+    priceSuffix: "/ user / month",
     badge: "Popular",
     popular: true,
     cta: "Upgrade",
@@ -66,7 +66,7 @@ const plans: PlanCard[] = [
   {
     name: "Max",
     price: "$100",
-    priceSuffix: "/ month",
+    priceSuffix: "/ user / month",
     cta: "Upgrade",
     ctaHref: "/sign-up",
     inheritLabel: "Everything from Pro, and more:",

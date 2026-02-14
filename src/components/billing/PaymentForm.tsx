@@ -19,13 +19,13 @@ const PLAN_INFO: Record<string, { name: string; price: string; period: string; d
   pro: {
     name: "Pro",
     price: "$20",
-    period: "/month",
+    period: "/user/mo",
     description: "For professionals who need more power",
   },
   max: {
     name: "Max",
     price: "$100",
-    period: "/month",
+    period: "/user/mo",
     description: "Maximum capabilities for power users",
   },
   credits_20m: {

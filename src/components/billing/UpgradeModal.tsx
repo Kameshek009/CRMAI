@@ -184,7 +184,7 @@ export function UpgradeModal({
                           <div className="flex items-baseline gap-2">
                             <span className="font-medium">{plan.name}</span>
                             <span className="text-sm text-muted-foreground">
-                              {plan.price}/mo
+                              {plan.price}/user/mo
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground">

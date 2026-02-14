@@ -119,7 +119,7 @@ export function PlanCard({
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-bold">{formatPrice()}</span>
           <span className="text-muted-foreground">
-            {limits.priceMonthly ? "/month" : "forever"}
+            {limits.priceMonthly ? "/user/mo" : "forever"}
           </span>
         </div>
 
