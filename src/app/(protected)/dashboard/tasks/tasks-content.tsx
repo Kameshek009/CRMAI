@@ -46,6 +46,7 @@ const taskFields: FormField[] = [
 interface TaskData {
   id: string;
   title: string;
+  description: string | null;
   type: string;
   priority: string;
   status: string;
@@ -58,6 +59,7 @@ export function TasksContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskData | null>(null);
   const [total, setTotal] = useState(0);
 
   const fetchTasks = useCallback(async () => {
@@ -97,11 +99,55 @@ export function TasksContent() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this task?")) return;
+    const res = await fetch(`/api/crm/tasks/${id}`, { method: "DELETE" });
+    const json = await res.json();
+    if (json.success) {
+      toast.success("Task deleted");
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setTotal((prev) => prev - 1);
+    } else {
+      toast.error(json.error || "Failed to delete task");
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    const task = tasks.find((t) => t.id === id);
+    if (task) {
+      setEditingTask(task);
+    }
+  };
+
+  const handleUpdate = async (values: Record<string, string>) => {
+    if (!editingTask) return;
+    const filtered = Object.fromEntries(
+      Object.entries(values).filter(([, v]) => v !== "")
+    );
+    const res = await fetch(`/api/crm/tasks/${editingTask.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(filtered),
+    });
+    const json = await res.json();
+    if (json.success) {
+      toast.success("Task updated");
+      fetchTasks();
+    } else {
+      toast.error(json.error || "Failed to update task");
+      throw new Error(json.error);
+    }
+  };
+
   const handleCreate = async (values: Record<string, string>) => {
+    // Filter out empty strings so Zod enum validation doesn't fail on unselected fields
+    const filtered = Object.fromEntries(
+      Object.entries(values).filter(([, v]) => v !== "")
+    );
     const res = await fetch("/api/crm/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify(filtered),
     });
     const json = await res.json();
     if (json.success) {
@@ -162,6 +208,8 @@ export function TasksContent() {
               dueDate={task.due_date}
               isAiGenerated={task.is_ai_generated}
               onToggle={handleToggle}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
         </div>
@@ -173,6 +221,22 @@ export function TasksContent() {
         title="New Task"
         fields={taskFields}
         onSubmit={handleCreate}
+      />
+
+      <EntityForm
+        open={!!editingTask}
+        onOpenChange={(open) => { if (!open) setEditingTask(null); }}
+        title="Edit Task"
+        fields={taskFields}
+        initialValues={editingTask ? {
+          title: editingTask.title,
+          description: editingTask.description || "",
+          type: editingTask.type || "",
+          priority: editingTask.priority || "",
+          due_date: editingTask.due_date || "",
+        } : {}}
+        onSubmit={handleUpdate}
+        submitLabel="Save"
       />
     </PageContainer>
   );

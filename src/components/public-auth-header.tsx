@@ -213,7 +213,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
               <Link href="#" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
                 Learn
               </Link>
-              <Link href="#" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+              <Link href="/pricing" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
                 Pricing
               </Link>
             </nav>
@@ -255,7 +255,7 @@ export function PublicAuthHeader() {
         initial={{ y: -24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="sticky top-0 z-50 flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6 lg:pl-10 bg-background/95 backdrop-blur-md border-b border-border"
+        className="sticky top-0 z-50 flex items-center justify-between h-12 sm:h-16 px-3 sm:px-6 lg:pl-10 bg-background/95 backdrop-blur-md border-b border-border"
       >
         <div className="flex items-center gap-1">
           <NexusBrandHeader />
@@ -277,7 +277,7 @@ export function PublicAuthHeader() {
             />
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Link
-                href="#"
+                href="/pricing"
                 className="flex items-center rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
               >
                 Pricing

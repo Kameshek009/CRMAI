@@ -2,8 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Calendar } from "lucide-react";
+import { Sparkles, Calendar, Pencil, Trash2 } from "lucide-react";
 
 interface TaskItemProps {
   id: string;
@@ -14,6 +15,8 @@ interface TaskItemProps {
   dueDate?: string | null;
   isAiGenerated: boolean;
   onToggle?: (id: string, done: boolean) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 const priorityColors: Record<string, string> = {
@@ -32,6 +35,8 @@ export function TaskItem({
   dueDate,
   isAiGenerated,
   onToggle,
+  onEdit,
+  onDelete,
 }: TaskItemProps) {
   const isDone = status === "done";
   const isOverdue = dueDate && new Date(dueDate) < new Date() && !isDone;
@@ -70,6 +75,28 @@ export function TaskItem({
             </span>
           )}
         </div>
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        {onEdit && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground hover:text-foreground"
+            onClick={() => onEdit(id)}
+          >
+            <Pencil className="size-3.5" />
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground hover:text-destructive"
+            onClick={() => onDelete(id)}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
+        )}
       </div>
     </div>
   );

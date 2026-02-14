@@ -27,7 +27,7 @@ const item = {
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden px-4 sm:px-6 pt-12 pb-16 md:pt-24 md:pb-28">
+    <section className="relative overflow-hidden px-4 sm:px-6 pt-8 pb-12 sm:pt-12 sm:pb-16 md:pt-24 md:pb-28">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left column */}
@@ -48,7 +48,7 @@ export function HeroSection() {
             {/* Headline */}
             <motion.h1
               variants={item}
-              className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1]"
+              className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1]"
             >
               The Best{" "}
               <span className="bg-gradient-to-r from-blue-600 via-violet-500 to-purple-600 bg-clip-text text-transparent">
@@ -67,7 +67,7 @@ export function HeroSection() {
             </motion.p>
 
             {/* Feature bullets */}
-            <motion.ul variants={container} className="flex flex-col gap-3 mt-1">
+            <motion.ul variants={container} className="flex flex-col gap-2 sm:gap-3 mt-1">
               {features.map((feat) => (
                 <motion.li
                   key={feat}
@@ -83,7 +83,7 @@ export function HeroSection() {
             </motion.ul>
 
             {/* CTA */}
-            <motion.div variants={item} className="flex flex-col gap-3 mt-2">
+            <motion.div variants={item} className="flex flex-col gap-2 sm:gap-3 mt-2">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
@@ -91,7 +91,7 @@ export function HeroSection() {
               >
                 <Link
                   href="/sign-up"
-                  className="inline-flex items-center gap-2 h-12 px-8 rounded-xl text-sm font-semibold bg-foreground text-background hover:opacity-90 transition-opacity shadow-lg"
+                  className="inline-flex items-center gap-2 h-11 sm:h-12 px-6 sm:px-8 rounded-xl text-sm font-semibold bg-foreground text-background hover:opacity-90 transition-opacity shadow-lg"
                 >
                   Get Started
                   <ArrowRight className="w-4 h-4" />

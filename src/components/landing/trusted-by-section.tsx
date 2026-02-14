@@ -17,7 +17,7 @@ export function TrustedBySection() {
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section ref={ref} className="py-20 px-6">
+    <section ref={ref} className="py-12 sm:py-20 px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -28,7 +28,7 @@ export function TrustedBySection() {
           Trusted by the best
         </span>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+        <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-6">
           {companies.map((company, i) => (
             <motion.span
               key={company}
