@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -43,9 +43,14 @@ export function EntityForm({
 }: EntityFormProps) {
   const [values, setValues] = useState<Record<string, string>>(initialValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const prevOpenRef = useRef(false);
 
   useEffect(() => {
-    if (open) setValues(initialValues);
+    // Only reset values when dialog opens (false → true), not on every render
+    if (open && !prevOpenRef.current) {
+      setValues(initialValues);
+    }
+    prevOpenRef.current = open;
   }, [open, initialValues]);
 
   const handleSubmit = async (e: React.FormEvent) => {
