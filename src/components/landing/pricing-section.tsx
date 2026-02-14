@@ -40,7 +40,7 @@ const plans: PlanCard[] = [
   },
   {
     name: "Pro",
-    price: "$20",
+    price: "$15",
     priceSuffix: "/ user / month",
     badge: "Popular",
     popular: true,
@@ -65,7 +65,7 @@ const plans: PlanCard[] = [
   },
   {
     name: "Max",
-    price: "$100",
+    price: "$35",
     priceSuffix: "/ user / month",
     cta: "Upgrade",
     ctaHref: "/sign-up",

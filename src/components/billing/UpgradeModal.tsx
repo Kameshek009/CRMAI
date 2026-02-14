@@ -37,7 +37,7 @@ const plans = [
   {
     tier: "pro",
     name: "Pro",
-    price: "$20",
+    price: "$15",
     tokens: "10M",
     description: "Perfect for regular users",
     icon: Sparkles,
@@ -45,7 +45,7 @@ const plans = [
   {
     tier: "max",
     name: "Max",
-    price: "$100",
+    price: "$35",
     tokens: "100M",
     description: "For power users",
     icon: Zap,

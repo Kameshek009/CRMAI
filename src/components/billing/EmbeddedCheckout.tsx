@@ -374,13 +374,13 @@ interface CheckoutModalProps extends EmbeddedCheckoutProps {
 const PLAN_INFO: Record<string, { name: string; price: string; period: string; description: string }> = {
   pro: {
     name: "Pro",
-    price: "$20",
+    price: "$15",
     period: "/month",
     description: "For professionals who need more power",
   },
   max: {
     name: "Max",
-    price: "$100",
+    price: "$35",
     period: "/month",
     description: "Maximum capabilities for power users",
   },

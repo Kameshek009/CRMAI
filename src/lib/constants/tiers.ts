@@ -42,8 +42,8 @@ export const TIER_DISPLAY_NAMES: Record<SubscriptionTier, string> = {
  */
 export const TIER_PRICES: Record<SubscriptionTier, number> = {
   free: 0,
-  pro: 2000, // $20
-  max: 10000, // $100
+  pro: 1500, // $15
+  max: 3500, // $35
   enterprise: 0, // Pay-as-you-go
 };
 

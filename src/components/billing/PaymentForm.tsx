@@ -18,13 +18,13 @@ const stripePromise = loadStripe(
 const PLAN_INFO: Record<string, { name: string; price: string; period: string; description: string }> = {
   pro: {
     name: "Pro",
-    price: "$20",
+    price: "$15",
     period: "/user/mo",
     description: "For professionals who need more power",
   },
   max: {
     name: "Max",
-    price: "$100",
+    price: "$35",
     period: "/user/mo",
     description: "Maximum capabilities for power users",
   },

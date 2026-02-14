@@ -36,8 +36,8 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   pro: {
     monthlyTokenLimit: 10_000_000,
     weeklyTokenLimit: 500_000,
-    priceMonthly: 20,
-    priceMonthlyCents: 2000,
+    priceMonthly: 15,
+    priceMonthlyCents: 1500,
     stripePriceId: process.env.STRIPE_PRICE_PRO_MONTHLY || null,
     isSubscription: true,
     features: [
@@ -56,8 +56,8 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   max: {
     monthlyTokenLimit: 100_000_000,
     weeklyTokenLimit: 2_500_000,
-    priceMonthly: 100,
-    priceMonthlyCents: 10000,
+    priceMonthly: 35,
+    priceMonthlyCents: 3500,
     stripePriceId: process.env.STRIPE_PRICE_MAX_MONTHLY || null,
     isSubscription: true,
     features: [
