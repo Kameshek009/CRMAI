@@ -12,6 +12,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -195,11 +196,7 @@ export function AppSidebar() {
         {navGroups.map((group, groupIndex) => (
           <SidebarGroup key={groupIndex}>
             {group.label && (
-              <div className="px-3 py-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {group.label}
-                </span>
-              </div>
+              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             )}
             <SidebarGroupContent>
               <SidebarMenu>

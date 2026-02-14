@@ -36,13 +36,13 @@ export function PublicAuthContent({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="flex-1 flex flex-col items-center justify-center px-4 py-12"
+      className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12"
     >
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
-        className="w-full max-w-[420px]"
+        className="w-full max-w-[420px] min-w-0"
       >
         <motion.div variants={item} className="mb-8">
           <motion.h1

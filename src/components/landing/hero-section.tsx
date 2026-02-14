@@ -27,7 +27,7 @@ const item = {
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+    <section className="relative overflow-hidden px-4 sm:px-6 pt-12 pb-16 md:pt-24 md:pb-28">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left column */}
@@ -119,7 +119,7 @@ export function HeroSection() {
           </motion.div>
 
           {/* Right column — mockup */}
-          <div className="flex justify-center lg:justify-end">
+          <div className="hidden sm:flex justify-center lg:justify-end">
             <ProductMockup />
           </div>
         </div>

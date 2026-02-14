@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, CheckSquare, BarChart2, LayoutGrid, Calendar, MessageCircle, Phone, Inbox, Film, FileText, Layout, BookOpen, ClipboardList, Clock, Zap, Timer, Grid3X3, Link2, Download, Play, BookMarked, HelpCircle, GraduationCap, Video } from "lucide-react";
+import { ChevronDown, CheckSquare, BarChart2, LayoutGrid, Calendar, MessageCircle, Phone, Inbox, Film, FileText, Layout, BookOpen, ClipboardList, Clock, Zap, Timer, Grid3X3, Link2, Download, Play, BookMarked, HelpCircle, GraduationCap, Video, Menu, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggleSlider } from "./theme-toggle-slider";
 import { NexusBrandHeader } from "./nexus-brand";
@@ -153,7 +153,7 @@ function MegaDropdown({
                     {col.title}
                   </span>
                   <ul className="flex flex-col gap-0.5">
-                    {col.items.map((item, i) => {
+                    {col.items.map((item) => {
                       const Icon = item.icon;
                       return (
                         <li key={item.label}>
@@ -180,73 +180,155 @@ function MegaDropdown({
   );
 }
 
+function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 400, damping: 35 }}
+            className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-background border-l border-border p-6 flex flex-col gap-6 overflow-y-auto"
+          >
+            <div className="flex items-center justify-between">
+              <NexusBrandHeader />
+              <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-1">
+              <Link href="#" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+                Product
+              </Link>
+              <Link href="#" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+                Learn
+              </Link>
+              <Link href="#" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+                Pricing
+              </Link>
+            </nav>
+
+            <div className="flex items-center px-3">
+              <ThemeToggleSlider />
+            </div>
+
+            <div className="flex flex-col gap-3 mt-auto">
+              <Link
+                href="/sign-in"
+                onClick={onClose}
+                className="h-11 inline-flex items-center justify-center rounded-xl text-sm font-medium border-2 border-foreground bg-background text-foreground hover:bg-muted transition-all"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                onClick={onClose}
+                className="h-11 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-foreground text-background hover:opacity-90 transition-all shadow-sm"
+              >
+                Get started
+              </Link>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function PublicAuthHeader() {
   const [openDropdown, setOpenDropdown] = useState<"product" | "learn" | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <motion.header
-      initial={{ y: -24, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="sticky top-0 z-50 flex items-center justify-between h-16 pl-10 pr-6 bg-background/95 backdrop-blur-md border-b border-border"
-    >
-      <div className="flex items-center gap-1">
-        <NexusBrandHeader />
+    <>
+      <motion.header
+        initial={{ y: -24, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="sticky top-0 z-50 flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6 lg:pl-10 bg-background/95 backdrop-blur-md border-b border-border"
+      >
+        <div className="flex items-center gap-1">
+          <NexusBrandHeader />
 
-        <nav className="flex items-center gap-0.5 ml-6">
-          <MegaDropdown
-            label="Product"
-            columns={PRODUCT_COLUMNS}
-            open={openDropdown === "product"}
-            onOpen={() => setOpenDropdown("product")}
-            onClose={() => setOpenDropdown(null)}
-          />
-          <MegaDropdown
-            label="Learn"
-            columns={LEARN_COLUMNS}
-            open={openDropdown === "learn"}
-            onOpen={() => setOpenDropdown("learn")}
-            onClose={() => setOpenDropdown(null)}
-          />
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+          <nav className="hidden md:flex items-center gap-0.5 ml-6">
+            <MegaDropdown
+              label="Product"
+              columns={PRODUCT_COLUMNS}
+              open={openDropdown === "product"}
+              onOpen={() => setOpenDropdown("product")}
+              onClose={() => setOpenDropdown(null)}
+            />
+            <MegaDropdown
+              label="Learn"
+              columns={LEARN_COLUMNS}
+              open={openDropdown === "learn"}
+              onOpen={() => setOpenDropdown("learn")}
+              onClose={() => setOpenDropdown(null)}
+            />
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="#"
+                className="flex items-center rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                Pricing
+              </Link>
+            </motion.div>
+          </nav>
+        </div>
+
+        {/* Desktop actions */}
+        <div className="hidden md:flex items-center gap-3">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 25 }}
+          >
+            <ThemeToggleSlider />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 25 }}
+            className="flex items-center gap-2"
+          >
             <Link
-              href="#"
-              className="flex items-center rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              href="/sign-in"
+              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium border-2 border-foreground bg-background text-foreground hover:bg-muted transition-all duration-200"
             >
-              Pricing
+              Sign in
+            </Link>
+            <Link
+              href="/sign-up"
+              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-foreground text-background hover:opacity-90 transition-all duration-200 shadow-sm"
+            >
+              Get started
             </Link>
           </motion.div>
-        </nav>
-      </div>
+        </div>
 
-      <div className="flex items-center gap-3">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 25 }}
-        >
+        {/* Mobile actions */}
+        <div className="flex md:hidden items-center gap-2">
           <ThemeToggleSlider />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: 8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 25 }}
-          className="flex items-center gap-2"
-        >
-          <Link
-            href="/sign-in"
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium border-2 border-foreground bg-background text-foreground hover:bg-muted transition-all duration-200"
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 rounded-lg hover:bg-muted transition-colors"
           >
-            Sign in
-          </Link>
-          <Link
-            href="/sign-up"
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-foreground text-background hover:opacity-90 transition-all duration-200 shadow-sm"
-          >
-            Get started
-          </Link>
-        </motion.div>
-      </div>
-    </motion.header>
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
+      </motion.header>
+
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+    </>
   );
 }
