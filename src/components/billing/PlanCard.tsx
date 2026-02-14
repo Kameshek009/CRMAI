@@ -28,10 +28,10 @@ const tierConfig: Record<
     name: "Free",
     description: "Perfect for trying out NexusCRM",
     features: [
-      "1M tokens per month",
+      "50K tokens per month",
+      "10K tokens/day limit",
       "Basic AI assistance",
       "Email support",
-      "Standard response time",
     ],
   },
   pro: {

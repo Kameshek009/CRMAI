@@ -87,7 +87,7 @@ interface ComparisonRow {
 }
 
 const comparisonRows: ComparisonRow[] = [
-  { label: "AI Tokens / month", free: "100K", pro: "10M", max: "100M", enterprise: "Unlimited" },
+  { label: "AI Tokens / month", free: "50K", pro: "10M", max: "100M", enterprise: "Unlimited" },
   { label: "Contacts", free: "50", pro: "200", max: "500", enterprise: "Unlimited" },
   { label: "Companies", free: "1", pro: "5", max: "10", enterprise: "25+" },
   { label: "Pipeline stages", free: "2", pro: "Unlimited", max: "Unlimited", enterprise: "Unlimited" },

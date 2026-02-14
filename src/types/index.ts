@@ -16,14 +16,15 @@ export interface TierLimits {
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free: {
-    monthlyTokenLimit: 100_000,
+    monthlyTokenLimit: 50_000,
     weeklyTokenLimit: 10_000,
     priceMonthly: 0,
     priceMonthlyCents: 0,
     stripePriceId: null,
     isSubscription: false,
     features: [
-      "100K AI tokens/month",
+      "50K AI tokens/month",
+      "10K tokens/day limit",
       "Up to 50 contacts",
       "1 company",
       "Basic pipeline (2 stages)",
