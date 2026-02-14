@@ -4,11 +4,15 @@ import { useState, useEffect, useCallback } from "react";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { TaskItem } from "@/components/crm/task-item";
 import { EmptyState } from "@/components/crm/empty-state";
+import { BulkActionBar } from "@/components/crm/bulk-action-bar";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { useMultiSelect } from "@/hooks/use-multi-select";
 import {
   Dialog,
   DialogContent,
@@ -54,9 +58,15 @@ export function TasksContent() {
   const [statusFilter, setStatusFilter] = useState("");
   const [formMode, setFormMode] = useState<FormMode>({ type: "closed" });
   const [total, setTotal] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isBulkLoading, setIsBulkLoading] = useState(false);
 
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { selectedIds, toggle, selectAll, deselectAll, isSelected, isAllSelected, count } = useMultiSelect();
+
+  const selectable = count > 0;
 
   const fetchTasks = useCallback(async () => {
     setIsLoading(true);
@@ -75,6 +85,11 @@ export function TasksContent() {
   }, [statusFilter]);
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
+
+  // Reset selection when filters change
+  useEffect(() => {
+    deselectAll();
+  }, [statusFilter, deselectAll]);
 
   // Initialize form values when mode changes
   useEffect(() => {
@@ -126,6 +141,49 @@ export function TasksContent() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    setIsBulkLoading(true);
+    try {
+      const res = await fetch("/api/crm/tasks/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", ids: selectedIds }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Deleted ${selectedIds.length} task${selectedIds.length !== 1 ? "s" : ""}`);
+        deselectAll();
+        fetchTasks();
+      } else {
+        toast.error(json.error || "Failed to delete tasks");
+      }
+    } finally {
+      setIsBulkLoading(false);
+      setConfirmDelete(false);
+    }
+  };
+
+  const handleBulkStatusChange = async (status: string) => {
+    setIsBulkLoading(true);
+    try {
+      const res = await fetch("/api/crm/tasks/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_status", ids: selectedIds, status }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Updated ${selectedIds.length} task${selectedIds.length !== 1 ? "s" : ""} to ${status}`);
+        deselectAll();
+        fetchTasks();
+      } else {
+        toast.error(json.error || "Failed to update tasks");
+      }
+    } finally {
+      setIsBulkLoading(false);
+    }
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -173,6 +231,8 @@ export function TasksContent() {
   const isEdit = formMode.type === "edit";
   const selectedType = formValues.type || "";
   const ctxField = contextFields[selectedType];
+  const visibleIds = tasks.map((t) => t.id);
+  const allSelected = isAllSelected(visibleIds);
 
   return (
     <PageContainer>
@@ -210,6 +270,15 @@ export function TasksContent() {
         />
       ) : (
         <div className="space-y-2">
+          {/* Select All */}
+          <div className="flex items-center gap-2 px-3 py-1">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={() => allSelected ? deselectAll() : selectAll(visibleIds)}
+              className="size-5"
+            />
+            <span className="text-sm text-muted-foreground">Select all</span>
+          </div>
           {tasks.map((task) => (
             <TaskItem
               key={task.id}
@@ -226,6 +295,9 @@ export function TasksContent() {
                 if (t) setFormMode({ type: "edit", task: t });
               }}
               onDelete={handleDelete}
+              selectable={selectable}
+              selected={isSelected(task.id)}
+              onSelectToggle={toggle}
             />
           ))}
         </div>
@@ -345,6 +417,39 @@ export function TasksContent() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <BulkActionBar
+        selectedCount={count}
+        onDeselectAll={deselectAll}
+        actions={[
+          {
+            label: "Change Status",
+            dropdown: [
+              { label: "To Do", value: "todo" },
+              { label: "In Progress", value: "in_progress" },
+              { label: "Done", value: "done" },
+              { label: "Cancelled", value: "cancelled" },
+            ],
+            onDropdownSelect: handleBulkStatusChange,
+          },
+          {
+            label: "Delete",
+            variant: "destructive",
+            onClick: () => setConfirmDelete(true),
+          },
+        ]}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete tasks"
+        description={`Are you sure you want to delete ${count} task${count !== 1 ? "s" : ""}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        isLoading={isBulkLoading}
+        onConfirm={handleBulkDelete}
+      />
     </PageContainer>
   );
 }

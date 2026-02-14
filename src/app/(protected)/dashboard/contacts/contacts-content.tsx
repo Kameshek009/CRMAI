@@ -5,11 +5,15 @@ import { PageContainer, PageHeader } from "@/components/dashboard/page-container
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContactCard } from "@/components/crm/contact-card";
 import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { ImportWizard } from "@/components/crm/import-wizard";
 import { EmptyState } from "@/components/crm/empty-state";
+import { BulkActionBar } from "@/components/crm/bulk-action-bar";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { useMultiSelect } from "@/hooks/use-multi-select";
 import { Plus, Search, Upload, Users } from "lucide-react";
 import { toast } from "sonner";
 
@@ -57,6 +61,10 @@ export function ContactsContent() {
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [total, setTotal] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isBulkLoading, setIsBulkLoading] = useState(false);
+
+  const { selectedIds, toggle, selectAll, deselectAll, isSelected, isAllSelected, count } = useMultiSelect();
 
   const fetchContacts = useCallback(async () => {
     setIsLoading(true);
@@ -81,6 +89,11 @@ export function ContactsContent() {
     fetchContacts();
   }, [fetchContacts]);
 
+  // Reset selection when filters change
+  useEffect(() => {
+    deselectAll();
+  }, [search, statusFilter, deselectAll]);
+
   const handleCreate = async (values: Record<string, string>) => {
     const res = await fetch("/api/crm/contacts", {
       method: "POST",
@@ -96,6 +109,52 @@ export function ContactsContent() {
       throw new Error(json.error);
     }
   };
+
+  const handleBulkDelete = async () => {
+    setIsBulkLoading(true);
+    try {
+      const res = await fetch("/api/crm/contacts/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", ids: selectedIds }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Deleted ${selectedIds.length} contact${selectedIds.length !== 1 ? "s" : ""}`);
+        deselectAll();
+        fetchContacts();
+      } else {
+        toast.error(json.error || "Failed to delete contacts");
+      }
+    } finally {
+      setIsBulkLoading(false);
+      setConfirmDelete(false);
+    }
+  };
+
+  const handleBulkStatusChange = async (status: string) => {
+    setIsBulkLoading(true);
+    try {
+      const res = await fetch("/api/crm/contacts/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_status", ids: selectedIds, status }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Updated ${selectedIds.length} contact${selectedIds.length !== 1 ? "s" : ""} to ${status}`);
+        deselectAll();
+        fetchContacts();
+      } else {
+        toast.error(json.error || "Failed to update contacts");
+      }
+    } finally {
+      setIsBulkLoading(false);
+    }
+  };
+
+  const visibleIds = contacts.map((c) => c.id);
+  const allSelected = isAllSelected(visibleIds);
 
   return (
     <PageContainer>
@@ -154,6 +213,15 @@ export function ContactsContent() {
         />
       ) : (
         <div className="space-y-2">
+          {/* Select All */}
+          <div className="flex items-center gap-2 px-4 py-1">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={() => allSelected ? deselectAll() : selectAll(visibleIds)}
+              className="size-5"
+            />
+            <span className="text-sm text-muted-foreground">Select all</span>
+          </div>
           {contacts.map((contact) => (
             <ContactCard
               key={contact.id}
@@ -166,6 +234,9 @@ export function ContactsContent() {
               status={contact.status}
               engagementScore={contact.engagement_score}
               companyName={contact.companies?.name}
+              selectable
+              selected={isSelected(contact.id)}
+              onSelectToggle={toggle}
             />
           ))}
         </div>
@@ -183,6 +254,39 @@ export function ContactsContent() {
         open={showImport}
         onOpenChange={setShowImport}
         onComplete={fetchContacts}
+      />
+
+      <BulkActionBar
+        selectedCount={count}
+        onDeselectAll={deselectAll}
+        actions={[
+          {
+            label: "Change Status",
+            dropdown: [
+              { label: "Lead", value: "lead" },
+              { label: "Active", value: "active" },
+              { label: "Inactive", value: "inactive" },
+              { label: "Churned", value: "churned" },
+            ],
+            onDropdownSelect: handleBulkStatusChange,
+          },
+          {
+            label: "Delete",
+            variant: "destructive",
+            onClick: () => setConfirmDelete(true),
+          },
+        ]}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete contacts"
+        description={`Are you sure you want to delete ${count} contact${count !== 1 ? "s" : ""}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        isLoading={isBulkLoading}
+        onConfirm={handleBulkDelete}
       />
     </PageContainer>
   );

@@ -186,3 +186,19 @@ export const reorderStagesSchema = z.object({
     })
   ),
 });
+
+// ============================================================================
+// Bulk action schemas
+// ============================================================================
+
+const bulkIds = z.array(z.string().uuid()).min(1).max(100);
+
+export const bulkContactsSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("delete"), ids: bulkIds }),
+  z.object({ action: z.literal("update_status"), ids: bulkIds, status: z.enum(["lead", "active", "inactive", "churned"]) }),
+]);
+
+export const bulkTasksSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("delete"), ids: bulkIds }),
+  z.object({ action: z.literal("update_status"), ids: bulkIds, status: z.enum(["todo", "in_progress", "done", "cancelled"]) }),
+]);

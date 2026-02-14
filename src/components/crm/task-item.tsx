@@ -17,6 +17,9 @@ interface TaskItemProps {
   onToggle?: (id: string, done: boolean) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectToggle?: (id: string) => void;
 }
 
 const priorityColors: Record<string, string> = {
@@ -37,6 +40,9 @@ export function TaskItem({
   onToggle,
   onEdit,
   onDelete,
+  selectable,
+  selected,
+  onSelectToggle,
 }: TaskItemProps) {
   const isDone = status === "done";
   const isInProgress = status === "in_progress";
@@ -47,13 +53,22 @@ export function TaskItem({
       "flex items-center gap-3 rounded-lg border p-3 transition-colors",
       isDone && "opacity-60",
       isInProgress && "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/10",
-      isOverdue && "border-red-200 bg-red-50/50 dark:bg-red-950/10"
+      isOverdue && "border-red-200 bg-red-50/50 dark:bg-red-950/10",
+      selected && "ring-2 ring-primary/50 bg-primary/5"
     )}>
-      <Checkbox
-        checked={isDone}
-        onCheckedChange={(checked) => onToggle?.(id, !!checked)}
-        className="size-5"
-      />
+      {selectable ? (
+        <Checkbox
+          checked={selected}
+          onCheckedChange={() => onSelectToggle?.(id)}
+          className="size-5"
+        />
+      ) : (
+        <Checkbox
+          checked={isDone}
+          onCheckedChange={(checked) => onToggle?.(id, !!checked)}
+          className="size-5"
+        />
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className={cn("text-sm font-medium", isDone && "line-through")}>{title}</span>
