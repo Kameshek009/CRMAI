@@ -17,7 +17,7 @@ import {
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DealCard, type DealForCard } from "@/components/crm/deal-card";
+import { DealCard, DealCardOverlay, type DealForCard } from "@/components/crm/deal-card";
 import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { EmptyState } from "@/components/crm/empty-state";
 import { Plus, Kanban, DollarSign, TrendingUp } from "lucide-react";
@@ -342,7 +342,7 @@ export function PipelineContent() {
         </div>
 
         <DragOverlay dropAnimation={null}>
-          {activeDeal && <DealCard deal={activeDeal} isOverlay />}
+          {activeDeal && <DealCardOverlay deal={activeDeal} />}
         </DragOverlay>
       </DndContext>
 
