@@ -103,7 +103,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               title={isConnected ? "Live updates active" : "Click to refresh"}
             >
               {isConnected ? (
-                <Wifi className="size-4 text-green-500" />
+                <Wifi className="size-4 text-success" />
               ) : (
                 <RefreshCw className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
               )}
@@ -130,7 +130,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
-            <div className={`size-2.5 rounded-full ${isConnected ? "bg-green-500" : "bg-muted-foreground"}`} />
+            <div className={`size-2.5 rounded-full ${isConnected ? "bg-success" : "bg-muted-foreground"}`} />
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -147,14 +147,14 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
       {/* Upgrade Prompt */}
       {!isLoading && isApproachingLimit && account?.tier === "free" && (
-        <Card className={isExceeded ? "border-destructive" : "border-orange-500/50"}>
+        <Card className={isExceeded ? "border-destructive" : "border-warning/50"}>
           <CardContent className="p-8">
             <div className="flex items-start gap-5">
               <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary">
                 {isExceeded ? (
                   <AlertTriangle className="size-6 text-destructive" />
                 ) : (
-                  <Sparkles className="size-6 text-orange-500" />
+                  <Sparkles className="size-6 text-warning" />
                 )}
               </div>
               <div className="flex-1 space-y-4">

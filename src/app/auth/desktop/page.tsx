@@ -26,10 +26,10 @@ export default async function DesktopAuthPage({
   // Validate required parameters
   if (!state) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Invalid Request</h1>
-          <p className="mt-2 text-[var(--muted-foreground)]">
+          <h1 className="text-2xl font-bold text-foreground">Invalid Request</h1>
+          <p className="mt-2 text-muted-foreground">
             Missing required state parameter. Please try again from the desktop app.
           </p>
         </div>

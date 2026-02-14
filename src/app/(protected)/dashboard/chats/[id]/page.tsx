@@ -313,15 +313,15 @@ export default function ChatDetailPage() {
         <div className="px-3 sm:px-6 py-2.5 sm:py-3 border-b bg-muted/30">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <Bot className="h-4 w-4 text-orange-400 shrink-0" />
+              <Bot className="h-4 w-4 text-chart-3 shrink-0" />
               <span className="text-xs sm:text-sm font-medium truncate">{visionBoard.title}</span>
               <span
                 className={cn(
                   'text-xs px-2 py-0.5 rounded-full shrink-0',
-                  visionBoard.status === 'active' && 'bg-green-500/20 text-green-500',
-                  visionBoard.status === 'completed' && 'bg-blue-500/20 text-blue-500',
-                  visionBoard.status === 'failed' && 'bg-red-500/20 text-red-500',
-                  visionBoard.status === 'paused' && 'bg-yellow-500/20 text-yellow-500'
+                  visionBoard.status === 'active' && 'bg-success/20 text-success',
+                  visionBoard.status === 'completed' && 'bg-chart-1/20 text-chart-1',
+                  visionBoard.status === 'failed' && 'bg-destructive/20 text-destructive',
+                  visionBoard.status === 'paused' && 'bg-warning/20 text-warning'
                 )}
               >
                 {visionBoard.status}
@@ -369,18 +369,18 @@ export default function ChatDetailPage() {
                   className={cn(
                     'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
                     message.message_type === 'error'
-                      ? 'bg-red-500/20'
+                      ? 'bg-destructive/20'
                       : message.message_type === 'result'
-                      ? 'bg-green-500/20'
+                      ? 'bg-success/20'
                       : 'bg-muted'
                   )}
                 >
                   {message.message_type === 'error' ? (
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <AlertCircle className="h-4 w-4 text-destructive" />
                   ) : message.message_type === 'result' ? (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-success" />
                   ) : (
-                    <Bot className="h-4 w-4 text-blue-400" />
+                    <Bot className="h-4 w-4 text-chart-1" />
                   )}
                 </div>
               )}
@@ -391,11 +391,11 @@ export default function ChatDetailPage() {
                   message.role === 'user'
                     ? 'bg-primary text-primary-foreground'
                     : message.message_type === 'error'
-                    ? 'bg-red-500/10 border border-red-500/30'
+                    ? 'bg-destructive/10 border border-destructive/30'
                     : message.message_type === 'result'
-                    ? 'bg-green-500/10 border border-green-500/30'
+                    ? 'bg-success/10 border border-success/30'
                     : message.message_type === 'plan' || message.message_type === 'action'
-                    ? 'bg-orange-500/10 border border-orange-500/30'
+                    ? 'bg-warning/10 border border-warning/30'
                     : 'bg-muted'
                 )}
               >
@@ -435,9 +435,9 @@ export default function ChatDetailPage() {
       <div className="px-3 sm:px-6 py-3 sm:py-4 border-t">
         {/* Offline warning */}
         {!isAgentOnline && (
-          <div className="flex items-center gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-            <AlertCircle className="h-4 w-4 text-yellow-500 shrink-0" />
-            <p className="text-xs sm:text-sm text-yellow-500">
+          <div className="flex items-center gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-warning/10 border border-warning/30">
+            <AlertCircle className="h-4 w-4 text-warning shrink-0" />
+            <p className="text-xs sm:text-sm text-warning">
               Agent offline. Messages will be queued.
             </p>
           </div>

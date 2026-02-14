@@ -46,7 +46,7 @@ export function PublicAuthContent({
       >
         <motion.div variants={item} className="mb-8">
           <motion.h1
-            className="text-2xl font-semibold tracking-tight text-[var(--foreground)]"
+            className="text-2xl font-semibold tracking-tight text-foreground"
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 30 }}
@@ -54,7 +54,7 @@ export function PublicAuthContent({
             {title}
           </motion.h1>
           <motion.p
-            className="mt-2 text-sm text-[var(--muted-foreground)]"
+            className="mt-2 text-sm text-muted-foreground"
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.28, type: "spring", stiffness: 300, damping: 30 }}
@@ -68,20 +68,20 @@ export function PublicAuthContent({
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: "spring", stiffness: 350, damping: 30, delay: 0.12 }}
-          className="rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] p-0 overflow-hidden shadow-lg"
+          className="rounded-2xl border-2 border-border bg-card p-0 overflow-hidden shadow-lg"
         >
           {children}
         </motion.div>
 
         <motion.p
           variants={item}
-          className="mt-6 text-center text-sm text-[var(--muted-foreground)]"
+          className="mt-6 text-center text-sm text-muted-foreground"
         >
           {footerText}{" "}
           <motion.span whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
             <Link
               href={footerLinkHref}
-              className="font-medium text-[var(--foreground)] underline underline-offset-2 hover:opacity-80 transition-opacity rounded-lg px-1 py-0.5"
+              className="font-medium text-foreground underline underline-offset-2 hover:opacity-80 transition-opacity rounded-lg px-1 py-0.5"
             >
               {footerLinkLabel}
             </Link>

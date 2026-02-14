@@ -68,7 +68,7 @@ export function Sidebar() {
   const tierName = account?.tier ? TIER_DISPLAY_NAMES[account.tier] || "Free" : "Free";
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-60 flex flex-col bg-[var(--background)] border-r border-[var(--border)] z-50">
+    <aside className="fixed left-0 top-0 h-screen w-60 flex flex-col bg-background border-r border-border z-50">
       {/* Logo */}
       <div className="h-14 flex items-center px-5">
         <Link href="/dashboard">
@@ -83,9 +83,9 @@ export function Sidebar() {
             <span className="text-sm font-medium">
               {user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0]}
             </span>
-            <ExternalLink className="w-3 h-3 text-[var(--muted-foreground)]" />
+            <ExternalLink className="w-3 h-3 text-muted-foreground" />
           </div>
-          <p className="text-[13px] text-[var(--muted-foreground)] mt-0.5">
+          <p className="text-[13px] text-muted-foreground mt-0.5">
             {tierName} Plan · {user.primaryEmailAddress?.emailAddress}
           </p>
         </div>
@@ -97,7 +97,7 @@ export function Sidebar() {
           <div key={groupIndex}>
             {/* Divider before each group (except first) */}
             {groupIndex > 0 && (
-              <div className="h-px bg-[var(--border)] mx-2 my-2" />
+              <div className="h-px bg-border mx-2 my-2" />
             )}
 
             <div className="space-y-0.5">
@@ -113,7 +113,7 @@ export function Sidebar() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors"
+                      className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                     >
                       <Icon className="w-4 h-4" strokeWidth={1.5} />
                       <span>{item.label}</span>
@@ -128,8 +128,8 @@ export function Sidebar() {
                     className={cn(
                       "flex items-center gap-3 h-10 px-3 rounded-lg text-sm transition-colors",
                       isActive
-                        ? "bg-[var(--secondary)] text-[var(--foreground)]"
-                        : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
+                        ? "bg-secondary text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                     )}
                   >
                     <Icon className="w-4 h-4" strokeWidth={1.5} />
@@ -144,10 +144,10 @@ export function Sidebar() {
 
       {/* Sign Out */}
       <div className="px-3 py-4">
-        <div className="h-px bg-[var(--border)] mx-2 mb-2" />
+        <div className="h-px bg-border mx-2 mb-2" />
         <button
           onClick={() => signOut({ redirectUrl: "/sign-in" })}
-          className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors w-full"
+          className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors w-full"
         >
           <LogOut className="w-4 h-4" strokeWidth={1.5} />
           <span>Sign out</span>

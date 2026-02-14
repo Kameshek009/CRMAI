@@ -118,7 +118,7 @@ function MegaDropdown({
     >
       <motion.button
         type="button"
-        className="flex items-center gap-1 rounded-xl px-4 py-2.5 text-sm font-medium text-[var(--foreground)] bg-transparent hover:bg-[var(--muted)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+        className="flex items-center gap-1 rounded-xl px-4 py-2.5 text-sm font-medium text-foreground bg-transparent hover:bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.98 }}
       >
@@ -138,7 +138,7 @@ function MegaDropdown({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ type: "spring", stiffness: 400, damping: 35 }}
-            className="absolute left-0 top-full mt-1 w-[max(90vw,640px)] max-w-[880px] rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xl z-50"
+            className="absolute left-0 top-full mt-1 w-[max(90vw,640px)] max-w-[880px] rounded-2xl border border-border bg-card p-6 shadow-xl z-50"
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-6">
               {columns.map((col, colIndex) => (
@@ -149,7 +149,7 @@ function MegaDropdown({
                   transition={{ delay: colIndex * 0.03 }}
                   className="flex flex-col gap-3"
                 >
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {col.title}
                   </span>
                   <ul className="flex flex-col gap-0.5">
@@ -159,9 +159,9 @@ function MegaDropdown({
                         <li key={item.label}>
                           <Link
                             href={item.href}
-                            className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+                            className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                           >
-                            <span className="text-[var(--muted-foreground)]">
+                            <span className="text-muted-foreground">
                               <Icon className="w-4 h-4" />
                             </span>
                             {item.label}
@@ -188,7 +188,7 @@ export function PublicAuthHeader() {
       initial={{ y: -24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="sticky top-0 z-50 flex items-center justify-between h-16 pl-10 pr-6 bg-[var(--background)]/95 backdrop-blur-md border-b border-[var(--border)]"
+      className="sticky top-0 z-50 flex items-center justify-between h-16 pl-10 pr-6 bg-background/95 backdrop-blur-md border-b border-border"
     >
       <div className="flex items-center gap-1">
         <NexusBrandHeader />
@@ -211,7 +211,7 @@ export function PublicAuthHeader() {
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
             <Link
               href="#"
-              className="flex items-center rounded-xl px-4 py-2.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              className="flex items-center rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
             >
               Pricing
             </Link>
@@ -235,15 +235,15 @@ export function PublicAuthHeader() {
         >
           <Link
             href="/sign-in"
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium border-2 border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-all duration-200"
+            className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium border-2 border-foreground bg-background text-foreground hover:bg-muted transition-all duration-200"
           >
-            Войти
+            Sign in
           </Link>
           <Link
             href="/sign-up"
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 transition-all duration-200 shadow-sm"
+            className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-foreground text-background hover:opacity-90 transition-all duration-200 shadow-sm"
           >
-            Регистрация
+            Get started
           </Link>
         </motion.div>
       </div>

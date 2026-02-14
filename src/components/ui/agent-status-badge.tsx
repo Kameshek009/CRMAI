@@ -30,15 +30,15 @@ const MODE_LABELS: Record<string, string> = {
 
 const MODE_COLORS: Record<string, { online: string; offline: string }> = {
   chat: {
-    online: 'bg-[#7ec4e3]/20 text-[#7ec4e3]',
+    online: 'bg-chart-1/20 text-chart-1',
     offline: 'bg-muted text-muted-foreground',
   },
   agent: {
-    online: 'bg-[#7eea9b]/20 text-[#7eea9b]',
+    online: 'bg-chart-2/20 text-chart-2',
     offline: 'bg-muted text-muted-foreground',
   },
   auto: {
-    online: 'bg-[#f2b76c]/20 text-[#f2b76c]',
+    online: 'bg-chart-3/20 text-chart-3',
     offline: 'bg-muted text-muted-foreground',
   },
 };
@@ -66,7 +66,7 @@ export function AgentStatusBadge({ compact = false, className }: AgentStatusBadg
           <div className={cn('flex items-center gap-2', className)}>
             {/* Status icon */}
             {isOnline ? (
-              <Monitor className="w-4 h-4 text-green-500" />
+              <Monitor className="w-4 h-4 text-success" />
             ) : (
               <MonitorOff className="w-4 h-4 text-muted-foreground" />
             )}
@@ -75,7 +75,7 @@ export function AgentStatusBadge({ compact = false, className }: AgentStatusBadg
             <div
               className={cn(
                 'w-2 h-2 rounded-full',
-                isOnline ? 'bg-green-500' : 'bg-red-500'
+                isOnline ? 'bg-success' : 'bg-destructive'
               )}
             />
 
@@ -86,10 +86,10 @@ export function AgentStatusBadge({ compact = false, className }: AgentStatusBadg
               </span>
             )}
 
-            {/* Mode badge (shown always, dimmed when offline) */}
+            {/* Mode badge */}
             <span
               className={cn(
-                'text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded',
+                'text-xs font-semibold uppercase px-1.5 py-0.5 rounded',
                 MODE_COLORS[mode]?.[isOnline ? 'online' : 'offline'] || MODE_COLORS.chat.offline
               )}
             >

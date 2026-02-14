@@ -37,7 +37,7 @@ export function UsageProgress({
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{label}</span>
         {showValues && (
-          <span className="text-sm text-[var(--muted-foreground)]">
+          <span className="text-sm text-muted-foreground">
             {formatCompact(used)} / {formatCompact(limit)}
           </span>
         )}
@@ -48,7 +48,7 @@ export function UsageProgress({
         className={sizeClasses[size]}
         aria-label={`${label}: ${percentage}%`}
       />
-      <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{percentage}% used</span>
         <span>{formatNumber(limit - used)} remaining</span>
       </div>
@@ -108,7 +108,7 @@ export function UsageCircle({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold">{percentage}%</span>
-        <span className="text-xs text-[var(--muted-foreground)]">used</span>
+        <span className="text-xs text-muted-foreground">used</span>
       </div>
     </div>
   );

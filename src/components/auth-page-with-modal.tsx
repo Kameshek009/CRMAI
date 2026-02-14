@@ -1,21 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { SignIn, SignUp } from "@clerk/nextjs";
 import { PublicAuthHeader } from "@/components/public-auth-header";
-import { AuthModal } from "@/components/auth-modal";
+import { PublicAuthContent } from "@/components/public-auth-content";
 
 export function AuthPageWithModal({ variant }: { variant: "signin" | "signup" }) {
-  const [open, setOpen] = useState(true);
-
-  useEffect(() => {
-    setOpen(true);
-  }, [variant]);
-
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <PublicAuthHeader />
-      <main className="flex-1" />
-      <AuthModal variant={variant} open={open} onOpenChange={setOpen} />
+      {variant === "signin" ? (
+        <PublicAuthContent
+          title="Welcome back"
+          subtitle="Sign in to your account to continue"
+          footerText="Don't have an account?"
+          footerLinkLabel="Sign up"
+          footerLinkHref="/sign-up"
+        >
+          <SignIn
+            afterSignInUrl="/dashboard"
+            signUpUrl="/sign-up"
+            appearance={{ elements: { footer: { display: "none" } } }}
+          />
+        </PublicAuthContent>
+      ) : (
+        <PublicAuthContent
+          title="Create an account"
+          subtitle="Get started with NexusCRM"
+          footerText="Already have an account?"
+          footerLinkLabel="Sign in"
+          footerLinkHref="/sign-in"
+        >
+          <SignUp
+            afterSignUpUrl="/dashboard"
+            signInUrl="/sign-in"
+            appearance={{ elements: { footer: { display: "none" } } }}
+          />
+        </PublicAuthContent>
+      )}
     </div>
   );
 }

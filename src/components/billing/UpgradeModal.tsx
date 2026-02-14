@@ -94,10 +94,10 @@ function getReasonIcon(reason: UpgradeReason) {
   switch (reason) {
     case "weekly_cap_exceeded":
     case "monthly_cap_exceeded":
-      return <Clock className="size-5 text-orange-500" />;
+      return <Clock className="size-5 text-warning" />;
     case "insufficient_credits":
     case "approaching_limit":
-      return <AlertTriangle className="size-5 text-orange-500" />;
+      return <AlertTriangle className="size-5 text-warning" />;
     default:
       return <Sparkles className="size-5 text-primary" />;
   }

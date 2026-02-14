@@ -61,8 +61,8 @@ function ReturnContent() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           {status === "loading" && (
             <>
-              <Loader2 className="w-8 h-8 animate-spin text-[var(--muted-foreground)]" />
-              <p className="text-sm text-[var(--muted-foreground)] mt-4">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mt-4">
                 Confirming your payment...
               </p>
             </>
@@ -70,11 +70,11 @@ function ReturnContent() {
 
           {status === "success" && (
             <>
-              <div className="w-12 h-12 rounded-full border border-[var(--border)] flex items-center justify-center mb-4">
-                <Check className="w-6 h-6 text-[var(--foreground)]" />
+              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center mb-4">
+                <Check className="w-6 h-6 text-foreground" />
               </div>
-              <p className="text-sm text-[var(--foreground)]">Payment complete</p>
-              <p className="text-xs text-[var(--muted-foreground)] mt-2">
+              <p className="text-sm text-foreground">Payment complete</p>
+              <p className="text-xs text-muted-foreground mt-2">
                 Redirecting...
               </p>
             </>
@@ -82,16 +82,16 @@ function ReturnContent() {
 
           {status === "failed" && (
             <>
-              <div className="w-12 h-12 rounded-full border border-[var(--border)] flex items-center justify-center mb-4">
-                <X className="w-6 h-6 text-[var(--foreground)]" />
+              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center mb-4">
+                <X className="w-6 h-6 text-foreground" />
               </div>
-              <p className="text-sm text-[var(--foreground)]">Payment was not completed</p>
-              <p className="text-xs text-[var(--muted-foreground)] mt-1">
+              <p className="text-sm text-foreground">Payment was not completed</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Please try again
               </p>
               <button
                 onClick={() => router.push("/dashboard/account/billing")}
-                className="mt-4 px-4 py-2 text-sm rounded-full border border-[var(--border)] hover:bg-[var(--secondary)] transition-colors cursor-pointer"
+                className="mt-4 px-4 py-2 text-sm rounded-full border border-border hover:bg-secondary transition-colors cursor-pointer"
               >
                 Back to billing
               </button>
@@ -100,16 +100,16 @@ function ReturnContent() {
 
           {status === "error" && (
             <>
-              <div className="w-12 h-12 rounded-full border border-[var(--border)] flex items-center justify-center mb-4">
-                <X className="w-6 h-6 text-[var(--foreground)]" />
+              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center mb-4">
+                <X className="w-6 h-6 text-foreground" />
               </div>
-              <p className="text-sm text-[var(--foreground)]">Something went wrong</p>
-              <p className="text-xs text-[var(--muted-foreground)] mt-1">
+              <p className="text-sm text-foreground">Something went wrong</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Please try again or contact support
               </p>
               <button
                 onClick={() => router.push("/dashboard/account/billing")}
-                className="mt-4 px-4 py-2 text-sm rounded-full border border-[var(--border)] hover:bg-[var(--secondary)] transition-colors cursor-pointer"
+                className="mt-4 px-4 py-2 text-sm rounded-full border border-border hover:bg-secondary transition-colors cursor-pointer"
               >
                 Back to billing
               </button>
@@ -128,7 +128,7 @@ export default function CheckoutReturnPage() {
         <PageContainer>
           <Card>
             <div className="flex flex-col items-center justify-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-[var(--muted-foreground)]" />
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           </Card>
         </PageContainer>

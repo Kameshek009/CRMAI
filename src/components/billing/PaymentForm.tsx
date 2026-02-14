@@ -141,24 +141,24 @@ export function PaymentModal({
       />
 
       {/* Modal content */}
-      <div className="relative z-10 w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+      <div className="relative z-10 w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-card rounded-2xl shadow-2xl border border-border animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-card">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-100">
+            <h2 className="text-lg font-semibold text-foreground">
               {type === "subscription" ? "Subscribe to " : "Purchase "}
               {planInfo?.name}
             </h2>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               {planInfo?.price}{planInfo?.period}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-2 rounded-full hover:bg-secondary transition-colors cursor-pointer"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-zinc-400" />
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
@@ -166,16 +166,16 @@ export function PaymentModal({
         <div className="p-4">
           {status === "error" && (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
-              <div className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-zinc-400" />
+              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-muted-foreground" />
               </div>
               <div className="text-center">
-                <p className="font-medium text-zinc-100">Something went wrong</p>
-                <p className="text-sm text-zinc-400 mt-1">{error || "Please try again"}</p>
+                <p className="font-medium text-foreground">Something went wrong</p>
+                <p className="text-sm text-muted-foreground mt-1">{error || "Please try again"}</p>
               </div>
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-full bg-[#007AFF] hover:bg-[#0066DD] text-white text-sm transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -184,12 +184,12 @@ export function PaymentModal({
 
           {status === "complete" && (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
-              <div className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-zinc-100" />
+              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-success" />
               </div>
               <div className="text-center">
-                <p className="font-medium text-zinc-100">Payment complete</p>
-                <p className="text-sm text-zinc-400 mt-1">
+                <p className="font-medium text-foreground">Payment complete</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   {type === "subscription"
                     ? "Your subscription is now active."
                     : "Credits have been added to your account."}
@@ -216,10 +216,6 @@ export function PaymentModal({
 
       {/* Custom styles to override Stripe's default styling */}
       <style jsx global>{`
-        .stripe-checkout-container {
-          --stripe-color-background: #18181b;
-          --stripe-color-text: #fafafa;
-        }
         .stripe-checkout-container iframe {
           border-radius: 12px;
         }

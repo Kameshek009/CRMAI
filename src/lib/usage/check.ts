@@ -214,10 +214,10 @@ export function getTierDisplayName(tier: SubscriptionTier): string {
  */
 export function getTierBadgeColor(tier: SubscriptionTier): string {
   const colors: Record<SubscriptionTier, string> = {
-    free: "bg-[var(--secondary)] text-[var(--foreground)]",
-    pro: "bg-[var(--secondary)] text-[var(--foreground)]",
-    max: "bg-[var(--secondary)] text-[var(--foreground)]",
-    enterprise: "bg-[var(--secondary)] text-[var(--foreground)]",
+    free: "bg-secondary text-foreground",
+    pro: "bg-secondary text-foreground",
+    max: "bg-secondary text-foreground",
+    enterprise: "bg-secondary text-foreground",
   };
   return colors[tier] || colors.free;
 }

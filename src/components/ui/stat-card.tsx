@@ -27,7 +27,7 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        "bg-[var(--card)] border border-[var(--border)]",
+        "bg-card border border-border",
         className
       )}
       shadow="none"
@@ -35,10 +35,10 @@ export function StatCard({
       <CardBody className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <p className="text-sm text-[var(--muted-foreground)]">{title}</p>
+            <p className="text-sm text-muted-foreground">{title}</p>
             <p className="text-2xl font-semibold tracking-tight">{value}</p>
             {subtitle && (
-              <p className="text-xs text-[var(--muted-foreground)]">
+              <p className="text-xs text-muted-foreground">
                 {subtitle}
               </p>
             )}
@@ -47,18 +47,18 @@ export function StatCard({
                 className={cn(
                   "flex items-center gap-1 text-xs font-medium",
                   trend.isPositive
-                    ? "text-[var(--success)]"
-                    : "text-[var(--destructive)]"
+                    ? "text-success"
+                    : "text-destructive"
                 )}
               >
                 <span>{trend.isPositive ? "+" : ""}{trend.value}%</span>
-                <span className="text-[var(--muted-foreground)]">vs last period</span>
+                <span className="text-muted-foreground">vs last period</span>
               </div>
             )}
           </div>
           {Icon && (
-            <div className="p-2 rounded-lg bg-[var(--secondary)]">
-              <Icon className="w-5 h-5 text-[var(--muted-foreground)]" />
+            <div className="p-2 rounded-lg bg-secondary">
+              <Icon className="w-5 h-5 text-muted-foreground" />
             </div>
           )}
         </div>

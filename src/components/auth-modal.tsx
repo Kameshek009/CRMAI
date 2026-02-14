@@ -18,7 +18,7 @@ export function AuthModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[420px] p-0 gap-0 overflow-hidden rounded-2xl border-2 border-[var(--border)] [&_.cl-rootBox]:w-full [&_.cl-card]:shadow-none [&_.cl-cardBox]:p-0"
+        className="sm:max-w-[420px] p-0 gap-0 overflow-hidden rounded-2xl border-2 border-border [&_.cl-rootBox]:w-full [&_.cl-card]:shadow-none [&_.cl-cardBox]:p-0"
         showCloseButton={true}
       >
         {variant === "signin" ? (

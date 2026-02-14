@@ -31,7 +31,7 @@ export function TierBadge({ tier, size = "md", className }: TierBadgeProps) {
     <span
       className={cn(
         "inline-flex items-center font-medium rounded-full",
-        "bg-[var(--secondary)] text-[var(--foreground)]",
+        "bg-secondary text-foreground",
         sizeClasses[size],
         className
       )}

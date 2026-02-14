@@ -265,15 +265,15 @@ export function EmbeddedCheckout({
   // Always render the container so the ref is available for mounting
   // Overlay loading/error/complete states on top
   return (
-    <div className="relative min-h-[400px] bg-white rounded-2xl overflow-hidden">
+    <div className="relative min-h-[400px] bg-card rounded-2xl overflow-hidden">
       {/* Close button - always visible except during loading (hidden when modal provides one) */}
       {onClose && state !== "loading" && !hideCloseButton && (
         <button
           onClick={handleClose}
-          className="absolute top-2 right-2 z-20 p-2 rounded-full hover:bg-[var(--secondary)] transition-colors"
+          className="absolute top-2 right-2 z-20 p-2 rounded-full hover:bg-secondary transition-colors"
           aria-label="Close checkout"
         >
-          <X className="w-5 h-5 text-[var(--muted-foreground)]" />
+          <X className="w-5 h-5 text-muted-foreground" />
         </button>
       )}
 
@@ -294,9 +294,9 @@ export function EmbeddedCheckout({
 
       {/* Loading overlay - light theme to match Stripe checkout */}
       {state === "loading" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white rounded-lg">
-          <Loader2 className="w-8 h-8 animate-spin text-zinc-500" />
-          <p className="text-sm text-zinc-500">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card rounded-lg">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
             Preparing checkout...
           </p>
         </div>
@@ -304,29 +304,29 @@ export function EmbeddedCheckout({
 
       {/* Error overlay - light theme to match Stripe checkout */}
       {state === "error" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 bg-white rounded-lg">
-          <div className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center">
-            <AlertCircle className="w-6 h-6 text-zinc-600" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 bg-card rounded-lg">
+          <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-muted-foreground" />
           </div>
           <div className="text-center">
-            <p className="font-medium text-zinc-900">
+            <p className="font-medium text-foreground">
               Something went wrong
             </p>
-            <p className="text-sm text-zinc-500 mt-1 max-w-[300px]">
+            <p className="text-sm text-muted-foreground mt-1 max-w-[300px]">
               {errorMessage || "Please try again"}
             </p>
           </div>
           <div className="flex gap-3 mt-4">
             <button
               onClick={handleRetry}
-              className="px-4 py-2 text-sm font-medium rounded-full bg-[#007AFF] text-white hover:bg-[#0066DD] transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2 text-sm font-medium rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again
             </button>
             <button
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium rounded-full border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+              className="px-4 py-2 text-sm font-medium rounded-full border border-border text-foreground hover:bg-secondary transition-colors cursor-pointer"
             >
               Close
             </button>
@@ -336,15 +336,15 @@ export function EmbeddedCheckout({
 
       {/* Complete overlay - light theme to match Stripe checkout */}
       {state === "complete" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 bg-white rounded-lg">
-          <div className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center">
-            <CheckCircle className="w-6 h-6 text-zinc-900" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 bg-card rounded-lg">
+          <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-success" />
           </div>
           <div className="text-center">
-            <p className="font-medium text-zinc-900">
+            <p className="font-medium text-foreground">
               Payment complete
             </p>
-            <p className="text-sm text-zinc-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               {type === "subscription"
                 ? "Your subscription is now active."
                 : "Credits have been added to your account."}
@@ -352,7 +352,7 @@ export function EmbeddedCheckout({
           </div>
           <button
             onClick={handleClose}
-            className="mt-4 px-4 py-2 text-sm font-medium rounded-full bg-[#007AFF] text-white hover:bg-[#0066DD] transition-colors cursor-pointer"
+            className="mt-4 px-4 py-2 text-sm font-medium rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
           >
             Continue
           </button>
@@ -447,10 +447,10 @@ export function CheckoutModal({
         {/* Close button - floating on top */}
         <button
           onClick={onClose}
-          className="absolute -top-2 -right-2 z-20 p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer shadow-lg border border-zinc-600"
+          className="absolute -top-2 -right-2 z-20 p-2 rounded-full bg-secondary hover:bg-accent transition-colors cursor-pointer shadow-lg border border-border"
           aria-label="Close checkout"
         >
-          <X className="w-5 h-5 text-white" />
+          <X className="w-5 h-5 text-foreground" />
         </button>
 
         {/* Stripe checkout - no extra wrapper, just the checkout */}

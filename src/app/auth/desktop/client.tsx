@@ -53,7 +53,6 @@ export default function DesktopAuthClient({
       }
 
       // Redirect to desktop app via deep link with tokens and account data
-      // New format: access_token + refresh_token (for refresh flow)
       const callbackUrl = `serotonin://callback?access_token=${encodeURIComponent(data.access_token)}&refresh_token=${encodeURIComponent(data.refresh_token)}&expires_at=${encodeURIComponent(data.expires_at)}&state=${encodeURIComponent(state)}&account=${encodeURIComponent(JSON.stringify(data.account))}&user=${encodeURIComponent(JSON.stringify(data.user))}`;
 
       // Try to open the deep link
@@ -80,28 +79,28 @@ export default function DesktopAuthClient({
   const platformDisplay = platform === "darwin" ? "macOS" : platform === "win32" ? "Windows" : platform || "Desktop";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
         {/* Card */}
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-6">
+        <div className="bg-card border border-border rounded-xl p-6">
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+            <h1 className="text-lg font-medium text-foreground">
               Authorize Desktop App
             </h1>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               {userEmail}
             </p>
           </div>
 
           {/* Device */}
-          <div className="text-center text-sm text-neutral-600 dark:text-neutral-400 mb-6">
+          <div className="text-center text-sm text-muted-foreground mb-6">
             {deviceName || "NexusCRM Desktop"} · {platformDisplay}
           </div>
 
           {/* Error */}
           {error && (
-            <div className="bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)] rounded px-3 py-2 mb-4 text-sm">
+            <div className="bg-secondary text-foreground border border-border rounded-lg px-3 py-2 mb-4 text-sm">
               {error}
             </div>
           )}
@@ -111,14 +110,14 @@ export default function DesktopAuthClient({
             <button
               onClick={handleCancel}
               disabled={isAuthorizing}
-              className="flex-1 px-4 py-2 rounded border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 rounded-lg border border-border text-foreground text-sm font-medium hover:bg-secondary transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleAuthorize}
               disabled={isAuthorizing}
-              className="flex-1 px-4 py-2 rounded bg-[#007AFF] text-white text-sm font-medium hover:bg-[#0066DD] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isAuthorizing ? (
                 <>
@@ -135,8 +134,8 @@ export default function DesktopAuthClient({
           </div>
 
           {/* Footer link */}
-          <p className="mt-4 text-xs text-center text-neutral-400 dark:text-neutral-500">
-            <a href="/sign-in" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">
+          <p className="mt-4 text-xs text-center text-muted-foreground">
+            <a href="/sign-in" className="hover:text-foreground transition-colors">
               Use a different account
             </a>
           </p>

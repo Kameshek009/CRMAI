@@ -37,7 +37,7 @@ export default function UsagePage() {
           disabled={isLoading}
         >
           {isConnected ? (
-            <Wifi className="mr-2 size-4 text-green-500" />
+            <Wifi className="mr-2 size-4 text-success" />
           ) : (
             <RefreshCw className={`mr-2 size-4 ${isLoading ? "animate-spin" : ""}`} />
           )}
@@ -184,7 +184,7 @@ export default function UsagePage() {
               </p>
             </div>
             <Badge variant={isConnected ? "default" : "secondary"} className="h-8 px-3">
-              <div className={`size-2.5 rounded-full mr-2 ${isConnected ? "bg-green-500" : "bg-muted-foreground"}`} />
+              <div className={`size-2.5 rounded-full mr-2 ${isConnected ? "bg-success" : "bg-muted-foreground"}`} />
               {isConnected ? "Live" : "Offline"}
             </Badge>
           </div>

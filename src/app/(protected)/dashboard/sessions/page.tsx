@@ -7,7 +7,7 @@ export default function SessionsPage() {
     <PageContainer>
       <Card>
         <p className="text-sm font-medium mb-4">Sessions</p>
-        <p className="text-sm text-[var(--muted-foreground)]">
+        <p className="text-sm text-muted-foreground">
           No sessions recorded yet
         </p>
       </Card>

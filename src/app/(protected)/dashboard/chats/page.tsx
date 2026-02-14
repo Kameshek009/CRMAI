@@ -239,11 +239,11 @@ export default function ChatsPage() {
   const getModeIcon = (mode: Chat['mode']) => {
     switch (mode) {
       case 'agent':
-        return <Bot className="h-4 w-4 text-orange-400" />;
+        return <Bot className="h-4 w-4 text-chart-3" />;
       case 'auto':
-        return <Sparkles className="h-4 w-4 text-purple-400" />;
+        return <Sparkles className="h-4 w-4 text-chart-4" />;
       default:
-        return <MessageSquare className="h-4 w-4 text-blue-400" />;
+        return <MessageSquare className="h-4 w-4 text-chart-1" />;
     }
   };
 
