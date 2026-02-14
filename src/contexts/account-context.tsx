@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
   useRef,
   ReactNode,
 } from "react";
@@ -303,17 +304,16 @@ export function AccountProvider({ children }: AccountProviderProps) {
     };
   }, [account?.id, subscribeToRealtime]);
 
-  // Calculate usage stats
-  const usage = account ? calculateUsageStats(account) : null;
+  // Calculate usage stats (memoized to prevent unnecessary consumer re-renders)
+  const usage = useMemo(
+    () => (account ? calculateUsageStats(account) : null),
+    [account]
+  );
 
-  const value: AccountContextValue = {
-    account,
-    usage,
-    isLoading,
-    error,
-    refetch,
-    isConnected,
-  };
+  const value: AccountContextValue = useMemo(
+    () => ({ account, usage, isLoading, error, refetch, isConnected }),
+    [account, usage, isLoading, error, refetch, isConnected]
+  );
 
   return (
     <AccountContext.Provider value={value}>{children}</AccountContext.Provider>

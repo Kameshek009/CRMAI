@@ -227,14 +227,14 @@ export function useUpgradeModal() {
     reason: "weekly_cap_exceeded",
   });
 
-  const showUpgradeModal = (props: Omit<UpgradeModalProps, "isOpen" | "onClose">) => {
+  const showUpgradeModal = React.useCallback((props: Omit<UpgradeModalProps, "isOpen" | "onClose">) => {
     setModalProps(props);
     setIsOpen(true);
-  };
+  }, []);
 
-  const closeUpgradeModal = () => {
+  const closeUpgradeModal = React.useCallback(() => {
     setIsOpen(false);
-  };
+  }, []);
 
   return {
     isOpen,
