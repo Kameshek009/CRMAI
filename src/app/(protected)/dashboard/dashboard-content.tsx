@@ -7,13 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
   Tooltip,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
 } from "recharts";
 import {
   Sparkles,
@@ -23,25 +27,19 @@ import {
   DollarSign,
   Clock,
   FileText,
-  Bookmark,
-  FolderOpen,
-  Upload,
-  LayoutGrid,
-  List,
-  Columns3,
-  Calendar,
-  Table,
   Plus,
   MoreHorizontal,
-  Flag,
   ArrowRight,
   TrendingUp,
-  Building2,
   AlertCircle,
   Info,
   Lightbulb,
+  Kanban,
+  Calendar,
+  Upload,
   type LucideIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useAccount } from "@/contexts/account-context";
 import { UpgradeModal, useUpgradeModal } from "@/components/billing";
 import type { CrmStats, AIInsight } from "@/types/crm";
@@ -144,7 +142,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [activities, setActivities] = useState<ActivityRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [revenueTrend, setRevenueTrend] = useState<{ date: string; revenue: number; cumulative: number }[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -153,13 +151,15 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       fetch("/api/crm/deals?limit=10").then((r) => r.json()),
       fetch("/api/crm/tasks?limit=20").then((r) => r.json()),
       fetch("/api/crm/activities?limit=8").then((r) => r.json()),
+      fetch("/api/crm/stats/revenue-trend").then((r) => r.json()),
     ])
-      .then(([statsRes, insightsRes, dealsRes, tasksRes, activitiesRes]) => {
+      .then(([statsRes, insightsRes, dealsRes, tasksRes, activitiesRes, revenueTrendRes]) => {
         if (statsRes.success) setCrmStats(statsRes.data);
         if (insightsRes.success) setInsights(insightsRes.data);
         if (dealsRes.success) setDeals(dealsRes.data);
         if (tasksRes.success) setTasks(tasksRes.data);
         if (activitiesRes.success) setActivities(activitiesRes.data);
+        if (revenueTrendRes.success) setRevenueTrend(revenueTrendRes.data);
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
@@ -176,6 +176,17 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       value: count,
       color: TASK_STATUS_COLORS[status] || "#a1a1aa",
     }));
+  }, [tasks]);
+
+  const upcomingTasks = useMemo(() => {
+    return tasks
+      .filter((t) => t.status === "todo" || t.status === "in_progress")
+      .sort((a, b) => {
+        if (!a.due_date) return 1;
+        if (!b.due_date) return -1;
+        return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+      })
+      .slice(0, 5);
   }, [tasks]);
 
   // Compute deal progress (position in pipeline as %)
@@ -222,115 +233,85 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Workspace header with tabs */}
-      <div className="border-b border-border px-4 sm:px-6">
-        <div className="flex items-center gap-3 pt-3 pb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">W</span>
-            </div>
-            <h1 className="text-base font-semibold">Workspace</h1>
+      {/* Workspace header */}
+      <div className="border-b border-border px-4 sm:px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-semibold">Welcome back, {userName}</h1>
+            <p className="text-sm text-muted-foreground">
+              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+              {crmStats && ` \u00B7 ${crmStats.tasksDueToday} tasks due today \u00B7 ${crmStats.openDeals} open deals`}
+            </p>
           </div>
-          <span className="text-xs text-muted-foreground">Welcome back, {userName}</span>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-transparent h-auto p-0 gap-0">
-            <TabsTrigger
-              value="overview"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 pb-2 text-sm"
-            >
-              <LayoutGrid className="w-3.5 h-3.5 mr-1.5" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="list"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 pb-2 text-sm"
-              asChild
-            >
-              <Link href="/dashboard/tasks">
-                <List className="w-3.5 h-3.5 mr-1.5" />
-                List
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger
-              value="board"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 pb-2 text-sm"
-              asChild
-            >
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard/pipeline">
-                <Columns3 className="w-3.5 h-3.5 mr-1.5" />
-                Board
+                <Kanban className="w-3.5 h-3.5 mr-1.5" />
+                Pipeline
               </Link>
-            </TabsTrigger>
-            <TabsTrigger
-              value="calendar"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 pb-2 text-sm"
-              asChild
-            >
-              <Link href="/dashboard/tasks">
-                <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                Calendar
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/chats">
+                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                AI Chat
               </Link>
-            </TabsTrigger>
-            <TabsTrigger
-              value="table"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 pb-2 text-sm"
-              asChild
-            >
-              <Link href="/dashboard/contacts">
-                <Table className="w-3.5 h-3.5 mr-1.5" />
-                Table
-              </Link>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Overview content */}
       <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-5">
         {/* Stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Open Deals</span>
-              <Handshake className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <div className="text-2xl font-bold">{crmStats?.openDeals ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              ${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline
-            </p>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Tasks Due</span>
-              <CheckSquare className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <div className="text-2xl font-bold">{crmStats?.tasksDueToday ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
-            </p>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Contacts</span>
-              <Users className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <div className="text-2xl font-bold">{crmStats?.totalContacts ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              +{crmStats?.newContactsThisWeek ?? 0} this week
-            </p>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Won This Month</span>
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <div className="text-2xl font-bold">${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {crmStats?.wonDealsThisMonth ?? 0} deal{(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed
-            </p>
-          </Card>
+          <Link href="/dashboard/pipeline">
+            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-muted-foreground">Open Deals</span>
+                <Handshake className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div className="text-2xl font-bold">{crmStats?.openDeals ?? 0}</div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                ${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline
+              </p>
+            </Card>
+          </Link>
+          <Link href="/dashboard/tasks">
+            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-muted-foreground">Tasks Due</span>
+                <CheckSquare className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div className="text-2xl font-bold">{crmStats?.tasksDueToday ?? 0}</div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
+              </p>
+            </Card>
+          </Link>
+          <Link href="/dashboard/contacts">
+            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-muted-foreground">Contacts</span>
+                <Users className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div className="text-2xl font-bold">{crmStats?.totalContacts ?? 0}</div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                +{crmStats?.newContactsThisWeek ?? 0} this week
+              </p>
+            </Card>
+          </Link>
+          <Link href="/dashboard/analytics">
+            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-muted-foreground">Won This Month</span>
+                <DollarSign className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div className="text-2xl font-bold">${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {crmStats?.wonDealsThisMonth ?? 0} deal{(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed
+              </p>
+            </Card>
+          </Link>
         </div>
 
         {/* Top row: Recent + Notes + Quick Actions */}
@@ -412,39 +393,54 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </CardContent>
           </Card>
 
-          {/* Quick Actions / Bookmarks */}
+          {/* Upcoming Tasks */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <Bookmark className="w-3.5 h-3.5" />
-                Quick Actions
+              <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  Upcoming Tasks
+                </span>
+                <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+                  <Link href="/dashboard/tasks">
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0 space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start text-xs h-8" asChild>
-                <Link href="/dashboard/pipeline">
-                  <Handshake className="w-3.5 h-3.5 mr-2" />
-                  Open Pipeline
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start text-xs h-8" asChild>
-                <Link href="/dashboard/contacts">
-                  <Users className="w-3.5 h-3.5 mr-2" />
-                  View Contacts
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start text-xs h-8" asChild>
-                <Link href="/dashboard/chats">
-                  <Sparkles className="w-3.5 h-3.5 mr-2" />
-                  AI Chat
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start text-xs h-8" asChild>
-                <Link href="/dashboard/analytics">
-                  <TrendingUp className="w-3.5 h-3.5 mr-2" />
-                  Analytics
-                </Link>
-              </Button>
+            <CardContent className="pt-0">
+              {upcomingTasks.length === 0 ? (
+                <div className="text-center py-6">
+                  <CheckSquare className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
+                  <p className="text-xs text-muted-foreground">No upcoming tasks</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {upcomingTasks.map((task) => (
+                    <div key={task.id} className="flex items-start gap-2.5">
+                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                        task.priority === "urgent" ? "bg-red-500" :
+                        task.priority === "high" ? "bg-orange-500" :
+                        task.priority === "medium" ? "bg-amber-500" : "bg-blue-500"
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{task.title}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {task.due_date
+                            ? new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                            : "No due date"}
+                          {task.due_date && new Date(task.due_date) < new Date() && (
+                            <span className="text-red-500 ml-1">overdue</span>
+                          )}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                        {task.type}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -465,13 +461,19 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            {/* Table header */}
-            <div className="grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-2 pb-2 border-b border-border">
+            {/* Table header - Desktop (6 columns) */}
+            <div className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-2 pb-2 border-b border-border">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Close</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
+            </div>
+            {/* Table header - Mobile (3 columns) */}
+            <div className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-2 pb-2 border-b border-border">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
             </div>
 
@@ -492,46 +494,76 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   const progress = dealProgress(deal);
                   const stageColor = deal.deal_stages?.color || "#6366f1";
                   return (
-                    <Link
-                      key={deal.id}
-                      href={`/dashboard/deals/${deal.id}`}
-                      className="grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-2 py-2.5 hover:bg-muted/50 rounded-lg transition-colors items-center"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ backgroundColor: stageColor }}
-                        />
-                        <span className="text-xs font-medium text-foreground truncate">{deal.title}</span>
-                        {deal.companies?.name && (
-                          <span className="text-[10px] text-muted-foreground truncate hidden sm:inline">
-                            {deal.companies.name}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] font-normal"
-                          style={{ borderColor: stageColor + "40", color: stageColor }}
-                        >
-                          {deal.deal_stages?.name || "—"}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Progress value={progress} className="h-1.5 flex-1" />
-                        <span className="text-[10px] text-muted-foreground w-8 text-right">{progress}%</span>
-                      </div>
-                      <span className="text-xs font-medium text-foreground">
-                        ${deal.value.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {deal.expected_close_date
-                          ? new Date(deal.expected_close_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                          : "—"}
-                      </span>
-                      <span className="text-xs font-medium text-foreground">{deal.ai_win_probability}%</span>
-                    </Link>
+                    <>
+                      {/* Desktop view (6 columns) */}
+                      <Link
+                        key={`${deal.id}-desktop`}
+                        href={`/dashboard/deals/${deal.id}`}
+                        className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-2 py-2.5 hover:bg-muted/50 rounded-lg transition-colors items-center"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ backgroundColor: stageColor }}
+                          />
+                          <span className="text-xs font-medium text-foreground truncate">{deal.title}</span>
+                          {deal.companies?.name && (
+                            <span className="text-[10px] text-muted-foreground truncate hidden sm:inline">
+                              {deal.companies.name}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-normal"
+                            style={{ borderColor: stageColor + "40", color: stageColor }}
+                          >
+                            {deal.deal_stages?.name || "—"}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Progress value={progress} className="h-1.5 flex-1" />
+                          <span className="text-[10px] text-muted-foreground w-8 text-right">{progress}%</span>
+                        </div>
+                        <span className="text-xs font-medium text-foreground">
+                          ${deal.value.toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {deal.expected_close_date
+                            ? new Date(deal.expected_close_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                            : "—"}
+                        </span>
+                        <span className="text-xs font-medium text-foreground">{deal.ai_win_probability}%</span>
+                      </Link>
+                      {/* Mobile view (3 columns) */}
+                      <Link
+                        key={`${deal.id}-mobile`}
+                        href={`/dashboard/deals/${deal.id}`}
+                        className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-2 py-2.5 hover:bg-muted/50 rounded-lg transition-colors items-center"
+                      >
+                        <div className="flex items-start gap-2 min-w-0">
+                          <div
+                            className="w-1.5 h-1.5 rounded-full shrink-0 mt-1"
+                            style={{ backgroundColor: stageColor }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-medium text-foreground truncate block">{deal.title}</span>
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] font-normal mt-1"
+                              style={{ borderColor: stageColor + "40", color: stageColor }}
+                            >
+                              {deal.deal_stages?.name || "—"}
+                            </Badge>
+                          </div>
+                        </div>
+                        <span className="text-xs font-medium text-foreground">
+                          ${deal.value.toLocaleString()}
+                        </span>
+                        <span className="text-xs font-medium text-foreground">{deal.ai_win_probability}%</span>
+                      </Link>
+                    </>
                   );
                 })}
               </div>
@@ -539,39 +571,50 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           </CardContent>
         </Card>
 
-        {/* Bottom row: Resources + Workload */}
+        {/* Bottom row: Revenue Trend + Workload */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Companies / Folders */}
+          {/* Revenue Trend Chart */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5" />
-                Companies
+                <TrendingUp className="w-3.5 h-3.5" />
+                Revenue Trend (30 Days)
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {crmStats && crmStats.totalContacts > 0 ? (
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Manage your companies and organizations.
-                  </p>
-                  <Button variant="outline" size="sm" className="text-xs" asChild>
-                    <Link href="/dashboard/companies">
-                      <FolderOpen className="w-3.5 h-3.5 mr-1.5" />
-                      View Companies
-                    </Link>
-                  </Button>
+              {revenueTrend.length === 0 || revenueTrend.every((d) => d.revenue === 0) ? (
+                <div className="text-center py-8">
+                  <DollarSign className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <p className="text-sm text-muted-foreground">No revenue data yet. Close deals to see trends.</p>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Building2 className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
-                  <p className="text-sm text-muted-foreground mb-3">Add companies to organize your contacts</p>
-                  <Button variant="outline" size="sm" className="text-xs" asChild>
-                    <Link href="/dashboard/companies">
-                      <Plus className="w-3.5 h-3.5 mr-1.5" />
-                      Add Company
-                    </Link>
-                  </Button>
+                <div className="h-[180px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={revenueTrend}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        tick={{ fontSize: 10 }}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 10 }}
+                        tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "var(--card)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                        }}
+                        formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+                        labelFormatter={(label) => new Date(String(label)).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
+                      />
+                      <Line type="monotone" dataKey="cumulative" stroke="#22c55e" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               )}
             </CardContent>

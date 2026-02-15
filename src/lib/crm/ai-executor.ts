@@ -805,7 +805,7 @@ async function deleteRecord(
       return { success: false, result: "Please provide a name/title or ID of the record to delete." };
     }
     const { data, error: fe } = await q.limit(1).single();
-    if (fe || !data) return { success: false, result: `${recordType} not found.` };
+    if (fe || !data || typeof data === 'string') return { success: false, result: `${recordType} not found.` };
     record = data;
   }
 
