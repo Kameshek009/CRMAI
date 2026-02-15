@@ -63,12 +63,19 @@ export function FooterSection() {
           ))}
         </div>
 
+        <div className="mt-10 pt-8 border-t border-border flex flex-col items-center gap-2 text-center">
+          <p className="text-sm text-muted-foreground">Need help? Contact us at</p>
+          <a href="mailto:support@nexuscrm.com" className="text-sm font-medium text-foreground hover:underline transition-colors">
+            support@nexuscrm.com
+          </a>
+        </div>
+
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center">
