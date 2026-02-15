@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContactCard } from "@/components/crm/contact-card";
-import { EntityForm, type FormField } from "@/components/crm/entity-form";
+import { EntityForm } from "@/components/crm/entity-form";
+import { contactFields } from "@/lib/crm/field-definitions";
 import { ImportWizard } from "@/components/crm/import-wizard";
 import { EmptyState } from "@/components/crm/empty-state";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
@@ -25,21 +26,6 @@ const statusFilters = [
   { label: "Churned", value: "churned" },
 ];
 
-const contactFields: FormField[] = [
-  { name: "first_name", label: "First Name", type: "text", required: true, placeholder: "John" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Doe" },
-  { name: "email", label: "Email", type: "email", placeholder: "john@example.com" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "+1 (555) 123-4567" },
-  { name: "title", label: "Job Title", type: "text", placeholder: "Sales Manager" },
-  {
-    name: "status", label: "Status", type: "select",
-    options: [
-      { label: "Lead", value: "lead" },
-      { label: "Active", value: "active" },
-      { label: "Inactive", value: "inactive" },
-    ],
-  },
-];
 
 interface ContactData {
   id: string;

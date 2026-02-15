@@ -11,7 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
 import { NoteEditor } from "@/components/crm/note-editor";
 import { ScoreBadge } from "@/components/crm/score-badge";
-import { ArrowLeft, Building2, Mail, Phone, Briefcase, Calendar } from "lucide-react";
+import { EntityForm } from "@/components/crm/entity-form";
+import { contactFields } from "@/lib/crm/field-definitions";
+import { ArrowLeft, Building2, Mail, Phone, Briefcase, Calendar, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 interface ContactDetailContentProps {
@@ -24,6 +26,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
   const [notes, setNotes] = useState<{ id: string; content: string; created_at: string; is_pinned: boolean }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -68,6 +71,19 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
     );
   }
 
+  const handleEdit = async (values: Record<string, string>) => {
+    const res = await fetch(`/api/crm/contacts/${contactId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setContact(json.data);
+      toast.success("Contact updated");
+    }
+  };
+
   const name = `${contact.first_name} ${contact.last_name || ""}`.trim();
   const initials = `${String(contact.first_name).charAt(0)}${String(contact.last_name || "").charAt(0)}`.toUpperCase();
 
@@ -93,6 +109,10 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
           <div className="flex items-center gap-2 mt-2">
             <Badge>{String(contact.status)}</Badge>
             <ScoreBadge score={Number(contact.engagement_score)} label="engagement" />
+            <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
+              <Pencil className="size-3.5 mr-1" />
+              Edit
+            </Button>
           </div>
         </div>
       </div>
@@ -171,6 +191,23 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
           </Card>
         </div>
       </div>
+
+      <EntityForm
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        title="Edit Contact"
+        fields={contactFields}
+        initialValues={{
+          first_name: contact.first_name || "",
+          last_name: contact.last_name || "",
+          email: contact.email || "",
+          phone: contact.phone || "",
+          title: contact.title || "",
+          status: contact.status || "",
+        }}
+        onSubmit={handleEdit}
+        submitLabel="Save"
+      />
     </PageContainer>
   );
 }

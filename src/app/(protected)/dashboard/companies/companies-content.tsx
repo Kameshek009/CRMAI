@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompanyCard } from "@/components/crm/company-card";
-import { EntityForm, type FormField } from "@/components/crm/entity-form";
+import { EntityForm } from "@/components/crm/entity-form";
+import { companyFields } from "@/lib/crm/field-definitions";
 import { EmptyState } from "@/components/crm/empty-state";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
@@ -15,23 +16,6 @@ import { useMultiSelect } from "@/hooks/use-multi-select";
 import { Plus, Search, Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const companyFields: FormField[] = [
-  { name: "name", label: "Company Name", type: "text", required: true, placeholder: "Acme Inc" },
-  { name: "domain", label: "Domain", type: "text", placeholder: "acme.com" },
-  { name: "industry", label: "Industry", type: "text", placeholder: "Technology" },
-  {
-    name: "size", label: "Company Size", type: "select",
-    options: [
-      { label: "1-10", value: "1-10" },
-      { label: "11-50", value: "11-50" },
-      { label: "51-200", value: "51-200" },
-      { label: "201-500", value: "201-500" },
-      { label: "500+", value: "500+" },
-    ],
-  },
-  { name: "website", label: "Website", type: "text", placeholder: "https://acme.com" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "+1 (555) 123-4567" },
-];
 
 interface CompanyData {
   id: string;

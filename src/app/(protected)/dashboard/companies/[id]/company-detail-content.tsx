@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScoreBadge } from "@/components/crm/score-badge";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
-import { ArrowLeft, Globe, Phone, Mail, Users, Handshake } from "lucide-react";
+import { EntityForm } from "@/components/crm/entity-form";
+import { companyFields } from "@/lib/crm/field-definitions";
+import { ArrowLeft, Globe, Phone, Mail, Users, Handshake, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 interface CompanyDetailContentProps {
   companyId: string;
@@ -22,6 +25,7 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
   const [contacts, setContacts] = useState<Record<string, any>[]>([]);
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -44,6 +48,19 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
     return <PageContainer><p>Company not found</p></PageContainer>;
   }
 
+  const handleEdit = async (values: Record<string, string>) => {
+    const res = await fetch(`/api/crm/companies/${companyId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setCompany(json.data);
+      toast.success("Company updated");
+    }
+  };
+
   const initials = String(company.name).slice(0, 2).toUpperCase();
 
   return (
@@ -64,7 +81,13 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
             {company.industry && <span>{String(company.industry)}</span>}
             {company.size && <span>{String(company.size)} employees</span>}
           </div>
-          <ScoreBadge score={Number(company.ai_health_score)} label="health" size="md" />
+          <div className="flex items-center gap-2 mt-1">
+            <ScoreBadge score={Number(company.ai_health_score)} label="health" size="md" />
+            <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
+              <Pencil className="size-3.5 mr-1" />
+              Edit
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -136,6 +159,23 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
           </Card>
         </div>
       </div>
+
+      <EntityForm
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        title="Edit Company"
+        fields={companyFields}
+        initialValues={{
+          name: company.name || "",
+          domain: company.domain || "",
+          industry: company.industry || "",
+          size: company.size || "",
+          website: company.website || "",
+          phone: company.phone || "",
+        }}
+        onSubmit={handleEdit}
+        submitLabel="Save"
+      />
     </PageContainer>
   );
 }

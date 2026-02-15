@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
 import { NoteEditor } from "@/components/crm/note-editor";
-import { ArrowLeft, DollarSign, Calendar, User, Building2, TrendingUp } from "lucide-react";
+import { EntityForm } from "@/components/crm/entity-form";
+import { dealFields } from "@/lib/crm/field-definitions";
+import { StageSelector } from "@/components/crm/stage-selector";
+import { ArrowLeft, DollarSign, Calendar, User, Building2, TrendingUp, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 interface DealDetailContentProps {
@@ -22,16 +25,21 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
   const [notes, setNotes] = useState<{ id: string; content: string; created_at: string; is_pinned: boolean }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showEdit, setShowEdit] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [stages, setStages] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
       fetch(`/api/crm/deals/${dealId}`).then((r) => r.json()),
       fetch(`/api/crm/activities?deal_id=${dealId}&limit=20`).then((r) => r.json()),
       fetch(`/api/crm/notes?deal_id=${dealId}&limit=20`).then((r) => r.json()),
-    ]).then(([dealRes, actRes, notesRes]) => {
+      fetch(`/api/crm/pipeline`).then((r) => r.json()),
+    ]).then(([dealRes, actRes, notesRes, stagesRes]) => {
       if (dealRes.success) setDeal(dealRes.data);
       if (actRes.success) setActivities(actRes.data);
       if (notesRes.success) setNotes(notesRes.data);
+      if (stagesRes.success) setStages(stagesRes.data);
       setIsLoading(false);
     });
   }, [dealId]);
@@ -46,6 +54,32 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
     if (json.success) {
       setNotes([json.data, ...notes]);
       toast.success("Note added");
+    }
+  };
+
+  const handleEdit = async (values: Record<string, string>) => {
+    const res = await fetch(`/api/crm/deals/${dealId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setDeal(json.data);
+      toast.success("Deal updated");
+    }
+  };
+
+  const handleStageChange = async (stageId: string) => {
+    const res = await fetch(`/api/crm/deals/${dealId}/stage`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage_id: stageId }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setDeal(json.data);
+      toast.success("Stage updated");
     }
   };
 
@@ -73,7 +107,21 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
               {String(stage.name)}
             </Badge>
           )}
+          <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
+            <Pencil className="size-3.5 mr-1" />
+            Edit
+          </Button>
         </div>
+        {stages.length > 0 && (
+          <div className="mt-3 max-w-xs">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Change Stage</label>
+            <StageSelector
+              stages={stages}
+              value={deal.stage_id || ""}
+              onChange={handleStageChange}
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -137,6 +185,22 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
           </Card>
         </div>
       </div>
+
+      <EntityForm
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        title="Edit Deal"
+        fields={dealFields}
+        initialValues={{
+          title: deal.title || "",
+          value: String(deal.value || ""),
+          expected_close_date: deal.expected_close_date || "",
+          description: deal.description || "",
+          status: deal.status || "",
+        }}
+        onSubmit={handleEdit}
+        submitLabel="Save"
+      />
     </PageContainer>
   );
 }
