@@ -12,8 +12,8 @@ import type { SubscriptionTier } from "@/types";
  */
 export const TIER_TOKEN_LIMITS: Record<SubscriptionTier, number> = {
   free: 50_000,
-  pro: 10_000_000,
-  max: 100_000_000,
+  pro: 500_000,
+  max: 1_500_000_000,
   enterprise: 0, // Credit-based, no monthly limit
 };
 
@@ -22,8 +22,8 @@ export const TIER_TOKEN_LIMITS: Record<SubscriptionTier, number> = {
  */
 export const TIER_WEEKLY_LIMITS: Record<SubscriptionTier, number> = {
   free: 10_000,
-  pro: 500_000,
-  max: 2_500_000,
+  pro: 100_000,
+  max: 500_000_000,
   enterprise: 0, // No daily cap for credits
 };
 
@@ -42,8 +42,8 @@ export const TIER_DISPLAY_NAMES: Record<SubscriptionTier, string> = {
  */
 export const TIER_PRICES: Record<SubscriptionTier, number> = {
   free: 0,
-  pro: 1500, // $15
-  max: 3500, // $35
+  pro: 1499, // $14.99
+  max: 3499, // $34.99
   enterprise: 0, // Pay-as-you-go
 };
 
@@ -51,8 +51,8 @@ export const TIER_PRICES: Record<SubscriptionTier, number> = {
  * Get tier from token limit
  */
 export function getTierFromLimit(limit: number): SubscriptionTier {
-  if (limit >= 100_000_000) return "max";
-  if (limit >= 10_000_000) return "pro";
+  if (limit >= 1_500_000_000) return "max";
+  if (limit >= 500_000) return "pro";
   return "free";
 }
 
@@ -60,8 +60,8 @@ export function getTierFromLimit(limit: number): SubscriptionTier {
  * Credit package token amounts
  */
 export const CREDIT_AMOUNTS: Record<string, number> = {
-  credits_20m: 20_000_000,
-  credits_50m: 50_000_000,
-  credits_100m: 100_000_000,
-  credits_500m: 500_000_000,
+  credits_100k: 100_000,
+  credits_250k: 250_000,
+  credits_600k: 600_000,
+  credits_1500k: 1_500_000,
 };

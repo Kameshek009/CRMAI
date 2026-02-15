@@ -214,18 +214,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       return;
     }
 
-    // Add credits to account and update to enterprise tier if not already
-    const newCredits = (account.token_credits || 0) + tokenAmount;
+    // Add purchased tokens to the account's token_limit (stacks on top of plan tokens)
+    const newTokenLimit = (account.token_limit || 0) + tokenAmount;
     const updateData: Record<string, unknown> = {
-      token_credits: newCredits,
+      token_limit: newTokenLimit,
       stripe_customer_id: customerId,
       updated_at: new Date().toISOString(),
     };
-
-    // If user is on free tier and buys credits, upgrade to enterprise
-    if (account.tier === "free") {
-      updateData.tier = "enterprise";
-    }
 
     const { error: updateError } = await supabase
       .from("accounts")
@@ -241,11 +236,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     await supabase.from("activity_logs").insert({
       account_id: account.id,
       event_type: "credits_purchased",
-      message: `Purchased ${(tokenAmount / 1_000_000).toFixed(0)}M tokens`,
+      message: `Purchased ${tokenAmount >= 1_000_000 ? (tokenAmount / 1_000_000).toFixed(1) + "M" : (tokenAmount / 1_000).toFixed(0) + "K"} tokens`,
       metadata: {
         package_id: packageId,
         token_amount: tokenAmount,
-        new_balance: newCredits,
+        new_token_limit: newTokenLimit,
         checkout_session_id: session.id,
       },
     });

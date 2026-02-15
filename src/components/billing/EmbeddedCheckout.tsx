@@ -20,7 +20,7 @@ interface EmbeddedCheckoutProps {
   type: "subscription" | "credits";
   /**
    * For subscriptions: "pro" | "max"
-   * For credits: "credits_20m" | "credits_50m" | "credits_100m" | "credits_500m"
+   * For credits: "credits_100k" | "credits_250k" | "credits_600k" | "credits_1500k"
    */
   itemId: string;
   /**
@@ -374,39 +374,39 @@ interface CheckoutModalProps extends EmbeddedCheckoutProps {
 const PLAN_INFO: Record<string, { name: string; price: string; period: string; description: string }> = {
   pro: {
     name: "Pro",
-    price: "$15",
+    price: "$14.99",
     period: "/month",
     description: "For professionals who need more power",
   },
   max: {
     name: "Max",
-    price: "$35",
+    price: "$34.99",
     period: "/month",
     description: "Maximum capabilities for power users",
   },
-  credits_20m: {
-    name: "20M Tokens",
-    price: "$10",
+  credits_100k: {
+    name: "100K Tokens",
+    price: "$19.99",
     period: "",
-    description: "One-time token credit purchase",
+    description: "Additional tokens added to your plan",
   },
-  credits_50m: {
-    name: "50M Tokens",
-    price: "$20",
+  credits_250k: {
+    name: "250K Tokens",
+    price: "$49.99",
     period: "",
-    description: "One-time token credit purchase",
+    description: "Additional tokens added to your plan",
   },
-  credits_100m: {
-    name: "100M Tokens",
-    price: "$35",
+  credits_600k: {
+    name: "600K Tokens",
+    price: "$99.99",
     period: "",
-    description: "One-time token credit purchase",
+    description: "Additional tokens added to your plan",
   },
-  credits_500m: {
-    name: "500M Tokens",
-    price: "$150",
+  credits_1500k: {
+    name: "1.5M Tokens",
+    price: "$199.98",
     period: "",
-    description: "One-time token credit purchase",
+    description: "Additional tokens added to your plan",
   },
 };
 

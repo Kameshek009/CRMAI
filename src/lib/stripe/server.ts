@@ -68,10 +68,10 @@ export const SUBSCRIPTION_PRICES = {
  */
 export function getCreditPrices() {
   return {
-    credits_20m: process.env.STRIPE_PRICE_CREDITS_20M || "",
-    credits_50m: process.env.STRIPE_PRICE_CREDITS_50M || "",
-    credits_100m: process.env.STRIPE_PRICE_CREDITS_100M || "",
-    credits_500m: process.env.STRIPE_PRICE_CREDITS_500M || "",
+    credits_100k: process.env.STRIPE_PRICE_CREDITS_100K || "",
+    credits_250k: process.env.STRIPE_PRICE_CREDITS_250K || "",
+    credits_600k: process.env.STRIPE_PRICE_CREDITS_600K || "",
+    credits_1500k: process.env.STRIPE_PRICE_CREDITS_1500K || "",
   };
 }
 
@@ -80,10 +80,10 @@ export function getCreditPrices() {
  * @deprecated Use getCreditPrices() instead
  */
 export const CREDIT_PRICES = {
-  get credits_20m() { return process.env.STRIPE_PRICE_CREDITS_20M || ""; },
-  get credits_50m() { return process.env.STRIPE_PRICE_CREDITS_50M || ""; },
-  get credits_100m() { return process.env.STRIPE_PRICE_CREDITS_100M || ""; },
-  get credits_500m() { return process.env.STRIPE_PRICE_CREDITS_500M || ""; },
+  get credits_100k() { return process.env.STRIPE_PRICE_CREDITS_100K || ""; },
+  get credits_250k() { return process.env.STRIPE_PRICE_CREDITS_250K || ""; },
+  get credits_600k() { return process.env.STRIPE_PRICE_CREDITS_600K || ""; },
+  get credits_1500k() { return process.env.STRIPE_PRICE_CREDITS_1500K || ""; },
 } as const;
 
 /**

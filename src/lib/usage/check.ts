@@ -111,7 +111,7 @@ function checkEnterpriseCredits(
     allowed: false,
     reason: "insufficient_credits",
     creditsRemaining: credits,
-    upgradeOptions: ["credits_20m", "credits_50m", "credits_100m", "credits_500m"],
+    upgradeOptions: ["credits_100k", "credits_250k", "credits_600k", "credits_1500k"],
   };
 }
 
@@ -126,7 +126,7 @@ function getUpgradeOptions(currentTier: SubscriptionTier): string[] {
   const higherTiers = tierOrder.slice(currentIndex + 1).filter(t => t !== "enterprise");
 
   // Always offer credit packages as an option
-  const creditOptions = ["credits_20m", "credits_50m", "credits_100m", "credits_500m"];
+  const creditOptions = ["credits_100k", "credits_250k", "credits_600k", "credits_1500k"];
 
   return [...higherTiers, ...creditOptions];
 }

@@ -5,7 +5,7 @@
  * Supports both hosted (redirect to Stripe) and embedded modes.
  *
  * Request body:
- * - packageId: "credits_20m" | "credits_50m" | "credits_100m" | "credits_500m"
+ * - packageId: "credits_100k" | "credits_250k" | "credits_600k" | "credits_1500k"
  * - hosted: boolean (optional) - if true, returns URL for Stripe hosted checkout
  *
  * Returns:
@@ -24,7 +24,7 @@ import {
 } from "@/lib/stripe/server";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 
-const VALID_PACKAGES = ["credits_20m", "credits_50m", "credits_100m", "credits_500m"];
+const VALID_PACKAGES = ["credits_100k", "credits_250k", "credits_600k", "credits_1500k"];
 
 export async function POST(request: NextRequest) {
   try {
