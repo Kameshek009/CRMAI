@@ -3,6 +3,37 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateTaskSchema } from "@/lib/crm/validation";
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { context, error } = await getTeamContext();
+    if (error) return error;
+
+    const permError = requirePermission(context.permissions, "tasks", "read");
+    if (permError) return permError;
+
+    const { id } = await params;
+    const supabase = createSupabaseAdmin();
+
+    const { data, error: dbError } = await supabase
+      .from("crm_tasks")
+      .select("*")
+      .eq("id", id)
+      .eq("team_id", context.teamId)
+      .single();
+
+    if (dbError || !data) {
+      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch {
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

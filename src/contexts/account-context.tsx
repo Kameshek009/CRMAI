@@ -192,7 +192,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("[AccountContext] API error:", response.status, errorText);
+        void errorText;
         throw new Error(`Failed to fetch account data (${response.status})`);
       }
 
@@ -206,12 +206,12 @@ export function AccountProvider({ children }: AccountProviderProps) {
         const transformedAccount = transformAccount(result.data.account);
         setAccount(transformedAccount);
         accountIdRef.current = transformedAccount.id;
-        console.log("[AccountContext] Account loaded:", transformedAccount.id);
+        // Account loaded successfully
       } else {
         throw new Error("No account data in response");
       }
     } catch (err) {
-      console.error("[AccountContext] Fetch error:", err);
+      void err;
       setError(err instanceof Error ? err : new Error("Unknown error"));
     } finally {
       setIsLoading(false);
@@ -223,7 +223,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
    */
   const subscribeToRealtime = useCallback(() => {
     if (!accountIdRef.current) {
-      console.log("[AccountContext] No account ID for realtime subscription");
+      // No account ID yet
       return;
     }
 
@@ -233,7 +233,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
     }
 
     const accountId = accountIdRef.current;
-    console.log("[AccountContext] Subscribing to realtime for account:", accountId);
+    // Subscribe to realtime for this account
 
     const channel = supabase
       .channel(`account:${accountId}`)
@@ -246,7 +246,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
           filter: `id=eq.${accountId}`,
         },
         (payload: { new: Record<string, unknown> | null }) => {
-          console.log("[AccountContext] Realtime update received:", payload);
+          // Realtime update received
 
           if (payload.new) {
             const updatedAccount = transformAccount(payload.new as {
@@ -267,7 +267,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
         }
       )
       .subscribe((status: string) => {
-        console.log("[AccountContext] Realtime subscription status:", status);
+        // Update connection status
         setIsConnected(status === "SUBSCRIBED");
       });
 
@@ -297,7 +297,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
 
     return () => {
       if (channelRef.current) {
-        console.log("[AccountContext] Cleaning up realtime subscription");
+        // Cleanup realtime subscription
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }

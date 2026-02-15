@@ -516,8 +516,8 @@ export default function ChatDetailPage() {
                     message.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
                   )}
                 >
-                  {formatTime(message.created_at)}
-                  {message.tokens_used > 0 && ` · ${message.tokens_used} tokens`}
+                  {formatTime(message.created_at || new Date().toISOString())}
+                  {(message.tokens_used ?? 0) > 0 && ` · ${message.tokens_used} tokens`}
                 </p>
               </div>
 

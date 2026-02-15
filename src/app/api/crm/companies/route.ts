@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       account_id: context.accountId,
       team_id: context.teamId,
       company_id: data.id,
-      type: "note",
+      type: "company_created",
       title: `Company created: ${data.name}`,
     });
 

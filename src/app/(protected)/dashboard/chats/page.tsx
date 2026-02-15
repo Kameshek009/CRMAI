@@ -399,7 +399,7 @@ export default function ChatsPage() {
                             {chat.title || 'New Chat'}
                           </h3>
                           <span className="text-xs text-muted-foreground/70 shrink-0">
-                            {formatTime(chat.updated_at)}
+                            {formatTime(chat.updated_at || chat.created_at || new Date().toISOString())}
                           </span>
                         </div>
                         <p className="text-xs sm:text-sm text-muted-foreground truncate">
