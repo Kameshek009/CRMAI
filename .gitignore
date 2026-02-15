@@ -1,6 +1,11 @@
 # Build output (do not upload)
 .next
 
+# Environment variables (contain secrets)
+.env
+.env.local
+.env.*.local
+
 # Clerk configuration (can include secrets)
 /.clerk/
 node_modules

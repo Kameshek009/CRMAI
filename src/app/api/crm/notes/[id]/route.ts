@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateNoteSchema } from "@/lib/crm/validation";
 
 export async function PATCH(
@@ -10,6 +10,9 @@ export async function PATCH(
   try {
     const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "contacts", "update");
+    if (permError) return permError;
 
     const { id } = await params;
     const body = await request.json();
@@ -44,6 +47,9 @@ export async function DELETE(
   try {
     const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "contacts", "delete");
+    if (permError) return permError;
 
     const { id } = await params;
     const supabase = createSupabaseAdmin();

@@ -87,14 +87,14 @@ export function FooterSection() {
             &copy; {new Date().getFullYear()} NexusCRM. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <Link href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Twitter
+            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Privacy
             </Link>
-            <Link href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              GitHub
+            <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Terms
             </Link>
-            <Link href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              LinkedIn
+            <Link href="/security" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Security
             </Link>
           </div>
         </motion.div>

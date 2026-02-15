@@ -214,6 +214,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       return;
     }
 
+    // Dedup: check if this checkout session was already processed
+    const { data: existingPayment } = await supabase
+      .from("payment_history")
+      .select("id")
+      .eq("stripe_checkout_session_id", session.id)
+      .single();
+
+    if (existingPayment) {
+      console.log(`[Webhook] Checkout session ${session.id} already processed, skipping`);
+      return;
+    }
+
     // Add purchased tokens to the account's token_limit (stacks on top of plan tokens)
     const newTokenLimit = (account.token_limit || 0) + tokenAmount;
     const updateData: Record<string, unknown> = {

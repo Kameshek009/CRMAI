@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ success: true, updated: ids.length });
     }
+
+    return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }

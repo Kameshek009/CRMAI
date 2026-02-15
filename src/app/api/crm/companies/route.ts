@@ -67,6 +67,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
 
+    // Log activity
+    await supabase.from("crm_activities").insert({
+      account_id: context.accountId,
+      team_id: context.teamId,
+      company_id: data.id,
+      type: "note",
+      title: `Company created: ${data.name}`,
+    });
+
     return NextResponse.json({ success: true, data });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

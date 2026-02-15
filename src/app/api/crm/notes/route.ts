@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parsePagination } from "@/lib/crm/helpers";
 import { createNoteSchema } from "@/lib/crm/validation";
 
@@ -8,6 +8,9 @@ export async function GET(request: NextRequest) {
   try {
     const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "contacts", "read");
+    if (permError) return permError;
 
     const { searchParams } = new URL(request.url);
     const { limit, offset } = parsePagination(searchParams);
@@ -45,6 +48,9 @@ export async function POST(request: NextRequest) {
   try {
     const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "contacts", "create");
+    if (permError) return permError;
 
     const body = await request.json();
     const parsed = createNoteSchema.safeParse(body);

@@ -6,11 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteCodeDisplay } from "@/components/team/invite-code-display";
 import { RoleBadge } from "@/components/team/role-badge";
 import { Users, Shield, Link2, Kanban } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function TeamOverviewPage() {
   const { currentTeam, teams, myRole, isDirector } = useTeam();
   const [inviteCode, setInviteCode] = useState(currentTeam?.inviteCode || "");
+  const [memberCount, setMemberCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!currentTeam?.id) return;
+    fetch(`/api/teams/${currentTeam.id}/members`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setMemberCount(json.data.length);
+        }
+      })
+      .catch(() => {});
+  }, [currentTeam?.id]);
 
   if (!currentTeam) return null;
 
@@ -29,7 +42,7 @@ export default function TeamOverviewPage() {
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{teams.length}</div>
+            <div className="text-2xl font-bold">{memberCount ?? "..."}</div>
             <p className="text-xs text-muted-foreground">Max {currentTeam.maxMembers}</p>
           </CardContent>
         </Card>
