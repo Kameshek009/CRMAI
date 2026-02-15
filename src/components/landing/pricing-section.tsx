@@ -71,8 +71,8 @@ const plans: PlanCard[] = [
     ctaHref: "/sign-up",
     inheritLabel: "Everything from Pro, and more:",
     features: [
-      "1.5B AI tokens / month",
-      "Virtually unlimited weekly tokens",
+      "1.5M AI tokens / month",
+      "300K tokens / week",
       "Up to 500 contacts",
       "Up to 10 companies",
       "Advanced AI automation",
@@ -84,7 +84,7 @@ const plans: PlanCard[] = [
       "SLA guarantee",
       "Unlimited team members",
     ],
-    tokenHighlight: "1.5B tokens/mo",
+    tokenHighlight: "1.5M tokens/mo",
   },
   {
     name: "Enterprise",

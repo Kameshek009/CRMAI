@@ -54,14 +54,14 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     ],
   },
   max: {
-    monthlyTokenLimit: 1_500_000_000,
-    weeklyTokenLimit: 500_000_000,
+    monthlyTokenLimit: 1_500_000,
+    weeklyTokenLimit: 300_000,
     priceMonthly: 34.99,
     priceMonthlyCents: 3499,
     stripePriceId: process.env.STRIPE_PRICE_MAX_MONTHLY || null,
     isSubscription: true,
     features: [
-      "1.5B AI tokens/month",
+      "1.5M AI tokens/month",
       "Up to 500 contacts",
       "Up to 10 companies",
       "Advanced AI automation",
