@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { AccountContent } from "./account-content";
+
+export const metadata: Metadata = { title: "Account" };
 
 export default async function AccountPage() {
   const user = await currentUser();

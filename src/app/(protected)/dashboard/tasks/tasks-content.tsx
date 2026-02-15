@@ -60,6 +60,9 @@ export function TasksContent() {
   const [total, setTotal] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const PAGE_SIZE = 50;
 
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,19 +71,22 @@ export function TasksContent() {
 
   const selectable = count > 0;
 
-  const fetchTasks = useCallback(async () => {
-    setIsLoading(true);
+  const fetchTasks = useCallback(async (offset = 0, append = false) => {
+    if (!append) setIsLoading(true);
+    else setIsLoadingMore(true);
     try {
-      const params = new URLSearchParams({ limit: "100" });
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
       if (statusFilter) params.set("status", statusFilter);
+      params.set("offset", String(offset));
       const res = await fetch(`/api/crm/tasks?${params}`);
       const json = await res.json();
       if (json.success) {
-        setTasks(json.data);
+        setTasks((prev) => append ? [...prev, ...json.data] : json.data);
         setTotal(json.total || 0);
       }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   }, [statusFilter]);
 
@@ -90,6 +96,8 @@ export function TasksContent() {
   useEffect(() => {
     deselectAll();
   }, [statusFilter, deselectAll]);
+
+  const hasMore = tasks.length < total;
 
   // Initialize form values when mode changes
   useEffect(() => {
@@ -300,6 +308,19 @@ export function TasksContent() {
               onSelectToggle={toggle}
             />
           ))}
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isLoadingMore}
+                onClick={() => fetchTasks(tasks.length, true)}
+              >
+                {isLoadingMore && <Loader2 className="size-4 mr-2 animate-spin" />}
+                Load More ({tasks.length} of {total})
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/crm/empty-state";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { useMultiSelect } from "@/hooks/use-multi-select";
-import { Plus, Search, Building2 } from "lucide-react";
+import { Plus, Search, Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const companyFields: FormField[] = [
@@ -50,23 +50,29 @@ export function CompaniesContent() {
   const [total, setTotal] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const PAGE_SIZE = 50;
 
   const { selectedIds, toggle, selectAll, deselectAll, isSelected, isAllSelected, count } = useMultiSelect();
 
-  const fetchCompanies = useCallback(async () => {
-    setIsLoading(true);
+  const fetchCompanies = useCallback(async (offset = 0, append = false) => {
+    if (!append) setIsLoading(true);
+    else setIsLoadingMore(true);
     try {
-      const params = new URLSearchParams({ limit: "50" });
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
       if (search) params.set("search", search);
+      params.set("offset", String(offset));
 
       const res = await fetch(`/api/crm/companies?${params}`);
       const json = await res.json();
       if (json.success) {
-        setCompanies(json.data);
+        setCompanies((prev) => append ? [...prev, ...json.data] : json.data);
         setTotal(json.total || 0);
       }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   }, [search]);
 
@@ -78,6 +84,8 @@ export function CompaniesContent() {
   useEffect(() => {
     deselectAll();
   }, [search, deselectAll]);
+
+  const hasMore = companies.length < total;
 
   const handleCreate = async (values: Record<string, string>) => {
     const res = await fetch("/api/crm/companies", {
@@ -180,6 +188,19 @@ export function CompaniesContent() {
               />
             ))}
           </div>
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isLoadingMore}
+                onClick={() => fetchCompanies(companies.length, true)}
+              >
+                {isLoadingMore && <Loader2 className="size-4 mr-2 animate-spin" />}
+                Load More ({companies.length} of {total})
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

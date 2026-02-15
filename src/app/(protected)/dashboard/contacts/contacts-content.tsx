@@ -14,7 +14,7 @@ import { EmptyState } from "@/components/crm/empty-state";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { useMultiSelect } from "@/hooks/use-multi-select";
-import { Plus, Search, Upload, Users } from "lucide-react";
+import { Plus, Search, Upload, Users, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const statusFilters = [
@@ -63,25 +63,31 @@ export function ContactsContent() {
   const [total, setTotal] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const PAGE_SIZE = 50;
 
   const { selectedIds, toggle, selectAll, deselectAll, isSelected, isAllSelected, count } = useMultiSelect();
 
-  const fetchContacts = useCallback(async () => {
-    setIsLoading(true);
+  const fetchContacts = useCallback(async (offset = 0, append = false) => {
+    if (!append) setIsLoading(true);
+    else setIsLoadingMore(true);
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       if (statusFilter) params.set("status", statusFilter);
-      params.set("limit", "50");
+      params.set("limit", String(PAGE_SIZE));
+      params.set("offset", String(offset));
 
       const res = await fetch(`/api/crm/contacts?${params}`);
       const json = await res.json();
       if (json.success) {
-        setContacts(json.data);
+        setContacts((prev) => append ? [...prev, ...json.data] : json.data);
         setTotal(json.total || 0);
       }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   }, [search, statusFilter]);
 
@@ -93,6 +99,8 @@ export function ContactsContent() {
   useEffect(() => {
     deselectAll();
   }, [search, statusFilter, deselectAll]);
+
+  const hasMore = contacts.length < total;
 
   const handleCreate = async (values: Record<string, string>) => {
     const res = await fetch("/api/crm/contacts", {
@@ -239,6 +247,19 @@ export function ContactsContent() {
               onSelectToggle={toggle}
             />
           ))}
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isLoadingMore}
+                onClick={() => fetchContacts(contacts.length, true)}
+              >
+                {isLoadingMore && <Loader2 className="size-4 mr-2 animate-spin" />}
+                Load More ({contacts.length} of {total})
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

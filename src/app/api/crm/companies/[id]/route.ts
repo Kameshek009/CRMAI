@@ -34,6 +34,7 @@ export async function GET(
       .from("contacts")
       .select("id", { count: "exact", head: true })
       .eq("company_id", id)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false);
 
     // Get deal count
@@ -41,6 +42,7 @@ export async function GET(
       .from("deals")
       .select("id", { count: "exact", head: true })
       .eq("company_id", id)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false);
 
     return NextResponse.json({
