@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext } from "@/lib/crm/team-helpers";
 import { updateNoteSchema } from "@/lib/crm/validation";
 
 export async function PATCH(
@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
 
     const { id } = await params;
@@ -23,7 +23,7 @@ export async function PATCH(
       .from("crm_notes")
       .update(parsed.data)
       .eq("id", id)
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .select()
       .single();
 
@@ -42,7 +42,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
 
     const { id } = await params;
@@ -52,7 +52,7 @@ export async function DELETE(
       .from("crm_notes")
       .delete()
       .eq("id", id)
-      .eq("account_id", accountId);
+      .eq("team_id", context.teamId);
 
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });

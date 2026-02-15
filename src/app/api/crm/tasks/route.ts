@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId, parsePagination } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { parsePagination } from "@/lib/crm/helpers";
 import { createTaskSchema } from "@/lib/crm/validation";
 
 export async function GET(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "tasks", "read");
+    if (permError) return permError;
 
     const { searchParams } = new URL(request.url);
     const { limit, offset } = parsePagination(searchParams);
@@ -20,7 +24,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("crm_tasks")
       .select("*", { count: "exact" })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .order("due_date", { ascending: true, nullsFirst: false })
       .range(offset, offset + limit - 1);
 
@@ -43,8 +47,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "tasks", "create");
+    if (permError) return permError;
 
     const body = await request.json();
     const parsed = createTaskSchema.safeParse(body);
@@ -55,7 +62,7 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("crm_tasks")
-      .insert({ account_id: accountId, ...parsed.data })
+      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
       .select()
       .single();
 

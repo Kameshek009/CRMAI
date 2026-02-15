@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { bulkContactsSchema } from "@/lib/crm/validation";
 
 export async function POST(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
 
     const body = await request.json();
@@ -21,11 +21,14 @@ export async function POST(request: NextRequest) {
     const { action, ids } = parsed.data;
 
     if (action === "delete") {
+      const permError = requirePermission(context.permissions, "contacts", "delete");
+      if (permError) return permError;
+
       const { error: dbError } = await supabase
         .from("contacts")
         .update({ is_deleted: true })
         .in("id", ids)
-        .eq("account_id", accountId);
+        .eq("team_id", context.teamId);
 
       if (dbError) {
         return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
@@ -35,12 +38,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "update_status") {
+      const permError = requirePermission(context.permissions, "contacts", "update");
+      if (permError) return permError;
+
       const { status } = parsed.data;
       const { error: dbError } = await supabase
         .from("contacts")
         .update({ status })
         .in("id", ids)
-        .eq("account_id", accountId);
+        .eq("team_id", context.teamId);
 
       if (dbError) {
         return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });

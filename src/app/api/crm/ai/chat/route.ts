@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { CRM_SYSTEM_PROMPT, CRM_TOOLS } from "@/lib/crm/ai-prompts";
 import { executeCrmToolCall } from "@/lib/crm/ai-executor";
@@ -11,8 +11,11 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "ai_chat", "allowed");
+    if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
 
@@ -20,7 +23,7 @@ export async function POST(request: NextRequest) {
     const { data: accountRow, error: accountError } = await supabase
       .from("accounts")
       .select("*")
-      .eq("id", accountId)
+      .eq("id", context.accountId)
       .single();
 
     if (accountError || !accountRow) {
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
     if (toolCalls && toolCalls.length > 0) {
       for (const tc of toolCalls) {
         const args = JSON.parse(tc.function.arguments);
-        const result = await executeCrmToolCall(accountId, tc.function.name, args);
+        const result = await executeCrmToolCall(context.accountId, tc.function.name, args);
         toolResults.push({ name: tc.function.name, ...result });
       }
 
@@ -158,11 +161,11 @@ export async function POST(request: NextRequest) {
           week_start_date: newDayStartDate,
           updated_at: now.toISOString(),
         })
-        .eq("id", accountId);
+        .eq("id", context.accountId);
 
       // Record in usage_records
       await supabase.from("usage_records").insert({
-        account_id: accountId,
+        account_id: context.accountId,
         tokens_consumed: totalTokensUsed,
         action_type: "crm_ai_chat",
         metadata: {

@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 
 export async function GET() {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "analytics", "read");
+    if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
     const now = new Date();
@@ -14,7 +17,7 @@ export async function GET() {
     const { count: totalContacts } = await supabase
       .from("contacts")
       .select("id", { count: "exact", head: true })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false);
 
     // New contacts this week
@@ -25,7 +28,7 @@ export async function GET() {
     const { count: newContactsThisWeek } = await supabase
       .from("contacts")
       .select("id", { count: "exact", head: true })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false)
       .gte("created_at", weekStart.toISOString());
 
@@ -33,13 +36,13 @@ export async function GET() {
     const { count: totalDeals } = await supabase
       .from("deals")
       .select("id", { count: "exact", head: true })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false);
 
     const { data: openDeals } = await supabase
       .from("deals")
       .select("id, value, ai_win_probability")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("status", "open")
       .eq("is_deleted", false);
 
@@ -58,7 +61,7 @@ export async function GET() {
     const { count: tasksDueToday } = await supabase
       .from("crm_tasks")
       .select("id", { count: "exact", head: true })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .in("status", ["todo", "in_progress"])
       .gte("due_date", todayStart.toISOString())
       .lte("due_date", todayEnd.toISOString());
@@ -67,7 +70,7 @@ export async function GET() {
     const { count: overdueTasksCount } = await supabase
       .from("crm_tasks")
       .select("id", { count: "exact", head: true })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .in("status", ["todo", "in_progress"])
       .lt("due_date", todayStart.toISOString());
 
@@ -77,7 +80,7 @@ export async function GET() {
     const { data: wonDeals } = await supabase
       .from("deals")
       .select("id, value")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("status", "won")
       .gte("actual_close_date", monthStart.toISOString().split("T")[0]);
 

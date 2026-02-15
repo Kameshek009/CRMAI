@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateDealSchema } from "@/lib/crm/validation";
 
 export async function GET(
@@ -8,8 +8,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "deals", "read");
+    if (permError) return permError;
 
     const { id } = await params;
     const supabase = createSupabaseAdmin();
@@ -18,7 +21,7 @@ export async function GET(
       .from("deals")
       .select("*, deal_stages(id, name, color, position, is_won, is_lost), contacts(id, first_name, last_name, email), companies(id, name)")
       .eq("id", id)
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false)
       .single();
 
@@ -37,8 +40,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "deals", "update");
+    if (permError) return permError;
 
     const { id } = await params;
     const body = await request.json();
@@ -52,7 +58,7 @@ export async function PATCH(
       .from("deals")
       .update(parsed.data)
       .eq("id", id)
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .select("*, deal_stages(id, name, color), contacts(id, first_name, last_name), companies(id, name)")
       .single();
 
@@ -71,8 +77,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "deals", "delete");
+    if (permError) return permError;
 
     const { id } = await params;
     const supabase = createSupabaseAdmin();
@@ -81,7 +90,7 @@ export async function DELETE(
       .from("deals")
       .update({ is_deleted: true })
       .eq("id", id)
-      .eq("account_id", accountId);
+      .eq("team_id", context.teamId);
 
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });

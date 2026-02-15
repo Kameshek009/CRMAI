@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 
 interface CsvContact {
   first_name: string;
@@ -14,8 +14,11 @@ interface CsvContact {
 
 export async function POST(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "contacts", "create");
+    if (permError) return permError;
 
     const body = await request.json();
     const { contacts } = body as { contacts: CsvContact[] };
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest) {
       const { data: existing } = await supabase
         .from("companies")
         .select("id")
-        .eq("account_id", accountId)
+        .eq("team_id", context.teamId)
         .ilike("name", name)
         .eq("is_deleted", false)
         .limit(1)
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
       } else {
         const { data: created } = await supabase
           .from("companies")
-          .insert({ account_id: accountId, name })
+          .insert({ account_id: context.accountId, team_id: context.teamId, name })
           .select("id")
           .single();
         if (created) {
@@ -61,7 +64,8 @@ export async function POST(request: NextRequest) {
 
     // Insert contacts
     const contactRows = contacts.map((c) => ({
-      account_id: accountId,
+      account_id: context.accountId,
+      team_id: context.teamId,
       first_name: c.first_name,
       last_name: c.last_name || null,
       email: c.email || null,
@@ -82,7 +86,8 @@ export async function POST(request: NextRequest) {
 
     // Log activity
     await supabase.from("crm_activities").insert({
-      account_id: accountId,
+      account_id: context.accountId,
+      team_id: context.teamId,
       type: "import",
       title: `Imported ${imported?.length || 0} contacts`,
       metadata: { count: imported?.length || 0, companies: companyNames.length },

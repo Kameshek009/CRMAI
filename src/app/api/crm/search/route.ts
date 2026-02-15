@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext } from "@/lib/crm/team-helpers";
 
 export async function GET(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const { data: contacts } = await supabase
       .from("contacts")
       .select("id, first_name, last_name, email, title")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false)
       .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`)
       .limit(limit);
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const { data: companies } = await supabase
       .from("companies")
       .select("id, name, industry, domain")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false)
       .or(`name.ilike.%${q}%,domain.ilike.%${q}%,industry.ilike.%${q}%`)
       .limit(limit);
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     const { data: deals } = await supabase
       .from("deals")
       .select("id, title, value, status")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false)
       .ilike("title", `%${q}%`)
       .limit(limit);

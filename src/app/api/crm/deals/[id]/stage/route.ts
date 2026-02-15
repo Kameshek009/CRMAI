@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateDealStageSchema } from "@/lib/crm/validation";
 
 export async function PATCH(
@@ -8,8 +8,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "deals", "update");
+    if (permError) return permError;
 
     const { id } = await params;
     const body = await request.json();
@@ -25,7 +28,7 @@ export async function PATCH(
       .from("deals")
       .select("id, title, stage_id, value")
       .eq("id", id)
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .single();
 
     if (!deal) {
@@ -37,7 +40,7 @@ export async function PATCH(
       .from("deal_stages")
       .select("id, name, is_won, is_lost")
       .eq("id", parsed.data.stage_id)
-      .eq("account_id", accountId)
+      .eq("account_id", context.accountId)
       .single();
 
     if (!newStage) {
@@ -69,7 +72,8 @@ export async function PATCH(
 
     // Log activity
     await supabase.from("crm_activities").insert({
-      account_id: accountId,
+      account_id: context.accountId,
+      team_id: context.teamId,
       deal_id: id,
       type: newStage.is_won ? "deal_won" : newStage.is_lost ? "deal_lost" : "deal_stage_changed",
       title: `Deal "${deal.title}" moved to ${newStage.name}`,

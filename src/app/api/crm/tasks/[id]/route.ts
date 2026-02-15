@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateTaskSchema } from "@/lib/crm/validation";
 
 export async function PATCH(
@@ -8,8 +8,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "tasks", "update");
+    if (permError) return permError;
 
     const { id } = await params;
     const body = await request.json();
@@ -30,7 +33,7 @@ export async function PATCH(
       .from("crm_tasks")
       .update(updateData)
       .eq("id", id)
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .select()
       .single();
 
@@ -41,7 +44,8 @@ export async function PATCH(
     // Log activity if completed
     if (parsed.data.status === "done") {
       await supabase.from("crm_activities").insert({
-        account_id: accountId,
+        account_id: context.accountId,
+        team_id: context.teamId,
         contact_id: data.contact_id,
         deal_id: data.deal_id,
         type: "task_completed",
@@ -60,8 +64,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "tasks", "delete");
+    if (permError) return permError;
 
     const { id } = await params;
     const supabase = createSupabaseAdmin();
@@ -70,7 +77,7 @@ export async function DELETE(
       .from("crm_tasks")
       .delete()
       .eq("id", id)
-      .eq("account_id", accountId);
+      .eq("team_id", context.teamId);
 
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });

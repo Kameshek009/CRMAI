@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId, ensureDealStages } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { ensureDealStages } from "@/lib/crm/helpers";
 import { createPipelineStageSchema, reorderStagesSchema } from "@/lib/crm/validation";
 
 export async function GET() {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
 
+    const permError = requirePermission(context.permissions, "pipeline", "read");
+    if (permError) return permError;
+
     const supabase = createSupabaseAdmin();
-    await ensureDealStages(accountId);
+    await ensureDealStages(context.accountId, context.teamId);
 
     // Get stages with deal counts
     const { data: stages, error: stagesError } = await supabase
       .from("deal_stages")
       .select("*")
-      .eq("account_id", accountId)
+      .eq("account_id", context.accountId)
       .order("position", { ascending: true });
 
     if (stagesError) {
@@ -26,7 +30,7 @@ export async function GET() {
     const { data: deals } = await supabase
       .from("deals")
       .select("*, contacts(id, first_name, last_name), companies(id, name)")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
 
@@ -63,8 +67,11 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "pipeline", "manage");
+    if (permError) return permError;
 
     const body = await request.json();
     const parsed = createPipelineStageSchema.safeParse(body);
@@ -75,7 +82,7 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("deal_stages")
-      .insert({ account_id: accountId, ...parsed.data })
+      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
       .select()
       .single();
 
@@ -91,8 +98,11 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "pipeline", "manage");
+    if (permError) return permError;
 
     const body = await request.json();
     const parsed = reorderStagesSchema.safeParse(body);
@@ -108,7 +118,7 @@ export async function PATCH(request: NextRequest) {
         .from("deal_stages")
         .update({ position: stage.position })
         .eq("id", stage.id)
-        .eq("account_id", accountId);
+        .eq("account_id", context.accountId);
     }
 
     return NextResponse.json({ success: true });

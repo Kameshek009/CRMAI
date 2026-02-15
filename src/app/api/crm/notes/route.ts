@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId, parsePagination } from "@/lib/crm/helpers";
+import { getTeamContext } from "@/lib/crm/team-helpers";
+import { parsePagination } from "@/lib/crm/helpers";
 import { createNoteSchema } from "@/lib/crm/validation";
 
 export async function GET(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("crm_notes")
       .select("*", { count: "exact" })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
 
     const body = await request.json();
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("crm_notes")
-      .insert({ account_id: accountId, ...parsed.data })
+      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
       .select()
       .single();
 
@@ -64,7 +65,8 @@ export async function POST(request: NextRequest) {
 
     // Log activity
     await supabase.from("crm_activities").insert({
-      account_id: accountId,
+      account_id: context.accountId,
+      team_id: context.teamId,
       contact_id: parsed.data.contact_id || null,
       deal_id: parsed.data.deal_id || null,
       company_id: parsed.data.company_id || null,

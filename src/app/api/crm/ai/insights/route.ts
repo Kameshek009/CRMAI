@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getAccountId } from "@/lib/crm/helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import type { AIInsight } from "@/types/crm";
 
 export async function GET() {
   try {
-    const { accountId, error } = await getAccountId();
+    const { context, error } = await getTeamContext();
     if (error) return error;
+
+    const permError = requirePermission(context.permissions, "analytics", "read");
+    if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
     const insights: AIInsight[] = [];
@@ -15,7 +18,7 @@ export async function GET() {
     const { count: overdueTasks } = await supabase
       .from("crm_tasks")
       .select("id", { count: "exact", head: true })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .in("status", ["todo", "in_progress"])
       .lt("due_date", new Date().toISOString());
 
@@ -36,7 +39,7 @@ export async function GET() {
     const { data: staleDeals } = await supabase
       .from("deals")
       .select("id, title, updated_at")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("status", "open")
       .eq("is_deleted", false)
       .lt("updated_at", thirtyDaysAgo.toISOString())
@@ -56,7 +59,7 @@ export async function GET() {
     const { count: coldContacts } = await supabase
       .from("contacts")
       .select("id", { count: "exact", head: true })
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("status", "active")
       .eq("is_deleted", false)
       .lt("engagement_score", 20);
@@ -78,7 +81,7 @@ export async function GET() {
     const { data: closingDeals } = await supabase
       .from("deals")
       .select("id, title, value, expected_close_date")
-      .eq("account_id", accountId)
+      .eq("team_id", context.teamId)
       .eq("status", "open")
       .eq("is_deleted", false)
       .lte("expected_close_date", nextWeek.toISOString().split("T")[0])
