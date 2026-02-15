@@ -66,6 +66,14 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Contact not found" }, { status: 404 });
     }
 
+    await supabase.from("crm_activities").insert({
+      account_id: context.accountId,
+      team_id: context.teamId,
+      contact_id: id,
+      type: "contact_updated",
+      title: `Contact updated: ${data.first_name} ${data.last_name || ""}`.trim(),
+    });
+
     return NextResponse.json({ success: true, data });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
@@ -86,6 +94,13 @@ export async function DELETE(
     const { id } = await params;
     const supabase = createSupabaseAdmin();
 
+    const { data: existing } = await supabase
+      .from("contacts")
+      .select("first_name, last_name")
+      .eq("id", id)
+      .eq("team_id", context.teamId)
+      .single();
+
     const { error: dbError } = await supabase
       .from("contacts")
       .update({ is_deleted: true })
@@ -95,6 +110,14 @@ export async function DELETE(
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
+
+    await supabase.from("crm_activities").insert({
+      account_id: context.accountId,
+      team_id: context.teamId,
+      contact_id: id,
+      type: "contact_deleted",
+      title: `Contact deleted: ${existing?.first_name || ""} ${existing?.last_name || ""}`.trim(),
+    });
 
     return NextResponse.json({ success: true });
   } catch {

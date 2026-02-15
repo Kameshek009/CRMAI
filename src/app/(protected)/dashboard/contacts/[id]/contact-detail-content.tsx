@@ -13,7 +13,7 @@ import { NoteEditor } from "@/components/crm/note-editor";
 import { ScoreBadge } from "@/components/crm/score-badge";
 import { EntityForm } from "@/components/crm/entity-form";
 import { contactFields } from "@/lib/crm/field-definitions";
-import { ArrowLeft, Building2, Mail, Phone, Briefcase, Calendar, Pencil } from "lucide-react";
+import { ArrowLeft, Building2, Mail, Phone, Briefcase, Calendar, Pencil, Handshake, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 
 interface ContactDetailContentProps {
@@ -25,6 +25,10 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
   const [contact, setContact] = useState<Record<string, any> | null>(null);
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
   const [notes, setNotes] = useState<{ id: string; content: string; created_at: string; is_pinned: boolean }[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [deals, setDeals] = useState<Record<string, any>[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [tasks, setTasks] = useState<Record<string, any>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
 
@@ -33,10 +37,14 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
       fetch(`/api/crm/contacts/${contactId}`).then((r) => r.json()),
       fetch(`/api/crm/activities?contact_id=${contactId}&limit=20`).then((r) => r.json()),
       fetch(`/api/crm/notes?contact_id=${contactId}&limit=20`).then((r) => r.json()),
-    ]).then(([contactRes, actRes, notesRes]) => {
+      fetch(`/api/crm/deals?contact_id=${contactId}&limit=10`).then((r) => r.json()),
+      fetch(`/api/crm/tasks?contact_id=${contactId}&limit=10`).then((r) => r.json()),
+    ]).then(([contactRes, actRes, notesRes, dealsRes, tasksRes]) => {
       if (contactRes.success) setContact(contactRes.data);
       if (actRes.success) setActivities(actRes.data);
       if (notesRes.success) setNotes(notesRes.data);
+      if (dealsRes.success) setDeals(dealsRes.data);
+      if (tasksRes.success) setTasks(tasksRes.data);
       setIsLoading(false);
     });
   }, [contactId]);
@@ -179,6 +187,66 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               ))}
             </CardContent>
           </Card>
+
+          {/* Related Deals */}
+          {deals.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Handshake className="size-4" />
+                  Deals ({deals.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {deals.map((deal) => (
+                    <Link
+                      key={String(deal.id)}
+                      href={`/dashboard/deals/${deal.id}`}
+                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{String(deal.title)}</p>
+                        <p className="text-xs text-muted-foreground">{String(deal.status)}</p>
+                      </div>
+                      <span className="text-sm font-bold">${Number(deal.value).toLocaleString()}</span>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Related Tasks */}
+          {tasks.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CheckSquare className="size-4" />
+                  Tasks ({tasks.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {tasks.map((task) => (
+                    <div key={String(task.id)} className="flex items-center justify-between rounded-lg border p-3">
+                      <div>
+                        <p className="text-sm font-medium">{String(task.title)}</p>
+                        {task.due_date && (
+                          <p className="text-xs text-muted-foreground">
+                            Due: {new Date(String(task.due_date)).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant={task.status === "done" ? "default" : "secondary"}>
+                        {String(task.status)}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Activity Timeline */}
           <Card>

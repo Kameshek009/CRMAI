@@ -12,7 +12,7 @@ import { NoteEditor } from "@/components/crm/note-editor";
 import { EntityForm } from "@/components/crm/entity-form";
 import { dealFields } from "@/lib/crm/field-definitions";
 import { StageSelector } from "@/components/crm/stage-selector";
-import { ArrowLeft, DollarSign, Calendar, User, Building2, TrendingUp, Pencil } from "lucide-react";
+import { ArrowLeft, DollarSign, Calendar, User, Building2, TrendingUp, Pencil, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 
 interface DealDetailContentProps {
@@ -28,6 +28,8 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
   const [showEdit, setShowEdit] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [stages, setStages] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [tasks, setTasks] = useState<Record<string, any>[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -35,11 +37,13 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
       fetch(`/api/crm/activities?deal_id=${dealId}&limit=20`).then((r) => r.json()),
       fetch(`/api/crm/notes?deal_id=${dealId}&limit=20`).then((r) => r.json()),
       fetch(`/api/crm/pipeline`).then((r) => r.json()),
-    ]).then(([dealRes, actRes, notesRes, stagesRes]) => {
+      fetch(`/api/crm/tasks?deal_id=${dealId}&limit=10`).then((r) => r.json()),
+    ]).then(([dealRes, actRes, notesRes, stagesRes, tasksRes]) => {
       if (dealRes.success) setDeal(dealRes.data);
       if (actRes.success) setActivities(actRes.data);
       if (notesRes.success) setNotes(notesRes.data);
       if (stagesRes.success) setStages(stagesRes.data);
+      if (tasksRes.success) setTasks(tasksRes.data);
       setIsLoading(false);
     });
   }, [dealId]);
@@ -176,6 +180,37 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
               ))}
             </CardContent>
           </Card>
+
+          {/* Related Tasks */}
+          {tasks.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CheckSquare className="size-4" />
+                  Tasks ({tasks.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {tasks.map((task) => (
+                    <div key={String(task.id)} className="flex items-center justify-between rounded-lg border p-3">
+                      <div>
+                        <p className="text-sm font-medium">{String(task.title)}</p>
+                        {task.due_date && (
+                          <p className="text-xs text-muted-foreground">
+                            Due: {new Date(String(task.due_date)).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant={task.status === "done" ? "default" : "secondary"}>
+                        {String(task.status)}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader><CardTitle className="text-sm">Activity</CardTitle></CardHeader>

@@ -1,0 +1,13 @@
+-- Add additional activity_type enum values for PATCH/DELETE logging
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'contact_updated';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'contact_deleted';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'company_created';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'company_updated';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'company_deleted';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'deal_updated';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'deal_deleted';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'task_created';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'task_updated';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'task_deleted';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'note_updated';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'note_deleted';

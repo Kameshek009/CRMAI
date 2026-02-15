@@ -34,6 +34,16 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Note not found" }, { status: 404 });
     }
 
+    await supabase.from("crm_activities").insert({
+      account_id: context.accountId,
+      team_id: context.teamId,
+      contact_id: data.contact_id,
+      deal_id: data.deal_id,
+      company_id: data.company_id,
+      type: "note_updated",
+      title: "Note updated",
+    });
+
     return NextResponse.json({ success: true, data });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
@@ -54,6 +64,13 @@ export async function DELETE(
     const { id } = await params;
     const supabase = createSupabaseAdmin();
 
+    const { data: existing } = await supabase
+      .from("crm_notes")
+      .select("contact_id, deal_id, company_id")
+      .eq("id", id)
+      .eq("team_id", context.teamId)
+      .single();
+
     const { error: dbError } = await supabase
       .from("crm_notes")
       .update({ is_deleted: true })
@@ -63,6 +80,16 @@ export async function DELETE(
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
+
+    await supabase.from("crm_activities").insert({
+      account_id: context.accountId,
+      team_id: context.teamId,
+      contact_id: existing?.contact_id,
+      deal_id: existing?.deal_id,
+      company_id: existing?.company_id,
+      type: "note_deleted",
+      title: "Note deleted",
+    });
 
     return NextResponse.json({ success: true });
   } catch {

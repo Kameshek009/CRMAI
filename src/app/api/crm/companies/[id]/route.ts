@@ -85,6 +85,14 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Company not found" }, { status: 404 });
     }
 
+    await supabase.from("crm_activities").insert({
+      account_id: context.accountId,
+      team_id: context.teamId,
+      company_id: id,
+      type: "company_updated",
+      title: `Company updated: ${data.name}`,
+    });
+
     return NextResponse.json({ success: true, data });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
@@ -105,6 +113,13 @@ export async function DELETE(
     const { id } = await params;
     const supabase = createSupabaseAdmin();
 
+    const { data: existing } = await supabase
+      .from("companies")
+      .select("name")
+      .eq("id", id)
+      .eq("team_id", context.teamId)
+      .single();
+
     const { error: dbError } = await supabase
       .from("companies")
       .update({ is_deleted: true })
@@ -114,6 +129,14 @@ export async function DELETE(
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
+
+    await supabase.from("crm_activities").insert({
+      account_id: context.accountId,
+      team_id: context.teamId,
+      company_id: id,
+      type: "company_deleted",
+      title: `Company deleted: ${existing?.name || "Unknown"}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch {

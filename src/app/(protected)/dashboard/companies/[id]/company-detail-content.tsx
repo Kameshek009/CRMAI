@@ -11,6 +11,7 @@ import { ScoreBadge } from "@/components/crm/score-badge";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
 import { EntityForm } from "@/components/crm/entity-form";
 import { companyFields } from "@/lib/crm/field-definitions";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Globe, Phone, Mail, Users, Handshake, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +25,8 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contacts, setContacts] = useState<Record<string, any>[]>([]);
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [deals, setDeals] = useState<Record<string, any>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
 
@@ -32,10 +35,12 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
       fetch(`/api/crm/companies/${companyId}`).then((r) => r.json()),
       fetch(`/api/crm/contacts?company_id=${companyId}&limit=20`).then((r) => r.json()),
       fetch(`/api/crm/activities?company_id=${companyId}&limit=20`).then((r) => r.json()),
-    ]).then(([companyRes, contactsRes, actRes]) => {
+      fetch(`/api/crm/deals?company_id=${companyId}&limit=10`).then((r) => r.json()),
+    ]).then(([companyRes, contactsRes, actRes, dealsRes]) => {
       if (companyRes.success) setCompany(companyRes.data);
       if (contactsRes.success) setContacts(contactsRes.data);
       if (actRes.success) setActivities(actRes.data);
+      if (dealsRes.success) setDeals(dealsRes.data);
       setIsLoading(false);
     });
   }, [companyId]);
@@ -150,6 +155,30 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Deals */}
+          {deals.length > 0 && (
+            <Card>
+              <CardHeader><CardTitle className="text-sm">Deals ({deals.length})</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {deals.map((deal) => (
+                    <Link
+                      key={String(deal.id)}
+                      href={`/dashboard/deals/${deal.id}`}
+                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{String(deal.title)}</p>
+                        <Badge variant="secondary" className="mt-1">{String(deal.status)}</Badge>
+                      </div>
+                      <span className="text-sm font-bold">${Number(deal.value).toLocaleString()}</span>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader><CardTitle className="text-sm">Activity</CardTitle></CardHeader>
