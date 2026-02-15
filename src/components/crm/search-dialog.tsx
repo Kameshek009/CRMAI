@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Search, User, Building2, Handshake, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSearchStore } from "@/stores/search-store";
 
 interface SearchResult {
   type: string;
@@ -27,7 +28,10 @@ const typeRoutes: Record<string, string> = {
 };
 
 export function SearchDialog() {
-  const [open, setOpen] = useState(false);
+  const { open: storeOpen, setOpen: setStoreOpen } = useSearchStore();
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = storeOpen || localOpen;
+  const setOpen = (v: boolean) => { setLocalOpen(v); setStoreOpen(v); };
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
