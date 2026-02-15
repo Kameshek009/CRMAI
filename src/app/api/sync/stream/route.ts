@@ -218,7 +218,7 @@ export async function OPTIONS() {
   return new Response(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": process.env.DESKTOP_APP_ORIGIN || "tauri://localhost",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "Authorization, Content-Type",
     },
