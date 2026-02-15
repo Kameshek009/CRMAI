@@ -7,14 +7,15 @@ import { NextResponse } from "next/server";
  * Returns { accountId, error } — if error is set, return it as a NextResponse.
  */
 export async function getAccountId(): Promise<
-  | { accountId: string; error: null }
-  | { accountId: null; error: NextResponse }
+  | { accountId: string; teamId: string | null; error: null }
+  | { accountId: null; teamId: null; error: NextResponse }
 > {
   const { userId } = await auth();
 
   if (!userId) {
     return {
       accountId: null,
+      teamId: null,
       error: NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -25,13 +26,14 @@ export async function getAccountId(): Promise<
   const supabase = createSupabaseAdmin();
   const { data: account, error: accountError } = await supabase
     .from("accounts")
-    .select("id")
+    .select("id, current_team_id")
     .eq("clerk_user_id", userId)
     .single();
 
   if (accountError || !account) {
     return {
       accountId: null,
+      teamId: null,
       error: NextResponse.json(
         { success: false, error: "Account not found" },
         { status: 404 }
@@ -39,7 +41,7 @@ export async function getAccountId(): Promise<
     };
   }
 
-  return { accountId: account.id, error: null };
+  return { accountId: account.id, teamId: account.current_team_id, error: null };
 }
 
 /**
@@ -83,16 +85,30 @@ export function parsePagination(searchParams: URLSearchParams) {
 /**
  * Ensure deal stages exist for an account, seeding defaults if needed
  */
-export async function ensureDealStages(accountId: string) {
+export async function ensureDealStages(accountId: string, teamId?: string | null) {
   const supabase = createSupabaseAdmin();
 
-  const { data: stages } = await supabase
+  let query = supabase
     .from("deal_stages")
     .select("id")
     .eq("account_id", accountId)
     .limit(1);
 
+  if (teamId) {
+    query = query.eq("team_id", teamId);
+  }
+
+  const { data: stages } = await query;
+
   if (!stages || stages.length === 0) {
     await supabase.rpc("seed_default_deal_stages", { p_account_id: accountId });
+    // Update newly seeded stages with team_id
+    if (teamId) {
+      await supabase
+        .from("deal_stages")
+        .update({ team_id: teamId })
+        .eq("account_id", accountId)
+        .is("team_id", null);
+    }
   }
 }

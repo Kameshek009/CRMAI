@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
-  useDroppable,
   PointerSensor,
   TouchSensor,
   useSensor,
@@ -14,15 +13,17 @@ import {
   type DragEndEvent,
   type DragOverEvent,
 } from "@dnd-kit/core";
-import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DealCard, DealCardOverlay, type DealForCard } from "@/components/crm/deal-card";
+import { DealCardOverlay, type DealForCard } from "@/components/crm/deal-card";
 import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { EmptyState } from "@/components/crm/empty-state";
-import { Plus, Kanban, DollarSign, TrendingUp } from "lucide-react";
+import { PipelineToolbar } from "@/components/pipeline/pipeline-toolbar";
+import { PipelineCanvas } from "@/components/pipeline/pipeline-canvas";
+import { PipelineMinimap } from "@/components/pipeline/pipeline-minimap";
+import { StageColumn } from "@/components/pipeline/stage-column";
+import { useCanvasTransform } from "@/hooks/use-canvas-transform";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Kanban } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -42,74 +43,10 @@ interface PipelineColumn {
   count: number;
 }
 
-// ── Droppable Column ────────────────────────────────────────────────────
+// ── Constants ───────────────────────────────────────────────────────────
 
-function StageColumn({
-  column,
-  isOver,
-  onAddDeal,
-}: {
-  column: PipelineColumn;
-  isOver: boolean;
-  onAddDeal: () => void;
-}) {
-  const { setNodeRef } = useDroppable({ id: column.stage.id });
-
-  return (
-    <div className="w-72 shrink-0 flex flex-col">
-      {/* Header */}
-      <div
-        className="flex items-center justify-between p-3 rounded-t-xl bg-card border border-b-0"
-        style={{ borderTopColor: column.stage.color || "#6b7280", borderTopWidth: 3 }}
-      >
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold">{column.stage.name}</h3>
-            <span className="text-[11px] bg-muted px-1.5 py-0.5 rounded-full font-medium tabular-nums">
-              {column.count}
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            ${column.totalValue.toLocaleString()}
-          </p>
-        </div>
-        <Button variant="ghost" size="icon" className="size-7" onClick={onAddDeal}>
-          <Plus className="size-4" />
-        </Button>
-      </div>
-
-      {/* Drop zone */}
-      <div
-        ref={setNodeRef}
-        className={cn(
-          "flex-1 p-2 space-y-2 min-h-[150px] max-h-[calc(100vh-280px)] overflow-y-auto rounded-b-xl border border-t-0 transition-colors duration-200",
-          isOver
-            ? "bg-primary/5 border-primary/40 ring-2 ring-primary/20"
-            : "bg-muted/20"
-        )}
-      >
-        {column.deals.map((deal) => (
-          <DealCard key={deal.id} deal={deal} />
-        ))}
-
-        {column.deals.length === 0 && !isOver && (
-          <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-            <Kanban className="size-5 mb-1 opacity-40" />
-            <p className="text-xs">No deals</p>
-          </div>
-        )}
-
-        {isOver && (
-          <div className="border-2 border-dashed border-primary/40 rounded-lg h-16 flex items-center justify-center animate-pulse">
-            <p className="text-xs text-primary/60 font-medium">Drop here</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Pipeline Page ───────────────────────────────────────────────────────
+const COLUMN_WIDTH = 288;
+const COLUMN_GAP = 16;
 
 const dealFields: FormField[] = [
   { name: "title", label: "Deal Title", type: "text", required: true, placeholder: "New deal" },
@@ -118,12 +55,15 @@ const dealFields: FormField[] = [
   { name: "description", label: "Description", type: "textarea" },
 ];
 
+// ── Pipeline Page ───────────────────────────────────────────────────────
+
 export function PipelineContent() {
   const [columns, setColumns] = useState<PipelineColumn[]>([]);
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [weightedForecast, setWeightedForecast] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   // DnD state
   const [activeDeal, setActiveDeal] = useState<DealForCard | null>(null);
@@ -133,9 +73,23 @@ export function PipelineContent() {
   const [showForm, setShowForm] = useState(false);
   const [newDealStageId, setNewDealStageId] = useState("");
 
+  // Canvas transform
+  const { transform, setTransform, zoomIn, zoomOut, resetView, fitToScreen, handlers } = useCanvasTransform();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Adjust sensor activation distance for zoom level
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: Math.max(5, 8 / transform.scale) },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    })
+  );
+
+  const contentWidth = useMemo(
+    () => columns.length * (COLUMN_WIDTH + COLUMN_GAP) + COLUMN_GAP,
+    [columns.length]
   );
 
   const fetchPipeline = useCallback(async () => {
@@ -156,6 +110,20 @@ export function PipelineContent() {
   useEffect(() => {
     fetchPipeline();
   }, [fetchPipeline]);
+
+  // Filtered columns by search
+  const filteredColumns = useMemo(() => {
+    if (!search) return columns;
+    const q = search.toLowerCase();
+    return columns.map((col) => ({
+      ...col,
+      deals: col.deals.filter(
+        (d) =>
+          d.title?.toLowerCase().includes(q) ||
+          d.value?.toString().includes(q)
+      ),
+    }));
+  }, [columns, search]);
 
   // Resolve an ID (could be a stage or a deal) to a stage ID
   const resolveStageId = useCallback(
@@ -273,13 +241,28 @@ export function PipelineContent() {
     }
   };
 
+  const handleFitToScreen = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    fitToScreen(container.clientWidth, contentWidth);
+  }, [fitToScreen, contentWidth]);
+
+  const handleMinimapNavigate = useCallback(
+    (x: number, y: number) => {
+      setTransform((prev) => ({ ...prev, x, y }));
+    },
+    [setTransform]
+  );
+
   // ── Loading ───────────────────────────────────────────────────────────
 
   if (isLoading) {
     return (
-      <PageContainer>
-        <Skeleton className="h-8 w-48 mb-4" />
-        <div className="flex gap-4 overflow-hidden">
+      <div className="flex flex-col h-full">
+        <div className="px-4 py-3 border-b">
+          <Skeleton className="h-8 w-48" />
+        </div>
+        <div className="flex gap-4 p-4 overflow-hidden flex-1">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="w-72 shrink-0 space-y-2">
               <Skeleton className="h-16 w-full rounded-xl" />
@@ -287,38 +270,40 @@ export function PipelineContent() {
             </div>
           ))}
         </div>
-      </PageContainer>
+      </div>
     );
   }
 
   if (columns.length === 0) {
     return (
-      <PageContainer>
+      <div className="flex items-center justify-center h-full">
         <EmptyState
           icon={Kanban}
           title="Pipeline not set up"
           description="Your deal stages are being configured."
         />
-      </PageContainer>
+      </div>
     );
   }
+
+  // Determine compact mode for low zoom
+  const compact = transform.scale < 0.6;
 
   // ── Render ────────────────────────────────────────────────────────────
 
   return (
-    <PageContainer>
-      <PageHeader title="Pipeline" description="Drag deals between stages">
-        <div className="flex items-center gap-4 text-sm">
-          <span className="flex items-center gap-1 font-medium">
-            <DollarSign className="size-4" />
-            {totalValue.toLocaleString()}
-          </span>
-          <span className="flex items-center gap-1 text-muted-foreground">
-            <TrendingUp className="size-4" />
-            ${weightedForecast.toLocaleString()} weighted
-          </span>
-        </div>
-      </PageHeader>
+    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+      <PipelineToolbar
+        totalValue={totalValue}
+        weightedForecast={weightedForecast}
+        search={search}
+        onSearchChange={setSearch}
+        scale={transform.scale}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onFit={handleFitToScreen}
+        onReset={resetView}
+      />
 
       <DndContext
         sensors={sensors}
@@ -327,24 +312,44 @@ export function PipelineContent() {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 snap-x snap-mandatory md:snap-none">
-          {columns.map((column) => (
-            <StageColumn
-              key={column.stage.id}
-              column={column}
-              isOver={activeOverStageId === column.stage.id}
-              onAddDeal={() => {
-                setNewDealStageId(column.stage.id);
-                setShowForm(true);
-              }}
-            />
-          ))}
-        </div>
+        <PipelineCanvas ref={containerRef} transform={transform} handlers={handlers}>
+          <div className="flex gap-4 p-4" style={{ minWidth: contentWidth }}>
+            {filteredColumns.map((column) => (
+              <StageColumn
+                key={column.stage.id}
+                stage={column.stage}
+                deals={column.deals}
+                totalValue={column.totalValue}
+                count={column.count}
+                isOver={activeOverStageId === column.stage.id}
+                compact={compact}
+                onAddDeal={() => {
+                  setNewDealStageId(column.stage.id);
+                  setShowForm(true);
+                }}
+              />
+            ))}
+          </div>
+        </PipelineCanvas>
 
         <DragOverlay dropAnimation={null}>
           {activeDeal && <DealCardOverlay deal={activeDeal} />}
         </DragOverlay>
       </DndContext>
+
+      {/* Minimap - bottom right */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <PipelineMinimap
+          transform={transform}
+          columnCount={columns.length}
+          containerWidth={containerRef.current?.clientWidth || 800}
+          containerHeight={containerRef.current?.clientHeight || 600}
+          contentWidth={contentWidth}
+          contentHeight={600}
+          stageColors={columns.map((c) => c.stage.color)}
+          onNavigate={handleMinimapNavigate}
+        />
+      </div>
 
       <EntityForm
         open={showForm}
@@ -353,6 +358,6 @@ export function PipelineContent() {
         fields={dealFields}
         onSubmit={handleCreateDeal}
       />
-    </PageContainer>
+    </div>
   );
 }

@@ -4,8 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useAccount } from "@/contexts/account-context";
+import { useTeam } from "@/contexts/team-context";
 import { Logo } from "@/components/ui/logo";
 import { NexusBrandSidebar } from "@/components/nexus-brand";
+import { TeamSwitcher } from "@/components/team/team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -43,6 +45,9 @@ import {
   CheckSquare,
   TrendingUp,
   Sparkles,
+  Shield,
+  Link2,
+  UserCog,
   type LucideIcon,
 } from "lucide-react";
 
@@ -51,6 +56,7 @@ interface NavItem {
   href: string;
   icon: LucideIcon;
   external?: boolean;
+  permission?: string;
 }
 
 interface NavGroup {
@@ -73,6 +79,16 @@ const navGroups: NavGroup[] = [
       { label: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
       { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
       { label: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
+    ],
+  },
+  {
+    label: "Team",
+    items: [
+      { label: "Overview", href: "/dashboard/team", icon: Users },
+      { label: "Members", href: "/dashboard/team/members", icon: UserCog },
+      { label: "Roles", href: "/dashboard/team/roles", icon: Shield, permission: "team_settings.manage" },
+      { label: "Connections", href: "/dashboard/team/connections", icon: Link2 },
+      { label: "Settings", href: "/dashboard/team/settings", icon: Settings, permission: "team_settings.manage" },
     ],
   },
   {
@@ -171,6 +187,7 @@ function NavUser() {
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { can } = useTeam();
 
   return (
     <Sidebar collapsible="icon">
@@ -191,6 +208,9 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+
+        {/* Team Switcher */}
+        <TeamSwitcher />
       </SidebarHeader>
 
       {/* Navigation Content */}
@@ -202,22 +222,24 @@ export function AppSidebar() {
             )}
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname === item.href ||
-                    (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                {group.items
+                  .filter((item) => !item.permission || can(item.permission))
+                  .map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href ||
+                      (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
-                        <Link href={item.href}>
-                          <Icon />
-                          <span>{item.label}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                          <Link href={item.href}>
+                            <Icon />
+                            <span>{item.label}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
               </SidebarMenu>
             </SidebarGroupContent>
             {groupIndex < navGroups.length - 1 && <SidebarSeparator className="my-2" />}
