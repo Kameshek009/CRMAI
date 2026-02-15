@@ -125,7 +125,7 @@ const item = {
 
 export function PricingSection() {
   return (
-    <section className="relative overflow-hidden px-4 sm:px-6 pt-10 sm:pt-16 pb-16 sm:pb-24">
+    <section id="pricing" className="relative overflow-hidden px-4 sm:px-6 pt-10 sm:pt-16 pb-16 sm:pb-24">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <motion.div

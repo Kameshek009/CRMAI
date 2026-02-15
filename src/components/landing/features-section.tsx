@@ -213,7 +213,7 @@ export function FeaturesSection() {
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
-    <section ref={sectionRef} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <section id="features" ref={sectionRef} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
       <motion.div style={{ y: bgY }} className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[800px] w-[800px] rounded-full bg-violet-500/[0.04] blur-[120px]" />
 
       <div className="mx-auto max-w-6xl">

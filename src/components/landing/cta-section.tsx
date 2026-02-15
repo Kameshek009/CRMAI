@@ -13,7 +13,7 @@ export function CTASection() {
   const opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
 
   return (
-    <section ref={ref} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <section id="cta" ref={ref} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
       <motion.div style={{ scale, opacity }} className="mx-auto max-w-4xl">
         <div className="relative rounded-3xl border border-border bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-blue-500/10 p-8 sm:p-14 text-center overflow-hidden">
           <div className="pointer-events-none absolute top-[-50%] left-[-20%] h-[400px] w-[400px] rounded-full bg-violet-500/20 blur-[100px]" />

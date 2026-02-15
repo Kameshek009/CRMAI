@@ -84,7 +84,7 @@ export function AISection() {
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
   return (
-    <section ref={sectionRef} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden bg-muted/30">
+    <section id="ai" ref={sectionRef} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden bg-muted/30">
       <motion.div style={{ y: bgY }} className="pointer-events-none absolute top-[-10%] right-[-10%] h-[600px] w-[600px] rounded-full bg-violet-500/[0.06] blur-[120px]" />
       <div className="pointer-events-none absolute bottom-[-10%] left-[-10%] h-[400px] w-[400px] rounded-full bg-blue-500/[0.05] blur-[100px]" />
 

@@ -7,40 +7,37 @@ const footerLinks = [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
+      { label: "Features", href: "/#features" },
       { label: "Pricing", href: "/pricing" },
-      { label: "AI Assistant", href: "#ai" },
-      { label: "Integrations", href: "#" },
-      { label: "Changelog", href: "#" },
+      { label: "AI Assistant", href: "/#ai" },
+      { label: "Integrations", href: "/#features" },
+      { label: "Testimonials", href: "/#testimonials" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Contact", href: "#" },
-      { label: "Press", href: "#" },
+      { label: "About", href: "/#stats" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Get Started", href: "/sign-up" },
+      { label: "Sign In", href: "/sign-in" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "#" },
-      { label: "Help Center", href: "#" },
-      { label: "Community", href: "#" },
-      { label: "Templates", href: "#" },
-      { label: "API Reference", href: "#" },
+      { label: "AI Chat", href: "/sign-up" },
+      { label: "Pipeline", href: "/sign-up" },
+      { label: "Analytics", href: "/sign-up" },
+      { label: "Contacts", href: "/sign-up" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Privacy", href: "#" },
-      { label: "Terms", href: "#" },
-      { label: "Security", href: "#" },
-      { label: "GDPR", href: "#" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Security", href: "/security" },
     ],
   },
 ];
@@ -83,11 +80,15 @@ export function FooterSection() {
             &copy; {new Date().getFullYear()} NexusCRM. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            {["Twitter", "GitHub", "LinkedIn"].map((social) => (
-              <Link key={social} href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                {social}
-              </Link>
-            ))}
+            <Link href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Twitter
+            </Link>
+            <Link href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              GitHub
+            </Link>
+            <Link href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              LinkedIn
+            </Link>
           </div>
         </motion.div>
       </div>

@@ -52,7 +52,7 @@ export function StatsSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <section id="stats" ref={ref} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
       <div
         className="pointer-events-none absolute inset-0 -z-10 opacity-[0.02]"
         style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "32px 32px" }}

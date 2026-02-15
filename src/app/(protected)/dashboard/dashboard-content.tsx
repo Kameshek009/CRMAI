@@ -266,10 +266,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <TabsTrigger
               value="calendar"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 pb-2 text-sm"
-              disabled
+              asChild
             >
-              <Calendar className="w-3.5 h-3.5 mr-1.5" />
-              Calendar
+              <Link href="/dashboard/tasks">
+                <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                Calendar
+              </Link>
             </TabsTrigger>
             <TabsTrigger
               value="table"
@@ -338,8 +340,10 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center justify-between">
                 Recent
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <MoreHorizontal className="w-3.5 h-3.5" />
+                <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+                  <Link href="/dashboard/activity">
+                    <MoreHorizontal className="w-3.5 h-3.5" />
+                  </Link>
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -373,8 +377,10 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" />
                 AI Insights
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto">
-                  <Plus className="w-3.5 h-3.5" />
+                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" asChild>
+                  <Link href="/dashboard/chats">
+                    <Plus className="w-3.5 h-3.5" />
+                  </Link>
                 </Button>
               </CardTitle>
             </CardHeader>

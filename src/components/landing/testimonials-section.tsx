@@ -18,7 +18,7 @@ export function TestimonialsSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden bg-muted/30">
+    <section id="testimonials" ref={ref} className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden bg-muted/30">
       <div className="pointer-events-none absolute top-[-15%] left-[50%] -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-purple-500/[0.04] blur-[120px]" />
 
       <div className="mx-auto max-w-6xl">

@@ -14,46 +14,46 @@ const PRODUCT_COLUMNS: { title: string; items: ColumnItem[] }[] = [
   {
     title: "PROJECTS",
     items: [
-      { label: "Tasks", href: "#", icon: CheckSquare },
-      { label: "Dashboards", href: "#", icon: BarChart2 },
-      { label: "Board view", href: "#", icon: LayoutGrid },
-      { label: "Gantt", href: "#", icon: Calendar },
+      { label: "Tasks", href: "/#features", icon: CheckSquare },
+      { label: "Dashboards", href: "/#features", icon: BarChart2 },
+      { label: "Board view", href: "/#features", icon: LayoutGrid },
+      { label: "Gantt", href: "/#features", icon: Calendar },
     ],
   },
   {
     title: "COMMUNICATION",
     items: [
-      { label: "Chat", href: "#", icon: MessageCircle },
-      { label: "SyncUp", href: "#", icon: Phone },
-      { label: "Inbox", href: "#", icon: Inbox },
-      { label: "Clips", href: "#", icon: Film },
+      { label: "Chat", href: "/#ai", icon: MessageCircle },
+      { label: "SyncUp", href: "/#ai", icon: Phone },
+      { label: "Inbox", href: "/#features", icon: Inbox },
+      { label: "Clips", href: "/#features", icon: Film },
     ],
   },
   {
     title: "KNOWLEDGE",
     items: [
-      { label: "Docs", href: "#", icon: FileText },
-      { label: "Whiteboards", href: "#", icon: Layout },
-      { label: "Wiki", href: "#", icon: BookOpen },
-      { label: "Forms", href: "#", icon: ClipboardList },
+      { label: "Docs", href: "/#features", icon: FileText },
+      { label: "Whiteboards", href: "/#features", icon: Layout },
+      { label: "Wiki", href: "/#features", icon: BookOpen },
+      { label: "Forms", href: "/#features", icon: ClipboardList },
     ],
   },
   {
     title: "TIME",
     items: [
-      { label: "Calendar", href: "#", icon: Calendar },
-      { label: "Scheduling", href: "#", icon: Clock },
-      { label: "Automations", href: "#", icon: Zap },
-      { label: "Time tracking", href: "#", icon: Timer },
+      { label: "Calendar", href: "/#features", icon: Calendar },
+      { label: "Scheduling", href: "/#features", icon: Clock },
+      { label: "Automations", href: "/#ai", icon: Zap },
+      { label: "Time tracking", href: "/#features", icon: Timer },
     ],
   },
   {
     title: "MORE",
     items: [
-      { label: "All features", href: "#", icon: Grid3X3 },
-      { label: "Integrations", href: "#", icon: Link2 },
-      { label: "Downloads", href: "#", icon: Download },
-      { label: "Watch demo", href: "#", icon: Play },
+      { label: "All features", href: "/#features", icon: Grid3X3 },
+      { label: "Integrations", href: "/#features", icon: Link2 },
+      { label: "Get started", href: "/sign-up", icon: Download },
+      { label: "Watch demo", href: "/#ai", icon: Play },
     ],
   },
 ];
@@ -62,19 +62,19 @@ const LEARN_COLUMNS: { title: string; items: ColumnItem[] }[] = [
   {
     title: "RESOURCES",
     items: [
-      { label: "Blog", href: "#", icon: BookMarked },
-      { label: "Guides", href: "#", icon: BookOpen },
-      { label: "FAQ", href: "#", icon: HelpCircle },
-      { label: "Help Center", href: "#", icon: HelpCircle },
+      { label: "Blog", href: "/#testimonials", icon: BookMarked },
+      { label: "Guides", href: "/#features", icon: BookOpen },
+      { label: "FAQ", href: "/pricing", icon: HelpCircle },
+      { label: "Help Center", href: "/#cta", icon: HelpCircle },
     ],
   },
   {
     title: "LEARNING",
     items: [
-      { label: "Tutorials", href: "#", icon: GraduationCap },
-      { label: "Webinars", href: "#", icon: Video },
-      { label: "Documentation", href: "#", icon: FileText },
-      { label: "API", href: "#", icon: Link2 },
+      { label: "Tutorials", href: "/#ai", icon: GraduationCap },
+      { label: "Webinars", href: "/#ai", icon: Video },
+      { label: "Documentation", href: "/#features", icon: FileText },
+      { label: "API", href: "/#features", icon: Link2 },
     ],
   },
 ];
@@ -207,10 +207,10 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             </div>
 
             <nav className="flex flex-col gap-1">
-              <Link href="#" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+              <Link href="/#features" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
                 Product
               </Link>
-              <Link href="#" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+              <Link href="/#ai" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
                 Learn
               </Link>
               <Link href="/pricing" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
