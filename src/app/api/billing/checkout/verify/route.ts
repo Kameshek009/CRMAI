@@ -24,6 +24,7 @@ import { getCheckoutSession } from "@/lib/stripe/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
 import type { SubscriptionTier } from "@/types";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
 
           // Only update if the tier doesn't match (webhook might have already done it)
           if (!account || account.tier !== targetTier) {
-            console.log(`[Verify] FALLBACK: Updating account ${accountId} to tier=${targetTier}`);
+            logger.info("Checkout", `[Verify] FALLBACK: Updating account ${accountId} to tier=${targetTier}`);
 
             const { error: updateError } = await supabase
               .from("accounts")
@@ -103,12 +104,12 @@ export async function GET(request: NextRequest) {
               .eq("id", accountId);
 
             if (updateError) {
-              console.error("[Verify] FALLBACK: Database update failed:", updateError);
+              logger.error("Checkout", "[Verify] FALLBACK: Database update failed:", updateError);
             } else {
-              console.log(`[Verify] FALLBACK: Successfully updated account ${accountId} to ${targetTier}`);
+              logger.info("Checkout", `[Verify] FALLBACK: Successfully updated account ${accountId} to ${targetTier}`);
             }
           } else {
-            console.log(`[Verify] Account ${accountId} already has tier=${targetTier}, no update needed`);
+            logger.info("Checkout", `[Verify] Account ${accountId} already has tier=${targetTier}, no update needed`);
           }
         }
 
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
             .single();
 
           if (!existingPayment) {
-            console.log(`[Verify] FALLBACK: Adding ${tokenAmount} credits to account ${accountId}`);
+            logger.info("Checkout", `[Verify] FALLBACK: Adding ${tokenAmount} credits to account ${accountId}`);
 
             // Get current credits
             const { data: currentAccount } = await supabase
@@ -153,9 +154,9 @@ export async function GET(request: NextRequest) {
               .eq("id", accountId);
 
             if (updateError) {
-              console.error("[Verify] FALLBACK: Credit update failed:", updateError);
+              logger.error("Checkout", "[Verify] FALLBACK: Credit update failed:", updateError);
             } else {
-              console.log(`[Verify] FALLBACK: Successfully added ${tokenAmount} credits to account ${accountId}`);
+              logger.info("Checkout", `[Verify] FALLBACK: Successfully added ${tokenAmount} credits to account ${accountId}`);
 
               // Record payment history to prevent duplicate processing
               await supabase.from("payment_history").insert({
@@ -170,7 +171,7 @@ export async function GET(request: NextRequest) {
               });
             }
           } else {
-            console.log(`[Verify] Credits already processed for session ${session.id}`);
+            logger.info("Checkout", `[Verify] Credits already processed for session ${session.id}`);
           }
         }
       }
@@ -197,7 +198,7 @@ export async function GET(request: NextRequest) {
       data: responseData,
     });
   } catch (error) {
-    console.error("[Verify Checkout] Error:", error);
+    logger.error("Checkout", "[Verify Checkout] Error:", error);
     return NextResponse.json(
       {
         success: false,

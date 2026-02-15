@@ -13,6 +13,7 @@ import { calculateUsageStats } from "@/lib/usage/check";
 import { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
 import { getCustomerBillingInfo } from "@/lib/stripe/customer";
 import type { Account, SubscriptionTier } from "@/types";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -34,7 +35,7 @@ export async function GET() {
       .single();
 
     if (accountError || !account) {
-      console.error("[Billing Account] Account not found:", accountError);
+      logger.error("BillingAccount", "[Billing Account] Account not found:", accountError);
       return NextResponse.json(
         { success: false, error: "Account not found" },
         { status: 404 }
@@ -101,7 +102,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("[Billing Account] Error:", error);
+    logger.error("BillingAccount", "[Billing Account] Error:", error);
     return NextResponse.json(
       {
         success: false,

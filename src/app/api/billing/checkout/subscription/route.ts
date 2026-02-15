@@ -23,6 +23,7 @@ import {
 } from "@/lib/stripe/server";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 import type { SubscriptionTier } from "@/types";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (accountError || !account) {
-      console.error("[Checkout] Account not found:", accountError);
+      logger.error("Subscription", "[Checkout] Account not found:", accountError);
       return NextResponse.json(
         { success: false, error: "Account not found" },
         { status: 404 }
@@ -104,20 +105,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Log account state for debugging
-    console.log(`[Checkout] ========== UPGRADE REQUEST ==========`);
-    console.log(`[Checkout] Target tier: ${tier}`);
-    console.log(`[Checkout] Account ID: ${account.id}`);
-    console.log(`[Checkout] Current tier: ${account.tier}`);
-    console.log(`[Checkout] stripe_subscription_id: ${account.stripe_subscription_id || 'NULL'}`);
-    console.log(`[Checkout] stripe_customer_id: ${account.stripe_customer_id || 'NULL'}`);
-    console.log(`[Checkout] =====================================`);
+    logger.info("Subscription", `[Checkout] ========== UPGRADE REQUEST ==========`);
+    logger.info("Subscription", `[Checkout] Target tier: ${tier}`);
+    logger.info("Subscription", `[Checkout] Account ID: ${account.id}`);
+    logger.info("Subscription", `[Checkout] Current tier: ${account.tier}`);
+    logger.info("Subscription", `[Checkout] stripe_subscription_id: ${account.stripe_subscription_id || 'NULL'}`);
+    logger.info("Subscription", `[Checkout] stripe_customer_id: ${account.stripe_customer_id || 'NULL'}`);
+    logger.info("Subscription", `[Checkout] =====================================`);
 
     // If user has an existing subscription, we need to handle the upgrade carefully
     // Option 1: Cancel old subscription and create new checkout for new tier
     // Option 2: Use Stripe Billing Portal (but we want in-app experience)
     // We'll go with Option 1: Cancel old and create new checkout
     if (account.stripe_subscription_id) {
-      console.log(`[Checkout] User has existing subscription ${account.stripe_subscription_id}, will cancel and create new checkout for ${tier}`);
+      logger.info("Subscription", `[Checkout] User has existing subscription ${account.stripe_subscription_id}, will cancel and create new checkout for ${tier}`);
 
       try {
         // Cancel the existing subscription immediately so we can create a new one
@@ -125,12 +126,12 @@ export async function POST(request: NextRequest) {
 
         // First check subscription status
         const existingSub = await stripeClient.subscriptions.retrieve(account.stripe_subscription_id);
-        console.log(`[Checkout] Existing subscription status: ${existingSub.status}`);
+        logger.info("Subscription", `[Checkout] Existing subscription status: ${existingSub.status}`);
 
         if (existingSub.status === "active" || existingSub.status === "trialing") {
           // Cancel immediately to allow new subscription
           await stripeClient.subscriptions.cancel(account.stripe_subscription_id);
-          console.log(`[Checkout] Cancelled existing subscription ${account.stripe_subscription_id}`);
+          logger.info("Subscription", `[Checkout] Cancelled existing subscription ${account.stripe_subscription_id}`);
         }
 
         // Clear the subscription ID from database so checkout can proceed
@@ -142,11 +143,11 @@ export async function POST(request: NextRequest) {
           })
           .eq("id", account.id);
 
-        console.log(`[Checkout] Cleared subscription ID from database, proceeding to create new checkout`);
+        logger.info("Subscription", `[Checkout] Cleared subscription ID from database, proceeding to create new checkout`);
 
         // Fall through to create new checkout session below
       } catch (cancelError) {
-        console.error("[Checkout] Failed to cancel existing subscription:", cancelError);
+        logger.error("Subscription", "[Checkout] Failed to cancel existing subscription:", cancelError);
         // Continue to checkout anyway - Stripe will handle it
       }
     }
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
       hosted,
     });
 
-    console.log(`[Checkout] Created ${hosted ? 'hosted' : 'embedded'} subscription session: ${session.id} for tier: ${tier}`);
+    logger.info("Subscription", `[Checkout] Created ${hosted ? 'hosted' : 'embedded'} subscription session: ${session.id} for tier: ${tier}`);
 
     // Return appropriate data based on checkout mode
     if (hosted) {
@@ -207,7 +208,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[Checkout] Error creating subscription session:", error);
+    logger.error("Subscription", "[Checkout] Error creating subscription session:", error);
     return NextResponse.json(
       {
         success: false,

@@ -23,6 +23,7 @@ import {
   CREDIT_AMOUNTS,
 } from "@/lib/stripe/server";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
+import { logger } from "@/lib/logger";
 
 const VALID_PACKAGES = ["credits_100k", "credits_250k", "credits_600k", "credits_1500k"];
 
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (accountError || !account) {
-      console.error("[Credits Checkout] Account not found:", accountError);
+      logger.error("Credits", "[Credits Checkout] Account not found:", accountError);
       return NextResponse.json(
         { success: false, error: "Account not found" },
         { status: 404 }
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
       hosted,
     });
 
-    console.log(
+    logger.info("Credits", 
       `[Credits Checkout] Created ${hosted ? 'hosted' : 'embedded'} session: ${session.id} for package: ${packageId} (${tokenAmount.toLocaleString()} tokens)`
     );
 
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[Credits Checkout] Error creating session:", error);
+    logger.error("Credits", "[Credits Checkout] Error creating session:", error);
     return NextResponse.json(
       {
         success: false,
