@@ -16,6 +16,7 @@ import { headers } from "next/headers";
 import { stripe, getTierFromPriceId, CREDIT_AMOUNTS, TIER_TOKEN_LIMITS } from "@/lib/stripe/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import type Stripe from "stripe";
+import { logger } from "@/lib/logger";
 
 const relevantEvents = new Set([
   "checkout.session.completed",
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
-    console.error("[Webhook] Signature verification failed:", err);
+    logger.error("Webhook", "[Webhook] Signature verification failed:", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  console.log(`[Webhook] Processing event: ${event.type}`);
+  logger.info("Webhook", `[Webhook] Processing event: ${event.type}`);
 
   try {
     switch (event.type) {
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[Webhook] Handler error:", error);
+    logger.error("Webhook", "[Webhook] Handler error:", error);
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 }
@@ -109,10 +110,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const accountId = metadata.account_id;
   const clerkUserId = metadata.clerk_user_id;
 
-  console.log(`[Webhook] Checkout completed: type=${type}, account=${accountId}, tier=${metadata.tier}, metadata=${JSON.stringify(metadata)}`);
+  logger.info("Webhook", `[Webhook] Checkout completed: type=${type}, account=${accountId}, tier=${metadata.tier}, metadata=${JSON.stringify(metadata)}`);
 
   if (!accountId && !clerkUserId) {
-    console.error("[Webhook] No account_id or clerk_user_id in session metadata");
+    logger.error("Webhook", "[Webhook] No account_id or clerk_user_id in session metadata");
     return;
   }
 
@@ -127,7 +128,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const { data: account, error: accountError } = await accountQuery.single();
 
   if (accountError || !account) {
-    console.error("[Webhook] Account not found:", accountError);
+    logger.error("Webhook", "[Webhook] Account not found:", accountError);
     return;
   }
 
@@ -137,21 +138,21 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     const subscriptionId = session.subscription as string;
     const tier = metadata.tier;
 
-    console.log(`[Webhook] Processing subscription checkout: tier="${tier}", customerId="${customerId}", subscriptionId="${subscriptionId}"`);
+    logger.info("Webhook", `[Webhook] Processing subscription checkout: tier="${tier}", customerId="${customerId}", subscriptionId="${subscriptionId}"`);
 
     if (!subscriptionId) {
-      console.error("[Webhook] No subscription ID in session");
+      logger.error("Webhook", "[Webhook] No subscription ID in session");
       return;
     }
 
     if (!tier) {
-      console.error("[Webhook] No tier in session metadata - this should never happen!");
+      logger.error("Webhook", "[Webhook] No tier in session metadata - this should never happen!");
       return;
     }
 
     // Get the token limit for this tier
     const tokenLimit = TIER_TOKEN_LIMITS[tier as keyof typeof TIER_TOKEN_LIMITS] || TIER_TOKEN_LIMITS.free;
-    console.log(`[Webhook] Token limit for tier "${tier}": ${tokenLimit}`);
+    logger.info("Webhook", `[Webhook] Token limit for tier "${tier}": ${tokenLimit}`);
 
     // Update account with subscription details
     const { error: updateError } = await supabase
@@ -170,11 +171,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       .eq("id", account.id);
 
     if (updateError) {
-      console.error("[Webhook] Failed to update account:", updateError);
+      logger.error("Webhook", "[Webhook] Failed to update account:", updateError);
       return;
     }
 
-    console.log(`[Webhook] Successfully updated account ${account.id} to tier="${tier}" with token_limit=${tokenLimit}`);
+    logger.info("Webhook", `[Webhook] Successfully updated account ${account.id} to tier="${tier}" with token_limit=${tokenLimit}`);
 
     // Log activity
     await supabase.from("activity_logs").insert({
@@ -201,7 +202,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       completed_at: new Date().toISOString(),
     });
 
-    console.log(`[Webhook] Account ${account.id} upgraded to ${tier}`);
+    logger.info("Webhook", `[Webhook] Account ${account.id} upgraded to ${tier}`);
 
   } else if (type === "credit_package") {
     // Handle credit package purchase
@@ -210,7 +211,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     const customerId = session.customer as string;
 
     if (!tokenAmount) {
-      console.error("[Webhook] No token_amount in credit package metadata");
+      logger.error("Webhook", "[Webhook] No token_amount in credit package metadata");
       return;
     }
 
@@ -222,7 +223,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       .single();
 
     if (existingPayment) {
-      console.log(`[Webhook] Checkout session ${session.id} already processed, skipping`);
+      logger.info("Webhook", `[Webhook] Checkout session ${session.id} already processed, skipping`);
       return;
     }
 
@@ -240,7 +241,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       .eq("id", account.id);
 
     if (updateError) {
-      console.error("[Webhook] Failed to add credits:", updateError);
+      logger.error("Webhook", "[Webhook] Failed to add credits:", updateError);
       return;
     }
 
@@ -269,7 +270,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       completed_at: new Date().toISOString(),
     });
 
-    console.log(`[Webhook] Account ${account.id} purchased ${tokenAmount.toLocaleString()} credits`);
+    logger.info("Webhook", `[Webhook] Account ${account.id} purchased ${tokenAmount.toLocaleString()} credits`);
   }
 }
 
@@ -284,8 +285,8 @@ async function handleSubscriptionChange(
   const customerId = subscription.customer as string;
   const priceId = subscription.items.data[0]?.price.id;
 
-  console.log(`[Webhook] handleSubscriptionChange: eventType="${eventType}", customerId="${customerId}", priceId="${priceId}"`);
-  console.log(`[Webhook] Subscription metadata:`, subscription.metadata);
+  logger.info("Webhook", `[Webhook] handleSubscriptionChange: eventType="${eventType}", customerId="${customerId}", priceId="${priceId}"`);
+  logger.info("Webhook", `[Webhook] Subscription metadata:`, subscription.metadata);
 
   // First try to get tier from price ID
   let tier = getTierFromPriceId(priceId);
@@ -293,15 +294,15 @@ async function handleSubscriptionChange(
   // If price ID lookup fails, try to get tier from subscription metadata
   if (!tier && subscription.metadata?.tier) {
     tier = subscription.metadata.tier as "pro" | "max";
-    console.log(`[Webhook] Using tier from subscription metadata: "${tier}"`);
+    logger.info("Webhook", `[Webhook] Using tier from subscription metadata: "${tier}"`);
   }
 
   if (!tier) {
-    console.warn(`[Webhook] Unknown price ID: ${priceId} and no tier in metadata - skipping subscription update`);
+    logger.warn("Webhook", `[Webhook] Unknown price ID: ${priceId} and no tier in metadata - skipping subscription update`);
     return;
   }
 
-  console.log(`[Webhook] Resolved tier="${tier}"`);
+  logger.info("Webhook", `[Webhook] Resolved tier="${tier}"`);
 
   const tokenLimit = TIER_TOKEN_LIMITS[tier];
 
@@ -313,7 +314,7 @@ async function handleSubscriptionChange(
     .single();
 
   if (!account) {
-    console.error("[Webhook] Account not found for customer:", customerId);
+    logger.error("Webhook", "[Webhook] Account not found for customer:", customerId);
     return;
   }
 
@@ -333,7 +334,7 @@ async function handleSubscriptionChange(
     .eq("stripe_customer_id", customerId);
 
   if (updateError) {
-    console.error("[Webhook] Failed to update subscription:", updateError);
+    logger.error("Webhook", "[Webhook] Failed to update subscription:", updateError);
     return;
   }
 
@@ -354,7 +355,7 @@ async function handleSubscriptionChange(
     });
   }
 
-  console.log(`[Webhook] Subscription ${eventType}: ${customerId} → ${tier}`);
+  logger.info("Webhook", `[Webhook] Subscription ${eventType}: ${customerId} → ${tier}`);
 }
 
 /**
@@ -373,7 +374,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
   const deletedSubscriptionId = subscription.id;
 
-  console.log(`[Webhook] handleSubscriptionDeleted: subscriptionId="${deletedSubscriptionId}", customerId="${customerId}"`);
+  logger.info("Webhook", `[Webhook] handleSubscriptionDeleted: subscriptionId="${deletedSubscriptionId}", customerId="${customerId}"`);
 
   // Get account with current subscription ID
   const { data: account } = await supabase
@@ -383,7 +384,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .single();
 
   if (!account) {
-    console.error("[Webhook] Account not found for cancelled subscription");
+    logger.error("Webhook", "[Webhook] Account not found for cancelled subscription");
     return;
   }
 
@@ -391,7 +392,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   // If the account has a DIFFERENT subscription ID (or a new one was just created),
   // it means the user upgraded and we should NOT downgrade them to free
   if (account.stripe_subscription_id && account.stripe_subscription_id !== deletedSubscriptionId) {
-    console.log(`[Webhook] Subscription ${deletedSubscriptionId} was deleted, but account already has a newer subscription ${account.stripe_subscription_id}. Skipping downgrade to free.`);
+    logger.info("Webhook", `[Webhook] Subscription ${deletedSubscriptionId} was deleted, but account already has a newer subscription ${account.stripe_subscription_id}. Skipping downgrade to free.`);
     return;
   }
 
@@ -406,11 +407,11 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
     if (activeSubscriptions.data.length > 0) {
       const activeSub = activeSubscriptions.data[0];
-      console.log(`[Webhook] Customer ${customerId} has active subscription ${activeSub.id}. Skipping downgrade to free.`);
+      logger.info("Webhook", `[Webhook] Customer ${customerId} has active subscription ${activeSub.id}. Skipping downgrade to free.`);
 
       // Update the account with the correct subscription ID if it's different
       if (activeSub.id !== account.stripe_subscription_id) {
-        console.log(`[Webhook] Updating account ${account.id} with correct subscription ID ${activeSub.id}`);
+        logger.info("Webhook", `[Webhook] Updating account ${account.id} with correct subscription ID ${activeSub.id}`);
         await supabase
           .from("accounts")
           .update({
@@ -422,13 +423,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       return;
     }
   } catch (stripeError) {
-    console.error("[Webhook] Failed to check active subscriptions:", stripeError);
+    logger.error("Webhook", "[Webhook] Failed to check active subscriptions:", stripeError);
     // Continue with downgrade if we can't verify - safer to rely on DB state
   }
 
   const oldTier = account.tier;
 
-  console.log(`[Webhook] Downgrading account ${account.id} from ${oldTier} to free (subscription ${deletedSubscriptionId} deleted, no active subscriptions found)`);
+  logger.info("Webhook", `[Webhook] Downgrading account ${account.id} from ${oldTier} to free (subscription ${deletedSubscriptionId} deleted, no active subscriptions found)`);
 
   // Downgrade to free tier
   const { error: updateError } = await supabase
@@ -442,7 +443,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .eq("stripe_customer_id", customerId);
 
   if (updateError) {
-    console.error("[Webhook] Failed to downgrade account:", updateError);
+    logger.error("Webhook", "[Webhook] Failed to downgrade account:", updateError);
     return;
   }
 
@@ -457,7 +458,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     },
   });
 
-  console.log(`[Webhook] Subscription cancelled: ${customerId} → free`);
+  logger.info("Webhook", `[Webhook] Subscription cancelled: ${customerId} → free`);
 }
 
 /**
@@ -480,7 +481,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     .single();
 
   if (!account) {
-    console.error("[Webhook] Account not found for invoice:", invoice.id);
+    logger.error("Webhook", "[Webhook] Account not found for invoice:", invoice.id);
     return;
   }
 
@@ -497,7 +498,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     .eq("stripe_customer_id", customerId);
 
   if (updateError) {
-    console.error("[Webhook] Failed to reset tokens:", updateError);
+    logger.error("Webhook", "[Webhook] Failed to reset tokens:", updateError);
     return;
   }
 
@@ -524,7 +525,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     completed_at: new Date().toISOString(),
   });
 
-  console.log(`[Webhook] Tokens reset for ${customerId} on renewal`);
+  logger.info("Webhook", `[Webhook] Tokens reset for ${customerId} on renewal`);
 }
 
 /**
@@ -534,7 +535,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   const supabase = createSupabaseAdmin();
   const customerId = invoice.customer as string;
 
-  console.warn(`[Webhook] Payment failed for customer: ${customerId}`);
+  logger.warn("Webhook", `[Webhook] Payment failed for customer: ${customerId}`);
 
   // Get account
   const { data: account } = await supabase
