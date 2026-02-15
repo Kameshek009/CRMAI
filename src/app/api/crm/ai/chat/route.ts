@@ -5,6 +5,7 @@ import { CRM_SYSTEM_PROMPT, CRM_TOOLS } from "@/lib/crm/ai-prompts";
 import { executeCrmToolCall } from "@/lib/crm/ai-executor";
 import { checkUsageAllowed } from "@/lib/usage/check";
 import { transformAccountRow } from "@/types";
+import { logger } from "@/lib/logger";
 import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
     if (toolCalls && toolCalls.length > 0) {
       for (const tc of toolCalls) {
         const args = JSON.parse(tc.function.arguments);
-        const result = await executeCrmToolCall(context.accountId, tc.function.name, args);
+        const result = await executeCrmToolCall(context.accountId, context.teamId, tc.function.name, args);
         toolResults.push({ name: tc.function.name, ...result });
       }
 
@@ -189,7 +190,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("[CRM AI Chat] Error:", err);
+    logger.error("CrmAI", "Chat error", err);
     return NextResponse.json({ success: false, error: "AI chat failed" }, { status: 500 });
   }
 }
