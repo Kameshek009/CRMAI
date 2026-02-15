@@ -54,7 +54,7 @@ DECLARE
   v_slug TEXT;
 BEGIN
   -- Generate a unique slug from name
-  v_slug := lower(regexp_replace(p_team_name, '[^a-zA-Z0-9]+', '-', 'g')) || '-' || encode(gen_random_bytes(3), 'hex');
+  v_slug := lower(regexp_replace(p_team_name, '[^a-zA-Z0-9]+', '-', 'g')) || '-' || substr(md5(random()::text), 1, 6);
 
   -- Create team
   INSERT INTO teams (name, slug, owner_account_id)

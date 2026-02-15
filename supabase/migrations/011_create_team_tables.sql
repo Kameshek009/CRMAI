@@ -21,7 +21,7 @@ CREATE TABLE teams (
   slug TEXT NOT NULL,
   description TEXT,
   owner_account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-  invite_code TEXT UNIQUE NOT NULL DEFAULT encode(gen_random_bytes(6), 'hex'),
+  invite_code TEXT UNIQUE NOT NULL DEFAULT substr(md5(random()::text), 1, 12),
   max_members INTEGER NOT NULL DEFAULT 3,
   settings JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
