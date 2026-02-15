@@ -19,7 +19,7 @@ export async function GET() {
     const { data: stages, error: stagesError } = await supabase
       .from("deal_stages")
       .select("*")
-      .eq("account_id", context.accountId)
+      .eq("team_id", context.teamId)
       .order("position", { ascending: true });
 
     if (stagesError) {
@@ -118,7 +118,7 @@ export async function PATCH(request: NextRequest) {
         .from("deal_stages")
         .update({ position: stage.position })
         .eq("id", stage.id)
-        .eq("account_id", context.accountId);
+        .eq("team_id", context.teamId);
     }
 
     return NextResponse.json({ success: true });

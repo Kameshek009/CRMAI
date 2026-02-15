@@ -40,7 +40,7 @@ export async function PATCH(
       .from("deal_stages")
       .select("id, name, is_won, is_lost")
       .eq("id", parsed.data.stage_id)
-      .eq("account_id", context.accountId)
+      .eq("team_id", context.teamId)
       .single();
 
     if (!newStage) {
