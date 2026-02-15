@@ -52,6 +52,11 @@ type SupabaseClient = ReturnType<typeof createSupabaseAdmin>;
 
 // ─── Helpers ────────────────────────────────────────────────
 
+/** Escape special LIKE/ILIKE characters to prevent injection */
+function sanitizeLike(input: string): string {
+  return input.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+}
+
 async function findOrCreateCompany(
   supabase: SupabaseClient,
   accountId: string,
@@ -63,7 +68,7 @@ async function findOrCreateCompany(
     .select("id")
     .eq("account_id", accountId)
     .eq("team_id", teamId)
-    .ilike("name", String(companyName))
+    .ilike("name", sanitizeLike(String(companyName)))
     .eq("is_deleted", false)
     .limit(1)
     .single();
@@ -145,7 +150,7 @@ async function createDeal(
     .select("id")
     .eq("account_id", accountId)
     .eq("team_id", teamId)
-    .ilike("name", stageName)
+    .ilike("name", sanitizeLike(stageName))
     .limit(1)
     .single();
 
@@ -171,7 +176,7 @@ async function createDeal(
       .eq("account_id", accountId)
       .eq("team_id", teamId)
       .eq("is_deleted", false)
-      .or(`first_name.ilike.%${args.contact_name}%,last_name.ilike.%${args.contact_name}%`)
+      .or(`first_name.ilike.%${sanitizeLike(String(args.contact_name))}%,last_name.ilike.%${sanitizeLike(String(args.contact_name))}%`)
       .limit(1)
       .single();
     contactId = contact?.id || null;
@@ -184,7 +189,7 @@ async function createDeal(
       .select("id")
       .eq("account_id", accountId)
       .eq("team_id", teamId)
-      .ilike("name", `%${args.company_name}%`)
+      .ilike("name", `%${sanitizeLike(String(args.company_name))}%`)
       .eq("is_deleted", false)
       .limit(1)
       .single();
@@ -198,7 +203,7 @@ async function createDeal(
       team_id: teamId,
       stage_id: stageId,
       title: String(args.title),
-      value: Number(args.value) || 0,
+      value: Math.max(0, Number(args.value) || 0),
       contact_id: contactId,
       company_id: companyId,
       expected_close_date: args.expected_close_date ? String(args.expected_close_date) : null,
@@ -242,7 +247,7 @@ async function createTask(
       .eq("account_id", accountId)
       .eq("team_id", teamId)
       .eq("is_deleted", false)
-      .or(`first_name.ilike.%${args.contact_name}%,last_name.ilike.%${args.contact_name}%`)
+      .or(`first_name.ilike.%${sanitizeLike(String(args.contact_name))}%,last_name.ilike.%${sanitizeLike(String(args.contact_name))}%`)
       .limit(1)
       .single();
     contactId = contact?.id || null;
@@ -255,7 +260,7 @@ async function createTask(
       .select("id")
       .eq("account_id", accountId)
       .eq("team_id", teamId)
-      .ilike("title", `%${args.deal_title}%`)
+      .ilike("title", `%${sanitizeLike(String(args.deal_title))}%`)
       .eq("is_deleted", false)
       .limit(1)
       .single();
@@ -306,7 +311,7 @@ async function searchCrm(
       .eq("account_id", accountId)
       .eq("team_id", teamId)
       .eq("is_deleted", false)
-      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
+      .or(`first_name.ilike.%${sanitizeLike(query)}%,last_name.ilike.%${sanitizeLike(query)}%,email.ilike.%${sanitizeLike(query)}%`)
       .limit(5);
 
     contacts?.forEach((c) =>
@@ -326,7 +331,7 @@ async function searchCrm(
       .eq("account_id", accountId)
       .eq("team_id", teamId)
       .eq("is_deleted", false)
-      .ilike("name", `%${query}%`)
+      .ilike("name", `%${sanitizeLike(query)}%`)
       .limit(5);
 
     companies?.forEach((c) =>
@@ -341,7 +346,7 @@ async function searchCrm(
       .eq("account_id", accountId)
       .eq("team_id", teamId)
       .eq("is_deleted", false)
-      .ilike("title", `%${query}%`)
+      .ilike("title", `%${sanitizeLike(query)}%`)
       .limit(5);
 
     deals?.forEach((d) =>
@@ -430,7 +435,7 @@ async function updateContact(
   if (args.contact_id) {
     contactQuery = contactQuery.eq("id", String(args.contact_id));
   } else if (args.contact_name) {
-    const name = String(args.contact_name);
+    const name = sanitizeLike(String(args.contact_name));
     contactQuery = contactQuery.or(`first_name.ilike.%${name}%,last_name.ilike.%${name}%`);
   } else {
     return { success: false, result: "Please provide a contact name or ID to update." };
@@ -528,7 +533,7 @@ async function updateDeal(
   if (args.deal_id) {
     dealQuery = dealQuery.eq("id", String(args.deal_id));
   } else if (args.deal_title) {
-    dealQuery = dealQuery.ilike("title", `%${args.deal_title}%`);
+    dealQuery = dealQuery.ilike("title", `%${sanitizeLike(String(args.deal_title))}%`);
   } else {
     return { success: false, result: "Please provide a deal title or ID to update." };
   }
@@ -548,8 +553,9 @@ async function updateDeal(
     changes.push(`title -> "${args.new_title}"`);
   }
   if (args.value !== undefined) {
-    updates.value = Number(args.value);
-    changes.push(`value -> $${Number(args.value).toLocaleString()}`);
+    const numValue = Math.max(0, Number(args.value) || 0);
+    updates.value = numValue;
+    changes.push(`value -> $${numValue.toLocaleString()}`);
   }
   if (args.expected_close_date !== undefined) {
     updates.expected_close_date = String(args.expected_close_date);
@@ -561,7 +567,7 @@ async function updateDeal(
       .select("id")
       .eq("account_id", accountId)
       .eq("team_id", teamId)
-      .ilike("name", String(args.stage_name))
+      .ilike("name", sanitizeLike(String(args.stage_name)))
       .limit(1)
       .single();
 
@@ -628,7 +634,7 @@ async function updateTask(
   if (args.task_id) {
     taskQuery = taskQuery.eq("id", String(args.task_id));
   } else if (args.task_title) {
-    taskQuery = taskQuery.ilike("title", `%${args.task_title}%`);
+    taskQuery = taskQuery.ilike("title", `%${sanitizeLike(String(args.task_title))}%`);
   } else {
     return { success: false, result: "Please provide a task title or ID to update." };
   }
@@ -710,7 +716,7 @@ async function completeTask(
   if (args.task_id) {
     taskQuery = taskQuery.eq("id", String(args.task_id));
   } else if (args.task_title) {
-    taskQuery = taskQuery.ilike("title", `%${args.task_title}%`);
+    taskQuery = taskQuery.ilike("title", `%${sanitizeLike(String(args.task_title))}%`);
   } else {
     return { success: false, result: "Please provide a task title or ID to complete." };
   }
@@ -781,7 +787,7 @@ async function deleteRecord(
     if (args.record_id) {
       q = q.eq("id", String(args.record_id));
     } else if (args.record_name) {
-      const name = String(args.record_name);
+      const name = sanitizeLike(String(args.record_name));
       q = q.or(`first_name.ilike.%${name}%,last_name.ilike.%${name}%`);
     } else {
       return { success: false, result: "Please provide a name/title or ID of the record to delete." };
@@ -800,21 +806,22 @@ async function deleteRecord(
     if (args.record_id) {
       q = q.eq("id", String(args.record_id));
     } else if (args.record_name) {
-      q = q.ilike("title", `%${args.record_name}%`);
+      q = q.ilike("title", `%${sanitizeLike(String(args.record_name))}%`);
     } else {
       return { success: false, result: "Please provide a name/title or ID of the record to delete." };
     }
     const { data, error: fe } = await q.limit(1).single();
-    if (fe || !data || typeof data === 'string') return { success: false, result: `${recordType} not found.` };
+    if (fe || !data) return { success: false, result: `${recordType} not found.` };
     record = data;
   }
 
-  // Soft delete
+  // Soft delete - include team_id for safety
   const now = new Date().toISOString();
   const { error: delError } = await supabase
     .from(table)
     .update({ is_deleted: true, updated_at: now } as never)
-    .eq("id" as never, record.id as never);
+    .eq("id" as never, record.id as never)
+    .eq("team_id" as never, teamId as never);
 
   if (delError) {
     return { success: false, result: `Failed to delete ${recordType}: ${delError.message}` };
@@ -854,7 +861,7 @@ async function getContactDetails(
   if (args.contact_id) {
     contactQuery = contactQuery.eq("id", String(args.contact_id));
   } else if (args.contact_name) {
-    const name = String(args.contact_name);
+    const name = sanitizeLike(String(args.contact_name));
     contactQuery = contactQuery.or(`first_name.ilike.%${name}%,last_name.ilike.%${name}%`);
   } else {
     return { success: false, result: "Please provide a contact name or ID." };
@@ -907,7 +914,7 @@ async function getDealDetails(
   if (args.deal_id) {
     dealQuery = dealQuery.eq("id", String(args.deal_id));
   } else if (args.deal_title) {
-    dealQuery = dealQuery.ilike("title", `%${args.deal_title}%`);
+    dealQuery = dealQuery.ilike("title", `%${sanitizeLike(String(args.deal_title))}%`);
   } else {
     return { success: false, result: "Please provide a deal title or ID." };
   }

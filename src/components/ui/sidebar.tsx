@@ -288,6 +288,7 @@ function Sidebar({
         <div
           className="fixed left-0 top-0 h-full w-2 z-40"
           onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           aria-hidden="true"
         />
       )}

@@ -31,7 +31,7 @@ export async function GET() {
       const dateStr = d.toISOString().split("T")[0];
       const dayRevenue = (wonDeals || [])
         .filter((deal) => deal.actual_close_date === dateStr)
-        .reduce((sum, deal) => sum + Number(deal.value), 0);
+        .reduce((sum, deal) => sum + (Number(deal.value) || 0), 0);
       dailyData.push({ date: dateStr, revenue: dayRevenue });
     }
 
