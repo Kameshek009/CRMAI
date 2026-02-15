@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
       const { error: dbError } = await supabase
         .from("crm_tasks")
-        .delete()
+        .update({ is_deleted: true })
         .in("id", ids)
         .eq("team_id", context.teamId);
 

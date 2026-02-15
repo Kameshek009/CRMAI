@@ -26,10 +26,10 @@ const footerLinks = [
   {
     title: "Resources",
     links: [
-      { label: "AI Chat", href: "/sign-up" },
-      { label: "Pipeline", href: "/sign-up" },
-      { label: "Analytics", href: "/sign-up" },
-      { label: "Contacts", href: "/sign-up" },
+      { label: "AI Chat", href: "/#ai" },
+      { label: "Pipeline", href: "/#features" },
+      { label: "Analytics", href: "/#features" },
+      { label: "Contacts", href: "/#features" },
     ],
   },
   {

@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       .from("crm_notes")
       .select("*", { count: "exact" })
       .eq("team_id", context.teamId)
+      .eq("is_deleted", false)
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);

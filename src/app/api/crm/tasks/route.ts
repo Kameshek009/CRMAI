@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       .from("crm_tasks")
       .select("*", { count: "exact" })
       .eq("team_id", context.teamId)
+      .eq("is_deleted", false)
       .order("due_date", { ascending: true, nullsFirst: false })
       .range(offset, offset + limit - 1);
 

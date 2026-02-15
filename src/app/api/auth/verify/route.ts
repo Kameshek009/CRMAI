@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/auth/verify
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (error && error.code !== "PGRST116") {
       // PGRST116 = no rows returned
-      console.error("Database error:", error);
+      logger.error("Auth","Database error:", error);
       return NextResponse.json(
         { success: false, error: "Database error" },
         { status: 500 }
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (createError) {
-        console.error("Failed to create account:", createError);
+        logger.error("Auth","Failed to create account:", createError);
         return NextResponse.json(
           { success: false, error: "Failed to create account" },
           { status: 500 }
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (teamError) {
-        console.error("Failed to create default team:", teamError);
+        logger.error("Auth","Failed to create default team:", teamError);
       }
 
       // Re-fetch account with current_team_id populated
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Auth verification error:", error);
+    logger.error("Auth","Auth verification error:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

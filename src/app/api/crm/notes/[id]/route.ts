@@ -56,7 +56,7 @@ export async function DELETE(
 
     const { error: dbError } = await supabase
       .from("crm_notes")
-      .delete()
+      .update({ is_deleted: true })
       .eq("id", id)
       .eq("team_id", context.teamId);
 

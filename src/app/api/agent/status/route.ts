@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/agent/status
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[agent/status] error:", error);
+    logger.error("AgentStatus","[agent/status] error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to get agent status" },
       { status: 500 }

@@ -471,6 +471,7 @@ export type Database = {
           created_at: string | null
           deal_id: string | null
           id: string
+          is_deleted: boolean | null
           is_pinned: boolean | null
           metadata: Json | null
           team_id: string | null
@@ -484,6 +485,7 @@ export type Database = {
           created_at?: string | null
           deal_id?: string | null
           id?: string
+          is_deleted?: boolean | null
           is_pinned?: boolean | null
           metadata?: Json | null
           team_id?: string | null
@@ -497,6 +499,7 @@ export type Database = {
           created_at?: string | null
           deal_id?: string | null
           id?: string
+          is_deleted?: boolean | null
           is_pinned?: boolean | null
           metadata?: Json | null
           team_id?: string | null
@@ -553,6 +556,7 @@ export type Database = {
           due_date: string | null
           id: string
           is_ai_generated: boolean | null
+          is_deleted: boolean | null
           metadata: Json | null
           priority: Database["public"]["Enums"]["task_priority"] | null
           status: Database["public"]["Enums"]["task_status"] | null
@@ -573,6 +577,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_ai_generated?: boolean | null
+          is_deleted?: boolean | null
           metadata?: Json | null
           priority?: Database["public"]["Enums"]["task_priority"] | null
           status?: Database["public"]["Enums"]["task_status"] | null
@@ -593,6 +598,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_ai_generated?: boolean | null
+          is_deleted?: boolean | null
           metadata?: Json | null
           priority?: Database["public"]["Enums"]["task_priority"] | null
           status?: Database["public"]["Enums"]["task_status"] | null
@@ -1621,7 +1627,7 @@ export const Constants = {
   },
 } as const
 
-// Convenience type aliases used by frontend components
-export type Chat = Database["public"]["Tables"]["chats"]["Row"];
-export type Message = Database["public"]["Tables"]["messages"]["Row"];
-export type VisionBoard = Database["public"]["Tables"]["vision_boards"]["Row"];
+// Type aliases used across the app
+export type Chat = Tables<"chats">;
+export type Message = Tables<"messages">;
+export type VisionBoard = Tables<"vision_boards">;

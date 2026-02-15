@@ -22,6 +22,7 @@ import { NextRequest } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // Heartbeat interval (30 seconds)
 const HEARTBEAT_INTERVAL_MS = 30 * 1000;
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
 
   const { account_id, session_id, sub: clerkUserId } = tokenData;
 
-  console.log(`[SSE] New connection: account=${account_id}, session=${session_id}`);
+  logger.info("Sync",`[SSE] New connection: account=${account_id}, session=${session_id}`);
 
   // Verify session is still valid
   const supabase = createSupabaseAdmin();
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
           const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
           controller.enqueue(encoder.encode(message));
         } catch (error) {
-          console.error(`[SSE] Failed to send event ${event}:`, error);
+          logger.error("Sync",`[SSE] Failed to send event ${event}:`, error);
         }
       };
 
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
         try {
           controller.enqueue(encoder.encode(`: ${comment}\n\n`));
         } catch (error) {
-          console.error("[SSE] Failed to send comment:", error);
+          logger.error("Sync","[SSE] Failed to send comment:", error);
         }
       };
 
@@ -142,7 +143,7 @@ export async function GET(request: NextRequest) {
             filter: `id=eq.${account_id}`,
           },
           (payload) => {
-            console.log(`[SSE] Account updated: ${account_id}`);
+            logger.info("Sync",`[SSE] Account updated: ${account_id}`);
 
             if (payload.new) {
               const account = payload.new as {
@@ -166,9 +167,9 @@ export async function GET(request: NextRequest) {
           }
         )
         .subscribe((status) => {
-          console.log(`[SSE] Realtime subscription status: ${status}`);
+          logger.info("Sync",`[SSE] Realtime subscription status: ${status}`);
           if (status === "SUBSCRIBED") {
-            console.log(`[SSE] Successfully subscribed to account ${account_id}`);
+            logger.info("Sync",`[SSE] Successfully subscribed to account ${account_id}`);
           } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
             sendEvent("error", { message: "Realtime subscription failed" });
           }
@@ -179,13 +180,13 @@ export async function GET(request: NextRequest) {
         sendComment(`heartbeat ${new Date().toISOString()}`);
       }, HEARTBEAT_INTERVAL_MS);
 
-      console.log(`[SSE] Stream started for account ${account_id}`);
+      logger.info("Sync",`[SSE] Stream started for account ${account_id}`);
     },
 
     cancel() {
       // Cleanup on disconnect
       isConnected = false;
-      console.log(`[SSE] Stream cancelled for account ${account_id}`);
+      logger.info("Sync",`[SSE] Stream cancelled for account ${account_id}`);
 
       if (heartbeatInterval) {
         clearInterval(heartbeatInterval);

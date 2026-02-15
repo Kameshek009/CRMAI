@@ -22,6 +22,7 @@ export async function GET(
       .select("*")
       .eq("id", id)
       .eq("team_id", context.teamId)
+      .eq("is_deleted", false)
       .single();
 
     if (dbError || !data) {
@@ -106,7 +107,7 @@ export async function DELETE(
 
     const { error: dbError } = await supabase
       .from("crm_tasks")
-      .delete()
+      .update({ is_deleted: true })
       .eq("id", id)
       .eq("team_id", context.teamId);
 
