@@ -192,12 +192,12 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Logo Header */}
-      <SidebarHeader>
+      <SidebarHeader className="relative">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard" className="group">
-                <div className="flex aspect-square size-8 items-center justify-center">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--accent-blue)]/10 to-[#a78bfa]/10 dark:from-[var(--accent-blue)]/15 dark:to-[#a78bfa]/15 transition-all duration-300 group-hover:from-[var(--accent-blue)]/20 group-hover:to-[#a78bfa]/20">
                   <Logo size={20} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -242,7 +242,7 @@ export function AppSidebar() {
                   })}
               </SidebarMenu>
             </SidebarGroupContent>
-            {groupIndex < navGroups.length - 1 && <SidebarSeparator className="my-2" />}
+            {groupIndex < navGroups.length - 1 && <SidebarSeparator className="my-2 opacity-40" />}
           </SidebarGroup>
         ))}
       </SidebarContent>
