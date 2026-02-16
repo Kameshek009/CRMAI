@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   PieChart,
@@ -13,8 +13,8 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -31,12 +31,16 @@ import {
   MoreHorizontal,
   ArrowRight,
   TrendingUp,
+  TrendingDown,
   AlertCircle,
   Info,
   Lightbulb,
   Kanban,
   Calendar,
   Upload,
+  Sun,
+  Moon,
+  Sunset,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -104,6 +108,13 @@ const PRIORITY_COLORS: Record<string, string> = {
   low: "text-blue-500",
 };
 
+const PRIORITY_BG: Record<string, string> = {
+  urgent: "bg-red-500/10 border-red-500/20",
+  high: "bg-orange-500/10 border-orange-500/20",
+  medium: "bg-amber-500/10 border-amber-500/20",
+  low: "bg-blue-500/10 border-blue-500/20",
+};
+
 const ACTIVITY_ICONS: Record<string, LucideIcon> = {
   deal_created: Handshake,
   deal_stage_changed: ArrowRight,
@@ -116,6 +127,20 @@ const ACTIVITY_ICONS: Record<string, LucideIcon> = {
   email: FileText,
   meeting: Calendar,
   import: Upload,
+};
+
+const ACTIVITY_COLORS: Record<string, string> = {
+  deal_created: "bg-indigo-500/10 text-indigo-500",
+  deal_stage_changed: "bg-blue-500/10 text-blue-500",
+  deal_won: "bg-emerald-500/10 text-emerald-500",
+  deal_lost: "bg-red-500/10 text-red-500",
+  contact_created: "bg-cyan-500/10 text-cyan-500",
+  task_completed: "bg-green-500/10 text-green-500",
+  note: "bg-amber-500/10 text-amber-500",
+  call: "bg-violet-500/10 text-violet-500",
+  email: "bg-sky-500/10 text-sky-500",
+  meeting: "bg-purple-500/10 text-purple-500",
+  import: "bg-teal-500/10 text-teal-500",
 };
 
 function timeAgo(dateStr: string): string {
@@ -131,6 +156,128 @@ function timeAgo(dateStr: string): string {
   if (days < 7) return `${days}d ago`;
   return date.toLocaleDateString();
 }
+
+function getGreeting(): { text: string; icon: LucideIcon; emoji: string } {
+  const hour = new Date().getHours();
+  if (hour < 12) return { text: "Good morning", icon: Sun, emoji: "" };
+  if (hour < 17) return { text: "Good afternoon", icon: Sunset, emoji: "" };
+  return { text: "Good evening", icon: Moon, emoji: "" };
+}
+
+// Animated number counter hook
+function useAnimatedNumber(target: number, duration = 1200): number {
+  const [current, setCurrent] = useState(0);
+  const rafRef = useRef<number>(undefined);
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const startValue = 0;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCurrent(Math.round(startValue + (target - startValue) * eased));
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [target, duration]);
+
+  return current;
+}
+
+// Stat card sub-component with animated number
+function AnimatedStatCard({
+  href,
+  label,
+  value,
+  formattedValue,
+  subtitle,
+  icon: Icon,
+  iconGradient,
+  trend,
+  delay,
+}: {
+  href: string;
+  label: string;
+  value: number;
+  formattedValue?: string;
+  subtitle: string;
+  icon: LucideIcon;
+  iconGradient: string;
+  trend?: { direction: "up" | "down"; text: string };
+  delay: number;
+}) {
+  const animatedValue = useAnimatedNumber(value);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <Link href={href}>
+        <Card className="p-4 cursor-pointer glass-card gradient-border-card stat-card-hover group">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", iconGradient)}>
+              <Icon className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold tracking-tight">
+            {formattedValue
+              ? formattedValue.replace(/[\d,]+/, animatedValue.toLocaleString())
+              : animatedValue.toLocaleString()
+            }
+          </div>
+          <div className="flex items-center justify-between mt-1.5">
+            <p className="text-xs text-muted-foreground">{subtitle}</p>
+            {trend && (
+              <div className={cn(
+                "flex items-center gap-0.5 text-[10px] font-medium",
+                trend.direction === "up" ? "text-emerald-500" : "text-red-500"
+              )}>
+                {trend.direction === "up" ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : (
+                  <TrendingDown className="w-3 h-3" />
+                )}
+                {trend.text}
+              </div>
+            )}
+          </div>
+        </Card>
+      </Link>
+    </motion.div>
+  );
+}
+
+// Stagger container animation
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+  },
+};
 
 export function DashboardContent({ userName }: DashboardContentProps) {
   const { account, usage, isLoading: accountLoading } = useAccount();
@@ -198,7 +345,6 @@ export function DashboardContent({ userName }: DashboardContentProps) {
     if (deal.deal_stages?.is_won) return 100;
     if (deal.deal_stages?.is_lost) return 0;
     const pos = deal.deal_stages?.position ?? 0;
-    // Assume roughly 5 stages max, scale accordingly
     return Math.min(Math.round(((pos + 1) / 5) * 100), 95);
   };
 
@@ -210,376 +356,537 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   };
 
   const insightColors: Record<string, string> = {
-    warning: "text-amber-600 bg-amber-500/10",
-    opportunity: "text-emerald-600 bg-emerald-500/10",
-    action: "text-blue-600 bg-blue-500/10",
-    info: "text-gray-600 bg-gray-500/10",
+    warning: "text-amber-500 bg-amber-500/10 border border-amber-500/20",
+    opportunity: "text-emerald-500 bg-emerald-500/10 border border-emerald-500/20",
+    action: "text-blue-500 bg-blue-500/10 border border-blue-500/20",
+    info: "text-muted-foreground bg-muted border border-border",
   };
+
+  const greeting = getGreeting();
+  const GreetingIcon = greeting.icon;
 
   if (isLoading) {
     return (
-      <div className="p-6 sm:p-8 space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <div className="flex gap-2">
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-9 w-24 rounded-lg" />
+      <div className="p-6 sm:p-8 space-y-6 dashboard-gradient-bg">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-80 rounded-lg" />
+          <Skeleton className="h-4 w-56 rounded-lg" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-[120px] rounded-xl" />
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-48 rounded-xl" />
+            <Skeleton key={i} className="h-[220px] rounded-xl" />
           ))}
         </div>
-        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-[300px] rounded-xl" />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full">
-      {/* Workspace header */}
-      <div className="border-b border-border px-4 sm:px-6 py-4">
+      {/* Workspace header with shimmer line */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="header-shimmer border-b border-border px-4 sm:px-6 py-5"
+      >
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold">Welcome back, {userName}</h1>
-            <p className="text-sm text-muted-foreground">
-              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-              {crmStats && ` \u00B7 ${crmStats.tasksDueToday} tasks due today \u00B7 ${crmStats.openDeals} open deals`}
-            </p>
+          <div className="flex items-center gap-3">
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, type: "spring", stiffness: 200 }}
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7ec4e3] via-[#a78bfa] to-[#7eea9b] flex items-center justify-center"
+            >
+              <GreetingIcon className="w-5 h-5 text-white" />
+            </motion.div>
+            <div>
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="text-lg font-semibold"
+              >
+                {greeting.text},{" "}
+                <span className="greeting-gradient-text">{userName}</span>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="text-sm text-muted-foreground"
+              >
+                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                {crmStats && ` \u00B7 ${crmStats.tasksDueToday} tasks due today \u00B7 ${crmStats.openDeals} open deals`}
+              </motion.p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="flex items-center gap-2"
+          >
+            <Button variant="outline" size="sm" className="group/btn" asChild>
               <Link href="/dashboard/pipeline">
-                <Kanban className="w-3.5 h-3.5 mr-1.5" />
+                <Kanban className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
                 Pipeline
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" className="group/btn" asChild>
               <Link href="/dashboard/chats">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                <Sparkles className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:rotate-12 group-hover/btn:scale-110" />
                 AI Chat
               </Link>
             </Button>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Overview content */}
-      <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-5">
-        {/* Stats row */}
+      {/* Overview content with gradient background */}
+      <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-5 dashboard-gradient-bg">
+        {/* Stats row - animated cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Link href="/dashboard/pipeline">
-            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Open Deals</span>
-                <Handshake className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div className="text-2xl font-bold">{crmStats?.openDeals ?? 0}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                ${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline
-              </p>
-            </Card>
-          </Link>
-          <Link href="/dashboard/tasks">
-            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Tasks Due</span>
-                <CheckSquare className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div className="text-2xl font-bold">{crmStats?.tasksDueToday ?? 0}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
-              </p>
-            </Card>
-          </Link>
-          <Link href="/dashboard/contacts">
-            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Contacts</span>
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div className="text-2xl font-bold">{crmStats?.totalContacts ?? 0}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                +{crmStats?.newContactsThisWeek ?? 0} this week
-              </p>
-            </Card>
-          </Link>
-          <Link href="/dashboard/analytics">
-            <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Won This Month</span>
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div className="text-2xl font-bold">${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {crmStats?.wonDealsThisMonth ?? 0} deal{(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed
-              </p>
-            </Card>
-          </Link>
+          <AnimatedStatCard
+            href="/dashboard/pipeline"
+            label="Open Deals"
+            value={crmStats?.openDeals ?? 0}
+            subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline`}
+            icon={Handshake}
+            iconGradient="bg-gradient-to-br from-indigo-500 to-purple-600"
+            delay={0.1}
+          />
+          <AnimatedStatCard
+            href="/dashboard/tasks"
+            label="Tasks Due"
+            value={crmStats?.tasksDueToday ?? 0}
+            subtitle={crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
+            icon={CheckSquare}
+            iconGradient="bg-gradient-to-br from-amber-500 to-orange-600"
+            trend={crmStats?.overdueTasksCount ? { direction: "down", text: `${crmStats.overdueTasksCount} late` } : undefined}
+            delay={0.15}
+          />
+          <AnimatedStatCard
+            href="/dashboard/contacts"
+            label="Contacts"
+            value={crmStats?.totalContacts ?? 0}
+            subtitle={`+${crmStats?.newContactsThisWeek ?? 0} this week`}
+            icon={Users}
+            iconGradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+            trend={
+              (crmStats?.newContactsThisWeek ?? 0) > 0
+                ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` }
+                : undefined
+            }
+            delay={0.2}
+          />
+          <AnimatedStatCard
+            href="/dashboard/analytics"
+            label="Won This Month"
+            value={crmStats?.wonValueThisMonth ?? 0}
+            formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`}
+            subtitle={`${crmStats?.wonDealsThisMonth ?? 0} deal${(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed`}
+            icon={DollarSign}
+            iconGradient="bg-gradient-to-br from-emerald-500 to-teal-600"
+            trend={
+              (crmStats?.wonDealsThisMonth ?? 0) > 0
+                ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` }
+                : undefined
+            }
+            delay={0.25}
+          />
         </div>
 
-        {/* Top row: Recent + Notes + Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Recent */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center justify-between">
-                Recent
-                <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
-                  <Link href="/dashboard/activity">
-                    <MoreHorizontal className="w-3.5 h-3.5" />
-                  </Link>
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {activities.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No recent activity yet</p>
-              ) : (
-                <div className="space-y-2.5">
-                  {activities.slice(0, 5).map((a) => {
-                    const Icon = ACTIVITY_ICONS[a.type] || Info;
-                    return (
-                      <div key={a.id} className="flex items-start gap-2.5">
-                        <div className="w-6 h-6 rounded-md bg-muted flex items-center justify-center shrink-0 mt-0.5">
-                          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-foreground truncate">{a.title}</p>
-                          <p className="text-[10px] text-muted-foreground">{timeAgo(a.created_at)}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* AI Insights / Notes */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                AI Insights
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" asChild>
-                  <Link href="/dashboard/chats">
-                    <Plus className="w-3.5 h-3.5" />
-                  </Link>
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {insights.length === 0 ? (
-                <div className="text-center py-6">
-                  <Sparkles className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
-                  <p className="text-xs text-muted-foreground">No insights yet. Add data to get AI-powered tips.</p>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {insights.slice(0, 4).map((insight) => {
-                    const Icon = insightIcons[insight.type] || Info;
-                    const color = insightColors[insight.type] || insightColors.info;
-                    return (
-                      <div key={insight.id} className="flex items-start gap-2.5">
-                        <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${color}`}>
-                          <Icon className="w-3.5 h-3.5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-foreground">{insight.title}</p>
-                          <p className="text-[10px] text-muted-foreground line-clamp-2">{insight.description}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Upcoming Tasks */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  Upcoming Tasks
-                </span>
-                <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
-                  <Link href="/dashboard/tasks">
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {upcomingTasks.length === 0 ? (
-                <div className="text-center py-6">
-                  <CheckSquare className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
-                  <p className="text-xs text-muted-foreground">No upcoming tasks</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {upcomingTasks.map((task) => (
-                    <div key={task.id} className="flex items-start gap-2.5">
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                        task.priority === "urgent" ? "bg-red-500" :
-                        task.priority === "high" ? "bg-orange-500" :
-                        task.priority === "medium" ? "bg-amber-500" : "bg-blue-500"
-                      }`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{task.title}</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {task.due_date
-                            ? new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                            : "No due date"}
-                          {task.due_date && new Date(task.due_date) < new Date() && (
-                            <span className="text-red-500 ml-1">overdue</span>
-                          )}
-                        </p>
-                      </div>
-                      <Badge variant="secondary" className="text-[10px] shrink-0">
-                        {task.type}
-                      </Badge>
+        {/* Top row: Recent + AI Insights + Upcoming Tasks */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        >
+          {/* Recent Activity - Timeline style */}
+          <motion.div variants={itemVariants}>
+            <Card className="glass-card h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                      <Clock className="w-3 h-3 text-white" />
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    Recent
+                  </span>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-muted/80" asChild>
+                    <Link href="/dashboard/activity">
+                      <MoreHorizontal className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {activities.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">No recent activity yet</p>
+                ) : (
+                  <div className="space-y-0 timeline-line">
+                    {activities.slice(0, 5).map((a, index) => {
+                      const Icon = ACTIVITY_ICONS[a.type] || Info;
+                      const colorClass = ACTIVITY_COLORS[a.type] || "bg-muted text-muted-foreground";
+                      return (
+                        <motion.div
+                          key={a.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: 0.4 + index * 0.08 }}
+                          className="flex items-start gap-2.5 pb-3 relative"
+                        >
+                          <div className={cn(
+                            "w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 z-10 ring-2 ring-background",
+                            colorClass
+                          )}>
+                            <Icon className="w-3 h-3" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-foreground truncate">{a.title}</p>
+                            <p className="text-[10px] text-muted-foreground">{timeAgo(a.created_at)}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
-        {/* Deals table - like ClickUp projects list */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold">Deals</CardTitle>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px]">
-                  {deals.length} total
-                </Badge>
-                <Button variant="outline" size="sm" className="h-7 text-xs" asChild>
-                  <Link href="/dashboard/pipeline">View All</Link>
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {/* Table header - Desktop (6 columns) */}
-            <div className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-2 pb-2 border-b border-border">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Close</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
-            </div>
-            {/* Table header - Mobile (3 columns) */}
-            <div className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-2 pb-2 border-b border-border">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
-            </div>
+          {/* AI Insights */}
+          <motion.div variants={itemVariants}>
+            <Card className="glass-card h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                    <Sparkles className="w-3 h-3 text-white" />
+                  </div>
+                  AI Insights
+                  <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto hover:bg-muted/80" asChild>
+                    <Link href="/dashboard/chats">
+                      <Plus className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {insights.length === 0 ? (
+                  <div className="text-center py-6">
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Sparkles className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
+                    </motion.div>
+                    <p className="text-xs text-muted-foreground">No insights yet. Add data to get AI-powered tips.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {insights.slice(0, 4).map((insight, index) => {
+                      const Icon = insightIcons[insight.type] || Info;
+                      const color = insightColors[insight.type] || insightColors.info;
+                      return (
+                        <motion.div
+                          key={insight.id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.4 + index * 0.08 }}
+                          className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", color)}>
+                            <Icon className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-foreground">{insight.title}</p>
+                            <p className="text-[10px] text-muted-foreground line-clamp-2">{insight.description}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
-            {deals.length === 0 ? (
-              <div className="text-center py-8">
-                <Handshake className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
-                <p className="text-sm text-muted-foreground">No deals yet</p>
-                <Button variant="outline" size="sm" className="mt-3" asChild>
-                  <Link href="/dashboard/pipeline">
-                    <Plus className="w-3.5 h-3.5 mr-1.5" />
-                    Create Deal
-                  </Link>
-                </Button>
-              </div>
-            ) : (
-              <div>
-                {deals.map((deal) => {
-                  const progress = dealProgress(deal);
-                  const stageColor = deal.deal_stages?.color || "#6366f1";
-                  return (
-                    <React.Fragment key={deal.id}>
-                      {/* Desktop view (6 columns) */}
-                      <Link
-                        href={`/dashboard/deals/${deal.id}`}
-                        className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-2 py-2.5 hover:bg-muted/50 rounded-lg transition-colors items-center"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ backgroundColor: stageColor }}
-                          />
-                          <span className="text-xs font-medium text-foreground truncate">{deal.title}</span>
-                          {deal.companies?.name && (
-                            <span className="text-[10px] text-muted-foreground truncate hidden sm:inline">
-                              {deal.companies.name}
-                            </span>
+          {/* Upcoming Tasks - Enhanced */}
+          <motion.div variants={itemVariants}>
+            <Card className="glass-card h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                      <CheckSquare className="w-3 h-3 text-white" />
+                    </div>
+                    Upcoming Tasks
+                  </span>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-muted/80" asChild>
+                    <Link href="/dashboard/tasks">
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {upcomingTasks.length === 0 ? (
+                  <div className="text-center py-6">
+                    <CheckSquare className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
+                    <p className="text-xs text-muted-foreground">No upcoming tasks</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {upcomingTasks.map((task, index) => {
+                      const isOverdue = task.due_date && new Date(task.due_date) < new Date();
+                      return (
+                        <motion.div
+                          key={task.id}
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: 0.4 + index * 0.08 }}
+                          className={cn(
+                            "flex items-start gap-2.5 p-2 rounded-lg transition-all hover:bg-muted/50",
+                            isOverdue && "bg-red-500/5"
                           )}
-                        </div>
-                        <div>
+                        >
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border-2 mt-0.5 shrink-0 flex items-center justify-center",
+                            PRIORITY_BG[task.priority] || "bg-blue-500/10 border-blue-500/20"
+                          )}>
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              task.priority === "urgent" ? "bg-red-500" :
+                              task.priority === "high" ? "bg-orange-500" :
+                              task.priority === "medium" ? "bg-amber-500" : "bg-blue-500"
+                            )} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{task.title}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {task.due_date
+                                ? new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                : "No due date"}
+                              {isOverdue && (
+                                <span className="text-red-500 ml-1 font-medium">overdue</span>
+                              )}
+                            </p>
+                          </div>
                           <Badge
                             variant="secondary"
-                            className="text-[10px] font-normal"
-                            style={{ borderColor: stageColor + "40", color: stageColor }}
+                            className={cn(
+                              "text-[10px] shrink-0",
+                              task.priority === "urgent" && "bg-red-500/10 text-red-600 border-red-500/20",
+                              task.priority === "high" && "bg-orange-500/10 text-orange-600 border-orange-500/20",
+                            )}
                           >
-                            {deal.deal_stages?.name || "—"}
+                            {task.type}
                           </Badge>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Progress value={progress} className="h-1.5 flex-1" />
-                          <span className="text-[10px] text-muted-foreground w-8 text-right">{progress}%</span>
-                        </div>
-                        <span className="text-xs font-medium text-foreground">
-                          ${deal.value.toLocaleString()}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {deal.expected_close_date
-                            ? new Date(deal.expected_close_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                            : "—"}
-                        </span>
-                        <span className="text-xs font-medium text-foreground">{deal.ai_win_probability}%</span>
-                      </Link>
-                      {/* Mobile view (3 columns) */}
-                      <Link
-                        href={`/dashboard/deals/${deal.id}`}
-                        className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-2 py-2.5 hover:bg-muted/50 rounded-lg transition-colors items-center"
-                      >
-                        <div className="flex items-start gap-2 min-w-0">
-                          <div
-                            className="w-1.5 h-1.5 rounded-full shrink-0 mt-1"
-                            style={{ backgroundColor: stageColor }}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-xs font-medium text-foreground truncate block">{deal.title}</span>
-                            <Badge
-                              variant="secondary"
-                              className="text-[10px] font-normal mt-1"
-                              style={{ borderColor: stageColor + "40", color: stageColor }}
-                            >
-                              {deal.deal_stages?.name || "—"}
-                            </Badge>
-                          </div>
-                        </div>
-                        <span className="text-xs font-medium text-foreground">
-                          ${deal.value.toLocaleString()}
-                        </span>
-                        <span className="text-xs font-medium text-foreground">{deal.ai_win_probability}%</span>
-                      </Link>
-                    </React.Fragment>
-                  );
-                })}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+
+        {/* Deals table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.45 }}
+        >
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                    <Handshake className="w-3 h-3 text-white" />
+                  </div>
+                  Deals
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-[10px]">
+                    {deals.length} total
+                  </Badge>
+                  <Button variant="outline" size="sm" className="h-7 text-xs group/btn" asChild>
+                    <Link href="/dashboard/pipeline">
+                      View All
+                      <ArrowRight className="w-3 h-3 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {/* Table header - Desktop (6 columns) */}
+              <div className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-3 pb-2 border-b border-border">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Close</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
+              </div>
+              {/* Table header - Mobile (3 columns) */}
+              <div className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-3 pb-2 border-b border-border">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
+              </div>
+
+              {deals.length === 0 ? (
+                <div className="text-center py-8">
+                  <Handshake className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
+                  <p className="text-sm text-muted-foreground">No deals yet</p>
+                  <Button variant="outline" size="sm" className="mt-3" asChild>
+                    <Link href="/dashboard/pipeline">
+                      <Plus className="w-3.5 h-3.5 mr-1.5" />
+                      Create Deal
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  {deals.map((deal, index) => {
+                    const progress = dealProgress(deal);
+                    const stageColor = deal.deal_stages?.color || "#6366f1";
+                    const winProb = deal.ai_win_probability;
+                    return (
+                      <React.Fragment key={deal.id}>
+                        {/* Desktop view (6 columns) */}
+                        <motion.div
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: 0.5 + index * 0.04 }}
+                        >
+                          <Link
+                            href={`/dashboard/deals/${deal.id}`}
+                            className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-3 py-2.5 deal-row-hover rounded-lg items-center"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div
+                                className="w-2 h-2 rounded-full shrink-0 ring-2 ring-offset-1 ring-offset-background"
+                                style={{ backgroundColor: stageColor, boxShadow: `0 0 6px ${stageColor}40` }}
+                              />
+                              <span className="text-xs font-medium text-foreground truncate">{deal.title}</span>
+                              {deal.companies?.name && (
+                                <span className="text-[10px] text-muted-foreground truncate hidden sm:inline">
+                                  {deal.companies.name}
+                                </span>
+                              )}
+                            </div>
+                            <div>
+                              <Badge
+                                variant="secondary"
+                                className="text-[10px] font-normal"
+                                style={{
+                                  borderColor: stageColor + "30",
+                                  color: stageColor,
+                                  backgroundColor: stageColor + "10",
+                                }}
+                              >
+                                {deal.deal_stages?.name || "\u2014"}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-700"
+                                  style={{
+                                    width: `${progress}%`,
+                                    background: `linear-gradient(90deg, ${stageColor}, ${stageColor}cc)`,
+                                  }}
+                                />
+                              </div>
+                              <span className="text-[10px] text-muted-foreground w-8 text-right">{progress}%</span>
+                            </div>
+                            <span className="text-xs font-medium text-foreground">
+                              ${deal.value.toLocaleString()}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {deal.expected_close_date
+                                ? new Date(deal.expected_close_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                : "\u2014"}
+                            </span>
+                            <span className={cn(
+                              "text-xs font-semibold",
+                              winProb >= 70 ? "text-emerald-500" :
+                              winProb >= 40 ? "text-amber-500" : "text-red-400"
+                            )}>
+                              {winProb}%
+                            </span>
+                          </Link>
+                        </motion.div>
+                        {/* Mobile view (3 columns) */}
+                        <Link
+                          href={`/dashboard/deals/${deal.id}`}
+                          className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-3 py-2.5 deal-row-hover rounded-lg items-center"
+                        >
+                          <div className="flex items-start gap-2 min-w-0">
+                            <div
+                              className="w-2 h-2 rounded-full shrink-0 mt-1"
+                              style={{ backgroundColor: stageColor, boxShadow: `0 0 6px ${stageColor}40` }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-medium text-foreground truncate block">{deal.title}</span>
+                              <Badge
+                                variant="secondary"
+                                className="text-[10px] font-normal mt-1"
+                                style={{
+                                  borderColor: stageColor + "30",
+                                  color: stageColor,
+                                  backgroundColor: stageColor + "10",
+                                }}
+                              >
+                                {deal.deal_stages?.name || "\u2014"}
+                              </Badge>
+                            </div>
+                          </div>
+                          <span className="text-xs font-medium text-foreground">
+                            ${deal.value.toLocaleString()}
+                          </span>
+                          <span className={cn(
+                            "text-xs font-semibold",
+                            winProb >= 70 ? "text-emerald-500" :
+                            winProb >= 40 ? "text-amber-500" : "text-red-400"
+                          )}>
+                            {winProb}%
+                          </span>
+                        </Link>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Bottom row: Revenue Trend + Workload */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Revenue Trend Chart */}
-          <Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.55 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        >
+          {/* Revenue Trend Chart - with gradient area fill */}
+          <Card className="glass-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5" />
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                  <TrendingUp className="w-3 h-3 text-white" />
+                </div>
                 Revenue Trend (30 Days)
               </CardTitle>
             </CardHeader>
@@ -590,42 +897,70 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   <p className="text-sm text-muted-foreground">No revenue data yet. Close deals to see trends.</p>
                 </div>
               ) : (
-                <div className="h-[180px]">
+                <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={revenueTrend}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                    <AreaChart data={revenueTrend}>
+                      <defs>
+                        <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
+                          <stop offset="50%" stopColor="#22c55e" stopOpacity={0.1} />
+                          <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="revenueStroke" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#22c55e" />
+                          <stop offset="100%" stopColor="#7ec4e3" />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
                       <XAxis
                         dataKey="date"
                         tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                        tick={{ fontSize: 10 }}
+                        tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
                         interval="preserveStartEnd"
+                        axisLine={false}
+                        tickLine={false}
                       />
                       <YAxis
-                        tick={{ fontSize: 10 }}
+                        tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
                         tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                        axisLine={false}
+                        tickLine={false}
                       />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "var(--card)",
                           border: "1px solid var(--border)",
-                          borderRadius: "8px",
+                          borderRadius: "12px",
                           fontSize: "12px",
+                          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                         }}
                         formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
                         labelFormatter={(label) => new Date(String(label)).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
                       />
-                      <Line type="monotone" dataKey="cumulative" stroke="#22c55e" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-                    </LineChart>
+                      <Area
+                        type="monotone"
+                        dataKey="cumulative"
+                        stroke="url(#revenueStroke)"
+                        strokeWidth={2.5}
+                        fill="url(#revenueGradient)"
+                        activeDot={{ r: 5, fill: "#22c55e", strokeWidth: 2, stroke: "var(--card)" }}
+                      />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Workload by Status - Pie Chart */}
-          <Card>
+          {/* Workload by Status - Pie Chart with glass card */}
+          <Card className="glass-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Workload by Status</CardTitle>
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <Kanban className="w-3 h-3 text-white" />
+                </div>
+                Workload by Status
+              </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               {taskStatusData.length === 0 ? (
@@ -635,18 +970,20 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 </div>
               ) : (
                 <div className="flex items-center gap-6">
-                  <div className="w-[160px] h-[160px] shrink-0">
+                  <div className="w-[170px] h-[170px] shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={taskStatusData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={45}
-                          outerRadius={72}
-                          paddingAngle={2}
+                          innerRadius={48}
+                          outerRadius={75}
+                          paddingAngle={3}
                           dataKey="value"
                           stroke="none"
+                          animationBegin={600}
+                          animationDuration={800}
                         >
                           {taskStatusData.map((entry, i) => (
                             <Cell key={i} fill={entry.color} />
@@ -656,58 +993,84 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           contentStyle={{
                             backgroundColor: "var(--card)",
                             border: "1px solid var(--border)",
-                            borderRadius: "8px",
+                            borderRadius: "12px",
                             fontSize: "12px",
+                            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                           }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="space-y-2 flex-1">
-                    {taskStatusData.map((entry) => (
-                      <div key={entry.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                  <div className="space-y-3 flex-1">
+                    {taskStatusData.map((entry, index) => (
+                      <motion.div
+                        key={entry.name}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.7 + index * 0.08 }}
+                        className="flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-2.5">
                           <div
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{ backgroundColor: entry.color }}
+                            className="w-3 h-3 rounded-full transition-transform group-hover:scale-125"
+                            style={{ backgroundColor: entry.color, boxShadow: `0 0 8px ${entry.color}40` }}
                           />
                           <span className="text-xs text-foreground">{entry.name}</span>
                         </div>
-                        <span className="text-xs font-semibold text-foreground">{entry.value}</span>
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${(entry.value / tasks.length) * 100}%`,
+                                backgroundColor: entry.color,
+                              }}
+                            />
+                          </div>
+                          <span className="text-xs font-semibold text-foreground w-6 text-right">{entry.value}</span>
+                        </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Plan info for free users */}
         {!accountLoading && account?.tier === "free" && usage && usage.percentUsed >= 80 && (
-          <Card className="border-amber-500/30 bg-amber-500/5">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">
-                    {usage.percentUsed >= 100 ? "Usage limit reached" : "Running low on tokens"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {usage.percentUsed >= 100
-                      ? "Upgrade to continue."
-                      : `${Math.round(usage.percentUsed)}% used this month.`}
-                  </p>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.6 }}
+          >
+            <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 via-amber-500/10 to-orange-500/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+                    <Sparkles className="w-4.5 h-4.5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">
+                      {usage.percentUsed >= 100 ? "Usage limit reached" : "Running low on tokens"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {usage.percentUsed >= 100
+                        ? "Upgrade to continue."
+                        : `${Math.round(usage.percentUsed)}% used this month.`}
+                    </p>
+                  </div>
+                  <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 hover:opacity-90" asChild>
+                    <Link href="/dashboard/account/billing">
+                      Upgrade
+                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                    </Link>
+                  </Button>
                 </div>
-                <Button size="sm" asChild>
-                  <Link href="/dashboard/account/billing">
-                    Upgrade
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
       </div>
 

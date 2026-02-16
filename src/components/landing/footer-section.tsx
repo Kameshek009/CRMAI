@@ -44,16 +44,24 @@ const footerLinks = [
 
 export function FooterSection() {
   return (
-    <footer className="border-t border-border bg-muted/20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-16">
+    <footer className="relative border-t border-white/10 dark:border-white/10">
+      {/* Top gradient line */}
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-[#a78bfa]/20 to-transparent" />
+
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14 sm:py-20">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-12">
           {footerLinks.map((group) => (
             <div key={group.title}>
-              <h4 className="text-sm font-semibold text-foreground mb-4">{group.title}</h4>
-              <ul className="space-y-2.5">
+              <h4 className="text-sm font-semibold text-foreground mb-5">
+                {group.title}
+              </h4>
+              <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -63,37 +71,53 @@ export function FooterSection() {
           ))}
         </div>
 
-        <div className="mt-10 pt-8 border-t border-border flex flex-col items-center gap-2 text-center">
+        {/* Contact */}
+        <div className="mt-12 pt-8 border-t border-white/10 dark:border-white/10 flex flex-col items-center gap-2 text-center">
           <p className="text-sm text-muted-foreground">Need help? Contact us at</p>
-          <a href="mailto:support@nexuscrm.com" className="text-sm font-medium text-foreground hover:underline transition-colors">
-            support@nexuscrm.com
+          <a
+            href="mailto:support@nexxuscrm.com"
+            className="text-sm font-medium text-foreground hover:underline transition-colors"
+          >
+            support@nexxuscrm.com
           </a>
         </div>
 
+        {/* Bottom bar */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="mt-10 pt-8 border-t border-white/10 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center">
-              <span className="text-background text-xs font-bold">N</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7ec4e3] to-[#a78bfa] flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs font-bold">N</span>
             </div>
-            <span className="text-sm font-semibold text-foreground">NexusCRM</span>
+            <span className="text-sm font-semibold text-foreground">
+              Nexxus CRM
+            </span>
           </div>
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} NexusCRM. All rights reserved.
+            &copy; {new Date().getFullYear()} Nexxus CRM. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <div className="flex items-center gap-5">
+            <Link
+              href="/privacy"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
               Privacy
             </Link>
-            <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/terms"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
               Terms
             </Link>
-            <Link href="/security" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/security"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
               Security
             </Link>
           </div>

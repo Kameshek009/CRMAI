@@ -685,6 +685,106 @@ body {
 }
 
 /* ============================================================================
+   LANDING PAGE ANIMATIONS & EFFECTS
+   ============================================================================ */
+
+/* Shimmer text effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.landing-shimmer-text {
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+}
+
+/* Gradient text - static vibrant gradient */
+.landing-gradient-text {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow button effect */
+.landing-glow-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-glow-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.landing-glow-button:hover::before {
+  opacity: 1;
+}
+
+/* Pulse animation for CTA button */
+@keyframes landingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(167, 139, 250, 0);
+  }
+}
+
+.landing-pulse-button {
+  animation: landingPulse 2.5s ease-in-out infinite;
+}
+
+/* Animated gradient border */
+@keyframes gradientBorderRotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.landing-gradient-border {
+  animation: gradientBorderRotate 6s ease infinite;
+}
+
+/* Glass card hover effect */
+.landing-glass-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Glass badge subtle animation */
+@keyframes glassBadgeShine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.landing-glass-badge {
+  background-size: 200% 100%;
+}
+
+/* ============================================================================
    PREMIUM DARK MODE ENHANCEMENTS
    ============================================================================ */
 
