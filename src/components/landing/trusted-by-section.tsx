@@ -4,15 +4,36 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
 const companies = [
-  "Salesforce",
-  "HubSpot",
-  "Stripe",
-  "Notion",
-  "Linear",
-  "Vercel",
-  "Figma",
-  "Slack",
+  "Salesforce", "HubSpot", "Stripe", "Notion", "Linear",
+  "Vercel", "Figma", "Slack", "Shopify", "Datadog",
+  "MongoDB", "Supabase",
 ];
+
+function MarqueeRow({ reverse = false, speed = 30 }: { reverse?: boolean; speed?: number }) {
+  const doubled = [...companies, ...companies];
+  return (
+    <div className="flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+      <motion.div
+        className="flex items-center gap-10 sm:gap-16 whitespace-nowrap"
+        animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
+        transition={{
+          duration: speed,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      >
+        {doubled.map((company, i) => (
+          <span
+            key={`${company}-${i}`}
+            className="text-lg sm:text-xl md:text-2xl font-semibold text-muted-foreground/20 hover:text-muted-foreground/50 transition-colors duration-500 select-none cursor-default shrink-0"
+          >
+            {company}
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
 
 export function TrustedBySection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -27,30 +48,15 @@ export function TrustedBySection() {
         initial={{ opacity: 0, y: 20 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="max-w-5xl mx-auto text-center"
+        className="max-w-6xl mx-auto"
       >
-        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground/60">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground/60 mb-8 sm:mb-12">
           Trusted by industry leaders
-        </span>
+        </p>
 
-        <div className="mt-8 sm:mt-12 flex flex-wrap items-center justify-center gap-x-10 sm:gap-x-16 gap-y-5 sm:gap-y-6">
-          {companies.map((company, i) => (
-            <motion.span
-              key={company}
-              initial={{ opacity: 0, y: 12 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 25,
-                delay: 0.1 + i * 0.05,
-              }}
-              whileHover={{ scale: 1.1, opacity: 1 }}
-              className="text-lg sm:text-xl font-semibold text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors duration-300 select-none cursor-default"
-            >
-              {company}
-            </motion.span>
-          ))}
+        <div className="flex flex-col gap-4">
+          <MarqueeRow speed={35} />
+          <MarqueeRow reverse speed={40} />
         </div>
       </motion.div>
 

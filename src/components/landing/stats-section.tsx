@@ -10,6 +10,8 @@ interface StatItem {
   label: string;
   description: string;
   gradient: string;
+  gradientColors: [string, string];
+  progress: number; // 0-100 for the ring
 }
 
 const stats: StatItem[] = [
@@ -19,6 +21,8 @@ const stats: StatItem[] = [
     label: "More Deals Closed",
     description: "Teams using Nexxus CRM close 3x more deals on average",
     gradient: "from-[#7ec4e3] to-[#a78bfa]",
+    gradientColors: ["#7ec4e3", "#a78bfa"],
+    progress: 95,
   },
   {
     value: 85,
@@ -26,6 +30,8 @@ const stats: StatItem[] = [
     label: "Less Manual Work",
     description: "AI automations eliminate repetitive data entry and follow-ups",
     gradient: "from-[#a78bfa] to-[#f472b6]",
+    gradientColors: ["#a78bfa", "#f472b6"],
+    progress: 85,
   },
   {
     value: 40,
@@ -33,6 +39,8 @@ const stats: StatItem[] = [
     label: "Faster Sales Cycle",
     description: "Shorten your pipeline with AI-powered insights and scoring",
     gradient: "from-[#f472b6] to-[#f2b76c]",
+    gradientColors: ["#f472b6", "#f2b76c"],
+    progress: 72,
   },
   {
     value: 10,
@@ -40,6 +48,8 @@ const stats: StatItem[] = [
     label: "Teams Trust Us",
     description: "Growing businesses worldwide choose Nexxus CRM",
     gradient: "from-[#7eea9b] to-[#7ec4e3]",
+    gradientColors: ["#7eea9b", "#7ec4e3"],
+    progress: 88,
   },
 ];
 
@@ -70,11 +80,67 @@ function AnimatedStatNumber({
 
   return (
     <span
-      className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}
+      className={`text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}
     >
       {display}
       {suffix}
     </span>
+  );
+}
+
+/* ---------- SVG Progress Ring ---------- */
+function ProgressRing({
+  progress,
+  gradientColors,
+  inView,
+  index,
+}: {
+  progress: number;
+  gradientColors: [string, string];
+  inView: boolean;
+  index: number;
+}) {
+  const gradientId = `ring-gradient-${index}`;
+  const size = 100;
+  const strokeWidth = 4;
+  const center = size / 2;
+  const radius = center - strokeWidth;
+  const circumference = 2 * Math.PI * radius;
+
+  return (
+    <svg width={size} height={size} className="absolute -inset-1 pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity duration-500">
+      <defs>
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={gradientColors[0]} />
+          <stop offset="100%" stopColor={gradientColors[1]} />
+        </linearGradient>
+      </defs>
+      {/* Background circle */}
+      <circle
+        cx={center}
+        cy={center}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        className="text-white/5"
+      />
+      {/* Animated progress circle */}
+      <motion.circle
+        cx={center}
+        cy={center}
+        r={radius}
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        initial={{ strokeDashoffset: circumference }}
+        animate={inView ? { strokeDashoffset: circumference - (circumference * progress) / 100 } : {}}
+        transition={{ duration: 2, delay: index * 0.15, ease: "easeOut" }}
+        transform={`rotate(-90 ${center} ${center})`}
+      />
+    </svg>
   );
 }
 
@@ -94,7 +160,7 @@ export function StatsSection() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[1000px] rounded-full"
           style={{
             background:
-              "radial-gradient(ellipse, rgba(126,196,227,0.06) 0%, rgba(167,139,250,0.03) 40%, transparent 70%)",
+              "radial-gradient(ellipse, rgba(126,196,227,0.08) 0%, rgba(167,139,250,0.04) 40%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
@@ -102,17 +168,9 @@ export function StatsSection() {
 
       {/* Grid pattern */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <svg
-          className="absolute inset-0 h-full w-full opacity-[0.02]"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="absolute inset-0 h-full w-full opacity-[0.02]" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern
-              id="stats-grid"
-              width="40"
-              height="40"
-              patternUnits="userSpaceOnUse"
-            >
+            <pattern id="stats-grid" width="40" height="40" patternUnits="userSpaceOnUse">
               <circle cx="1" cy="1" r="1" fill="currentColor" />
             </pattern>
           </defs>
@@ -157,12 +215,22 @@ export function StatsSection() {
                 className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
               />
 
-              <AnimatedStatNumber
-                value={stat.value}
-                suffix={stat.suffix}
-                gradient={stat.gradient}
-                inView={inView}
-              />
+              {/* Progress ring behind number */}
+              <div className="relative inline-flex items-center justify-center w-[100px] h-[100px] mx-auto mb-2">
+                <ProgressRing
+                  progress={stat.progress}
+                  gradientColors={stat.gradientColors}
+                  inView={inView}
+                  index={i}
+                />
+                <AnimatedStatNumber
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  gradient={stat.gradient}
+                  inView={inView}
+                />
+              </div>
+
               <h3 className="mt-4 text-base sm:text-lg font-semibold text-foreground">
                 {stat.label}
               </h3>

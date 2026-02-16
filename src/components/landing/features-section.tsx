@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef, useCallback } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import {
   Brain,
   GitBranch,
@@ -77,11 +78,26 @@ const features: BentoFeature[] = [
   },
 ];
 
+/* ---------- mouse-following glow card ---------- */
 function BentoCard({ feature, index }: { feature: BentoFeature; index: number }) {
   const Icon = feature.icon;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const glowX = useMotionValue(0);
+  const glowY = useMotionValue(0);
+  const smoothGlowX = useSpring(glowX, { stiffness: 200, damping: 30 });
+  const smoothGlowY = useSpring(glowY, { stiffness: 200, damping: 30 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    glowX.set(e.clientX - rect.left);
+    glowY.set(e.clientY - rect.top);
+  }, [glowX, glowY]);
 
   return (
     <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -91,8 +107,8 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
         stiffness: 150,
         damping: 22,
       }}
-      whileHover={{ y: -4, scale: 1.02 }}
-      className={`landing-glass-card group relative overflow-hidden rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-8 transition-all duration-300 hover:border-white/20 dark:hover:border-white/20 hover:shadow-2xl hover:shadow-purple-500/5 ${
+      whileHover={{ y: -6, scale: 1.02 }}
+      className={`landing-glass-card group relative overflow-hidden rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-8 transition-all duration-300 hover:border-white/20 dark:hover:border-white/20 hover:shadow-2xl hover:shadow-purple-500/10 ${
         feature.size === "lg"
           ? "md:col-span-2 md:row-span-2"
           : feature.size === "md"
@@ -100,9 +116,17 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
           : ""
       }`}
     >
+      {/* Mouse-following glow */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(400px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.12), rgba(126,196,227,0.06), transparent 60%)`,
+        }}
+      />
+
       {/* Background gradient */}
       <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-40 group-hover:opacity-60 transition-opacity duration-500`}
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-40 group-hover:opacity-70 transition-opacity duration-500`}
       />
 
       {/* Hover glow border effect */}
@@ -113,9 +137,13 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
       />
 
       <div className="relative z-10">
-        {/* Icon */}
-        <div className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${feature.iconGradient} mb-5 sm:mb-6 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}>
-          <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+        {/* Icon with pulse ring */}
+        <div className="relative mb-5 sm:mb-6">
+          <div className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${feature.iconGradient} shadow-lg group-hover:shadow-xl transition-all duration-300`}>
+            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          </div>
+          {/* Animated ring on hover */}
+          <div className={`absolute inset-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${feature.iconGradient} opacity-0 group-hover:opacity-30 group-hover:scale-[1.6] transition-all duration-700 blur-md`} />
         </div>
 
         {/* Title */}
@@ -128,23 +156,41 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
           {feature.description}
         </p>
 
-        {/* Decorative dots for large cards */}
+        {/* Mini visual for large cards */}
         {feature.size === "lg" && (
-          <div className="mt-6 sm:mt-8 flex gap-1.5">
+          <div className="mt-6 sm:mt-8 flex items-center gap-3">
             {[...Array(4)].map((_, i) => (
               <motion.div
                 key={i}
-                className={`w-2 h-2 rounded-full bg-gradient-to-br ${feature.iconGradient}`}
-                animate={{ opacity: [0.3, 1, 0.3] }}
+                className={`h-1.5 rounded-full bg-gradient-to-r ${feature.iconGradient}`}
+                animate={{ width: [12, 24, 16, 32, 12] }}
                 transition={{
-                  duration: 2,
+                  duration: 3,
                   repeat: Infinity,
-                  delay: i * 0.3,
+                  delay: i * 0.4,
+                  ease: "easeInOut",
                 }}
               />
             ))}
           </div>
         )}
+
+        {/* Subtle arrow on hover */}
+        <motion.div
+          className="mt-4 flex items-center gap-1.5 text-xs font-semibold opacity-0 group-hover:opacity-60 transition-opacity duration-300"
+          initial={false}
+        >
+          <span className={`bg-gradient-to-r ${feature.iconGradient} bg-clip-text text-transparent`}>
+            Learn more
+          </span>
+          <motion.span
+            animate={{ x: [0, 3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className={`bg-gradient-to-r ${feature.iconGradient} bg-clip-text text-transparent`}
+          >
+            &rarr;
+          </motion.span>
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -158,8 +204,15 @@ export function FeaturesSection() {
         <div
           className="absolute top-[10%] left-1/2 -translate-x-1/2 h-[800px] w-[800px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)",
             filter: "blur(100px)",
+          }}
+        />
+        <div
+          className="absolute bottom-[10%] right-[10%] h-[500px] w-[500px] rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(126,196,227,0.05) 0%, transparent 70%)",
+            filter: "blur(80px)",
           }}
         />
       </div>

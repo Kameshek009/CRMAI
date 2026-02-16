@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { ArrowRight, Sparkles, Play } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { motion, useMotionValue, useTransform, animate, useSpring } from "framer-motion";
+import { ArrowRight, Sparkles, Play, TrendingUp, Users, DollarSign, BarChart3, Zap } from "lucide-react";
 
 /* ---------- animated counter ---------- */
 function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -32,43 +32,39 @@ function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: stri
 function FloatingOrbs() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* Large primary orb */}
       <motion.div
         animate={{ x: [0, 80, -40, 0], y: [0, -60, 40, 0], scale: [1, 1.15, 0.95, 1] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-[-15%] left-[40%] h-[700px] w-[700px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(126,196,227,0.15) 0%, rgba(167,139,250,0.08) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(126,196,227,0.18) 0%, rgba(167,139,250,0.10) 50%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
-      {/* Purple accent orb */}
       <motion.div
         animate={{ x: [0, -60, 30, 0], y: [0, 50, -30, 0] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         className="absolute top-[10%] left-[10%] h-[500px] w-[500px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(167,139,250,0.12) 0%, rgba(244,114,182,0.06) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(167,139,250,0.15) 0%, rgba(244,114,182,0.08) 50%, transparent 70%)",
           filter: "blur(100px)",
         }}
       />
-      {/* Pink accent orb */}
       <motion.div
         animate={{ x: [0, 50, -70, 0], y: [0, -40, 60, 0] }}
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 4 }}
         className="absolute top-[20%] right-[5%] h-[400px] w-[400px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(244,114,182,0.10) 0%, rgba(126,234,155,0.05) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(244,114,182,0.12) 0%, rgba(126,234,155,0.06) 50%, transparent 70%)",
           filter: "blur(90px)",
         }}
       />
-      {/* Green subtle orb */}
       <motion.div
         animate={{ x: [0, -30, 50, 0], y: [0, 30, -50, 0] }}
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 6 }}
         className="absolute bottom-[5%] left-[25%] h-[350px] w-[350px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(126,234,155,0.08) 0%, rgba(126,196,227,0.04) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(126,234,155,0.10) 0%, rgba(126,196,227,0.05) 50%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -89,6 +85,228 @@ function GridPattern() {
         <rect width="100%" height="100%" fill="url(#hero-grid)" />
       </svg>
     </div>
+  );
+}
+
+/* ---------- mouse spotlight ---------- */
+function MouseSpotlight() {
+  const spotlightRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { stiffness: 100, damping: 30 });
+  const smoothY = useSpring(mouseY, { stiffness: 100, damping: 30 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  return (
+    <motion.div
+      ref={spotlightRef}
+      className="pointer-events-none fixed inset-0 z-0 opacity-60"
+      style={{
+        background: useTransform(
+          [smoothX, smoothY],
+          ([x, y]) =>
+            `radial-gradient(600px circle at ${x}px ${y}px, rgba(167,139,250,0.06), rgba(126,196,227,0.03), transparent 60%)`
+        ),
+      }}
+    />
+  );
+}
+
+/* ---------- 3D product mockup ---------- */
+function ProductPreview3D() {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-300, 300], [8, -8]), { stiffness: 150, damping: 20 });
+  const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-8, 8]), { stiffness: 150, damping: 20 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left - rect.width / 2);
+    mouseY.set(e.clientY - rect.top - rect.height / 2);
+  }, [mouseX, mouseY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(0);
+    mouseY.set(0);
+  }, [mouseX, mouseY]);
+
+  const miniDeals = [
+    { name: "Acme Corp", value: "$45,000", change: "+12%", status: "Hot" },
+    { name: "Globex Inc", value: "$28,500", change: "+8%", status: "Warm" },
+    { name: "Wayne Ent", value: "$31,200", change: "+24%", status: "Hot" },
+    { name: "Stark Ltd", value: "$18,750", change: "+5%", status: "New" },
+  ];
+
+  return (
+    <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 0, y: 60, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: 0.6, duration: 0.8, type: "spring", stiffness: 100, damping: 20 }}
+      style={{ rotateX, rotateY, transformPerspective: 1200 }}
+      className="relative w-full max-w-4xl mx-auto mt-12 sm:mt-16"
+    >
+      {/* Glow behind */}
+      <div className="absolute -inset-8 -z-10 rounded-3xl" style={{
+        background: "radial-gradient(ellipse at center, rgba(167,139,250,0.15) 0%, rgba(126,196,227,0.08) 30%, transparent 70%)",
+        filter: "blur(50px)",
+      }} />
+
+      <motion.div
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="rounded-2xl sm:rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-2xl shadow-2xl overflow-hidden"
+      >
+        {/* Title bar */}
+        <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 border-b border-white/10 dark:border-white/10 bg-white/[0.02]">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-400/80" />
+            <div className="w-3 h-3 rounded-full bg-amber-400/80" />
+            <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
+          </div>
+          <span className="text-[11px] text-muted-foreground font-medium ml-2">Nexxus CRM — Dashboard</span>
+          <div className="ml-auto flex items-center gap-2">
+            <div className="h-5 w-24 rounded-md bg-white/5 border border-white/10" />
+          </div>
+        </div>
+
+        <div className="flex min-h-[280px] sm:min-h-[340px]">
+          {/* Sidebar */}
+          <div className="hidden sm:flex w-[52px] border-r border-white/10 bg-white/[0.02] flex-col items-center py-4 gap-3">
+            {[BarChart3, Users, DollarSign, Zap].map((Icon, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1 + i * 0.1 }}
+                className={`w-8 h-8 rounded-xl flex items-center justify-center ${i === 0 ? "bg-gradient-to-br from-[#7ec4e3] to-[#a78bfa] shadow-lg" : "hover:bg-white/5"} transition-colors`}
+              >
+                <Icon className={`w-4 h-4 ${i === 0 ? "text-white" : "text-muted-foreground/50"}`} />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Main content */}
+          <div className="flex-1 p-4 sm:p-5">
+            {/* Top stats */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {[
+                { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-[#7ec4e3] to-[#a78bfa]" },
+                { label: "Deals Won", value: "148", change: "+24%", color: "from-[#a78bfa] to-[#f472b6]" },
+                { label: "Conversion", value: "68%", change: "+7%", color: "from-[#7eea9b] to-[#7ec4e3]" },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9 + i * 0.1 }}
+                  className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                >
+                  <p className="text-[10px] text-muted-foreground/60 mb-1">{stat.label}</p>
+                  <p className="text-base sm:text-lg font-bold text-foreground">{stat.value}</p>
+                  <span className={`text-[10px] font-semibold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    {stat.change}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Deals table */}
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-hidden">
+              <div className="grid grid-cols-4 gap-2 px-3 py-2 border-b border-white/10">
+                {["Deal", "Value", "Growth", "Status"].map(h => (
+                  <span key={h} className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50">{h}</span>
+                ))}
+              </div>
+              {miniDeals.map((deal, i) => (
+                <motion.div
+                  key={deal.name}
+                  initial={{ opacity: 0, x: 15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.2 + i * 0.08 }}
+                  className="grid grid-cols-4 gap-2 px-3 py-2 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                >
+                  <span className="text-[11px] font-medium text-foreground/80 truncate">{deal.name}</span>
+                  <span className="text-[11px] font-semibold text-foreground">{deal.value}</span>
+                  <span className="text-[11px] font-semibold text-emerald-400">{deal.change}</span>
+                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md w-fit ${
+                    deal.status === "Hot" ? "bg-rose-500/10 text-rose-400"
+                    : deal.status === "Warm" ? "bg-amber-500/10 text-amber-400"
+                    : "bg-blue-500/10 text-blue-400"
+                  }`}>{deal.status}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right panel - mini chart */}
+          <div className="hidden lg:flex w-[180px] border-l border-white/10 bg-white/[0.02] flex-col p-4 gap-3">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.4 }}
+            >
+              <p className="text-[10px] text-muted-foreground/60 mb-2">Revenue Trend</p>
+              <div className="flex items-end gap-1 h-16">
+                {[35, 45, 38, 52, 48, 65, 58, 72, 68, 85, 78, 92].map((h, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ height: 0 }}
+                    animate={{ height: `${h}%` }}
+                    transition={{ delay: 1.5 + i * 0.05, duration: 0.5, ease: "easeOut" }}
+                    className="flex-1 rounded-sm bg-gradient-to-t from-[#7ec4e3]/40 to-[#a78bfa]/60"
+                  />
+                ))}
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8 }}
+              className="flex items-center gap-2 mt-2"
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-[11px] font-semibold text-emerald-400">+42% MoM</span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+              className="mt-auto rounded-xl bg-gradient-to-br from-[#a78bfa]/10 to-[#f472b6]/10 border border-[#a78bfa]/20 p-3"
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles className="w-3 h-3 text-[#a78bfa]" />
+                <span className="text-[9px] font-bold text-[#a78bfa]">AI INSIGHT</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                3 deals need follow-up this week. Expected close rate: 78%
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Reflection effect */}
+      <div className="hidden sm:block absolute -bottom-12 left-[5%] right-[5%] h-16 rounded-full"
+        style={{
+          background: "radial-gradient(ellipse, rgba(167,139,250,0.08) 0%, transparent 70%)",
+          filter: "blur(20px)",
+        }}
+      />
+    </motion.div>
   );
 }
 
@@ -119,11 +337,44 @@ const itemVariants = {
   },
 };
 
+/* ---------- typed text effect ---------- */
+function TypedText({ words }: { words: string[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % words.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [words.length]);
+
+  return (
+    <span className="relative inline-block min-w-[200px] sm:min-w-[280px]">
+      {words.map((word, i) => (
+        <motion.span
+          key={word}
+          initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+          animate={{
+            opacity: i === currentIndex ? 1 : 0,
+            y: i === currentIndex ? 0 : -20,
+            filter: i === currentIndex ? "blur(0px)" : "blur(8px)",
+          }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className={`landing-gradient-text bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent ${i === currentIndex ? "relative" : "absolute left-0 top-0"}`}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
 export function HeroSection() {
   return (
     <section className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6 pt-20 pb-12 sm:pt-28 sm:pb-20">
       <FloatingOrbs />
       <GridPattern />
+      <MouseSpotlight />
 
       {/* Radial gradient fade at edges */}
       <div
@@ -151,7 +402,7 @@ export function HeroSection() {
           </span>
         </motion.div>
 
-        {/* Main heading with shimmer */}
+        {/* Main heading with typed text */}
         <motion.h1
           variants={itemVariants}
           className="text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] font-bold tracking-tighter leading-[0.95]"
@@ -160,9 +411,7 @@ export function HeroSection() {
             Nexxus
           </span>
           <br />
-          <span className="landing-gradient-text bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
-            CRM
-          </span>
+          <TypedText words={["CRM", "Sales", "Growth", "Revenue"]} />
         </motion.h1>
 
         {/* Subtitle */}
@@ -212,7 +461,7 @@ export function HeroSection() {
         {/* Stats row */}
         <motion.div
           variants={itemVariants}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 mt-8 sm:mt-12 pt-8 sm:pt-10 border-t border-white/10 dark:border-white/10 w-full max-w-3xl"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 mt-4 sm:mt-6 pt-8 sm:pt-10 border-t border-white/10 dark:border-white/10 w-full max-w-3xl"
         >
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col items-center gap-1">
@@ -224,6 +473,9 @@ export function HeroSection() {
           ))}
         </motion.div>
       </motion.div>
+
+      {/* 3D Product Preview */}
+      <ProductPreview3D />
 
       {/* Bottom fade gradient */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />

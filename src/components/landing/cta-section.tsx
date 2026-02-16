@@ -5,9 +5,69 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 
+/* ---------- aurora background ---------- */
+function AuroraBackground() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Aurora layers */}
+      <motion.div
+        animate={{
+          x: [0, 100, -50, 80, 0],
+          y: [0, -30, 20, -10, 0],
+          scale: [1, 1.2, 0.9, 1.1, 1],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-[40%] -left-[20%] h-[600px] w-[800px] rounded-full"
+        style={{
+          background: "radial-gradient(ellipse, rgba(167,139,250,0.25) 0%, rgba(126,196,227,0.1) 40%, transparent 70%)",
+          filter: "blur(80px)",
+        }}
+      />
+      <motion.div
+        animate={{
+          x: [0, -80, 40, -60, 0],
+          y: [0, 40, -20, 30, 0],
+          scale: [1, 0.9, 1.15, 1, 1],
+        }}
+        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        className="absolute -bottom-[30%] -right-[15%] h-[500px] w-[700px] rounded-full"
+        style={{
+          background: "radial-gradient(ellipse, rgba(126,196,227,0.2) 0%, rgba(244,114,182,0.08) 40%, transparent 70%)",
+          filter: "blur(100px)",
+        }}
+      />
+      <motion.div
+        animate={{
+          x: [0, 50, -30, 0],
+          y: [0, -50, 30, 0],
+          rotate: [0, 10, -5, 0],
+        }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+        className="absolute top-[10%] right-[20%] h-[400px] w-[400px] rounded-full"
+        style={{
+          background: "radial-gradient(ellipse, rgba(244,114,182,0.15) 0%, rgba(126,234,155,0.06) 40%, transparent 70%)",
+          filter: "blur(90px)",
+        }}
+      />
+      <motion.div
+        animate={{
+          x: [0, -40, 60, 0],
+          y: [0, 30, -40, 0],
+        }}
+        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 8 }}
+        className="absolute bottom-[20%] left-[30%] h-[300px] w-[500px] rounded-full"
+        style={{
+          background: "radial-gradient(ellipse, rgba(126,234,155,0.12) 0%, rgba(167,139,250,0.05) 40%, transparent 70%)",
+          filter: "blur(80px)",
+        }}
+      />
+    </div>
+  );
+}
+
 /* ---------- floating particles ---------- */
 function FloatingParticles() {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
+  const particles = Array.from({ length: 40 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
@@ -21,17 +81,19 @@ function FloatingParticles() {
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          className="absolute rounded-full bg-white/20"
+          className="absolute rounded-full"
           style={{
             width: p.size,
             height: p.size,
             left: `${p.x}%`,
             top: `${p.y}%`,
+            background: `rgba(167, 139, 250, ${0.15 + Math.random() * 0.2})`,
           }}
           animate={{
-            y: [0, -30, 10, -20, 0],
-            x: [0, 15, -10, 5, 0],
-            opacity: [0.2, 0.6, 0.3, 0.5, 0.2],
+            y: [0, -40, 15, -25, 0],
+            x: [0, 20, -15, 8, 0],
+            opacity: [0.1, 0.5, 0.2, 0.4, 0.1],
+            scale: [1, 1.5, 0.8, 1.2, 1],
           }}
           transition={{
             duration: p.duration,
@@ -75,52 +137,16 @@ export function CTASection() {
 
           {/* Inner card */}
           <div className="relative rounded-[calc(2rem-4px)] bg-background/95 dark:bg-[#0a0a0a]/95 backdrop-blur-xl p-10 sm:p-16 md:p-20 text-center overflow-hidden">
-            {/* Background gradient orbs */}
-            <div className="pointer-events-none absolute inset-0">
-              <div
-                className="absolute top-[-30%] left-[-10%] h-[500px] w-[500px] rounded-full"
-                style={{
-                  background: "radial-gradient(circle, rgba(167,139,250,0.15) 0%, transparent 70%)",
-                  filter: "blur(80px)",
-                }}
-              />
-              <div
-                className="absolute bottom-[-30%] right-[-10%] h-[400px] w-[400px] rounded-full"
-                style={{
-                  background: "radial-gradient(circle, rgba(126,196,227,0.12) 0%, transparent 70%)",
-                  filter: "blur(80px)",
-                }}
-              />
-              <div
-                className="absolute top-[20%] right-[20%] h-[300px] w-[300px] rounded-full"
-                style={{
-                  background: "radial-gradient(circle, rgba(244,114,182,0.08) 0%, transparent 70%)",
-                  filter: "blur(60px)",
-                }}
-              />
-            </div>
-
+            {/* Aurora background */}
+            <AuroraBackground />
             <FloatingParticles />
 
             {/* Grid pattern */}
             <div className="pointer-events-none absolute inset-0">
-              <svg
-                className="absolute inset-0 h-full w-full opacity-[0.03]"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg className="absolute inset-0 h-full w-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <pattern
-                    id="cta-grid"
-                    width="30"
-                    height="30"
-                    patternUnits="userSpaceOnUse"
-                  >
-                    <path
-                      d="M 30 0 L 0 0 0 30"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.5"
-                    />
+                  <pattern id="cta-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="currentColor" strokeWidth="0.5" />
                   </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#cta-grid)" />
@@ -150,7 +176,7 @@ export function CTASection() {
 
               {/* Subtitle */}
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed">
-                Join 10,000+ teams already using Nexxus CRM to close more deals, faster. Free forever -- no credit card required.
+                Join 10,000+ teams already using Nexxus CRM to close more deals, faster. Free forever — no credit card required.
               </p>
 
               {/* CTA buttons */}
@@ -181,6 +207,21 @@ export function CTASection() {
                   </Link>
                 </motion.div>
               </div>
+
+              {/* Trust badges */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={inView ? { opacity: 1 } : {}}
+                transition={{ delay: 0.5 }}
+                className="mt-10 flex items-center justify-center gap-6 sm:gap-8 text-xs text-muted-foreground/60"
+              >
+                {["No credit card", "Free forever", "Setup in 2 min", "Cancel anytime"].map((text, i) => (
+                  <span key={i} className="flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-emerald-500/60" />
+                    {text}
+                  </span>
+                ))}
+              </motion.div>
             </motion.div>
           </div>
         </div>
