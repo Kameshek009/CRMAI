@@ -45,7 +45,7 @@ function AuroraBackground() {
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 5 }}
         className="absolute top-[10%] right-[20%] h-[400px] w-[400px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(244,114,182,0.15) 0%, rgba(126,234,155,0.06) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(244,114,182,0.15) 0%, rgba(129,140,248,0.06) 40%, transparent 70%)",
           filter: "blur(90px)",
         }}
       />
@@ -57,7 +57,7 @@ function AuroraBackground() {
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 8 }}
         className="absolute bottom-[20%] left-[30%] h-[300px] w-[500px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(126,234,155,0.12) 0%, rgba(167,139,250,0.05) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(129,140,248,0.12) 0%, rgba(167,139,250,0.05) 40%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -73,7 +73,7 @@ function CTAGradientMesh() {
         animate={{
           background: [
             "radial-gradient(at 10% 20%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
-            "radial-gradient(at 50% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 20% 30%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 80% 20%, rgba(126,234,155,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 50% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 20% 30%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 80% 20%, rgba(129,140,248,0.08) 0%, transparent 50%)",
             "radial-gradient(at 80% 40%, rgba(244,114,182,0.10) 0%, transparent 50%), radial-gradient(at 30% 70%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 60% 10%, rgba(167,139,250,0.08) 0%, transparent 50%)",
             "radial-gradient(at 10% 20%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
           ],

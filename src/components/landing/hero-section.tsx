@@ -55,7 +55,7 @@ function FloatingOrbs() {
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 4 }}
         className="absolute top-[20%] right-[5%] h-[400px] w-[400px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(244,114,182,0.12) 0%, rgba(126,234,155,0.06) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(244,114,182,0.12) 0%, rgba(129,140,248,0.06) 50%, transparent 70%)",
           filter: "blur(90px)",
         }}
       />
@@ -64,7 +64,7 @@ function FloatingOrbs() {
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 6 }}
         className="absolute bottom-[5%] left-[25%] h-[350px] w-[350px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(126,234,155,0.10) 0%, rgba(167,139,250,0.05) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(129,140,248,0.10) 0%, rgba(167,139,250,0.05) 50%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -133,7 +133,7 @@ function GradientMesh() {
           background: [
             "radial-gradient(at 20% 30%, rgba(167,139,250,0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.04) 0%, transparent 50%)",
             "radial-gradient(at 40% 60%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 60% 30%, rgba(167,139,250,0.08) 0%, transparent 50%), radial-gradient(at 30% 80%, rgba(244,114,182,0.06) 0%, transparent 50%)",
-            "radial-gradient(at 70% 40%, rgba(167,139,250,0.07) 0%, transparent 50%), radial-gradient(at 30% 50%, rgba(167,139,250,0.05) 0%, transparent 50%), radial-gradient(at 60% 70%, rgba(126,234,155,0.05) 0%, transparent 50%)",
+            "radial-gradient(at 70% 40%, rgba(167,139,250,0.07) 0%, transparent 50%), radial-gradient(at 30% 50%, rgba(167,139,250,0.05) 0%, transparent 50%), radial-gradient(at 60% 70%, rgba(129,140,248,0.05) 0%, transparent 50%)",
             "radial-gradient(at 20% 30%, rgba(167,139,250,0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.04) 0%, transparent 50%)",
           ],
         }}
