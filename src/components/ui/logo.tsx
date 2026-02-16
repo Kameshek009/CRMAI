@@ -45,7 +45,7 @@ export function LogoWithText({
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <Logo size={size} variant={variant} />
-      <span className="font-semibold text-lg tracking-tight">serotonin</span>
+      <span className="font-semibold text-lg tracking-tight">Nexxus CRM</span>
     </div>
   );
 }

@@ -23,12 +23,12 @@ export function AuthModal({
       >
         {variant === "signin" ? (
           <SignIn
-            afterSignInUrl="/dashboard"
+            forceRedirectUrl="/dashboard"
             signUpUrl="/sign-up"
           />
         ) : (
           <SignUp
-            afterSignUpUrl="/dashboard"
+            forceRedirectUrl="/dashboard"
             signInUrl="/sign-in"
           />
         )}

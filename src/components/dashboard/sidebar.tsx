@@ -45,8 +45,8 @@ const navGroups: NavGroup[] = [
   },
   {
     items: [
-      { label: "Docs", href: "https://docs.serotonin.to", icon: FileText, external: true },
-      { label: "Contact Us", href: "mailto:support@serotonin.to", icon: Mail, external: true },
+      { label: "Docs", href: "https://docs.nexxuscrm.com", icon: FileText, external: true },
+      { label: "Contact Us", href: "mailto:support@nexxuscrm.com", icon: Mail, external: true },
     ],
   },
 ];

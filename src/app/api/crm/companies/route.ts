@@ -4,6 +4,11 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parsePagination } from "@/lib/crm/helpers";
 import { createCompanySchema } from "@/lib/crm/validation";
 
+/** Escape special LIKE/ILIKE characters to prevent injection */
+function sanitizeLike(input: string): string {
+  return input.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { context, error } = await getTeamContext();
@@ -27,7 +32,8 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1);
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,industry.ilike.%${search}%,domain.ilike.%${search}%`);
+      const s = sanitizeLike(search);
+      query = query.or(`name.ilike.%${s}%,industry.ilike.%${s}%,domain.ilike.%${s}%`);
     }
 
     const { data, error: dbError, count } = await query;

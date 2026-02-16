@@ -130,10 +130,14 @@ function UrgencyCountdown() {
 /* ---------- live counter ---------- */
 function LiveCounter() {
   const [count, setCount] = useState(10847);
+  const tickRef = useRef(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCount((prev) => prev + Math.floor(Math.random() * 3));
+      tickRef.current += 1;
+      // Deterministic increment based on tick count (avoids Math.random in render)
+      const increment = (tickRef.current % 3) + 1;
+      setCount((prev) => prev + increment);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -166,19 +170,21 @@ function LiveCounter() {
 }
 
 /* ---------- floating particles ---------- */
-function FloatingParticles() {
-  const particles = Array.from({ length: 40 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 10 + 15,
-    delay: Math.random() * 5,
-  }));
+// Pre-computed particle positions to avoid Math.random() during SSR/hydration
+const PARTICLES = Array.from({ length: 40 }, (_, i) => ({
+  id: i,
+  x: ((i * 37 + 13) % 100),
+  y: ((i * 53 + 7) % 100),
+  size: 1 + (i % 3),
+  duration: 15 + (i % 10),
+  delay: (i % 5),
+  opacity: 0.15 + ((i % 4) * 0.05),
+}));
 
+function FloatingParticles() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {particles.map((p) => (
+      {PARTICLES.map((p) => (
         <motion.div
           key={p.id}
           className="absolute rounded-full"
@@ -187,7 +193,7 @@ function FloatingParticles() {
             height: p.size,
             left: `${p.x}%`,
             top: `${p.y}%`,
-            background: `rgba(167, 139, 250, ${0.15 + Math.random() * 0.2})`,
+            background: `rgba(167, 139, 250, ${p.opacity})`,
           }}
           animate={{
             y: [0, -40, 15, -25, 0],
@@ -324,9 +330,9 @@ export function CTASection() {
                   { text: "Free forever", icon: "✨" },
                   { text: "Setup in 2 min", icon: "⚡" },
                   { text: "Cancel anytime", icon: "🔓" },
-                ].map((item, i) => (
+                ].map((item) => (
                   <motion.span
-                    key={i}
+                    key={item.text}
                     whileHover={{ scale: 1.05, y: -2 }}
                     className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl cursor-default"
                   >

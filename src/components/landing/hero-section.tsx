@@ -152,6 +152,12 @@ function MouseSpotlight() {
   const smoothX = useSpring(mouseX, { stiffness: 100, damping: 30 });
   const smoothY = useSpring(mouseY, { stiffness: 100, damping: 30 });
 
+  const backgroundValue = useTransform(
+    [smoothX, smoothY],
+    ([x, y]) =>
+      `radial-gradient(600px circle at ${x}px ${y}px, rgba(167,139,250,0.06), rgba(126,196,227,0.03), transparent 60%)`
+  );
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
@@ -165,13 +171,7 @@ function MouseSpotlight() {
     <motion.div
       ref={spotlightRef}
       className="pointer-events-none fixed inset-0 z-0 opacity-60"
-      style={{
-        background: useTransform(
-          [smoothX, smoothY],
-          ([x, y]) =>
-            `radial-gradient(600px circle at ${x}px ${y}px, rgba(167,139,250,0.06), rgba(126,196,227,0.03), transparent 60%)`
-        ),
-      }}
+      style={{ background: backgroundValue }}
     />
   );
 }

@@ -148,12 +148,16 @@ function AIChatMockup() {
 }
 
 /* ---------- neural network particles ---------- */
+// Pre-computed node positions to avoid Math.random() during SSR/hydration
+const NEURAL_NODES = [
+  { id: 0, x: 15, y: 25 }, { id: 1, x: 72, y: 18 }, { id: 2, x: 45, y: 55 },
+  { id: 3, x: 88, y: 42 }, { id: 4, x: 30, y: 75 }, { id: 5, x: 62, y: 85 },
+  { id: 6, x: 20, y: 48 }, { id: 7, x: 78, y: 68 }, { id: 8, x: 50, y: 32 },
+  { id: 9, x: 35, y: 90 }, { id: 10, x: 85, y: 15 }, { id: 11, x: 55, y: 60 },
+];
+
 function NeuralNetworkBg() {
-  const nodes = Array.from({ length: 12 }, (_, i) => ({
-    id: i,
-    x: 10 + Math.random() * 80,
-    y: 10 + Math.random() * 80,
-  }));
+  const nodes = NEURAL_NODES;
 
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden opacity-30">
@@ -170,7 +174,7 @@ function NeuralNetworkBg() {
               initial={{ pathLength: 0, opacity: 0 }}
               whileInView={{ pathLength: 1, opacity: 0.3 }}
               viewport={{ once: true }}
-              transition={{ duration: 2, delay: Math.random() * 1 }}
+              transition={{ duration: 2, delay: ((n1.id + n2.id) % 10) * 0.1 }}
             />
           ))
         )}

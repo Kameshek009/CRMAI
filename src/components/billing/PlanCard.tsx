@@ -131,8 +131,8 @@ export function PlanCard({
 
         {/* Features */}
         <ul className="space-y-3">
-          {config.features.map((feature, index) => (
-            <li key={index} className="flex items-start gap-3">
+          {config.features.map((feature) => (
+            <li key={feature} className="flex items-start gap-3">
               <Check className="size-4 text-primary mt-0.5 shrink-0" />
               <span className="text-sm">{feature}</span>
             </li>
