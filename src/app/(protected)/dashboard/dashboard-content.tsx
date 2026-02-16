@@ -41,6 +41,11 @@ import {
   Sun,
   Moon,
   Sunset,
+  Target,
+  Zap,
+  Timer,
+  BarChart3,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -433,10 +438,22 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             transition={{ duration: 0.4, delay: 0.3 }}
             className="flex items-center gap-2"
           >
+            <Button variant="outline" size="sm" className="group/btn hidden sm:inline-flex" asChild>
+              <Link href="/dashboard/contacts">
+                <Users className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
+                Contacts
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" className="group/btn" asChild>
               <Link href="/dashboard/pipeline">
                 <Kanban className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
                 Pipeline
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="group/btn hidden sm:inline-flex" asChild>
+              <Link href="/dashboard/analytics">
+                <BarChart3 className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
+                Analytics
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="group/btn" asChild>
@@ -500,6 +517,60 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 : undefined
             }
             delay={0.25}
+          />
+        </div>
+
+        {/* Extra metrics row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <AnimatedStatCard
+            href="/dashboard/analytics"
+            label="Win Rate"
+            value={crmStats && (crmStats.wonDealsThisMonth + (crmStats.totalDeals - crmStats.openDeals - crmStats.wonDealsThisMonth)) > 0
+              ? Math.round((crmStats.wonDealsThisMonth / Math.max(crmStats.totalDeals - crmStats.openDeals, 1)) * 100)
+              : 0
+            }
+            formattedValue={`${crmStats && (crmStats.wonDealsThisMonth + (crmStats.totalDeals - crmStats.openDeals - crmStats.wonDealsThisMonth)) > 0
+              ? Math.round((crmStats.wonDealsThisMonth / Math.max(crmStats.totalDeals - crmStats.openDeals, 1)) * 100)
+              : 0}%`}
+            subtitle="Closed deals ratio"
+            icon={Target}
+            iconGradient="bg-gradient-to-br from-rose-500 to-pink-600"
+            delay={0.3}
+          />
+          <AnimatedStatCard
+            href="/dashboard/analytics"
+            label="Forecast"
+            value={crmStats?.weightedForecast ?? 0}
+            formattedValue={`$${(crmStats?.weightedForecast ?? 0).toLocaleString()}`}
+            subtitle="Weighted pipeline"
+            icon={Zap}
+            iconGradient="bg-gradient-to-br from-violet-500 to-purple-600"
+            delay={0.35}
+          />
+          <AnimatedStatCard
+            href="/dashboard/companies"
+            label="Companies"
+            value={crmStats?.totalDeals ?? 0}
+            subtitle="Total deals tracked"
+            icon={Building2}
+            iconGradient="bg-gradient-to-br from-teal-500 to-emerald-600"
+            delay={0.4}
+          />
+          <AnimatedStatCard
+            href="/dashboard/analytics"
+            label="Avg Deal"
+            value={crmStats?.wonDealsThisMonth && crmStats?.wonValueThisMonth
+              ? Math.round(crmStats.wonValueThisMonth / crmStats.wonDealsThisMonth)
+              : 0
+            }
+            formattedValue={`$${crmStats?.wonDealsThisMonth && crmStats?.wonValueThisMonth
+              ? Math.round(crmStats.wonValueThisMonth / crmStats.wonDealsThisMonth).toLocaleString()
+              : "0"
+            }`}
+            subtitle="Average won deal size"
+            icon={BarChart3}
+            iconGradient="bg-gradient-to-br from-sky-500 to-blue-600"
+            delay={0.45}
           />
         </div>
 

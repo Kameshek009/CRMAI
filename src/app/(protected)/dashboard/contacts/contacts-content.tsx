@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 import { ContactCard } from "@/components/crm/contact-card";
 import { EntityForm } from "@/components/crm/entity-form";
 import { contactFields } from "@/lib/crm/field-definitions";
@@ -15,7 +17,19 @@ import { EmptyState } from "@/components/crm/empty-state";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { useMultiSelect } from "@/hooks/use-multi-select";
-import { Plus, Search, Upload, Users, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Plus,
+  Search,
+  Upload,
+  Users,
+  Loader2,
+  ListFilter,
+  UserPlus,
+  UserCheck,
+  UserX,
+  UserMinus,
+} from "lucide-react";
 import { toast } from "sonner";
 
 const statusFilters = [
@@ -26,6 +40,12 @@ const statusFilters = [
   { label: "Churned", value: "churned" },
 ];
 
+const sortOptions = [
+  { label: "Newest", value: "created_desc" },
+  { label: "Name A-Z", value: "name_asc" },
+  { label: "Name Z-A", value: "name_desc" },
+  { label: "Engagement", value: "engagement_desc" },
+];
 
 interface ContactData {
   id: string;
@@ -36,6 +56,7 @@ interface ContactData {
   title: string | null;
   status: string;
   engagement_score: number;
+  source: string | null;
   companies: { id: string; name: string } | null;
 }
 
@@ -50,6 +71,9 @@ export function ContactsContent() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [sortBy, setSortBy] = useState("created_desc");
+  const [sourceFilter, setSourceFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const PAGE_SIZE = 50;
 
@@ -81,12 +105,63 @@ export function ContactsContent() {
     fetchContacts();
   }, [fetchContacts]);
 
-  // Reset selection when filters change
   useEffect(() => {
     deselectAll();
   }, [search, statusFilter, deselectAll]);
 
+  // Client-side filtering and sorting
+  const filteredContacts = useMemo(() => {
+    let result = [...contacts];
+
+    if (sourceFilter) {
+      result = result.filter((c) => c.source?.toLowerCase() === sourceFilter.toLowerCase());
+    }
+
+    result.sort((a, b) => {
+      if (sortBy === "name_asc") {
+        return `${a.first_name} ${a.last_name || ""}`.localeCompare(`${b.first_name} ${b.last_name || ""}`);
+      }
+      if (sortBy === "name_desc") {
+        return `${b.first_name} ${b.last_name || ""}`.localeCompare(`${a.first_name} ${a.last_name || ""}`);
+      }
+      if (sortBy === "engagement_desc") {
+        return b.engagement_score - a.engagement_score;
+      }
+      return 0; // default API order
+    });
+
+    return result;
+  }, [contacts, sourceFilter, sortBy]);
+
+  // Extract unique sources
+  const sources = useMemo(() => {
+    const set = new Set<string>();
+    contacts.forEach((c) => { if (c.source) set.add(c.source); });
+    return Array.from(set).sort();
+  }, [contacts]);
+
+  // Status stats
+  const statusStats = useMemo(() => {
+    const counts: Record<string, number> = { lead: 0, active: 0, inactive: 0, churned: 0 };
+    contacts.forEach((c) => { counts[c.status] = (counts[c.status] || 0) + 1; });
+    return counts;
+  }, [contacts]);
+
   const hasMore = contacts.length < total;
+
+  const statusIcons: Record<string, typeof Users> = {
+    lead: UserPlus,
+    active: UserCheck,
+    inactive: UserMinus,
+    churned: UserX,
+  };
+
+  const statusColors: Record<string, string> = {
+    lead: "text-indigo-500 bg-indigo-500/10",
+    active: "text-emerald-500 bg-emerald-500/10",
+    inactive: "text-gray-500 bg-gray-500/10",
+    churned: "text-red-500 bg-red-500/10",
+  };
 
   const handleCreate = async (values: Record<string, string>) => {
     const res = await fetch("/api/crm/contacts", {
@@ -147,7 +222,7 @@ export function ContactsContent() {
     }
   };
 
-  const visibleIds = contacts.map((c) => c.id);
+  const visibleIds = filteredContacts.map((c) => c.id);
   const allSelected = isAllSelected(visibleIds);
 
   return (
@@ -165,17 +240,60 @@ export function ContactsContent() {
         </div>
       </PageHeader>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search contacts..."
-            className="pl-9"
-          />
+      {/* Status Summary */}
+      {contacts.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {(["lead", "active", "inactive", "churned"] as const).map((status, i) => {
+            const Icon = statusIcons[status] || Users;
+            const color = statusColors[status] || "text-muted-foreground bg-muted";
+            return (
+              <motion.div key={status} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
+                <Card
+                  className={cn("glass-card cursor-pointer transition-all", statusFilter === status && "ring-1 ring-primary")}
+                  onClick={() => setStatusFilter(statusFilter === status ? "" : status)}
+                >
+                  <CardContent className="p-3 flex items-center gap-3">
+                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", color)}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold">{statusStats[status] || 0}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{status}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
+      )}
+
+      {/* Filters */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search contacts..."
+              className="pl-9"
+            />
+          </div>
+          <div className="flex gap-2">
+            {sources.length > 0 && (
+              <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
+                <ListFilter className="size-4 mr-1" />
+                Sources
+                {sourceFilter && <Badge className="ml-1.5 h-4 px-1 text-[9px]">!</Badge>}
+              </Button>
+            )}
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+              {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+        </div>
+
         <div className="flex gap-1">
           {statusFilters.map((f) => (
             <Badge
@@ -188,6 +306,29 @@ export function ContactsContent() {
             </Badge>
           ))}
         </div>
+
+        {showFilters && sources.length > 0 && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="flex flex-wrap gap-1">
+            <span className="text-xs text-muted-foreground self-center mr-1">Source:</span>
+            <Badge
+              variant={sourceFilter === "" ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => setSourceFilter("")}
+            >
+              All
+            </Badge>
+            {sources.map((src) => (
+              <Badge
+                key={src}
+                variant={sourceFilter === src ? "default" : "outline"}
+                className="cursor-pointer capitalize"
+                onClick={() => setSourceFilter(src)}
+              >
+                {src}
+              </Badge>
+            ))}
+          </motion.div>
+        )}
       </div>
 
       {/* Contact List */}
@@ -197,26 +338,28 @@ export function ContactsContent() {
             <Skeleton key={i} className="h-20 w-full rounded-lg" />
           ))}
         </div>
-      ) : contacts.length === 0 ? (
+      ) : filteredContacts.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No contacts yet"
-          description="Add your first contact to start building your CRM."
-          actionLabel="Add Contact"
-          onAction={() => setShowForm(true)}
+          title={search || statusFilter || sourceFilter ? "No matching contacts" : "No contacts yet"}
+          description={search || statusFilter || sourceFilter ? "Try adjusting your filters." : "Add your first contact to start building your CRM."}
+          actionLabel={!(search || statusFilter || sourceFilter) ? "Add Contact" : undefined}
+          onAction={!(search || statusFilter || sourceFilter) ? () => setShowForm(true) : undefined}
         />
       ) : (
         <div className="space-y-2">
-          {/* Select All */}
-          <div className="flex items-center gap-2 px-4 py-1">
-            <Checkbox
-              checked={allSelected}
-              onCheckedChange={() => allSelected ? deselectAll() : selectAll(visibleIds)}
-              className="size-5"
-            />
-            <span className="text-sm text-muted-foreground">Select all</span>
+          <div className="flex items-center justify-between px-4 py-1">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={allSelected}
+                onCheckedChange={() => allSelected ? deselectAll() : selectAll(visibleIds)}
+                className="size-5"
+              />
+              <span className="text-sm text-muted-foreground">Select all</span>
+            </div>
+            <span className="text-xs text-muted-foreground">{filteredContacts.length} contact{filteredContacts.length !== 1 ? "s" : ""}</span>
           </div>
-          {contacts.map((contact) => (
+          {filteredContacts.map((contact) => (
             <ContactCard
               key={contact.id}
               id={contact.id}
