@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
         .from("contacts")
         .update({ is_deleted: true })
         .in("id", ids)
+        .eq("account_id", context.accountId)
         .eq("team_id", context.teamId);
 
       if (dbError) {
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
         .from("contacts")
         .update({ status })
         .in("id", ids)
+        .eq("account_id", context.accountId)
         .eq("team_id", context.teamId);
 
       if (dbError) {

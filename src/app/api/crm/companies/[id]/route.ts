@@ -17,37 +17,39 @@ export async function GET(
     const { id } = await params;
     const supabase = createSupabaseAdmin();
 
-    const { data, error: dbError } = await supabase
-      .from("companies")
-      .select("*")
-      .eq("id", id)
-      .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .single();
+    const [companyResult, contactCountResult, dealCountResult] = await Promise.all([
+      supabase
+        .from("companies")
+        .select("*")
+        .eq("id", id)
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false)
+        .single(),
+      supabase
+        .from("contacts")
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", id)
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false),
+      supabase
+        .from("deals")
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", id)
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false),
+    ]);
 
-    if (dbError || !data) {
+    if (companyResult.error || !companyResult.data) {
       return NextResponse.json({ success: false, error: "Company not found" }, { status: 404 });
     }
 
-    // Get contact count
-    const { count: contactCount } = await supabase
-      .from("contacts")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", id)
-      .eq("team_id", context.teamId)
-      .eq("is_deleted", false);
-
-    // Get deal count
-    const { count: dealCount } = await supabase
-      .from("deals")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", id)
-      .eq("team_id", context.teamId)
-      .eq("is_deleted", false);
-
     return NextResponse.json({
       success: true,
-      data: { ...data, contact_count: contactCount || 0, deal_count: dealCount || 0 },
+      data: {
+        ...companyResult.data,
+        contact_count: contactCountResult.count || 0,
+        deal_count: dealCountResult.count || 0,
+      },
     });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

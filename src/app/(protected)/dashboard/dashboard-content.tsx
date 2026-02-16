@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -145,13 +145,18 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   const [revenueTrend, setRevenueTrend] = useState<{ date: string; revenue: number; cumulative: number }[]>([]);
 
   useEffect(() => {
+    const safeFetch = (url: string) =>
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : { success: false }))
+        .catch(() => ({ success: false }));
+
     Promise.all([
-      fetch("/api/crm/stats").then((r) => r.json()),
-      fetch("/api/crm/ai/insights").then((r) => r.json()),
-      fetch("/api/crm/deals?limit=10").then((r) => r.json()),
-      fetch("/api/crm/tasks?limit=20").then((r) => r.json()),
-      fetch("/api/crm/activities?limit=8").then((r) => r.json()),
-      fetch("/api/crm/stats/revenue-trend").then((r) => r.json()),
+      safeFetch("/api/crm/stats"),
+      safeFetch("/api/crm/ai/insights"),
+      safeFetch("/api/crm/deals?limit=10"),
+      safeFetch("/api/crm/tasks?limit=20"),
+      safeFetch("/api/crm/activities?limit=8"),
+      safeFetch("/api/crm/stats/revenue-trend"),
     ])
       .then(([statsRes, insightsRes, dealsRes, tasksRes, activitiesRes, revenueTrendRes]) => {
         if (statsRes.success) setCrmStats(statsRes.data);
@@ -160,9 +165,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         if (tasksRes.success) setTasks(tasksRes.data);
         if (activitiesRes.success) setActivities(activitiesRes.data);
         if (revenueTrendRes.success) setRevenueTrend(revenueTrendRes.data);
-        setIsLoading(false);
       })
-      .catch(() => setIsLoading(false));
+      .finally(() => setIsLoading(false));
   }, []);
 
   // Compute task status distribution for pie chart
@@ -494,10 +498,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   const progress = dealProgress(deal);
                   const stageColor = deal.deal_stages?.color || "#6366f1";
                   return (
-                    <>
+                    <React.Fragment key={deal.id}>
                       {/* Desktop view (6 columns) */}
                       <Link
-                        key={`${deal.id}-desktop`}
                         href={`/dashboard/deals/${deal.id}`}
                         className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-2 py-2.5 hover:bg-muted/50 rounded-lg transition-colors items-center"
                       >
@@ -538,7 +541,6 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                       </Link>
                       {/* Mobile view (3 columns) */}
                       <Link
-                        key={`${deal.id}-mobile`}
                         href={`/dashboard/deals/${deal.id}`}
                         className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-2 py-2.5 hover:bg-muted/50 rounded-lg transition-colors items-center"
                       >
@@ -563,7 +565,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         </span>
                         <span className="text-xs font-medium text-foreground">{deal.ai_win_probability}%</span>
                       </Link>
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </div>

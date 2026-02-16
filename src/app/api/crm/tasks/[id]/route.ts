@@ -50,7 +50,7 @@ export async function PATCH(
     const body = await request.json();
     const parsed = updateTaskSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();

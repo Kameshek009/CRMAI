@@ -76,7 +76,7 @@ export function getContactDisplayName(firstName: string, lastName?: string | nul
  * Parse pagination params from URL search params
  */
 export function parsePagination(searchParams: URLSearchParams) {
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const page = Math.min(10000, Math.max(1, parseInt(searchParams.get("page") || "1", 10)));
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "25", 10)));
   const offset = (page - 1) * limit;
   return { page, limit, offset };

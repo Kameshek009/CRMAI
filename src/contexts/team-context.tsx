@@ -147,7 +147,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
       setIsDirector(data.isDirector || false);
       setMemberId(data.memberId || null);
     } catch (err) {
-      void err;
+      console.error("[TeamContext] Error loading teams:", err);
       setError(err instanceof Error ? err : new Error("Unknown error"));
     } finally {
       setIsLoading(false);
@@ -166,7 +166,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
       // Refetch to update state
       await fetchTeams();
     } catch (err) {
-      void err;
+      console.error("[TeamContext] Error switching team:", err);
       throw err;
     }
   }, [fetchTeams]);

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = createNoteSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();

@@ -15,17 +15,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Query required" }, { status: 400 });
     }
 
+    if (q.length > 100) {
+      return NextResponse.json({ success: false, error: "Query too long" }, { status: 400 });
+    }
+
+    // Sanitize query for ILIKE to prevent wildcard injection
+    const sq = q.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+
     const supabase = createSupabaseAdmin();
     const results: { type: string; id: string; title: string; subtitle: string }[] = [];
 
-    // Search contacts
-    const { data: contacts } = await supabase
-      .from("contacts")
-      .select("id, first_name, last_name, email, title")
-      .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`)
-      .limit(limit);
+    // Run searches in parallel
+    const [contactsResult, companiesResult, dealsResult] = await Promise.all([
+      supabase
+        .from("contacts")
+        .select("id, first_name, last_name, email, title")
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false)
+        .or(`first_name.ilike.%${sq}%,last_name.ilike.%${sq}%,email.ilike.%${sq}%`)
+        .limit(limit),
+      supabase
+        .from("companies")
+        .select("id, name, industry, domain")
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false)
+        .or(`name.ilike.%${sq}%,domain.ilike.%${sq}%,industry.ilike.%${sq}%`)
+        .limit(limit),
+      supabase
+        .from("deals")
+        .select("id, title, value, status")
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false)
+        .ilike("title", `%${sq}%`)
+        .limit(limit),
+    ]);
+
+    const contacts = contactsResult.data;
+    const companies = companiesResult.data;
+    const deals = dealsResult.data;
 
     contacts?.forEach((c) =>
       results.push({
@@ -36,15 +63,6 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    // Search companies
-    const { data: companies } = await supabase
-      .from("companies")
-      .select("id, name, industry, domain")
-      .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .or(`name.ilike.%${q}%,domain.ilike.%${q}%,industry.ilike.%${q}%`)
-      .limit(limit);
-
     companies?.forEach((c) =>
       results.push({
         type: "company",
@@ -53,15 +71,6 @@ export async function GET(request: NextRequest) {
         subtitle: c.industry || c.domain || "",
       })
     );
-
-    // Search deals
-    const { data: deals } = await supabase
-      .from("deals")
-      .select("id, title, value, status")
-      .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .ilike("title", `%${q}%`)
-      .limit(limit);
 
     deals?.forEach((d) =>
       results.push({

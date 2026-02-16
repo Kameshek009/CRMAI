@@ -191,8 +191,6 @@ export function AccountProvider({ children }: AccountProviderProps) {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        void errorText;
         throw new Error(`Failed to fetch account data (${response.status})`);
       }
 
@@ -211,7 +209,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
         throw new Error("No account data in response");
       }
     } catch (err) {
-      void err;
+      console.error("[AccountContext] Error loading account:", err);
       setError(err instanceof Error ? err : new Error("Unknown error"));
     } finally {
       setIsLoading(false);
