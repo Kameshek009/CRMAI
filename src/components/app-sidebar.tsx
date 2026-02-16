@@ -50,6 +50,7 @@ import {
   UserCog,
   type LucideIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
@@ -108,6 +109,13 @@ const TIER_DISPLAY_NAMES: Record<string, string> = {
   enterprise: "Enterprise",
 };
 
+const TIER_COLORS: Record<string, string> = {
+  free: "bg-muted text-muted-foreground",
+  pro: "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600 border-blue-200/50 dark:border-blue-800/30",
+  max: "bg-gradient-to-r from-violet-500/10 to-purple-500/10 text-violet-600 border-violet-200/50 dark:border-violet-800/30",
+  enterprise: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-600 border-amber-200/50 dark:border-amber-800/30",
+};
+
 function NavUser() {
   const { user } = useUser();
   const { signOut } = useClerk();
@@ -117,6 +125,7 @@ function NavUser() {
   if (!user) return null;
 
   const tierName = account?.tier ? TIER_DISPLAY_NAMES[account.tier] || "Free" : "Free";
+  const tierColor = account?.tier ? TIER_COLORS[account.tier] || TIER_COLORS.free : TIER_COLORS.free;
   const displayName = user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "User";
   const email = user.primaryEmailAddress?.emailAddress || "";
   const initials = displayName.slice(0, 2).toUpperCase();
@@ -128,21 +137,23 @@ function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group/user"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="h-8 w-8 rounded-lg ring-2 ring-transparent group-hover/user:ring-primary/10 transition-all">
                 <AvatarImage src={user.imageUrl} alt={displayName} />
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 text-xs font-semibold">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate font-semibold">{displayName}</span>
                 <span className="truncate text-xs text-muted-foreground">{email}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -150,32 +161,37 @@ function NavUser() {
             <div className="flex items-center gap-2 p-2">
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.imageUrl} alt={displayName} />
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 text-xs font-semibold">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate font-semibold">{displayName}</span>
                 <span className="truncate text-xs text-muted-foreground">{email}</span>
               </div>
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="outline" className={cn("ml-2 text-[10px] border", tierColor)}>
                 {tierName}
               </Badge>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/account">
-                <Settings className="mr-2 size-4" />
+              <Link href="/dashboard/account" className="flex items-center gap-2">
+                <Settings className="size-4" />
                 Settings
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/account/billing">
-                <CreditCard className="mr-2 size-4" />
+              <Link href="/dashboard/account/billing" className="flex items-center gap-2">
+                <CreditCard className="size-4" />
                 Billing
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/sign-in" })}>
-              <LogOut className="mr-2 size-4" />
+            <DropdownMenuItem
+              onClick={() => signOut({ redirectUrl: "/sign-in" })}
+              className="text-red-600 focus:text-red-600 focus:bg-red-500/10"
+            >
+              <LogOut className="size-4" />
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -196,8 +212,8 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard" className="group">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--accent-blue)]/10 to-[#a78bfa]/10 dark:from-[var(--accent-blue)]/15 dark:to-[#a78bfa]/15 transition-all duration-300 group-hover:from-[var(--accent-blue)]/20 group-hover:to-[#a78bfa]/20">
+              <Link href="/dashboard" className="group/logo">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--accent-blue)]/15 to-[#a78bfa]/15 dark:from-[var(--accent-blue)]/20 dark:to-[#a78bfa]/20 transition-all duration-300 group-hover/logo:from-[var(--accent-blue)]/25 group-hover/logo:to-[#a78bfa]/25 group-hover/logo:shadow-md group-hover/logo:shadow-[var(--accent-blue)]/10">
                   <Logo size={20} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -218,7 +234,9 @@ export function AppSidebar() {
         {navGroups.map((group, groupIndex) => (
           <SidebarGroup key={groupIndex}>
             {group.label && (
-              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                {group.label}
+              </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
               <SidebarMenu>
@@ -233,8 +251,8 @@ export function AppSidebar() {
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
                           <Link href={item.href}>
-                            <Icon />
-                            <span>{item.label}</span>
+                            <Icon className={cn(isActive && "text-[var(--accent-blue)]")} />
+                            <span className={cn(isActive && "font-semibold")}>{item.label}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -242,7 +260,7 @@ export function AppSidebar() {
                   })}
               </SidebarMenu>
             </SidebarGroupContent>
-            {groupIndex < navGroups.length - 1 && <SidebarSeparator className="my-2 opacity-40" />}
+            {groupIndex < navGroups.length - 1 && <SidebarSeparator className="my-2 opacity-30" />}
           </SidebarGroup>
         ))}
       </SidebarContent>

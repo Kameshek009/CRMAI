@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,7 +14,8 @@ import { NoteEditor } from "@/components/crm/note-editor";
 import { ScoreBadge } from "@/components/crm/score-badge";
 import { EntityForm } from "@/components/crm/entity-form";
 import { contactFields } from "@/lib/crm/field-definitions";
-import { ArrowLeft, Building2, Mail, Phone, Briefcase, Calendar, Pencil, Handshake, CheckSquare } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, Building2, Mail, Phone, Briefcase, Calendar, Pencil, Handshake, CheckSquare, FileText, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 interface ContactCompany {
@@ -53,6 +55,27 @@ interface ContactTask {
 interface ContactDetailContentProps {
   contactId: string;
 }
+
+const statusConfig: Record<string, { color: string; dot: string }> = {
+  lead: { color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", dot: "bg-indigo-500" },
+  active: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", dot: "bg-emerald-500" },
+  inactive: { color: "bg-gray-500/10 text-gray-500 border-gray-500/20", dot: "bg-gray-400" },
+  churned: { color: "bg-red-500/10 text-red-600 border-red-500/20", dot: "bg-red-500" },
+};
+
+const avatarGradients: Record<string, string> = {
+  lead: "from-indigo-500/20 to-purple-500/20",
+  active: "from-emerald-500/20 to-teal-500/20",
+  inactive: "from-gray-400/20 to-gray-500/20",
+  churned: "from-red-500/20 to-orange-500/20",
+};
+
+const priorityConfig: Record<string, string> = {
+  urgent: "bg-red-500/10 text-red-600 border-red-200 dark:border-red-800/40",
+  high: "bg-orange-500/10 text-orange-600 border-orange-200 dark:border-orange-800/40",
+  medium: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800/40",
+  low: "bg-gray-500/10 text-gray-600 border-gray-200 dark:border-gray-800",
+};
 
 export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
   const [contact, setContact] = useState<Contact | null>(null);
@@ -96,8 +119,19 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
   if (isLoading) {
     return (
       <PageContainer>
-        <Skeleton className="h-8 w-48 mb-4" />
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-6 w-32 mb-6 rounded-lg" />
+        <div className="flex items-start gap-5 mb-8">
+          <Skeleton className="size-20 rounded-2xl" />
+          <div className="space-y-3 flex-1">
+            <Skeleton className="h-8 w-64 rounded-lg" />
+            <Skeleton className="h-4 w-48 rounded-lg" />
+            <Skeleton className="h-8 w-80 rounded-lg" />
+          </div>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl lg:col-span-2" />
+        </div>
       </PageContainer>
     );
   }
@@ -123,171 +157,281 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
     }
   };
 
+  const status = String(contact.status || "lead");
+  const config = statusConfig[status] || statusConfig.lead;
+  const gradient = avatarGradients[status] || avatarGradients.lead;
   const name = `${contact.first_name} ${contact.last_name || ""}`.trim();
   const initials = `${String(contact.first_name).charAt(0)}${String(contact.last_name || "").charAt(0)}`.toUpperCase();
 
   return (
     <PageContainer>
-      <div className="mb-4">
-        <Button variant="ghost" size="sm" asChild>
+      <motion.div
+        initial={{ opacity: 0, x: -8 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-6"
+      >
+        <Button variant="ghost" size="sm" className="hover:bg-muted/80 -ml-2" asChild>
           <Link href="/dashboard/contacts">
-            <ArrowLeft className="size-4 mr-1" />
-            Back to Contacts
+            <ArrowLeft className="size-4 mr-1.5" />
+            Contacts
           </Link>
         </Button>
-      </div>
+      </motion.div>
 
       {/* Header */}
-      <div className="flex items-start gap-4 mb-6">
-        <Avatar className="size-16">
-          <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">{name}</h1>
-          {contact.title && <p className="text-muted-foreground">{String(contact.title)}</p>}
-          <div className="flex items-center gap-2 mt-2">
-            <Badge>{String(contact.status)}</Badge>
-            <ScoreBadge score={Number(contact.engagement_score)} label="engagement" />
-            <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
-              <Pencil className="size-3.5 mr-1" />
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="flex items-start gap-5 mb-8"
+      >
+        <div className="relative">
+          <Avatar className="size-20 ring-4 ring-background shadow-lg">
+            <AvatarFallback className={cn("text-2xl font-bold bg-gradient-to-br", gradient)}>
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className={cn("absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-3 border-background", config.dot)} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight">{name}</h1>
+          {contact.title && <p className="text-muted-foreground mt-0.5">{String(contact.title)}</p>}
+          <div className="flex items-center gap-3 mt-3 flex-wrap">
+            <Badge variant="outline" className={cn("text-xs border badge-shimmer", config.color)}>
+              {status}
+            </Badge>
+            <ScoreBadge score={Number(contact.engagement_score)} size="md" />
+            {contact.source && (
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                <Globe className="size-3 mr-1" />
+                {String(contact.source)}
+              </Badge>
+            )}
+            <Button variant="outline" size="sm" onClick={() => setShowEdit(true)} className="ml-auto shadow-sm">
+              <Pencil className="size-3.5 mr-1.5" />
               Edit
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Info */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-sm">Contact Info</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {contact.email && (
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="size-4 text-muted-foreground" />
-                <a href={`mailto:${contact.email}`} className="hover:underline">{String(contact.email)}</a>
+        {/* Info Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <Card className="glass-card lg:col-span-1">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                  <Mail className="w-3 h-3 text-white" />
+                </div>
+                Contact Info
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {contact.email && (
+                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
+                    <Mail className="size-4 text-sky-500" />
+                  </div>
+                  <a href={`mailto:${contact.email}`} className="hover:underline text-foreground truncate">{String(contact.email)}</a>
+                </div>
+              )}
+              {contact.phone && (
+                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <Phone className="size-4 text-emerald-500" />
+                  </div>
+                  <span>{String(contact.phone)}</span>
+                </div>
+              )}
+              {contact.title && (
+                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                    <Briefcase className="size-4 text-violet-500" />
+                  </div>
+                  <span>{String(contact.title)}</span>
+                </div>
+              )}
+              {contact.companies && (
+                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <Building2 className="size-4 text-amber-500" />
+                  </div>
+                  <Link
+                    href={`/dashboard/companies/${contact.companies.id}`}
+                    className="hover:underline font-medium"
+                  >
+                    {contact.companies.name}
+                  </Link>
+                </div>
+              )}
+              <div className="flex items-center gap-3 text-sm p-2 rounded-lg text-muted-foreground">
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <Calendar className="size-4" />
+                </div>
+                Added {new Date(String(contact.created_at)).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
               </div>
-            )}
-            {contact.phone && (
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="size-4 text-muted-foreground" />
-                <span>{String(contact.phone)}</span>
-              </div>
-            )}
-            {contact.title && (
-              <div className="flex items-center gap-2 text-sm">
-                <Briefcase className="size-4 text-muted-foreground" />
-                <span>{String(contact.title)}</span>
-              </div>
-            )}
-            {contact.companies && (
-              <div className="flex items-center gap-2 text-sm">
-                <Building2 className="size-4 text-muted-foreground" />
-                <Link
-                  href={`/dashboard/companies/${contact.companies.id}`}
-                  className="hover:underline"
-                >
-                  {contact.companies.name}
-                </Link>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="size-4" />
-              Added {new Date(String(contact.created_at)).toLocaleDateString()}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Activity & Notes */}
         <div className="lg:col-span-2 space-y-6">
           {/* Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Notes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <NoteEditor onSubmit={handleAddNote} />
-              {notes.map((note) => (
-                <div key={note.id} className="border-l-2 border-muted pl-3 py-1">
-                  <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(note.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.25 }}
+          >
+            <Card className="glass-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                    <FileText className="w-3 h-3 text-white" />
+                  </div>
+                  Notes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <NoteEditor onSubmit={handleAddNote} />
+                {notes.map((note, i) => (
+                  <motion.div
+                    key={note.id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.05 * i }}
+                    className="border-l-3 border-amber-500/30 pl-4 py-2 rounded-r-lg hover:bg-muted/30 transition-colors"
+                  >
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{note.content}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      {new Date(note.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                  </motion.div>
+                ))}
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Related Deals */}
           {deals.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Handshake className="size-4" />
-                  Deals ({deals.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {deals.map((deal) => (
-                    <Link
-                      key={String(deal.id)}
-                      href={`/dashboard/deals/${deal.id}`}
-                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50"
-                    >
-                      <div>
-                        <p className="text-sm font-medium">{String(deal.title)}</p>
-                        <p className="text-xs text-muted-foreground">{String(deal.status)}</p>
-                      </div>
-                      <span className="text-sm font-bold">${Number(deal.value).toLocaleString()}</span>
-                    </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <Card className="glass-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                      <Handshake className="w-3 h-3 text-white" />
+                    </div>
+                    Deals
+                    <Badge variant="secondary" className="text-[10px] ml-1">{deals.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {deals.map((deal) => (
+                      <Link
+                        key={String(deal.id)}
+                        href={`/dashboard/deals/${deal.id}`}
+                        className="flex items-center justify-between rounded-xl border p-3.5 premium-card bg-card"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate">{String(deal.title)}</p>
+                          <Badge variant="outline" className="text-[10px] mt-1 capitalize">{String(deal.status)}</Badge>
+                        </div>
+                        <span className="text-sm font-bold tabular-nums">${Number(deal.value).toLocaleString()}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
 
           {/* Related Tasks */}
           {tasks.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <CheckSquare className="size-4" />
-                  Tasks ({tasks.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {tasks.map((task) => (
-                    <div key={String(task.id)} className="flex items-center justify-between rounded-lg border p-3">
-                      <div>
-                        <p className="text-sm font-medium">{String(task.title)}</p>
-                        {task.due_date && (
-                          <p className="text-xs text-muted-foreground">
-                            Due: {new Date(String(task.due_date)).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                      <Badge variant={task.status === "done" ? "default" : "secondary"}>
-                        {String(task.status)}
-                      </Badge>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
+            >
+              <Card className="glass-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                      <CheckSquare className="w-3 h-3 text-white" />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    Tasks
+                    <Badge variant="secondary" className="text-[10px] ml-1">{tasks.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {tasks.map((task) => {
+                      const isOverdue = task.due_date && new Date(String(task.due_date)) < new Date() && task.status !== "done";
+                      return (
+                        <div
+                          key={String(task.id)}
+                          className={cn(
+                            "flex items-center justify-between rounded-xl border p-3.5 bg-card",
+                            isOverdue && "border-red-200/60 bg-red-50/20 dark:border-red-900/20 dark:bg-red-950/10"
+                          )}
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{String(task.title)}</p>
+                            {task.due_date && (
+                              <p className={cn("text-[11px] mt-0.5", isOverdue ? "text-red-600 font-semibold" : "text-muted-foreground")}>
+                                Due: {new Date(String(task.due_date)).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                {isOverdue && " (overdue)"}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {task.priority && (
+                              <Badge variant="outline" className={cn("text-[10px]", priorityConfig[task.priority] || "")}>
+                                {task.priority}
+                              </Badge>
+                            )}
+                            <Badge variant={task.status === "done" ? "default" : "secondary"} className="text-[10px]">
+                              {String(task.status)}
+                            </Badge>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
 
           {/* Activity Timeline */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ActivityTimeline activities={activities} />
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+          >
+            <Card className="glass-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                    <Calendar className="w-3 h-3 text-white" />
+                  </div>
+                  Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActivityTimeline activities={activities} />
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
 

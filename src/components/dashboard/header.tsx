@@ -35,12 +35,14 @@ export function Header({ title, description, children, className }: HeaderProps)
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex items-center justify-between h-16 px-6 bg-background/80 backdrop-blur-sm border-b border-border",
+        "sticky top-0 z-30 flex items-center justify-between h-16 px-6 header-shimmer",
+        "bg-background/70 backdrop-blur-xl border-b border-border/50",
+        "dark:bg-background/60",
         className
       )}
     >
       <div className="space-y-0.5">
-        {title && <h1 className="text-xl font-semibold">{title}</h1>}
+        {title && <h1 className="text-xl font-bold tracking-tight">{title}</h1>}
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
         )}
@@ -53,7 +55,12 @@ export function Header({ title, description, children, className }: HeaderProps)
         <button
           onClick={cycleTheme}
           aria-label="Toggle theme"
-          className="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          className={cn(
+            "flex size-9 items-center justify-center rounded-xl",
+            "text-muted-foreground hover:text-foreground",
+            "hover:bg-secondary/80 active:scale-95",
+            "transition-all duration-200"
+          )}
         >
           <ThemeIcon className="size-[18px]" />
         </button>

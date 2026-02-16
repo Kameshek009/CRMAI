@@ -23,11 +23,18 @@ interface ContactCardProps {
   onSelectToggle?: (id: string) => void;
 }
 
-const statusColors: Record<string, string> = {
-  lead: "bg-blue-500/10 text-blue-600",
-  active: "bg-emerald-500/10 text-emerald-600",
-  inactive: "bg-gray-500/10 text-gray-600",
-  churned: "bg-red-500/10 text-red-600",
+const statusConfig: Record<string, { color: string; dot: string }> = {
+  lead: { color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", dot: "bg-indigo-500" },
+  active: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", dot: "bg-emerald-500" },
+  inactive: { color: "bg-gray-500/10 text-gray-500 border-gray-500/20", dot: "bg-gray-400" },
+  churned: { color: "bg-red-500/10 text-red-600 border-red-500/20", dot: "bg-red-500" },
+};
+
+const avatarGradients: Record<string, string> = {
+  lead: "from-indigo-500/20 to-purple-500/20",
+  active: "from-emerald-500/20 to-teal-500/20",
+  inactive: "from-gray-400/20 to-gray-500/20",
+  churned: "from-red-500/20 to-orange-500/20",
 };
 
 export function ContactCard({
@@ -46,53 +53,60 @@ export function ContactCard({
 }: ContactCardProps) {
   const name = `${firstName} ${lastName || ""}`.trim();
   const initials = `${firstName.charAt(0)}${lastName?.charAt(0) || ""}`.toUpperCase();
+  const config = statusConfig[status] || statusConfig.lead;
+  const gradient = avatarGradients[status] || avatarGradients.lead;
 
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50",
-        selected && "ring-2 ring-primary/50 bg-primary/5"
+        "premium-card card-shine flex items-center gap-4 rounded-xl border p-4 bg-card",
+        selected && "ring-2 ring-primary/40 bg-primary/5 shadow-md"
       )}
     >
       {selectable && (
         <Checkbox
           checked={selected}
           onCheckedChange={() => onSelectToggle?.(id)}
-          className="size-5 shrink-0"
+          className="size-5 shrink-0 premium-checkbox"
         />
       )}
       <Link
         href={`/dashboard/contacts/${id}`}
-        className="flex items-center gap-4 flex-1 min-w-0"
+        className="flex items-center gap-4 flex-1 min-w-0 relative z-[1]"
       >
-        <Avatar className="size-10">
-          <AvatarFallback className="text-sm">{initials}</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className={cn("size-11 ring-2 ring-offset-2 ring-offset-background transition-all", selected ? "ring-primary/30" : "ring-transparent")}>
+            <AvatarFallback className={cn("text-sm font-semibold bg-gradient-to-br", gradient)}>
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background", config.dot)} />
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium truncate">{name}</span>
-            <Badge variant="outline" className={statusColors[status] || ""}>
+            <span className="font-semibold truncate text-sm">{name}</span>
+            <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 border badge-shimmer", config.color)}>
               {status}
             </Badge>
           </div>
-          {title && <p className="text-sm text-muted-foreground truncate">{title}</p>}
-          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+          {title && <p className="text-xs text-muted-foreground truncate mt-0.5">{title}</p>}
+          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
             {companyName && (
-              <span className="flex items-center gap-1">
-                <Building2 className="size-3" />
-                {companyName}
+              <span className="flex items-center gap-1 hover:text-foreground transition-colors">
+                <Building2 className="size-3 shrink-0" />
+                <span className="truncate max-w-[120px]">{companyName}</span>
               </span>
             )}
             {email && (
-              <span className="flex items-center gap-1">
-                <Mail className="size-3" />
-                {email}
+              <span className="flex items-center gap-1 hover:text-foreground transition-colors">
+                <Mail className="size-3 shrink-0" />
+                <span className="truncate max-w-[140px]">{email}</span>
               </span>
             )}
             {phone && (
-              <span className="flex items-center gap-1">
-                <Phone className="size-3" />
+              <span className="flex items-center gap-1 hover:text-foreground transition-colors hidden sm:flex">
+                <Phone className="size-3 shrink-0" />
                 {phone}
               </span>
             )}

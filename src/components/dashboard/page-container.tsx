@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { Card as ShadcnCard, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PageContainerProps {
@@ -10,8 +11,8 @@ interface PageContainerProps {
 
 export function PageContainer({ children, className }: PageContainerProps) {
   return (
-    <div className={cn("p-6 sm:p-8 lg:p-10", className)}>
-      <div className="mx-auto max-w-5xl space-y-8">
+    <div className={cn("p-6 sm:p-8 lg:p-10 page-gradient-bg min-h-full", className)}>
+      <div className="mx-auto max-w-5xl space-y-8 relative z-[1]">
         {children}
       </div>
     </div>
@@ -26,15 +27,29 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, children }: PageHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div className="space-y-1.5 section-header-line">
+        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
         )}
       </div>
-      {children && <div className="flex items-center gap-3">{children}</div>}
-    </div>
+      {children && (
+        <motion.div
+          initial={{ opacity: 0, x: 12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="flex items-center gap-3"
+        >
+          {children}
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
 
@@ -49,7 +64,7 @@ export function Section({ children, className, title, description }: SectionProp
   return (
     <div className={cn("space-y-6", className)}>
       {(title || description) && (
-        <div className="space-y-2">
+        <div className="space-y-1.5 section-header-line">
           {title && <h2 className="text-lg font-semibold tracking-tight">{title}</h2>}
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>

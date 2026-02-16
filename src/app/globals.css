@@ -1165,3 +1165,341 @@ body {
   background-size: 200% 100%;
   animation: shimmer 4s linear infinite;
 }
+
+/* ============================================================================
+   PREMIUM COMPONENT STYLES
+   ============================================================================ */
+
+/* --- Premium Card Hover Effects --- */
+
+.premium-card {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.premium-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: linear-gradient(
+    135deg,
+    rgba(126, 196, 227, 0.06) 0%,
+    transparent 40%,
+    transparent 60%,
+    rgba(167, 139, 250, 0.04) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.premium-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 30px -6px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.premium-card:hover::before {
+  opacity: 1;
+}
+
+.dark .premium-card:hover {
+  box-shadow:
+    0 8px 30px -6px rgba(0, 0, 0, 0.4),
+    0 0 1px rgba(126, 196, 227, 0.15),
+    0 0 20px rgba(126, 196, 227, 0.04);
+}
+
+/* --- Gradient Avatar Ring --- */
+
+.avatar-ring {
+  position: relative;
+}
+
+.avatar-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue), #a78bfa, var(--accent-green));
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-ring:hover::before {
+  opacity: 1;
+}
+
+/* --- Score Ring Progress --- */
+
+.score-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+/* --- Priority Pulse Indicator --- */
+
+@keyframes priorityPulse {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50% { box-shadow: 0 0 0 4px transparent; }
+}
+
+.priority-pulse {
+  animation: priorityPulse 2s ease-in-out infinite;
+}
+
+/* --- Page Gradient Backgrounds --- */
+
+.page-gradient-bg {
+  position: relative;
+}
+
+.page-gradient-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(126, 196, 227, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 0%, rgba(167, 139, 250, 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(126, 234, 155, 0.015) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .page-gradient-bg::before {
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(126, 196, 227, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 0%, rgba(167, 139, 250, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(126, 234, 155, 0.02) 0%, transparent 50%);
+}
+
+/* --- Empty State Premium --- */
+
+.empty-state-icon {
+  position: relative;
+}
+
+.empty-state-icon::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(126, 196, 227, 0.15), rgba(167, 139, 250, 0.1));
+  filter: blur(16px);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* --- Glass Input --- */
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(126, 196, 227, 0.3) !important;
+  box-shadow: 0 0 0 3px rgba(126, 196, 227, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dark .glass-input {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .glass-input:focus {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(126, 196, 227, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(126, 196, 227, 0.06), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Metric Glow Dot --- */
+
+@keyframes metricPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+.metric-dot {
+  position: relative;
+}
+
+.metric-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: metricPulse 2.5s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* --- Premium Badge Shimmer --- */
+
+.badge-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.badge-shimmer:hover::after {
+  left: 100%;
+}
+
+/* --- Enhanced Section Header --- */
+
+.section-header-line {
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.section-header-line::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--accent-blue), #a78bfa);
+}
+
+/* --- Kanban Column Glow --- */
+
+.kanban-column-active {
+  position: relative;
+}
+
+.kanban-column-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  border-radius: 9999px;
+  opacity: 0.6;
+}
+
+/* --- Smooth Number Transition --- */
+
+.number-transition {
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+/* --- Interactive Checkbox Premium --- */
+
+.premium-checkbox {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-checkbox:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 3px rgba(126, 196, 227, 0.1);
+}
+
+/* --- Card Shine Effect on Hover --- */
+
+@keyframes cardShine {
+  0% { left: -150%; }
+  100% { left: 150%; }
+}
+
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -150%;
+  width: 100%;
+  height: 200%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.03) 45%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 55%,
+    transparent 60%
+  );
+  pointer-events: none;
+  transition: none;
+}
+
+.card-shine:hover::after {
+  animation: cardShine 0.8s ease forwards;
+}
+
+/* --- Status Dot with Glow --- */
+
+.status-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.4;
+  filter: blur(3px);
+}
+
+.status-dot-active {
+  background: #22c55e;
+}
+
+.status-dot-lead {
+  background: #6366f1;
+}
+
+.status-dot-inactive {
+  background: #a1a1aa;
+}
+
+.status-dot-churned {
+  background: #ef4444;
+}

@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Building2, User, GripVertical, Calendar } from "lucide-react";
+import { Building2, User, GripVertical, Calendar, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 export interface DealForCard {
@@ -36,37 +36,38 @@ function DealCardInner({
   const prob = deal.ai_win_probability ?? 0;
   const probColor =
     prob >= 70
-      ? "text-emerald-600 border-emerald-200"
+      ? "text-emerald-600 border-emerald-200 dark:border-emerald-800/40 bg-emerald-500/10"
       : prob >= 40
-        ? "text-amber-600 border-amber-200"
-        : "text-red-600 border-red-200";
+        ? "text-amber-600 border-amber-200 dark:border-amber-800/40 bg-amber-500/10"
+        : "text-red-600 border-red-200 dark:border-red-800/40 bg-red-500/10";
   const probLabel = prob >= 70 ? "Hot" : prob >= 40 ? "Warm" : "At Risk";
+  const probDot = prob >= 70 ? "bg-emerald-500" : prob >= 40 ? "bg-amber-500" : "bg-red-500";
 
   return (
-    <Card className={cn("p-3 transition-all group", className)}>
-      <div className="flex items-start gap-2">
+    <Card className={cn("p-3.5 transition-all group premium-card card-shine border bg-card", className)}>
+      <div className="flex items-start gap-2 relative z-[1]">
         {dragHandle}
         <div className="flex-1 min-w-0">
           <Link
             href={`/dashboard/deals/${deal.id}`}
-            className="font-medium text-sm hover:underline truncate block"
+            className="font-semibold text-sm hover:text-primary transition-colors truncate block"
           >
             {deal.title}
           </Link>
-          <p className="text-base font-semibold mt-0.5">
+          <p className="text-base font-bold mt-0.5 tracking-tight">
             ${Number(deal.value).toLocaleString()}
           </p>
 
           {(contactName || deal.companies?.name) && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-muted-foreground">
               {deal.companies?.name && (
-                <span className="flex items-center gap-1 truncate max-w-[120px]">
+                <span className="flex items-center gap-1 truncate max-w-[120px] hover:text-foreground transition-colors">
                   <Building2 className="size-3 shrink-0" />
                   {deal.companies.name}
                 </span>
               )}
               {contactName && (
-                <span className="flex items-center gap-1 truncate max-w-[120px]">
+                <span className="flex items-center gap-1 truncate max-w-[120px] hover:text-foreground transition-colors">
                   <User className="size-3 shrink-0" />
                   {contactName}
                 </span>
@@ -74,12 +75,13 @@ function DealCardInner({
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-2.5">
             <Badge
               variant="outline"
-              className={cn("text-[10px] px-1.5", probColor)}
+              className={cn("text-[10px] px-1.5 py-0 badge-shimmer", probColor)}
               aria-label={`Win probability: ${probLabel}, ${prob}%`}
             >
+              <div className={cn("w-1.5 h-1.5 rounded-full mr-1", probDot)} />
               {probLabel} {prob}%
             </Badge>
             {deal.expected_close_date && (
@@ -113,7 +115,7 @@ export function DealCard({ deal }: { deal: DealForCard }) {
     <button
       {...attributes}
       {...listeners}
-      className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+      className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0 hover:scale-110"
     >
       <GripVertical className="size-4" />
     </button>
@@ -124,7 +126,7 @@ export function DealCard({ deal }: { deal: DealForCard }) {
       <DealCardInner
         deal={deal}
         dragHandle={handle}
-        className={isDragging ? "shadow-lg ring-2 ring-primary/20" : "hover:shadow-md"}
+        className={isDragging ? "shadow-xl ring-2 ring-primary/20 scale-[1.02]" : "hover:shadow-md"}
       />
     </div>
   );
@@ -136,7 +138,7 @@ export function DealCardOverlay({ deal }: { deal: DealForCard }) {
   return (
     <DealCardInner
       deal={deal}
-      className="shadow-xl ring-2 ring-primary/30 rotate-2"
+      className="shadow-2xl ring-2 ring-primary/30 rotate-2 scale-105"
     />
   );
 }
