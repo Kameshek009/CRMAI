@@ -28,7 +28,7 @@ const features: BentoFeature[] = [
     description:
       "Let artificial intelligence score leads, predict outcomes, and draft follow-ups. Your AI co-pilot works 24/7 so you never miss an opportunity.",
     gradient: "from-[#a78bfa]/20 via-[#a78bfa]/10 to-transparent",
-    iconGradient: "from-[#a78bfa] to-[#a78bfa]",
+    iconGradient: "from-[#818cf8] to-[#a78bfa]",
     size: "lg",
   },
   {

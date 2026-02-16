@@ -92,7 +92,7 @@ function AIChatMockup() {
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-gradient-to-r from-[#a78bfa] to-[#a78bfa] text-white rounded-br-md shadow-lg shadow-purple-500/10"
+                    ? "bg-gradient-to-r from-[#818cf8] to-[#a78bfa] text-white rounded-br-md shadow-lg shadow-purple-500/10"
                     : "bg-white/[0.05] dark:bg-white/[0.05] border border-white/10 dark:border-white/10 text-foreground rounded-bl-md"
                 }`}
               >
@@ -136,7 +136,7 @@ function AIChatMockup() {
         <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
           <Wand2 className="w-4 h-4 text-[#a78bfa]/50" />
           <span className="text-[12px] text-muted-foreground/40 flex-1">Ask AI anything about your CRM...</span>
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-[#a78bfa] to-[#a78bfa] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-[#818cf8] to-[#a78bfa] flex items-center justify-center">
             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
@@ -208,7 +208,7 @@ const capabilities = [
     icon: Target,
     title: "AI Lead Scoring",
     description: "Automatically rank leads based on behavior, engagement, and fit. Focus on deals that matter most.",
-    gradient: "from-[#a78bfa] to-[#a78bfa]",
+    gradient: "from-[#818cf8] to-[#a78bfa]",
     stat: "94%",
     statLabel: "Accuracy",
   },

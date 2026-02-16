@@ -247,7 +247,7 @@ function ProductPreview3D() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1 + i * 0.1 }}
-                className={`w-8 h-8 rounded-xl flex items-center justify-center ${i === 0 ? "bg-gradient-to-br from-[#a78bfa] to-[#a78bfa] shadow-lg" : "hover:bg-white/5"} transition-colors`}
+                className={`w-8 h-8 rounded-xl flex items-center justify-center ${i === 0 ? "bg-gradient-to-br from-[#818cf8] to-[#a78bfa] shadow-lg" : "hover:bg-white/5"} transition-colors`}
               >
                 <Icon className={`w-4 h-4 ${i === 0 ? "text-white" : "text-muted-foreground/50"}`} />
               </motion.div>
@@ -259,7 +259,7 @@ function ProductPreview3D() {
             {/* Top stats */}
             <div className="grid grid-cols-3 gap-3 mb-4">
               {[
-                { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-[#a78bfa] to-[#a78bfa]" },
+                { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-[#818cf8] to-[#a78bfa]" },
                 { label: "Deals Won", value: "148", change: "+24%", color: "from-[#a78bfa] to-[#f472b6]" },
                 { label: "Conversion", value: "68%", change: "+7%", color: "from-[#818cf8] to-[#a78bfa]" },
               ].map((stat, i) => (
@@ -322,7 +322,7 @@ function ProductPreview3D() {
                     initial={{ height: 0 }}
                     animate={{ height: `${h}%` }}
                     transition={{ delay: 1.5 + i * 0.05, duration: 0.5, ease: "easeOut" }}
-                    className="flex-1 rounded-sm bg-gradient-to-t from-[#a78bfa]/40 to-[#a78bfa]/60"
+                    className="flex-1 rounded-sm bg-gradient-to-t from-[#818cf8]/40 to-[#a78bfa]/60"
                   />
                 ))}
               </div>

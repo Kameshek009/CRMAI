@@ -19,7 +19,7 @@ const stats: StatItem[] = [
     suffix: "x",
     label: "More Deals Closed",
     description: "Teams using Nexxus CRM close 3x more deals on average",
-    gradient: "from-[#a78bfa] to-[#a78bfa]",
+    gradient: "from-[#818cf8] to-[#a78bfa]",
     gradientColors: ["#a78bfa", "#a78bfa"],
     progress: 95,
   },

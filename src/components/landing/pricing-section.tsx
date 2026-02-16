@@ -29,7 +29,7 @@ const plans: PlanCard[] = [
     cta: "Get Started",
     ctaHref: "/sign-up",
     icon: Sparkles,
-    gradient: "from-[#a78bfa] to-[#a78bfa]",
+    gradient: "from-[#818cf8] to-[#a78bfa]",
     features: [
       "50K AI tokens / month",
       "10K tokens / week",
