@@ -37,8 +37,8 @@ const stats: StatItem[] = [
     suffix: "%",
     label: "Faster Sales Cycle",
     description: "Shorten your pipeline with AI-powered insights and scoring",
-    gradient: "from-[#f472b6] to-[#f2b76c]",
-    gradientColors: ["#f472b6", "#f2b76c"],
+    gradient: "from-[#f472b6] to-[#e879f9]",
+    gradientColors: ["#f472b6", "#e879f9"],
     progress: 72,
   },
   {
@@ -46,8 +46,8 @@ const stats: StatItem[] = [
     suffix: "K+",
     label: "Teams Trust Us",
     description: "Growing businesses worldwide choose Nexxus CRM",
-    gradient: "from-[#7eea9b] to-[#a78bfa]",
-    gradientColors: ["#7eea9b", "#a78bfa"],
+    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradientColors: ["#818cf8", "#a78bfa"],
     progress: 88,
   },
 ];
@@ -270,7 +270,7 @@ export function StatsSection() {
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             The numbers speak
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#7eea9b] via-[#a78bfa] to-[#a78bfa] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-[#818cf8] via-[#a78bfa] to-[#a78bfa] bg-clip-text text-transparent">
               for themselves
             </span>
           </h2>

@@ -355,7 +355,7 @@ function ScrollProgress() {
       className="absolute bottom-0 left-0 right-0 h-[2px] origin-left"
       style={{
         scaleX,
-        background: "linear-gradient(90deg, #a78bfa, #a78bfa, #f472b6, #7eea9b)",
+        background: "linear-gradient(90deg, #a78bfa, #a78bfa, #f472b6, #818cf8)",
       }}
     />
   );

@@ -45,8 +45,8 @@ const features: BentoFeature[] = [
     title: "Team Collaboration",
     description:
       "Share pipelines, assign deals, mention teammates, and keep everyone aligned in real time.",
-    gradient: "from-[#f472b6]/20 via-[#7eea9b]/10 to-transparent",
-    iconGradient: "from-[#f472b6] to-[#f2b76c]",
+    gradient: "from-[#f472b6]/20 via-[#818cf8]/10 to-transparent",
+    iconGradient: "from-[#f472b6] to-[#e879f9]",
     size: "sm",
   },
   {
@@ -54,8 +54,8 @@ const features: BentoFeature[] = [
     title: "Analytics & Insights",
     description:
       "Beautiful dashboards with conversion rates, revenue forecasts, and performance metrics that update in real time.",
-    gradient: "from-[#7eea9b]/20 via-[#a78bfa]/10 to-transparent",
-    iconGradient: "from-[#7eea9b] to-[#a78bfa]",
+    gradient: "from-[#818cf8]/20 via-[#a78bfa]/10 to-transparent",
+    iconGradient: "from-[#818cf8] to-[#a78bfa]",
     size: "sm",
   },
   {
@@ -63,8 +63,8 @@ const features: BentoFeature[] = [
     title: "Smart Automation",
     description:
       "Create triggers and workflows that eliminate repetitive tasks. Auto-assign leads, send follow-ups, update stages — hands free.",
-    gradient: "from-[#f2b76c]/20 via-[#f472b6]/10 to-transparent",
-    iconGradient: "from-[#f2b76c] to-[#f472b6]",
+    gradient: "from-[#e879f9]/20 via-[#f472b6]/10 to-transparent",
+    iconGradient: "from-[#e879f9] to-[#f472b6]",
     size: "md",
   },
   {
@@ -72,8 +72,8 @@ const features: BentoFeature[] = [
     title: "Real-time Sync",
     description:
       "Instant sync across all devices. Connect with Gmail, Outlook, Slack, Zapier, and 50+ tools seamlessly.",
-    gradient: "from-[#a78bfa]/20 via-[#7eea9b]/10 to-transparent",
-    iconGradient: "from-[#a78bfa] to-[#7eea9b]",
+    gradient: "from-[#a78bfa]/20 via-[#818cf8]/10 to-transparent",
+    iconGradient: "from-[#a78bfa] to-[#818cf8]",
     size: "lg",
   },
 ];

@@ -77,7 +77,7 @@ const plans: PlanCard[] = [
     cta: "Upgrade to Max",
     ctaHref: "/sign-up",
     icon: Crown,
-    gradient: "from-[#f472b6] to-[#f2b76c]",
+    gradient: "from-[#f472b6] to-[#e879f9]",
     inheritLabel: "Everything from Pro, plus:",
     features: [
       "1.5M AI tokens / month",
@@ -101,7 +101,7 @@ const plans: PlanCard[] = [
     cta: "Contact Sales",
     ctaHref: "mailto:sales@nexxuscrm.com",
     icon: Building2,
-    gradient: "from-[#7eea9b] to-[#a78bfa]",
+    gradient: "from-[#818cf8] to-[#a78bfa]",
     inheritLabel: "Everything from Max, plus:",
     features: [
       "Unlimited AI tokens (credit-based)",
@@ -174,7 +174,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       {plan.popular && (
         <div className="absolute inset-0 rounded-3xl landing-gradient-border p-px pointer-events-none"
           style={{
-            background: "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #7eea9b, #a78bfa)",
+            background: "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #818cf8, #a78bfa)",
             backgroundSize: "400% 400%",
             mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
             WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",

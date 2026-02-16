@@ -236,7 +236,7 @@ export function CTASection() {
             className="absolute inset-0 rounded-[2rem] landing-gradient-border"
             style={{
               background:
-                "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #7eea9b, #a78bfa)",
+                "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #818cf8, #a78bfa)",
               backgroundSize: "400% 400%",
             }}
           />

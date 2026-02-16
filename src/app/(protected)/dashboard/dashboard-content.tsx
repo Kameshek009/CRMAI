@@ -93,9 +93,9 @@ interface ActivityRow {
 }
 
 const TASK_STATUS_COLORS: Record<string, string> = {
-  todo: "#6366f1",
-  in_progress: "#3b82f6",
-  done: "#22c55e",
+  todo: "#a78bfa",
+  in_progress: "#818cf8",
+  done: "#c084fc",
   cancelled: "#a1a1aa",
 };
 
@@ -407,7 +407,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: 0.6, delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7ec4e3] via-[#a78bfa] to-[#7eea9b] flex items-center justify-center"
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#818cf8] via-[#a78bfa] to-[#c084fc] flex items-center justify-center"
             >
               <GreetingIcon className="w-5 h-5 text-white" />
             </motion.div>
@@ -476,7 +476,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.openDeals ?? 0}
             subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline`}
             icon={Handshake}
-            iconGradient="bg-gradient-to-br from-indigo-500 to-purple-600"
+            iconGradient="bg-gradient-to-br from-violet-500 to-purple-600"
             delay={0.1}
           />
           <AnimatedStatCard
@@ -485,7 +485,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.tasksDueToday ?? 0}
             subtitle={crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
             icon={CheckSquare}
-            iconGradient="bg-gradient-to-br from-amber-500 to-orange-600"
+            iconGradient="bg-gradient-to-br from-fuchsia-500 to-purple-600"
             trend={crmStats?.overdueTasksCount ? { direction: "down", text: `${crmStats.overdueTasksCount} late` } : undefined}
             delay={0.15}
           />
@@ -495,7 +495,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.totalContacts ?? 0}
             subtitle={`+${crmStats?.newContactsThisWeek ?? 0} this week`}
             icon={Users}
-            iconGradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+            iconGradient="bg-gradient-to-br from-indigo-500 to-violet-600"
             trend={
               (crmStats?.newContactsThisWeek ?? 0) > 0
                 ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` }
@@ -510,7 +510,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`}
             subtitle={`${crmStats?.wonDealsThisMonth ?? 0} deal${(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed`}
             icon={DollarSign}
-            iconGradient="bg-gradient-to-br from-emerald-500 to-teal-600"
+            iconGradient="bg-gradient-to-br from-purple-500 to-violet-600"
             trend={
               (crmStats?.wonDealsThisMonth ?? 0) > 0
                 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` }
@@ -534,7 +534,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               : 0}%`}
             subtitle="Closed deals ratio"
             icon={Target}
-            iconGradient="bg-gradient-to-br from-rose-500 to-pink-600"
+            iconGradient="bg-gradient-to-br from-pink-500 to-fuchsia-600"
             delay={0.3}
           />
           <AnimatedStatCard
@@ -544,7 +544,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             formattedValue={`$${(crmStats?.weightedForecast ?? 0).toLocaleString()}`}
             subtitle="Weighted pipeline"
             icon={Zap}
-            iconGradient="bg-gradient-to-br from-violet-500 to-purple-600"
+            iconGradient="bg-gradient-to-br from-violet-400 to-purple-600"
             delay={0.35}
           />
           <AnimatedStatCard
@@ -553,7 +553,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.totalDeals ?? 0}
             subtitle="Total deals tracked"
             icon={Building2}
-            iconGradient="bg-gradient-to-br from-teal-500 to-emerald-600"
+            iconGradient="bg-gradient-to-br from-violet-400 to-indigo-600"
             delay={0.4}
           />
           <AnimatedStatCard
@@ -569,7 +569,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             }`}
             subtitle="Average won deal size"
             icon={BarChart3}
-            iconGradient="bg-gradient-to-br from-sky-500 to-blue-600"
+            iconGradient="bg-gradient-to-br from-purple-400 to-violet-600"
             delay={0.45}
           />
         </div>
@@ -587,7 +587,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
                       <Clock className="w-3 h-3 text-white" />
                     </div>
                     Recent
@@ -639,7 +639,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <Card className="glass-card h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-fuchsia-500 to-purple-500 flex items-center justify-center">
                     <Sparkles className="w-3 h-3 text-white" />
                   </div>
                   AI Insights
@@ -696,7 +696,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                       <CheckSquare className="w-3 h-3 text-white" />
                     </div>
                     Upcoming Tasks
@@ -781,7 +781,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
                     <Handshake className="w-3 h-3 text-white" />
                   </div>
                   Deals
@@ -955,7 +955,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           <Card className="glass-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
                   <TrendingUp className="w-3 h-3 text-white" />
                 </div>
                 Revenue Trend (30 Days)
@@ -973,13 +973,13 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                     <AreaChart data={revenueTrend}>
                       <defs>
                         <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
-                          <stop offset="50%" stopColor="#22c55e" stopOpacity={0.1} />
-                          <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.3} />
+                          <stop offset="50%" stopColor="#a78bfa" stopOpacity={0.1} />
+                          <stop offset="100%" stopColor="#a78bfa" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="revenueStroke" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#22c55e" />
-                          <stop offset="100%" stopColor="#7ec4e3" />
+                          <stop offset="0%" stopColor="#818cf8" />
+                          <stop offset="100%" stopColor="#c084fc" />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
@@ -1014,7 +1014,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         stroke="url(#revenueStroke)"
                         strokeWidth={2.5}
                         fill="url(#revenueGradient)"
-                        activeDot={{ r: 5, fill: "#22c55e", strokeWidth: 2, stroke: "var(--card)" }}
+                        activeDot={{ r: 5, fill: "#a78bfa", strokeWidth: 2, stroke: "var(--card)" }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -1027,7 +1027,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           <Card className="glass-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                   <Kanban className="w-3 h-3 text-white" />
                 </div>
                 Workload by Status
@@ -1116,10 +1116,10 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.6 }}
           >
-            <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 via-amber-500/10 to-orange-500/5">
+            <Card className="border-violet-500/30 bg-gradient-to-r from-violet-500/5 via-purple-500/10 to-fuchsia-500/5">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
                     <Sparkles className="w-4.5 h-4.5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -1132,7 +1132,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         : `${Math.round(usage.percentUsed)}% used this month.`}
                     </p>
                   </div>
-                  <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 hover:opacity-90" asChild>
+                  <Button size="sm" className="bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 hover:opacity-90" asChild>
                     <Link href="/dashboard/account/billing">
                       Upgrade
                       <ArrowRight className="w-3.5 h-3.5 ml-1.5" />

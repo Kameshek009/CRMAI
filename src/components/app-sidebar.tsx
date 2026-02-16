@@ -213,7 +213,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard" className="group/logo">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--accent-blue)]/15 to-[#a78bfa]/15 dark:from-[var(--accent-blue)]/20 dark:to-[#a78bfa]/20 transition-all duration-300 group-hover/logo:from-[var(--accent-blue)]/25 group-hover/logo:to-[#a78bfa]/25 group-hover/logo:shadow-md group-hover/logo:shadow-[var(--accent-blue)]/10">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#818cf8]/15 to-[#c084fc]/15 dark:from-[#818cf8]/20 dark:to-[#c084fc]/20 transition-all duration-300 group-hover/logo:from-[#818cf8]/25 group-hover/logo:to-[#c084fc]/25 group-hover/logo:shadow-md group-hover/logo:shadow-[#a78bfa]/10">
                   <Logo size={20} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">

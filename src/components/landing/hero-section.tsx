@@ -261,7 +261,7 @@ function ProductPreview3D() {
               {[
                 { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-[#a78bfa] to-[#a78bfa]" },
                 { label: "Deals Won", value: "148", change: "+24%", color: "from-[#a78bfa] to-[#f472b6]" },
-                { label: "Conversion", value: "68%", change: "+7%", color: "from-[#7eea9b] to-[#a78bfa]" },
+                { label: "Conversion", value: "68%", change: "+7%", color: "from-[#818cf8] to-[#a78bfa]" },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
