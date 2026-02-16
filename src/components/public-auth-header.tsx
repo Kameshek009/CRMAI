@@ -320,7 +320,7 @@ export function PublicAuthHeader() {
             </Link>
             <Link
               href="/sign-up"
-              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] text-white hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-200"
+              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] text-white hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-200"
             >
               Get started
             </Link>
@@ -355,7 +355,7 @@ function ScrollProgress() {
       className="absolute bottom-0 left-0 right-0 h-[2px] origin-left"
       style={{
         scaleX,
-        background: "linear-gradient(90deg, #7ec4e3, #a78bfa, #f472b6, #7eea9b)",
+        background: "linear-gradient(90deg, #a78bfa, #a78bfa, #f472b6, #7eea9b)",
       }}
     />
   );

@@ -10,7 +10,7 @@ const testimonials = [
     role: "VP of Sales",
     company: "TechFlow",
     avatar: "SM",
-    gradient: "from-[#7ec4e3] to-[#a78bfa]",
+    gradient: "from-[#a78bfa] to-[#a78bfa]",
     text: "Nexxus CRM transformed how our team sells. The AI insights alone helped us identify $200K in pipeline we were about to lose. We closed 40% more deals in Q1.",
     stars: 5,
   },
@@ -37,7 +37,7 @@ const testimonials = [
     role: "Sales Director",
     company: "CloudBase",
     avatar: "MC",
-    gradient: "from-[#7eea9b] to-[#7ec4e3]",
+    gradient: "from-[#7eea9b] to-[#a78bfa]",
     text: "Finally a CRM that doesn't feel like it was built in 2005. Clean, fast, and the AI actually delivers on its promises. My reps save 2 hours daily.",
     stars: 5,
   },
@@ -55,7 +55,7 @@ const testimonials = [
     role: "CRO",
     company: "FinBridge",
     avatar: "DK",
-    gradient: "from-[#7ec4e3] to-[#7eea9b]",
+    gradient: "from-[#a78bfa] to-[#7eea9b]",
     text: "The revenue forecasting is scary accurate. We planned our entire hiring roadmap based on Nexxus CRM predictions and hit targets within 5% variance.",
     stars: 5,
   },
@@ -64,7 +64,7 @@ const testimonials = [
     role: "Sales Manager",
     company: "NovaTech",
     avatar: "EV",
-    gradient: "from-[#a78bfa] to-[#7ec4e3]",
+    gradient: "from-[#a78bfa] to-[#a78bfa]",
     text: "Onboarding new sales reps used to take weeks. With Nexxus CRM's AI assistant, new team members are productive from day one. Absolute game changer.",
     stars: 5,
   },
@@ -216,7 +216,7 @@ export function TestimonialsSection() {
         <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
           Don&apos;t take our
           <br />
-          <span className="landing-gradient-text bg-gradient-to-r from-[#f472b6] via-[#a78bfa] to-[#7ec4e3] bg-clip-text text-transparent">
+          <span className="landing-gradient-text bg-gradient-to-r from-[#f472b6] via-[#a78bfa] to-[#a78bfa] bg-clip-text text-transparent">
             word for it
           </span>
         </h2>

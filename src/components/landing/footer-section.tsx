@@ -73,7 +73,7 @@ export function FooterSection() {
         <div className="flex flex-col lg:flex-row items-start justify-between gap-10 mb-12 pb-12 border-b border-white/10 dark:border-white/10">
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7ec4e3] to-[#a78bfa] flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#a78bfa] to-[#a78bfa] flex items-center justify-center shadow-lg shadow-purple-500/20">
                 <span className="text-white text-sm font-bold">N</span>
               </div>
               <span className="text-lg font-bold text-foreground">Nexxus CRM</span>
@@ -92,7 +92,7 @@ export function FooterSection() {
                 placeholder="Enter your email"
                 className="h-11 px-4 rounded-xl border border-white/10 bg-white/5 text-sm text-foreground placeholder:text-muted-foreground/50 backdrop-blur-xl focus:outline-none focus:border-[#a78bfa]/50 transition-colors w-full lg:w-64"
               />
-              <button className="h-11 px-6 rounded-xl bg-gradient-to-r from-[#7ec4e3] to-[#a78bfa] text-white text-sm font-semibold shrink-0 hover:shadow-lg hover:shadow-purple-500/20 transition-shadow">
+              <button className="h-11 px-6 rounded-xl bg-gradient-to-r from-[#a78bfa] to-[#a78bfa] text-white text-sm font-semibold shrink-0 hover:shadow-lg hover:shadow-purple-500/20 transition-shadow">
                 Subscribe
               </button>
             </div>
@@ -142,7 +142,7 @@ export function FooterSection() {
           className="mt-10 pt-8 border-t border-white/10 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7ec4e3] to-[#a78bfa] flex items-center justify-center shadow-lg">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#a78bfa] to-[#a78bfa] flex items-center justify-center shadow-lg">
               <span className="text-white text-xs font-bold">N</span>
             </div>
             <span className="text-sm font-semibold text-foreground">

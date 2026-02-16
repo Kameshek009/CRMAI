@@ -27,8 +27,8 @@ const features: BentoFeature[] = [
     title: "AI-Powered CRM",
     description:
       "Let artificial intelligence score leads, predict outcomes, and draft follow-ups. Your AI co-pilot works 24/7 so you never miss an opportunity.",
-    gradient: "from-[#7ec4e3]/20 via-[#a78bfa]/10 to-transparent",
-    iconGradient: "from-[#7ec4e3] to-[#a78bfa]",
+    gradient: "from-[#a78bfa]/20 via-[#a78bfa]/10 to-transparent",
+    iconGradient: "from-[#a78bfa] to-[#a78bfa]",
     size: "lg",
   },
   {
@@ -54,8 +54,8 @@ const features: BentoFeature[] = [
     title: "Analytics & Insights",
     description:
       "Beautiful dashboards with conversion rates, revenue forecasts, and performance metrics that update in real time.",
-    gradient: "from-[#7eea9b]/20 via-[#7ec4e3]/10 to-transparent",
-    iconGradient: "from-[#7eea9b] to-[#7ec4e3]",
+    gradient: "from-[#7eea9b]/20 via-[#a78bfa]/10 to-transparent",
+    iconGradient: "from-[#7eea9b] to-[#a78bfa]",
     size: "sm",
   },
   {
@@ -72,8 +72,8 @@ const features: BentoFeature[] = [
     title: "Real-time Sync",
     description:
       "Instant sync across all devices. Connect with Gmail, Outlook, Slack, Zapier, and 50+ tools seamlessly.",
-    gradient: "from-[#7ec4e3]/20 via-[#7eea9b]/10 to-transparent",
-    iconGradient: "from-[#7ec4e3] to-[#7eea9b]",
+    gradient: "from-[#a78bfa]/20 via-[#7eea9b]/10 to-transparent",
+    iconGradient: "from-[#a78bfa] to-[#7eea9b]",
     size: "lg",
   },
 ];
@@ -133,7 +133,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
       <motion.div
         className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(400px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.12), rgba(126,196,227,0.06), transparent 60%)`,
+          background: `radial-gradient(400px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.12), rgba(167,139,250,0.06), transparent 60%)`,
         }}
       />
 
@@ -145,7 +145,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
       {/* Hover glow border effect */}
       <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: "linear-gradient(135deg, rgba(126,196,227,0.1) 0%, rgba(167,139,250,0.05) 50%, rgba(244,114,182,0.1) 100%)",
+          background: "linear-gradient(135deg, rgba(167,139,250,0.1) 0%, rgba(167,139,250,0.05) 50%, rgba(244,114,182,0.1) 100%)",
         }}
       />
 
@@ -224,7 +224,7 @@ export function FeaturesSection() {
         <div
           className="absolute bottom-[10%] right-[10%] h-[500px] w-[500px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(126,196,227,0.05) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
@@ -246,7 +246,7 @@ export function FeaturesSection() {
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             Everything you need to
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
               close more deals
             </span>
           </h2>

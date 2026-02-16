@@ -29,7 +29,7 @@ const plans: PlanCard[] = [
     cta: "Get Started",
     ctaHref: "/sign-up",
     icon: Sparkles,
-    gradient: "from-[#7ec4e3] to-[#a78bfa]",
+    gradient: "from-[#a78bfa] to-[#a78bfa]",
     features: [
       "50K AI tokens / month",
       "10K tokens / week",
@@ -101,7 +101,7 @@ const plans: PlanCard[] = [
     cta: "Contact Sales",
     ctaHref: "mailto:sales@nexxuscrm.com",
     icon: Building2,
-    gradient: "from-[#7eea9b] to-[#7ec4e3]",
+    gradient: "from-[#7eea9b] to-[#a78bfa]",
     inheritLabel: "Everything from Max, plus:",
     features: [
       "Unlimited AI tokens (credit-based)",
@@ -174,7 +174,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       {plan.popular && (
         <div className="absolute inset-0 rounded-3xl landing-gradient-border p-px pointer-events-none"
           style={{
-            background: "linear-gradient(135deg, #7ec4e3, #a78bfa, #f472b6, #7eea9b, #7ec4e3)",
+            background: "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #7eea9b, #a78bfa)",
             backgroundSize: "400% 400%",
             mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
             WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -285,7 +285,7 @@ export function PricingSection() {
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             Choose your
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
               perfect plan
             </span>
           </h1>
@@ -323,7 +323,7 @@ export function PricingSection() {
         filter: "blur(80px)",
       }} />
       <div className="pointer-events-none absolute -bottom-32 -left-32 h-[400px] w-[400px] rounded-full" style={{
-        background: "radial-gradient(circle, rgba(126,196,227,0.05) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%)",
         filter: "blur(80px)",
       }} />
     </section>

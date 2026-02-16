@@ -19,8 +19,8 @@ const stats: StatItem[] = [
     suffix: "x",
     label: "More Deals Closed",
     description: "Teams using Nexxus CRM close 3x more deals on average",
-    gradient: "from-[#7ec4e3] to-[#a78bfa]",
-    gradientColors: ["#7ec4e3", "#a78bfa"],
+    gradient: "from-[#a78bfa] to-[#a78bfa]",
+    gradientColors: ["#a78bfa", "#a78bfa"],
     progress: 95,
   },
   {
@@ -46,8 +46,8 @@ const stats: StatItem[] = [
     suffix: "K+",
     label: "Teams Trust Us",
     description: "Growing businesses worldwide choose Nexxus CRM",
-    gradient: "from-[#7eea9b] to-[#7ec4e3]",
-    gradientColors: ["#7eea9b", "#7ec4e3"],
+    gradient: "from-[#7eea9b] to-[#a78bfa]",
+    gradientColors: ["#7eea9b", "#a78bfa"],
     progress: 88,
   },
 ];
@@ -241,7 +241,7 @@ export function StatsSection() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[1000px] rounded-full"
           style={{
             background:
-              "radial-gradient(ellipse, rgba(126,196,227,0.08) 0%, rgba(167,139,250,0.04) 40%, transparent 70%)",
+              "radial-gradient(ellipse, rgba(167,139,250,0.08) 0%, rgba(167,139,250,0.04) 40%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
@@ -270,7 +270,7 @@ export function StatsSection() {
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             The numbers speak
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#7eea9b] via-[#7ec4e3] to-[#a78bfa] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-[#7eea9b] via-[#a78bfa] to-[#a78bfa] bg-clip-text text-transparent">
               for themselves
             </span>
           </h2>

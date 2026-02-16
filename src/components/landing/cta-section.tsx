@@ -19,7 +19,7 @@ function AuroraBackground() {
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         className="absolute -top-[40%] -left-[20%] h-[600px] w-[800px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(167,139,250,0.25) 0%, rgba(126,196,227,0.1) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(167,139,250,0.25) 0%, rgba(167,139,250,0.1) 40%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -32,7 +32,7 @@ function AuroraBackground() {
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }}
         className="absolute -bottom-[30%] -right-[15%] h-[500px] w-[700px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(126,196,227,0.2) 0%, rgba(244,114,182,0.08) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(167,139,250,0.2) 0%, rgba(244,114,182,0.08) 40%, transparent 70%)",
           filter: "blur(100px)",
         }}
       />
@@ -72,10 +72,10 @@ function CTAGradientMesh() {
       <motion.div
         animate={{
           background: [
-            "radial-gradient(at 10% 20%, rgba(126,196,227,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
-            "radial-gradient(at 50% 80%, rgba(126,196,227,0.10) 0%, transparent 50%), radial-gradient(at 20% 30%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 80% 20%, rgba(126,234,155,0.08) 0%, transparent 50%)",
-            "radial-gradient(at 80% 40%, rgba(244,114,182,0.10) 0%, transparent 50%), radial-gradient(at 30% 70%, rgba(126,196,227,0.12) 0%, transparent 50%), radial-gradient(at 60% 10%, rgba(167,139,250,0.08) 0%, transparent 50%)",
-            "radial-gradient(at 10% 20%, rgba(126,196,227,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 10% 20%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 50% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 20% 30%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 80% 20%, rgba(126,234,155,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 80% 40%, rgba(244,114,182,0.10) 0%, transparent 50%), radial-gradient(at 30% 70%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 60% 10%, rgba(167,139,250,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 10% 20%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
@@ -236,7 +236,7 @@ export function CTASection() {
             className="absolute inset-0 rounded-[2rem] landing-gradient-border"
             style={{
               background:
-                "linear-gradient(135deg, #7ec4e3, #a78bfa, #f472b6, #7eea9b, #7ec4e3)",
+                "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #7eea9b, #a78bfa)",
               backgroundSize: "400% 400%",
             }}
           />
@@ -279,7 +279,7 @@ export function CTASection() {
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground mb-6">
                 Ready to supercharge
                 <br className="hidden sm:block" />
-                <span className="landing-gradient-text bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+                <span className="landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
                   {" "}your sales?
                 </span>
               </h2>
@@ -298,7 +298,7 @@ export function CTASection() {
                 >
                   <Link
                     href="/sign-up"
-                    className="landing-pulse-button group relative inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] text-white shadow-2xl shadow-purple-500/25 transition-shadow hover:shadow-purple-500/40"
+                    className="landing-pulse-button group relative inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] text-white shadow-2xl shadow-purple-500/25 transition-shadow hover:shadow-purple-500/40"
                   >
                     Get Started Free
                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
