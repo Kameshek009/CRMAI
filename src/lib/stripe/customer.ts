@@ -173,8 +173,9 @@ export async function getCustomerBillingInfo(
     });
 
     let subscription: SubscriptionInfo | null = null;
-    if (subscriptionsResponse.data.length > 0) {
-      const sub = subscriptionsResponse.data[0] as any; // Use any to access raw Stripe properties
+    const firstSubscription = subscriptionsResponse.data[0];
+    if (firstSubscription) {
+      const sub = firstSubscription as any; // Use any to access raw Stripe properties
       const priceId = sub.items?.data?.[0]?.price?.id || "";
 
       subscription = {

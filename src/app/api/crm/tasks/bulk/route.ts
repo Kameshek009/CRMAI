@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
         .from("crm_tasks")
         .update({ is_deleted: true })
         .in("id", ids)
+        .eq("account_id", context.accountId)
         .eq("team_id", context.teamId);
 
       if (dbError) {
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
         .from("crm_tasks")
         .update(updateData)
         .in("id", ids)
+        .eq("account_id", context.accountId)
         .eq("team_id", context.teamId);
 
       if (dbError) {
@@ -61,7 +63,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/tasks/bulk POST]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

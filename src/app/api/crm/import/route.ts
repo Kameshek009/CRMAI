@@ -62,6 +62,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const invalidEmails: string[] = [];
+    for (const c of contacts) {
+      if (c.email && !emailRegex.test(c.email)) {
+        invalidEmails.push(c.email);
+      }
+    }
+    if (invalidEmails.length > 0) {
+      return NextResponse.json(
+        { success: false, error: `Invalid email format: ${invalidEmails.slice(0, 5).join(", ")}${invalidEmails.length > 5 ? ` and ${invalidEmails.length - 5} more` : ""}` },
+        { status: 400 }
+      );
+    }
+
     // Insert contacts
     const contactRows = contacts.map((c) => ({
       account_id: context.accountId,
@@ -85,13 +100,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Log activity
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      type: "import",
-      title: `Imported ${imported?.length || 0} contacts`,
-      metadata: { count: imported?.length || 0, companies: companyNames.length },
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        type: "import",
+        title: `Imported ${imported?.length || 0} contacts`,
+        metadata: { count: imported?.length || 0, companies: companyNames.length },
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({
       success: true,
@@ -100,7 +117,8 @@ export async function POST(request: NextRequest) {
         companies: companyNames.length,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/import POST]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

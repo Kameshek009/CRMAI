@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/contacts/bulk POST]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       .from("crm_activities")
       .select("*", { count: "exact" })
       .eq("team_id", context.teamId)
+      .eq("is_deleted", false)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -38,7 +39,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/activities GET]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -69,7 +71,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/activities POST]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

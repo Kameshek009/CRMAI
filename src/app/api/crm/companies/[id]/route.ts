@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateCompanySchema } from "@/lib/crm/validation";
+import { isValidUUID } from "@/lib/crm/helpers";
 
 export async function GET(
   request: NextRequest,
@@ -15,6 +16,9 @@ export async function GET(
     if (permError) return permError;
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
+    }
     const supabase = createSupabaseAdmin();
 
     const [companyResult, contactCountResult, dealCountResult] = await Promise.all([
@@ -51,7 +55,8 @@ export async function GET(
         deal_count: dealCountResult.count || 0,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/companies/[id] GET]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -68,6 +73,9 @@ export async function PATCH(
     if (permError) return permError;
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
+    }
     const body = await request.json();
     const parsed = updateCompanySchema.safeParse(body);
     if (!parsed.success) {
@@ -87,16 +95,19 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Company not found" }, { status: 404 });
     }
 
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      company_id: id,
-      type: "company_updated",
-      title: `Company updated: ${data.name}`,
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        company_id: id,
+        type: "company_updated",
+        title: `Company updated: ${data.name}`,
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/companies/[id] PATCH]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -113,6 +124,9 @@ export async function DELETE(
     if (permError) return permError;
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
+    }
     const supabase = createSupabaseAdmin();
 
     const { data: existing } = await supabase
@@ -132,16 +146,19 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
 
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      company_id: id,
-      type: "company_deleted",
-      title: `Company deleted: ${existing?.name || "Unknown"}`,
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        company_id: id,
+        type: "company_deleted",
+        title: `Company deleted: ${existing?.name || "Unknown"}`,
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/companies/[id] DELETE]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

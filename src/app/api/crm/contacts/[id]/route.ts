@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateContactSchema } from "@/lib/crm/validation";
+import { isValidUUID } from "@/lib/crm/helpers";
 
 export async function GET(
   request: NextRequest,
@@ -15,6 +16,9 @@ export async function GET(
     if (permError) return permError;
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
+    }
     const supabase = createSupabaseAdmin();
 
     const { data, error: dbError } = await supabase
@@ -30,7 +34,8 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/contacts/[id] GET]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -47,6 +52,9 @@ export async function PATCH(
     if (permError) return permError;
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
+    }
     const body = await request.json();
     const parsed = updateContactSchema.safeParse(body);
     if (!parsed.success) {
@@ -66,16 +74,19 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Contact not found" }, { status: 404 });
     }
 
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      contact_id: id,
-      type: "contact_updated",
-      title: `Contact updated: ${data.first_name} ${data.last_name || ""}`.trim(),
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        contact_id: id,
+        type: "contact_updated",
+        title: `Contact updated: ${data.first_name} ${data.last_name || ""}`.trim(),
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/contacts/[id] PATCH]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -92,6 +103,9 @@ export async function DELETE(
     if (permError) return permError;
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
+    }
     const supabase = createSupabaseAdmin();
 
     const { data: existing } = await supabase
@@ -111,16 +125,19 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
 
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      contact_id: id,
-      type: "contact_deleted",
-      title: `Contact deleted: ${existing?.first_name || ""} ${existing?.last_name || ""}`.trim(),
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        contact_id: id,
+        type: "contact_deleted",
+        title: `Contact deleted: ${existing?.first_name || ""} ${existing?.last_name || ""}`.trim(),
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/contacts/[id] DELETE]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

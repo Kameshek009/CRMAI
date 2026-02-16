@@ -25,6 +25,9 @@ const PING_INTERVAL_MS = 15 * 1000;
 // Poll for new messages every 2 seconds (fast enough for real-time feel)
 const MESSAGE_POLL_INTERVAL_MS = 2 * 1000;
 
+// Maximum SSE connection duration (5 minutes) to prevent unbounded streams
+const MAX_CONNECTION_DURATION_MS = 5 * 60 * 1000;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -35,7 +38,7 @@ export async function GET(
   const { userId } = await auth();
 
   if (!userId) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
@@ -51,7 +54,7 @@ export async function GET(
     .single();
 
   if (accountError || !account) {
-    return new Response(JSON.stringify({ error: "Account not found" }), {
+    return new Response(JSON.stringify({ success: false, error: "Account not found" }), {
       status: 404,
       headers: { "Content-Type": "application/json" },
     });
@@ -66,7 +69,7 @@ export async function GET(
     .single();
 
   if (chatError || !chat) {
-    return new Response(JSON.stringify({ error: "Chat not found" }), {
+    return new Response(JSON.stringify({ success: false, error: "Chat not found" }), {
       status: 404,
       headers: { "Content-Type": "application/json" },
     });
@@ -93,6 +96,8 @@ export async function GET(
   let isConnected = true;
   let pingInterval: NodeJS.Timeout | null = null;
   let pollInterval: NodeJS.Timeout | null = null;
+  let timeoutTimer: NodeJS.Timeout | null = null;
+  const connectionStartTime = Date.now();
 
   const stream = new ReadableStream({
     start(controller) {
@@ -110,10 +115,34 @@ export async function GET(
       };
 
       /**
+       * Close the stream and clean up all intervals/timers
+       */
+      const closeStream = (reason: string) => {
+        if (!isConnected) return;
+        isConnected = false;
+        if (pingInterval) clearInterval(pingInterval);
+        if (pollInterval) clearInterval(pollInterval);
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+        try {
+          const msg = `event: disconnected\ndata: ${JSON.stringify({ reason })}\n\n`;
+          controller.enqueue(encoder.encode(msg));
+          controller.close();
+        } catch {
+          // Stream may already be closed
+        }
+      };
+
+      /**
        * Poll for new messages
        */
       const pollMessages = async () => {
         if (!isConnected) return;
+
+        // Check if max connection duration has been exceeded
+        if (Date.now() - connectionStartTime >= MAX_CONNECTION_DURATION_MS) {
+          closeStream("max_duration_exceeded");
+          return;
+        }
 
         try {
           // Query for messages newer than last seen
@@ -168,16 +197,14 @@ export async function GET(
       // Start message polling
       pollInterval = setInterval(pollMessages, MESSAGE_POLL_INTERVAL_MS);
 
+      // Set a hard timeout to close the stream after max duration
+      timeoutTimer = setTimeout(() => {
+        closeStream("max_duration_exceeded");
+      }, MAX_CONNECTION_DURATION_MS);
+
       // Handle client disconnect
       request.signal.addEventListener("abort", () => {
-        isConnected = false;
-        if (pingInterval) clearInterval(pingInterval);
-        if (pollInterval) clearInterval(pollInterval);
-        try {
-          controller.close();
-        } catch {
-          // Already closed
-        }
+        closeStream("client_disconnected");
       });
     },
 
@@ -185,6 +212,7 @@ export async function GET(
       isConnected = false;
       if (pingInterval) clearInterval(pingInterval);
       if (pollInterval) clearInterval(pollInterval);
+      if (timeoutTimer) clearTimeout(timeoutTimer);
     },
   });
 

@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/notes GET]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -71,19 +72,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Log activity
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      contact_id: parsed.data.contact_id || null,
-      deal_id: parsed.data.deal_id || null,
-      company_id: parsed.data.company_id || null,
-      type: "note",
-      title: "Note added",
-      description: parsed.data.content.slice(0, 200),
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        contact_id: parsed.data.contact_id || null,
+        deal_id: parsed.data.deal_id || null,
+        company_id: parsed.data.company_id || null,
+        type: "note",
+        title: "Note added",
+        description: parsed.data.content.slice(0, 200),
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/notes POST]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

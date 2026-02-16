@@ -60,7 +60,8 @@ export async function GET() {
         openDealsCount: openColumns.reduce((sum, c) => sum + c.count, 0),
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/pipeline GET]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -91,7 +92,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/pipeline POST]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -122,7 +124,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/pipeline PATCH]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

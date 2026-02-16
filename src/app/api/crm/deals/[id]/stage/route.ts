@@ -23,12 +23,13 @@ export async function PATCH(
 
     const supabase = createSupabaseAdmin();
 
-    // Get current deal
+    // Get current deal (only if not soft-deleted)
     const { data: deal } = await supabase
       .from("deals")
       .select("id, title, stage_id, value")
       .eq("id", id)
       .eq("team_id", context.teamId)
+      .eq("is_deleted", false)
       .single();
 
     if (!deal) {
@@ -71,21 +72,24 @@ export async function PATCH(
     }
 
     // Log activity
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      deal_id: id,
-      type: newStage.is_won ? "deal_won" : newStage.is_lost ? "deal_lost" : "deal_stage_changed",
-      title: `Deal "${deal.title}" moved to ${newStage.name}`,
-      metadata: {
-        from_stage_id: deal.stage_id,
-        to_stage_id: newStage.id,
-        value: deal.value,
-      },
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        deal_id: id,
+        type: newStage.is_won ? "deal_won" : newStage.is_lost ? "deal_lost" : "deal_stage_changed",
+        title: `Deal "${deal.title}" moved to ${newStage.name}`,
+        metadata: {
+          from_stage_id: deal.stage_id,
+          to_stage_id: newStage.id,
+          value: deal.value,
+        },
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({ success: true, data: updated });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/deals/[id]/stage PATCH]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

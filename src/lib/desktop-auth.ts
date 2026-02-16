@@ -10,7 +10,24 @@ import jwt from "jsonwebtoken";
 import { createSupabaseAdmin } from "./supabase/server";
 
 // Configuration
-const JWT_SECRET = process.env.DESKTOP_JWT_SECRET || process.env.CLERK_SECRET_KEY!;
+// Validate JWT secret: prefer DESKTOP_JWT_SECRET, fall back to CLERK_SECRET_KEY
+const DESKTOP_SECRET = process.env.DESKTOP_JWT_SECRET;
+const CLERK_SECRET = process.env.CLERK_SECRET_KEY;
+
+if (!DESKTOP_SECRET) {
+  console.warn(
+    "[desktop-auth] DESKTOP_JWT_SECRET is not set. Falling back to CLERK_SECRET_KEY for JWT signing. " +
+    "Set DESKTOP_JWT_SECRET in production for better security isolation."
+  );
+}
+
+const JWT_SECRET: string = DESKTOP_SECRET || CLERK_SECRET || "";
+if (!JWT_SECRET) {
+  console.error(
+    "[desktop-auth] Neither DESKTOP_JWT_SECRET nor CLERK_SECRET_KEY is set. " +
+    "Desktop authentication will not work."
+  );
+}
 const ACCESS_TOKEN_EXPIRY = parseInt(process.env.DESKTOP_TOKEN_EXPIRY || "3600"); // 1 hour default
 const REFRESH_TOKEN_EXPIRY_DAYS = 365; // 1 year
 const AUTH_CODE_EXPIRY_MINUTES = 5;
@@ -68,22 +85,21 @@ export async function validateAuthCode(
 ): Promise<{ clerkUserId: string; deviceName?: string; deviceId?: string } | null> {
   const supabase = createSupabaseAdmin();
 
-  // Find the auth code
+  // Atomically mark as used and return the auth code in one operation
+  // This prevents race conditions where two requests could validate the same code
   const { data: authCode, error } = await supabase
     .from("desktop_auth_codes")
-    .select("*")
+    .update({ used: true })
     .eq("code", code)
     .eq("used", false)
     .gt("expires_at", new Date().toISOString())
+    .select()
     .single();
 
   if (error || !authCode) {
-    console.log("Auth code not found or expired:", error?.message);
+    console.log("Auth code not found, expired, or already used:", error?.message);
     return null;
   }
-
-  // Mark as used
-  await supabase.from("desktop_auth_codes").update({ used: true }).eq("id", authCode.id);
 
   return {
     clerkUserId: authCode.clerk_user_id,

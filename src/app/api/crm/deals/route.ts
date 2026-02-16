@@ -42,7 +42,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/deals GET]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -73,19 +74,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Log activity
-    await supabase.from("crm_activities").insert({
-      account_id: context.accountId,
-      team_id: context.teamId,
-      deal_id: data.id,
-      contact_id: data.contact_id,
-      company_id: data.company_id,
-      type: "deal_created",
-      title: `Deal created: ${data.title}`,
-      metadata: { value: data.value },
-    });
+    try {
+      await supabase.from("crm_activities").insert({
+        account_id: context.accountId,
+        team_id: context.teamId,
+        deal_id: data.id,
+        contact_id: data.contact_id,
+        company_id: data.company_id,
+        type: "deal_created",
+        title: `Deal created: ${data.title}`,
+        metadata: { value: data.value },
+      });
+    } catch { /* activity logging is non-critical */ }
 
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("[API crm/deals POST]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
