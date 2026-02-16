@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { ChevronDown, CheckSquare, BarChart2, LayoutGrid, Calendar, MessageCircle, Phone, Inbox, Film, FileText, Layout, BookOpen, ClipboardList, Clock, Zap, Timer, Grid3X3, Link2, Download, Play, BookMarked, HelpCircle, GraduationCap, Video, Menu, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggleSlider } from "./theme-toggle-slider";
@@ -138,7 +138,7 @@ function MegaDropdown({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ type: "spring", stiffness: 400, damping: 35 }}
-            className="absolute left-0 top-full mt-1 w-[max(90vw,640px)] max-w-[880px] rounded-2xl border border-border bg-card p-6 shadow-xl z-50"
+            className="absolute left-0 top-full mt-1 w-[max(90vw,640px)] max-w-[880px] rounded-2xl border border-white/10 bg-background/90 dark:bg-[#0a0b14]/90 backdrop-blur-2xl p-6 shadow-2xl shadow-black/10 z-50"
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-6">
               {columns.map((col, colIndex) => (
@@ -248,6 +248,13 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 export function PublicAuthHeader() {
   const [openDropdown, setOpenDropdown] = useState<"product" | "learn" | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
@@ -255,7 +262,11 @@ export function PublicAuthHeader() {
         initial={{ y: -24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="sticky top-0 z-50 flex items-center justify-between h-12 sm:h-16 px-3 sm:px-6 lg:pl-10 bg-background/95 backdrop-blur-md border-b border-border"
+        className={`sticky top-0 z-50 flex items-center justify-between h-12 sm:h-16 px-3 sm:px-6 lg:pl-10 transition-all duration-300 ${
+          scrolled
+            ? "bg-background/80 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/5"
+            : "bg-background/50 backdrop-blur-md border-b border-transparent"
+        }`}
       >
         <div className="flex items-center gap-1">
           <NexusBrandHeader />
@@ -303,13 +314,13 @@ export function PublicAuthHeader() {
           >
             <Link
               href="/sign-in"
-              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium border-2 border-foreground bg-background text-foreground hover:bg-muted transition-all duration-200"
+              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium border border-white/15 bg-white/5 text-foreground hover:bg-white/10 backdrop-blur-xl transition-all duration-200"
             >
               Sign in
             </Link>
             <Link
               href="/sign-up"
-              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-foreground text-background hover:opacity-90 transition-all duration-200 shadow-sm"
+              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] text-white hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-200"
             >
               Get started
             </Link>
