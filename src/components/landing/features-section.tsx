@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import {
   Brain,
   GitBranch,
@@ -78,26 +78,38 @@ const features: BentoFeature[] = [
   },
 ];
 
-/* ---------- mouse-following glow card ---------- */
+/* ---------- mouse-following glow card with 3D tilt ---------- */
 function BentoCard({ feature, index }: { feature: BentoFeature; index: number }) {
   const Icon = feature.icon;
   const cardRef = useRef<HTMLDivElement>(null);
   const glowX = useMotionValue(0);
   const glowY = useMotionValue(0);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
   const smoothGlowX = useSpring(glowX, { stiffness: 200, damping: 30 });
   const smoothGlowY = useSpring(glowY, { stiffness: 200, damping: 30 });
+  const rotateX = useSpring(useTransform(mouseY, [-200, 200], [6, -6]), { stiffness: 200, damping: 25 });
+  const rotateY = useSpring(useTransform(mouseX, [-200, 200], [-6, 6]), { stiffness: 200, damping: 25 });
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     glowX.set(e.clientX - rect.left);
     glowY.set(e.clientY - rect.top);
-  }, [glowX, glowY]);
+    mouseX.set(e.clientX - rect.left - rect.width / 2);
+    mouseY.set(e.clientY - rect.top - rect.height / 2);
+  }, [glowX, glowY, mouseX, mouseY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(0);
+    mouseY.set(0);
+  }, [mouseX, mouseY]);
 
   return (
     <motion.div
       ref={cardRef}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -107,6 +119,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
         stiffness: 150,
         damping: 22,
       }}
+      style={{ rotateX, rotateY, transformPerspective: 1000 }}
       whileHover={{ y: -6, scale: 1.02 }}
       className={`landing-glass-card group relative overflow-hidden rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-8 transition-all duration-300 hover:border-white/20 dark:hover:border-white/20 hover:shadow-2xl hover:shadow-purple-500/10 ${
         feature.size === "lg"

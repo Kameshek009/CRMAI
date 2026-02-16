@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { motion, useMotionValue, useTransform, animate, useInView, useSpring } from "framer-motion";
 
 interface StatItem {
   value: number;
@@ -144,6 +143,88 @@ function ProgressRing({
   );
 }
 
+/* ---------- 3D tilt stat card ---------- */
+function StatCard({ stat, index, inView }: { stat: StatItem; index: number; inView: boolean }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const glowX = useMotionValue(0);
+  const glowY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-150, 150], [8, -8]), { stiffness: 200, damping: 25 });
+  const rotateY = useSpring(useTransform(mouseX, [-150, 150], [-8, 8]), { stiffness: 200, damping: 25 });
+  const smoothGlowX = useSpring(glowX, { stiffness: 200, damping: 30 });
+  const smoothGlowY = useSpring(glowY, { stiffness: 200, damping: 30 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left - rect.width / 2);
+    mouseY.set(e.clientY - rect.top - rect.height / 2);
+    glowX.set(e.clientX - rect.left);
+    glowY.set(e.clientY - rect.top);
+  }, [mouseX, mouseY, glowX, glowY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(0);
+    mouseY.set(0);
+  }, [mouseX, mouseY]);
+
+  return (
+    <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{
+        delay: index * 0.12,
+        type: "spring",
+        stiffness: 150,
+        damping: 22,
+      }}
+      style={{ rotateX, rotateY, transformPerspective: 800 }}
+      whileHover={{ y: -6, scale: 1.03 }}
+      className="group relative text-center p-8 sm:p-10 rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.02] dark:bg-white/[0.02] backdrop-blur-xl hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/5"
+    >
+      {/* Mouse-following glow */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(250px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.10), transparent 60%)`,
+        }}
+      />
+
+      {/* Background glow */}
+      <div
+        className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
+      />
+
+      {/* Progress ring behind number */}
+      <div className="relative inline-flex items-center justify-center w-[100px] h-[100px] mx-auto mb-2">
+        <ProgressRing
+          progress={stat.progress}
+          gradientColors={stat.gradientColors}
+          inView={inView}
+          index={index}
+        />
+        <AnimatedStatNumber
+          value={stat.value}
+          suffix={stat.suffix}
+          gradient={stat.gradient}
+          inView={inView}
+        />
+      </div>
+
+      <h3 className="mt-4 text-base sm:text-lg font-semibold text-foreground relative z-10">
+        {stat.label}
+      </h3>
+      <p className="mt-2 text-sm text-muted-foreground leading-relaxed relative z-10">
+        {stat.description}
+      </p>
+    </motion.div>
+  );
+}
+
 export function StatsSection() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -198,46 +279,7 @@ export function StatsSection() {
         {/* Stats grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 40, scale: 0.95 }}
-              animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{
-                delay: i * 0.12,
-                type: "spring",
-                stiffness: 150,
-                damping: 22,
-              }}
-              className="group relative text-center p-8 sm:p-10 rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.02] dark:bg-white/[0.02] backdrop-blur-xl hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/5"
-            >
-              {/* Background glow */}
-              <div
-                className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
-              />
-
-              {/* Progress ring behind number */}
-              <div className="relative inline-flex items-center justify-center w-[100px] h-[100px] mx-auto mb-2">
-                <ProgressRing
-                  progress={stat.progress}
-                  gradientColors={stat.gradientColors}
-                  inView={inView}
-                  index={i}
-                />
-                <AnimatedStatNumber
-                  value={stat.value}
-                  suffix={stat.suffix}
-                  gradient={stat.gradient}
-                  inView={inView}
-                />
-              </div>
-
-              <h3 className="mt-4 text-base sm:text-lg font-semibold text-foreground">
-                {stat.label}
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                {stat.description}
-              </p>
-            </motion.div>
+            <StatCard key={stat.label} stat={stat} index={i} inView={inView} />
           ))}
         </div>
       </div>

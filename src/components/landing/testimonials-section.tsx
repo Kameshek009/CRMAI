@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { useRef, useCallback } from "react";
+import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 
 const testimonials = [
@@ -80,8 +80,46 @@ const testimonials = [
 ];
 
 function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-150, 150], [5, -5]), { stiffness: 200, damping: 25 });
+  const rotateY = useSpring(useTransform(mouseX, [-150, 150], [-5, 5]), { stiffness: 200, damping: 25 });
+  const glowX = useMotionValue(0);
+  const glowY = useMotionValue(0);
+  const smoothGlowX = useSpring(glowX, { stiffness: 200, damping: 30 });
+  const smoothGlowY = useSpring(glowY, { stiffness: 200, damping: 30 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left - rect.width / 2);
+    mouseY.set(e.clientY - rect.top - rect.height / 2);
+    glowX.set(e.clientX - rect.left);
+    glowY.set(e.clientY - rect.top);
+  }, [mouseX, mouseY, glowX, glowY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(0);
+    mouseY.set(0);
+  }, [mouseX, mouseY]);
+
   return (
-    <div className="group relative flex-shrink-0 w-[340px] sm:w-[380px] rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-7 hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/5">
+    <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ rotateX, rotateY, transformPerspective: 800 }}
+      className="group relative flex-shrink-0 w-[340px] sm:w-[380px] rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-7 hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/5"
+    >
+      {/* Mouse-following glow */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(300px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.10), transparent 60%)`,
+        }}
+      />
+
       {/* Background glow on hover */}
       <div
         className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${t.gradient} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500`}
@@ -91,19 +129,19 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
       <Quote className="absolute top-5 right-5 w-8 h-8 text-white/5 group-hover:text-[#a78bfa]/10 transition-colors duration-300" />
 
       {/* Stars */}
-      <div className="flex gap-0.5 mb-4">
+      <div className="flex gap-0.5 mb-4 relative z-10">
         {[...Array(t.stars)].map((_, si) => (
           <Star key={si} className="w-4 h-4 fill-amber-400 text-amber-400" />
         ))}
       </div>
 
       {/* Text */}
-      <p className="text-sm sm:text-base text-foreground/90 leading-relaxed mb-6">
+      <p className="text-sm sm:text-base text-foreground/90 leading-relaxed mb-6 relative z-10">
         &ldquo;{t.text}&rdquo;
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-5 border-t border-white/10 dark:border-white/10">
+      <div className="flex items-center gap-3 pt-5 border-t border-white/10 dark:border-white/10 relative z-10">
         <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-lg`}>
           {t.avatar}
         </div>
@@ -114,7 +152,7 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

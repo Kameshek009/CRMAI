@@ -785,6 +785,67 @@ body {
   background-size: 200% 100%;
 }
 
+/* Magnetic card hover with depth */
+.landing-magnetic-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Holographic shimmer effect */
+@keyframes holoShimmer {
+  0% { background-position: -200% -200%; }
+  100% { background-position: 200% 200%; }
+}
+
+.landing-holo-shimmer {
+  background: linear-gradient(
+    135deg,
+    transparent 20%,
+    rgba(167, 139, 250, 0.08) 30%,
+    rgba(126, 196, 227, 0.08) 40%,
+    transparent 50%
+  );
+  background-size: 300% 300%;
+  animation: holoShimmer 8s ease-in-out infinite;
+}
+
+/* Breathing glow ring */
+@keyframes breatheGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); opacity: 0.5; }
+  50% { box-shadow: 0 0 40px 8px rgba(167, 139, 250, 0.12); opacity: 1; }
+}
+
+.landing-breathe-glow {
+  animation: breatheGlow 4s ease-in-out infinite;
+}
+
+/* Text gradient underline reveal */
+@keyframes underlineReveal {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.landing-underline-reveal::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #7ec4e3, #a78bfa, #f472b6);
+  animation: underlineReveal 0.8s ease-out forwards;
+}
+
+/* Floating badge pulse */
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.landing-badge-pulse:hover {
+  animation: badgePulse 0.6s ease-in-out;
+}
+
 /* ============================================================================
    PREMIUM DARK MODE ENHANCEMENTS
    ============================================================================ */

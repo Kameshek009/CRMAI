@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Clock, Users, Zap } from "lucide-react";
 
 /* ---------- aurora background ---------- */
 function AuroraBackground() {
@@ -62,6 +62,106 @@ function AuroraBackground() {
         }}
       />
     </div>
+  );
+}
+
+/* ---------- animated gradient mesh for CTA ---------- */
+function CTAGradientMesh() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <motion.div
+        animate={{
+          background: [
+            "radial-gradient(at 10% 20%, rgba(126,196,227,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 50% 80%, rgba(126,196,227,0.10) 0%, transparent 50%), radial-gradient(at 20% 30%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 80% 20%, rgba(126,234,155,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 80% 40%, rgba(244,114,182,0.10) 0%, transparent 50%), radial-gradient(at 30% 70%, rgba(126,196,227,0.12) 0%, transparent 50%), radial-gradient(at 60% 10%, rgba(167,139,250,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 10% 20%, rgba(126,196,227,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
+          ],
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0"
+      />
+    </div>
+  );
+}
+
+/* ---------- urgency countdown ---------- */
+function UrgencyCountdown() {
+  const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 59, seconds: 59 });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        let { hours, minutes, seconds } = prev;
+        seconds--;
+        if (seconds < 0) { seconds = 59; minutes--; }
+        if (minutes < 0) { minutes = 59; hours--; }
+        if (hours < 0) { hours = 23; minutes = 59; seconds = 59; }
+        return { hours, minutes, seconds };
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="flex items-center justify-center gap-3 mb-8"
+    >
+      <div className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-2 backdrop-blur-xl">
+        <Clock className="w-3.5 h-3.5 text-amber-400" />
+        <span className="text-xs font-semibold text-amber-400">Limited offer ends in:</span>
+        <div className="flex items-center gap-1 font-mono text-sm font-bold text-foreground">
+          <span className="bg-white/10 rounded-md px-1.5 py-0.5">{pad(timeLeft.hours)}</span>
+          <span className="text-amber-400">:</span>
+          <span className="bg-white/10 rounded-md px-1.5 py-0.5">{pad(timeLeft.minutes)}</span>
+          <span className="text-amber-400">:</span>
+          <span className="bg-white/10 rounded-md px-1.5 py-0.5">{pad(timeLeft.seconds)}</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ---------- live counter ---------- */
+function LiveCounter() {
+  const [count, setCount] = useState(10847);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCount((prev) => prev + Math.floor(Math.random() * 3));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.8 }}
+      className="flex items-center justify-center gap-6 sm:gap-8 mt-8"
+    >
+      <div className="flex items-center gap-2">
+        <div className="relative flex items-center">
+          <span className="absolute inline-flex h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+        </div>
+        <span className="text-sm font-medium text-foreground">{count.toLocaleString()}</span>
+        <span className="text-sm text-muted-foreground">teams signed up</span>
+      </div>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Users className="w-3.5 h-3.5" />
+        <span>47 joined today</span>
+      </div>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Zap className="w-3.5 h-3.5 text-amber-400" />
+        <span>Free forever</span>
+      </div>
+    </motion.div>
   );
 }
 
@@ -137,8 +237,9 @@ export function CTASection() {
 
           {/* Inner card */}
           <div className="relative rounded-[calc(2rem-4px)] bg-background/95 dark:bg-[#0a0a0a]/95 backdrop-blur-xl p-10 sm:p-16 md:p-20 text-center overflow-hidden">
-            {/* Aurora background */}
+            {/* Aurora + gradient mesh background */}
             <AuroraBackground />
+            <CTAGradientMesh />
             <FloatingParticles />
 
             {/* Grid pattern */}
@@ -164,6 +265,9 @@ export function CTASection() {
                 <Sparkles className="w-3.5 h-3.5" />
                 Start for free today
               </div>
+
+              {/* Urgency countdown */}
+              <UrgencyCountdown />
 
               {/* Heading */}
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground mb-6">
@@ -213,15 +317,27 @@ export function CTASection() {
                 initial={{ opacity: 0 }}
                 animate={inView ? { opacity: 1 } : {}}
                 transition={{ delay: 0.5 }}
-                className="mt-10 flex items-center justify-center gap-6 sm:gap-8 text-xs text-muted-foreground/60"
+                className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground/60"
               >
-                {["No credit card", "Free forever", "Setup in 2 min", "Cancel anytime"].map((text, i) => (
-                  <span key={i} className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500/60" />
-                    {text}
-                  </span>
+                {[
+                  { text: "No credit card", icon: "💳" },
+                  { text: "Free forever", icon: "✨" },
+                  { text: "Setup in 2 min", icon: "⚡" },
+                  { text: "Cancel anytime", icon: "🔓" },
+                ].map((item, i) => (
+                  <motion.span
+                    key={i}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl cursor-default"
+                  >
+                    <span>{item.icon}</span>
+                    <span className="font-medium">{item.text}</span>
+                  </motion.span>
                 ))}
               </motion.div>
+
+              {/* Live counter */}
+              <LiveCounter />
             </motion.div>
           </div>
         </div>

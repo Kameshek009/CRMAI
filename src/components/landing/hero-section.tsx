@@ -88,6 +88,62 @@ function GridPattern() {
   );
 }
 
+/* ---------- animated beam rays ---------- */
+function BeamRays() {
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {/* Beam 1 - top left to center */}
+      <motion.div
+        animate={{ opacity: [0, 0.4, 0], x: ["-100%", "200%"] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+        className="absolute top-[20%] left-0 h-[1px] w-[300px]"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent)" }}
+      />
+      {/* Beam 2 - top right diagonal */}
+      <motion.div
+        animate={{ opacity: [0, 0.3, 0], x: ["200%", "-100%"] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        className="absolute top-[35%] right-0 h-[1px] w-[400px]"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(126,196,227,0.5), transparent)", transform: "rotate(-15deg)" }}
+      />
+      {/* Beam 3 - vertical subtle */}
+      <motion.div
+        animate={{ opacity: [0, 0.2, 0], y: ["-100%", "200%"] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+        className="absolute top-0 left-[60%] w-[1px] h-[200px]"
+        style={{ background: "linear-gradient(180deg, transparent, rgba(244,114,182,0.4), transparent)" }}
+      />
+      {/* Wide beam glow */}
+      <motion.div
+        animate={{ opacity: [0, 0.15, 0], rotate: [0, 3, 0] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[-20%] left-[30%] w-[2px] h-[140%]"
+        style={{ background: "linear-gradient(180deg, transparent, rgba(167,139,250,0.3), rgba(126,196,227,0.2), transparent)", filter: "blur(4px)" }}
+      />
+    </div>
+  );
+}
+
+/* ---------- animated gradient mesh ---------- */
+function GradientMesh() {
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
+      <motion.div
+        animate={{
+          background: [
+            "radial-gradient(at 20% 30%, rgba(126,196,227,0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.04) 0%, transparent 50%)",
+            "radial-gradient(at 40% 60%, rgba(126,196,227,0.06) 0%, transparent 50%), radial-gradient(at 60% 30%, rgba(167,139,250,0.08) 0%, transparent 50%), radial-gradient(at 30% 80%, rgba(244,114,182,0.06) 0%, transparent 50%)",
+            "radial-gradient(at 70% 40%, rgba(126,196,227,0.07) 0%, transparent 50%), radial-gradient(at 30% 50%, rgba(167,139,250,0.05) 0%, transparent 50%), radial-gradient(at 60% 70%, rgba(126,234,155,0.05) 0%, transparent 50%)",
+            "radial-gradient(at 20% 30%, rgba(126,196,227,0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.04) 0%, transparent 50%)",
+          ],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0"
+      />
+    </div>
+  );
+}
+
 /* ---------- mouse spotlight ---------- */
 function MouseSpotlight() {
   const spotlightRef = useRef<HTMLDivElement>(null);
@@ -372,8 +428,10 @@ function TypedText({ words }: { words: string[] }) {
 export function HeroSection() {
   return (
     <section className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6 pt-20 pb-12 sm:pt-28 sm:pb-20">
+      <GradientMesh />
       <FloatingOrbs />
       <GridPattern />
+      <BeamRays />
       <MouseSpotlight />
 
       {/* Radial gradient fade at edges */}
@@ -392,14 +450,18 @@ export function HeroSection() {
       >
         {/* Badge */}
         <motion.div variants={itemVariants}>
-          <span className="landing-glass-badge inline-flex items-center gap-2.5 rounded-full border border-white/10 dark:border-white/10 bg-white/5 dark:bg-white/5 px-5 py-2 text-xs font-semibold tracking-wide text-muted-foreground backdrop-blur-xl shadow-lg">
+          <motion.span
+            className="landing-glass-badge inline-flex items-center gap-2.5 rounded-full border border-white/10 dark:border-white/10 bg-white/5 dark:bg-white/5 px-5 py-2 text-xs font-semibold tracking-wide text-muted-foreground backdrop-blur-xl shadow-lg cursor-default"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(167,139,250,0.15)" }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
             Now with AI-Powered Insights
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          </span>
+          </motion.span>
         </motion.div>
 
         {/* Main heading with typed text */}
@@ -419,7 +481,16 @@ export function HeroSection() {
           variants={itemVariants}
           className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed font-light"
         >
-          The AI-powered CRM that helps you close more deals, nurture deeper relationships, and scale revenue —{" "}
+          The AI-powered CRM that helps you{" "}
+          <span className="text-foreground font-medium relative">
+            close more deals
+            <motion.span
+              className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-[#7ec4e3] via-[#a78bfa] to-[#f472b6] rounded-full"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ delay: 1.5, duration: 0.8, ease: "easeOut" }}
+            />
+          </span>, nurture deeper relationships, and scale revenue —{" "}
           <span className="text-foreground font-medium">effortlessly</span>.
         </motion.p>
 
