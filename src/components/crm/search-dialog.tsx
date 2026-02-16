@@ -31,7 +31,7 @@ export function SearchDialog() {
   const { open: storeOpen, setOpen: setStoreOpen } = useSearchStore();
   const [localOpen, setLocalOpen] = useState(false);
   const open = storeOpen || localOpen;
-  const setOpen = (v: boolean) => { setLocalOpen(v); setStoreOpen(v); };
+  const setOpen = useCallback((v: boolean) => { setLocalOpen(v); setStoreOpen(v); }, [setStoreOpen]);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +49,7 @@ export function SearchDialog() {
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [setOpen]);
 
   // Search
   const search = useCallback(async (q: string) => {

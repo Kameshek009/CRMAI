@@ -47,7 +47,6 @@ export async function executeCrmToolCall(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClient = ReturnType<typeof createSupabaseAdmin>;
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -448,8 +447,7 @@ async function updateContact(
   }
 
   // Build update object
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updates: Record<string, any> = {};
+  const updates: Record<string, string | null> = {};
   const changes: string[] = [];
 
   if (args.first_name !== undefined) {
@@ -544,8 +542,7 @@ async function updateDeal(
     return { success: false, result: "Deal not found." };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updates: Record<string, any> = {};
+  const updates: Record<string, string | number | null> = {};
   const changes: string[] = [];
 
   if (args.new_title !== undefined) {
@@ -645,8 +642,7 @@ async function updateTask(
     return { success: false, result: "Task not found." };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updates: Record<string, any> = {};
+  const updates: Record<string, string | null> = {};
   const changes: string[] = [];
 
   if (args.new_title !== undefined) {
@@ -774,8 +770,7 @@ async function deleteRecord(
   }
 
   // Find the record
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let record: any = null;
+  let record: { id: string; first_name?: string; last_name?: string | null; title?: string } | null = null;
 
   if (recordType === "contact") {
     let q = supabase
@@ -813,6 +808,10 @@ async function deleteRecord(
     const { data, error: fe } = await q.limit(1).single();
     if (fe || !data) return { success: false, result: `${recordType} not found.` };
     record = data;
+  }
+
+  if (!record) {
+    return { success: false, result: `${recordType} not found.` };
   }
 
   // Soft delete - include team_id for safety
@@ -874,8 +873,7 @@ async function getContactDetails(
   }
 
   const fullName = `${contact.first_name} ${contact.last_name || ""}`.trim();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const companyName = (contact.companies as any)?.name || "None";
+  const companyName = (contact.companies as unknown as { name: string } | null)?.name || "None";
 
   const details = [
     `**${fullName}**`,
@@ -925,13 +923,10 @@ async function getDealDetails(
     return { success: false, result: "Deal not found." };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stageName = (deal.deal_stages as any)?.name || "Unknown";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const contact = deal.contacts as any;
+  const stageName = (deal.deal_stages as unknown as { name: string } | null)?.name || "Unknown";
+  const contact = deal.contacts as unknown as { first_name: string; last_name: string | null } | null;
   const contactName = contact ? `${contact.first_name} ${contact.last_name || ""}`.trim() : "None";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const companyName = (deal.companies as any)?.name || "None";
+  const companyName = (deal.companies as unknown as { name: string } | null)?.name || "None";
 
   const details = [
     `**${deal.title}**`,

@@ -15,21 +15,62 @@ import { StageSelector } from "@/components/crm/stage-selector";
 import { ArrowLeft, DollarSign, Calendar, User, Building2, TrendingUp, Pencil, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 
+interface DealStage {
+  id: string;
+  name: string;
+  color: string;
+  position: number;
+  is_won?: boolean;
+  is_lost?: boolean;
+}
+
+interface DealContact {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+}
+
+interface DealCompany {
+  id: string;
+  name: string;
+}
+
+interface Deal {
+  id: string;
+  title: string;
+  value: number | null;
+  status: string | null;
+  description: string | null;
+  expected_close_date: string | null;
+  actual_close_date: string | null;
+  ai_win_probability: number | null;
+  stage_id: string;
+  created_at: string | null;
+  deal_stages: DealStage | null;
+  contacts: DealContact | null;
+  companies: DealCompany | null;
+}
+
+interface DealTask {
+  id: string;
+  title: string;
+  status: string | null;
+  due_date: string | null;
+  priority: string | null;
+}
+
 interface DealDetailContentProps {
   dealId: string;
 }
 
 export function DealDetailContent({ dealId }: DealDetailContentProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [deal, setDeal] = useState<Record<string, any> | null>(null);
+  const [deal, setDeal] = useState<Deal | null>(null);
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
   const [notes, setNotes] = useState<{ id: string; content: string; created_at: string; is_pinned: boolean }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [stages, setStages] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [tasks, setTasks] = useState<Record<string, any>[]>([]);
+  const [stages, setStages] = useState<DealStage[]>([]);
+  const [tasks, setTasks] = useState<DealTask[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -90,9 +131,9 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
   if (isLoading) return <PageContainer><Skeleton className="h-64 w-full" /></PageContainer>;
   if (!deal) return <PageContainer><p>Deal not found</p></PageContainer>;
 
-  const stage = deal.deal_stages as Record<string, unknown> | null;
-  const contact = deal.contacts as Record<string, unknown> | null;
-  const company = deal.companies as Record<string, unknown> | null;
+  const stage = deal.deal_stages;
+  const contact = deal.contacts;
+  const company = deal.companies;
 
   return (
     <PageContainer>

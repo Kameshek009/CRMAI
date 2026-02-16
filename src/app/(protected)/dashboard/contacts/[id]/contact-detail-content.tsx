@@ -16,19 +16,50 @@ import { contactFields } from "@/lib/crm/field-definitions";
 import { ArrowLeft, Building2, Mail, Phone, Briefcase, Calendar, Pencil, Handshake, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 
+interface ContactCompany {
+  id: string;
+  name: string;
+}
+
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  title: string | null;
+  status: string | null;
+  engagement_score: number | null;
+  source: string | null;
+  created_at: string | null;
+  companies: ContactCompany | null;
+}
+
+interface ContactDeal {
+  id: string;
+  title: string;
+  value: number | null;
+  status: string | null;
+}
+
+interface ContactTask {
+  id: string;
+  title: string;
+  status: string | null;
+  due_date: string | null;
+  priority: string | null;
+}
+
 interface ContactDetailContentProps {
   contactId: string;
 }
 
 export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [contact, setContact] = useState<Record<string, any> | null>(null);
+  const [contact, setContact] = useState<Contact | null>(null);
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
   const [notes, setNotes] = useState<{ id: string; content: string; created_at: string; is_pinned: boolean }[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [deals, setDeals] = useState<Record<string, any>[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [tasks, setTasks] = useState<Record<string, any>[]>([]);
+  const [deals, setDeals] = useState<ContactDeal[]>([]);
+  const [tasks, setTasks] = useState<ContactTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
 
@@ -150,14 +181,14 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                 <span>{String(contact.title)}</span>
               </div>
             )}
-            {contact.companies && typeof contact.companies === "object" && (
+            {contact.companies && (
               <div className="flex items-center gap-2 text-sm">
                 <Building2 className="size-4 text-muted-foreground" />
                 <Link
-                  href={`/dashboard/companies/${(contact.companies as Record<string, string>).id}`}
+                  href={`/dashboard/companies/${contact.companies.id}`}
                   className="hover:underline"
                 >
-                  {(contact.companies as Record<string, string>).name}
+                  {contact.companies.name}
                 </Link>
               </div>
             )}

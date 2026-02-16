@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext } from "@/lib/crm/team-helpers";
+import { isValidUUID } from "@/lib/crm/helpers";
 
 export async function GET(
   _request: NextRequest,
@@ -11,6 +12,9 @@ export async function GET(
     if (error) return error;
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
+    }
     if (context.teamId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }

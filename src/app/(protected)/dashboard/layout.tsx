@@ -6,6 +6,7 @@ import { TeamProvider } from "@/contexts/team-context";
 import { TeamGuard } from "@/components/auth/team-guard";
 import { CrmOverlays } from "@/components/crm/crm-overlays";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export default async function DashboardLayout({
   children,
@@ -26,7 +27,9 @@ export default async function DashboardLayout({
             </header>
             <TeamGuard>
               <main className="flex-1 overflow-auto">
-                {children}
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
               </main>
             </TeamGuard>
           </SidebarInset>

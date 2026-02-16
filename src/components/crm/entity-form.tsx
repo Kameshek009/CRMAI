@@ -71,40 +71,46 @@ export function EntityForm({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {fields.map((field) => (
-            <div key={field.name} className="space-y-1.5">
-              <label className="text-sm font-medium">{field.label}</label>
-              {field.type === "textarea" ? (
-                <Textarea
-                  value={values[field.name] || ""}
-                  onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
-                  placeholder={field.placeholder}
-                  rows={3}
-                />
-              ) : field.type === "select" ? (
-                <select
-                  value={values[field.name] || ""}
-                  onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="">Select...</option>
-                  {field.options?.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <Input
-                  type={field.type}
-                  value={values[field.name] || ""}
-                  onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
-                  placeholder={field.placeholder}
-                  required={field.required}
-                />
-              )}
-            </div>
-          ))}
+          {fields.map((field) => {
+            const fieldId = `entity-form-${field.name}`;
+            return (
+              <div key={field.name} className="space-y-1.5">
+                <label htmlFor={fieldId} className="text-sm font-medium">{field.label}</label>
+                {field.type === "textarea" ? (
+                  <Textarea
+                    id={fieldId}
+                    value={values[field.name] || ""}
+                    onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
+                    placeholder={field.placeholder}
+                    rows={3}
+                  />
+                ) : field.type === "select" ? (
+                  <select
+                    id={fieldId}
+                    value={values[field.name] || ""}
+                    onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <option value="">Select...</option>
+                    {field.options?.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <Input
+                    id={fieldId}
+                    type={field.type}
+                    value={values[field.name] || ""}
+                    onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
+                    placeholder={field.placeholder}
+                    required={field.required}
+                  />
+                )}
+              </div>
+            );
+          })}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel

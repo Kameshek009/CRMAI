@@ -75,7 +75,11 @@ function DealCardInner({
           )}
 
           <div className="flex items-center justify-between mt-2">
-            <Badge variant="outline" className={cn("text-[10px] px-1.5", probColor)}>
+            <Badge
+              variant="outline"
+              className={cn("text-[10px] px-1.5", probColor)}
+              aria-label={`Win probability: ${probLabel}, ${prob}%`}
+            >
               {probLabel} {prob}%
             </Badge>
             {deal.expected_close_date && (

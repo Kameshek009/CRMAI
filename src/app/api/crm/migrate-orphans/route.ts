@@ -19,24 +19,24 @@ export async function POST() {
     const supabase = createSupabaseAdmin();
     const { accountId, teamId } = context;
 
-    const tables = ["contacts", "companies", "deals", "crm_tasks", "crm_activities"] as const;
+    const tables = ["contacts", "companies", "deals", "crm_tasks", "crm_activities"];
     const results: Record<string, number> = {};
 
     for (const table of tables) {
       // Fix records with NULL team_id
       const { data: nullFixed } = await supabase
         .from(table)
-        .update({ team_id: teamId } as never)
-        .eq("account_id" as never, accountId as never)
-        .is("team_id" as never, null as never)
+        .update({ team_id: teamId })
+        .eq("account_id", accountId)
+        .is("team_id", null)
         .select("id");
 
       // Fix records with empty string team_id
       const { data: emptyFixed } = await supabase
         .from(table)
-        .update({ team_id: teamId } as never)
-        .eq("account_id" as never, accountId as never)
-        .eq("team_id" as never, "" as never)
+        .update({ team_id: teamId })
+        .eq("account_id", accountId)
+        .eq("team_id", "")
         .select("id");
 
       results[table] = (nullFixed?.length || 0) + (emptyFixed?.length || 0);
@@ -45,10 +45,10 @@ export async function POST() {
     // Also un-delete contacts that might have been soft-deleted by accident
     const { data: restoredData } = await supabase
       .from("contacts")
-      .update({ is_deleted: false } as never)
-      .eq("account_id" as never, accountId as never)
-      .eq("team_id" as never, teamId as never)
-      .eq("is_deleted" as never, true as never)
+      .update({ is_deleted: false })
+      .eq("account_id", accountId)
+      .eq("team_id", teamId)
+      .eq("is_deleted", true)
       .select("id");
     const restoredContacts = restoredData?.length || 0;
 

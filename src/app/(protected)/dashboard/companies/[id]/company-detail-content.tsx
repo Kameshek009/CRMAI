@@ -15,18 +15,45 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Globe, Phone, Mail, Users, Handshake, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
+interface Company {
+  id: string;
+  name: string;
+  domain: string | null;
+  industry: string | null;
+  size: string | null;
+  website: string | null;
+  phone: string | null;
+  email: string | null;
+  ai_health_score: number | null;
+  contact_count: number;
+  deal_count: number;
+  created_at: string | null;
+}
+
+interface CompanyContact {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  title: string | null;
+  email: string | null;
+}
+
+interface CompanyDeal {
+  id: string;
+  title: string;
+  value: number | null;
+  status: string | null;
+}
+
 interface CompanyDetailContentProps {
   companyId: string;
 }
 
 export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [company, setCompany] = useState<Record<string, any> | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [contacts, setContacts] = useState<Record<string, any>[]>([]);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [contacts, setContacts] = useState<CompanyContact[]>([]);
   const [activities, setActivities] = useState<{ id: string; type: string; title: string; description?: string | null; created_at: string }[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [deals, setDeals] = useState<Record<string, any>[]>([]);
+  const [deals, setDeals] = useState<CompanyDeal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
 

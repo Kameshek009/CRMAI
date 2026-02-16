@@ -1,17 +1,21 @@
 /**
  * Usage Checking Module
  *
- * Implements weekly caps and enterprise credit checking for the token system.
+ * Implements daily caps and enterprise credit checking for the token system.
  *
- * Weekly Cap System:
- * - Monthly limit is divided into 4 weekly portions
- * - If user exceeds their weekly portion, they're capped until next week
+ * Daily Cap System:
+ * - Each tier has a daily token limit (resets every 24h)
+ * - If user exceeds their daily limit, they're capped until next day
  * - Prevents burst usage and promotes steady consumption
  *
  * Enterprise Credits:
- * - No monthly/weekly caps
+ * - No monthly/daily caps
  * - Uses prepaid token credits that deplete
  * - Must buy more credits when depleted
+ *
+ * NOTE: Some interface field names (weeklyUsed, weeklyLimit, weeklyTokensUsed, etc.)
+ * retain "weekly" naming for backward compatibility with the database schema and UI
+ * components, even though the actual limit period is 24 hours (daily).
  */
 
 import type { Account, UsageCheckResult, SubscriptionTier } from "@/types";
@@ -21,7 +25,7 @@ import { TIER_TOKEN_LIMITS, TIER_WEEKLY_LIMITS } from "@/lib/constants/tiers";
  * Check if a user is allowed to use tokens based on their tier and usage.
  *
  * For subscription tiers (free, pro, max):
- * - Checks weekly cap (monthly_limit / 4)
+ * - Checks daily cap (24h rolling window)
  * - Returns upgrade options if capped
  *
  * For enterprise tier:
@@ -37,41 +41,40 @@ export function checkUsageAllowed(
     return checkEnterpriseCredits(account, tokensNeeded);
   }
 
-  // Subscription tiers use weekly caps
-  return checkWeeklyCap(account, tokensNeeded);
+  // Subscription tiers use daily caps
+  return checkDailyCap(account, tokensNeeded);
 }
 
 /**
- * Check weekly cap for subscription tiers
+ * Check daily cap for subscription tiers.
+ * Uses a 24h rolling window to limit token consumption.
  */
-function checkWeeklyCap(
+function checkDailyCap(
   account: Account,
   tokensNeeded: number
 ): UsageCheckResult {
   const tierLimit = TIER_TOKEN_LIMITS[account.tier] || TIER_TOKEN_LIMITS.free;
   const monthlyLimit = Math.max(account.tokenLimit, tierLimit);
-  // Daily limit from tier config (stored in weeklyTokenLimit field)
+  // Daily limit from tier config (TIER_WEEKLY_LIMITS is named for legacy reasons but holds daily values)
   const dailyLimit = TIER_WEEKLY_LIMITS[account.tier] || TIER_WEEKLY_LIMITS.free;
 
-  // Check if day has rolled over (more than 24h since week_start_date)
+  // Check if day has rolled over (more than 24h since the day-start timestamp)
   const dayStartDate = new Date(account.weekStartDate);
   const now = new Date();
   const hoursSinceDayStart =
     (now.getTime() - dayStartDate.getTime()) / (1000 * 60 * 60);
 
-  // If 24+ hours have passed, daily usage should be 0
-  let effectiveDailyUsed = account.weeklyTokensUsed;
-  if (hoursSinceDayStart >= 24) {
-    effectiveDailyUsed = 0;
-  }
+  // If 24+ hours have passed, daily usage resets to 0
+  // account.weeklyTokensUsed stores the current day's usage (legacy field name)
+  const effectiveDailyUsed = hoursSinceDayStart >= 24 ? 0 : account.weeklyTokensUsed;
 
   // Check daily limit
   if (effectiveDailyUsed + tokensNeeded > dailyLimit) {
     return {
       allowed: false,
-      reason: "weekly_cap_exceeded",
-      weeklyUsed: effectiveDailyUsed,
-      weeklyLimit: dailyLimit,
+      reason: "weekly_cap_exceeded", // Legacy reason name; actually means daily cap exceeded
+      weeklyUsed: effectiveDailyUsed, // Legacy field name; represents daily usage
+      weeklyLimit: dailyLimit, // Legacy field name; represents daily limit
       monthlyUsed: account.tokensUsed,
       monthlyLimit,
       upgradeOptions: getUpgradeOptions(account.tier),
@@ -132,7 +135,10 @@ function getUpgradeOptions(currentTier: SubscriptionTier): string[] {
 }
 
 /**
- * Calculate usage statistics from account data
+ * Calculate usage statistics from account data.
+ *
+ * Return field names use "weekly" prefix for backward compatibility with
+ * UI components and the database schema, but the actual period is 24 hours.
  */
 export function calculateUsageStats(account: Account) {
   const isEnterprise = account.tier === "enterprise";
@@ -150,12 +156,12 @@ export function calculateUsageStats(account: Account) {
   const msRemaining = billingCycleEnd.getTime() - now.getTime();
   const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
 
-  // Calculate hours into current day period (24h cycle)
+  // Calculate hours into current 24h period
   const dayStartDate = new Date(account.weekStartDate);
   const hoursSinceDayStart =
     (now.getTime() - dayStartDate.getTime()) / (1000 * 60 * 60);
 
-  // If 24h+ passed, effective daily usage is 0
+  // If 24h+ passed, effective daily usage resets to 0
   const effectiveDailyUsed = hoursSinceDayStart >= 24 ? 0 : account.weeklyTokensUsed;
 
   // Calculate percentages
@@ -163,7 +169,7 @@ export function calculateUsageStats(account: Account) {
     ? Math.min(100, (account.tokensUsed / monthlyLimit) * 100)
     : 0;
 
-  const weeklyPercentUsed = dailyLimit > 0
+  const dailyPercentUsed = dailyLimit > 0
     ? Math.min(100, (effectiveDailyUsed / dailyLimit) * 100)
     : 0;
 
@@ -172,11 +178,11 @@ export function calculateUsageStats(account: Account) {
     tokenLimit: monthlyLimit,
     percentUsed,
     tokensRemaining: Math.max(0, monthlyLimit - account.tokensUsed),
-    weeklyTokensUsed: effectiveDailyUsed,
-    weeklyTokenLimit: dailyLimit,
-    weeklyPercentUsed,
+    weeklyTokensUsed: effectiveDailyUsed,   // Legacy name; actually daily usage
+    weeklyTokenLimit: dailyLimit,            // Legacy name; actually daily limit
+    weeklyPercentUsed: dailyPercentUsed,     // Legacy name; actually daily percentage
     daysRemaining,
-    daysIntoWeek: Math.min(Math.floor(hoursSinceDayStart), 24),
+    daysIntoWeek: Math.min(Math.floor(hoursSinceDayStart), 24), // Hours into current 24h period
     billingCycleStart,
     billingCycleEnd,
     tokenCredits: account.tokenCredits || 0,

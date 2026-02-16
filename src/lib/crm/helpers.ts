@@ -45,6 +45,13 @@ export async function getAccountId(): Promise<
 }
 
 /**
+ * Validate that a string is a properly formatted UUID v4
+ */
+export function isValidUUID(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+/**
  * Get initials from first and last name
  */
 export function getInitials(firstName: string, lastName?: string | null): string {
