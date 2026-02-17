@@ -421,11 +421,14 @@ export function ChatsContent() {
                           <h3 className="font-medium text-foreground truncate text-sm sm:text-[15px]">
                             {chat.title || 'New Chat'}
                           </h3>
+                          <span className="text-xs text-muted-foreground/50 bg-muted px-1.5 py-0.5 rounded shrink-0">
+                            {chat.mode === 'chat' ? 'Chat' : chat.mode === 'agent' ? 'Agent' : 'Auto'}
+                          </span>
                           <span className="text-xs text-muted-foreground/70 shrink-0">
                             {formatTime(chat.updated_at || chat.created_at || new Date().toISOString())}
                           </span>
                         </div>
-                        <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                           {chat.last_message_preview || 'No messages yet'}
                         </p>
                       </div>

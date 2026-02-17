@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Bot,
+  Sparkles,
   User,
   AlertCircle,
   CheckCircle,
@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Markdown } from '@/components/ui/markdown';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import type { Message } from '@/lib/supabase/types';
 
 interface MessageBubbleProps {
@@ -17,6 +17,7 @@ interface MessageBubbleProps {
   isNew?: boolean;
   isHighlighted?: boolean;
   onDelete?: (messageId: string) => void;
+  userImageUrl?: string;
 }
 
 function formatTime(dateString: string): string {
@@ -28,115 +29,123 @@ function formatTime(dateString: string): string {
   });
 }
 
-export function MessageBubble({ message, isNew, isHighlighted, onDelete }: MessageBubbleProps) {
+export function MessageBubble({ message, isNew, isHighlighted, onDelete, userImageUrl }: MessageBubbleProps) {
   const isUser = message.role === 'user';
+  const messageType = message.message_type;
 
   return (
-    <div
+    <motion.div
+      initial={isNew ? { opacity: 0, y: 8 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        'flex gap-3 group',
-        isUser ? 'justify-end' : 'justify-start',
-        isNew && isUser && 'message-animate-in-right',
-        isNew && !isUser && 'message-animate-in-left',
-        isHighlighted && 'ring-2 ring-primary/50 rounded-xl',
+        'group py-5 px-1',
+        isHighlighted && 'bg-primary/5 -mx-2 px-3 rounded-lg',
       )}
     >
-      {!isUser && (
-        <div
-          className={cn(
-            'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
-            message.message_type === 'error'
-              ? 'bg-destructive/20'
-              : message.message_type === 'result'
-              ? 'bg-success/20'
-              : 'bg-muted'
-          )}
-        >
-          {message.message_type === 'error' ? (
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          ) : message.message_type === 'result' ? (
-            <CheckCircle className="h-4 w-4 text-success" />
-          ) : (
-            <Bot className="h-4 w-4 text-chart-1" />
-          )}
-        </div>
-      )}
-
-      <div className="relative max-w-[85%] sm:max-w-[75%]">
-        <div
-          className={cn(
-            'rounded-xl px-3 sm:px-4 py-2.5 sm:py-3',
-            isUser
-              ? 'bg-primary text-primary-foreground'
-              : message.message_type === 'error'
-              ? 'bg-destructive/10 border border-destructive/30'
-              : message.message_type === 'result'
-              ? 'bg-success/10 border border-success/30'
-              : message.message_type === 'plan' || message.message_type === 'action'
-              ? 'bg-warning/10 border border-warning/30'
-              : 'bg-muted'
-          )}
-        >
-          {message.message_type !== 'text' && !isUser && (
-            <p className="text-xs font-medium uppercase mb-1 opacity-70">
-              {message.message_type}
-            </p>
-          )}
-          {isUser ? (
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-          ) : (
-            <Markdown content={message.content} />
-          )}
-          <p
-            className={cn(
-              'text-xs mt-2',
-              isUser ? 'text-primary-foreground/60' : 'text-muted-foreground'
+      {/* Role header */}
+      <div className="flex items-center gap-2.5 mb-2.5">
+        {isUser ? (
+          <>
+            {userImageUrl ? (
+              <img
+                src={userImageUrl}
+                alt="You"
+                className="h-6 w-6 rounded-full object-cover"
+              />
+            ) : (
+              <div className="h-6 w-6 rounded-full bg-foreground/10 flex items-center justify-center">
+                <User className="h-3.5 w-3.5 text-foreground" />
+              </div>
             )}
-          >
-            {formatTime(message.created_at || new Date().toISOString())}
-            {(message.tokens_used ?? 0) > 0 && ` · ${message.tokens_used} tokens`}
-          </p>
-        </div>
-
-        {/* Delete button on hover */}
-        {onDelete && !message.id.startsWith('temp-') && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              'absolute -top-2 h-6 w-6 rounded-full bg-background border shadow-sm',
-              'opacity-0 group-hover:opacity-100 transition-opacity',
-              isUser ? '-left-2' : '-right-2'
-            )}
-            onClick={() => onDelete(message.id)}
-          >
-            <Trash2 className="h-3 w-3 text-muted-foreground" />
-          </Button>
+            <span className="text-sm font-semibold text-foreground">You</span>
+          </>
+        ) : (
+          <>
+            <div className={cn(
+              'h-6 w-6 rounded-full flex items-center justify-center',
+              messageType === 'error' ? 'bg-destructive/15' :
+              messageType === 'result' ? 'bg-success/15' :
+              'bg-chart-1/15'
+            )}>
+              {messageType === 'error' ? (
+                <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+              ) : messageType === 'result' ? (
+                <CheckCircle className="h-3.5 w-3.5 text-success" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5 text-chart-1" />
+              )}
+            </div>
+            <span className="text-sm font-semibold text-foreground">AI Assistant</span>
+          </>
         )}
       </div>
 
-      {isUser && (
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-          <User className="h-4 w-4 text-primary-foreground" />
-        </div>
-      )}
-    </div>
+      {/* Message content */}
+      <div className={cn(
+        'pl-8.5',
+        messageType === 'error' && !isUser && 'border-l-2 border-destructive/50 pl-4 ml-8.5',
+        messageType === 'result' && !isUser && 'border-l-2 border-success/50 pl-4 ml-8.5',
+        (messageType === 'plan' || messageType === 'action') && !isUser && 'border-l-2 border-warning/50 pl-4 ml-8.5',
+      )}>
+        {messageType !== 'text' && !isUser && (
+          <span className="text-xs font-medium uppercase text-muted-foreground mb-1.5 block tracking-wide">
+            {messageType}
+          </span>
+        )}
+        {isUser ? (
+          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{message.content}</p>
+        ) : (
+          <Markdown content={message.content} />
+        )}
+      </div>
+
+      {/* Footer: timestamp + tokens + delete */}
+      <div className="flex items-center gap-2.5 mt-2.5 pl-8.5">
+        <span className="text-xs text-muted-foreground/60">
+          {formatTime(message.created_at || new Date().toISOString())}
+        </span>
+        {(message.tokens_used ?? 0) > 0 && (
+          <span className="text-xs text-muted-foreground/60">
+            {message.tokens_used} tokens
+          </span>
+        )}
+        {onDelete && !message.id.startsWith('temp-') && (
+          <button
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground/60 hover:text-destructive flex items-center gap-1"
+            onClick={() => onDelete(message.id)}
+          >
+            <Trash2 className="h-3 w-3" />
+            Delete
+          </button>
+        )}
+      </div>
+    </motion.div>
   );
 }
 
 export function TypingIndicator() {
   return (
-    <div className="flex gap-3 justify-start">
-      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-        <Bot className="h-4 w-4 text-chart-1" />
-      </div>
-      <div className="bg-muted rounded-xl px-4 py-3">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:0ms]" />
-          <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:150ms]" />
-          <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce [animation-delay:300ms]" />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.3 }}
+      className="py-5 px-1"
+    >
+      {/* Role header */}
+      <div className="flex items-center gap-2.5 mb-2.5">
+        <div className="h-6 w-6 rounded-full bg-chart-1/15 flex items-center justify-center">
+          <Sparkles className="h-3.5 w-3.5 text-chart-1 animate-pulse" />
         </div>
+        <span className="text-sm font-semibold text-foreground">AI Assistant</span>
       </div>
-    </div>
+
+      {/* Shimmer + thinking text */}
+      <div className="pl-8.5 flex items-center gap-3">
+        <div className="thinking-shimmer h-4 w-16 rounded-full" />
+        <span className="text-sm text-muted-foreground/70 animate-pulse">Thinking...</span>
+      </div>
+    </motion.div>
   );
 }

@@ -78,7 +78,7 @@ export function ChatHeader({ chat, onChatUpdate, onDelete, onSearchToggle }: Cha
   };
 
   return (
-    <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b">
+    <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/50">
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         <Button
           variant="ghost"
@@ -120,6 +120,9 @@ export function ChatHeader({ chat, onChatUpdate, onDelete, onSearchToggle }: Cha
                 {chat.title || 'New Chat'}
               </h1>
               <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  {chat.mode === 'chat' ? 'AI Chat' : chat.mode === 'agent' ? 'Agent' : 'Auto'}
+                </span>
                 <AgentStatusBadge compact />
               </div>
             </>

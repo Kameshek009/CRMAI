@@ -9,8 +9,9 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { useAccount } from '@/contexts/account-context';
-import { AlertCircle, Bot } from 'lucide-react';
+import { AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -28,6 +29,7 @@ export default function ChatDetailPage() {
   const router = useRouter();
   const chatId = params.id as string;
   const { account } = useAccount();
+  const { user } = useUser();
   const { isOnline: isAgentOnline } = useAgentStatus();
 
   const [chat, setChat] = useState<Chat | null>(null);
@@ -302,14 +304,29 @@ export default function ChatDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full p-4 sm:p-6">
-        <Skeleton className="h-8 sm:h-10 w-36 sm:w-48 mb-4" />
-        <div className="flex-1 space-y-3 sm:space-y-4">
+      <div className="flex flex-col h-full">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b">
+          <Skeleton className="h-8 w-36 sm:w-48" />
+        </div>
+        <div className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 pt-8 space-y-8">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-14 sm:h-16 w-4/5 sm:w-3/4" />
+            <div key={i} className="space-y-2.5">
+              <div className="flex items-center gap-2.5">
+                <Skeleton className="h-6 w-6 rounded-full" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <div className="pl-8.5 space-y-1.5">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
           ))}
         </div>
-        <Skeleton className="h-11 sm:h-12 w-full" />
+        <div className="px-4 pb-4 pt-2">
+          <div className="max-w-3xl mx-auto">
+            <Skeleton className="h-14 w-full rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -317,7 +334,7 @@ export default function ChatDetailPage() {
   if (!chat) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 sm:p-6">
-        <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
+        <AlertCircle className="h-10 w-10 text-muted-foreground mb-4" />
         <h2 className="text-lg sm:text-xl font-semibold mb-2">Chat not found</h2>
         <p className="text-sm sm:text-base text-muted-foreground mb-4 text-center px-4">
           This chat may have been deleted or you don&apos;t have access.
@@ -364,10 +381,10 @@ export default function ChatDetailPage() {
 
       {/* Vision Board Status */}
       {visionBoard && (
-        <div className="px-3 sm:px-6 py-2.5 sm:py-3 border-b bg-muted/30">
-          <div className="flex items-center justify-between gap-2">
+        <div className="px-4 sm:px-6 py-2.5 border-b bg-muted/30">
+          <div className="flex items-center justify-between gap-2 max-w-3xl mx-auto">
             <div className="flex items-center gap-2 min-w-0">
-              <Bot className="h-4 w-4 text-chart-3 shrink-0" />
+              <Sparkles className="h-4 w-4 text-chart-3 shrink-0" />
               <span className="text-xs sm:text-sm font-medium truncate">{visionBoard.title}</span>
               <span
                 className={cn(
@@ -402,6 +419,7 @@ export default function ChatDetailPage() {
         currentHighlightId={currentHighlightId}
         onDeleteMessage={handleDeleteMessage}
         onQuickSend={handleSend}
+        userImageUrl={user?.imageUrl}
       />
 
       <ChatComposer

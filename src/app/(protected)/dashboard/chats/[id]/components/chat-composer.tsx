@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Send, Loader2, Clock, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowUp, Loader2, Clock, AlertCircle, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import type { Chat } from '@/lib/supabase/types';
 
 interface ChatComposerProps {
@@ -23,6 +23,7 @@ export function ChatComposer({
 }: ChatComposerProps) {
   const [input, setInput] = useState('');
   const [countdown, setCountdown] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Live countdown timer for daily limit reset
   useEffect(() => {
@@ -63,6 +64,10 @@ export function ChatComposer({
     if (!input.trim() || isSending) return;
     onSend(input.trim());
     setInput('');
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -72,63 +77,111 @@ export function ChatComposer({
     }
   };
 
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+    }
+  };
+
   return (
-    <div className="px-3 sm:px-6 py-3 sm:py-4 border-t">
-      {/* Daily limit countdown */}
-      {rateLimitResetsAt && countdown && (
-        <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-destructive/10 border border-destructive/30">
-          <div className="flex items-center gap-2 min-w-0">
-            <Clock className="h-4 w-4 text-destructive shrink-0" />
-            <p className="text-xs sm:text-sm text-destructive">
-              Daily limit reached. Resets in <span className="font-mono font-semibold">{countdown}</span>
+    <div className="px-4 pb-4 pt-2">
+      <div className="max-w-3xl mx-auto">
+        {/* Daily limit countdown */}
+        {rateLimitResetsAt && countdown && (
+          <div className="flex items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-destructive/10 border border-destructive/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <Clock className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-xs sm:text-sm text-destructive">
+                Daily limit reached. Resets in <span className="font-mono font-semibold">{countdown}</span>
+              </p>
+            </div>
+            <a
+              href="/dashboard/upgrade"
+              className="text-xs font-medium text-destructive hover:underline shrink-0"
+            >
+              Upgrade
+            </a>
+          </div>
+        )}
+        {/* Offline warning */}
+        {!isAgentOnline && (
+          <div className="flex items-center gap-2 mb-3 p-3 rounded-xl bg-warning/10 border border-warning/30">
+            <AlertCircle className="h-4 w-4 text-warning shrink-0" />
+            <p className="text-xs sm:text-sm text-warning">
+              Agent offline. Messages will be queued.
             </p>
           </div>
-          <a
-            href="/dashboard/upgrade"
-            className="text-xs font-medium text-destructive hover:underline shrink-0"
-          >
-            Upgrade
-          </a>
+        )}
+
+        {/* Composer container */}
+        <div className={cn(
+          'relative rounded-2xl border bg-background transition-all duration-200',
+          'shadow-sm hover:shadow-md',
+          'focus-within:border-ring focus-within:shadow-md',
+          'focus-within:ring-2 focus-within:ring-ring/20',
+        )}>
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              chat.mode === 'chat'
+                ? 'Message AI assistant...'
+                : !isAgentOnline
+                ? 'Agent offline — message will be queued...'
+                : chat.mode === 'agent'
+                ? 'Describe a task for the agent...'
+                : 'Send a message...'
+            }
+            className={cn(
+              'w-full min-h-[52px] max-h-40 resize-none border-none bg-transparent',
+              'px-4 pt-3.5 pb-12 text-sm',
+              'placeholder:text-muted-foreground/50',
+              'focus:outline-none focus:ring-0',
+            )}
+            disabled={isSending}
+          />
+
+          {/* Bottom bar inside composer */}
+          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground/50"
+                disabled
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isSending}
+              size="icon"
+              className={cn(
+                'h-8 w-8 rounded-lg transition-all',
+                input.trim() && !isSending
+                  ? 'bg-foreground text-background hover:bg-foreground/90'
+                  : 'bg-muted text-muted-foreground'
+              )}
+            >
+              {isSending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ArrowUp className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
-      )}
-      {/* Offline warning */}
-      {!isAgentOnline && (
-        <div className="flex items-center gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-warning/10 border border-warning/30">
-          <AlertCircle className="h-4 w-4 text-warning shrink-0" />
-          <p className="text-xs sm:text-sm text-warning">
-            Agent offline. Messages will be queued.
-          </p>
-        </div>
-      )}
-      <div className="flex gap-2">
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={
-            chat.mode === 'chat'
-              ? 'Ask CRM AI anything...'
-              : !isAgentOnline
-              ? 'Agent offline - message will be queued...'
-              : chat.mode === 'agent'
-              ? 'Describe a task for the agent...'
-              : 'Send a message...'
-          }
-          className="min-h-[44px] max-h-32 resize-none text-sm sm:text-base"
-          disabled={isSending}
-        />
-        <Button
-          onClick={handleSend}
-          disabled={!input.trim() || isSending}
-          size="icon"
-          className="h-11 w-11 shrink-0"
-        >
-          {isSending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
-        </Button>
+
+        <p className="text-center text-xs text-muted-foreground/40 mt-2">
+          AI can make mistakes. Verify important information.
+        </p>
       </div>
     </div>
   );
