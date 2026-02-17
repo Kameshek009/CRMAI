@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { uploadChatFile } from "@/lib/supabase/storage";
+import { logger } from "@/lib/logger";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -112,7 +113,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, attachment });
   } catch (error) {
-    console.error("[ChatUpload]", error);
+    logger.error("ChatUpload", "Failed to upload file", error);
     return NextResponse.json(
       { success: false, error: "Failed to upload file" },
       { status: 500 }

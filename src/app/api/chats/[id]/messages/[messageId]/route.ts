@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * DELETE /api/chats/[id]/messages/[messageId]
@@ -80,7 +81,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[api/chats/[id]/messages/[messageId]] DELETE error:", error);
+    logger.error("ChatMessageDelete", "Failed to delete message", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete message" },
       { status: 500 }

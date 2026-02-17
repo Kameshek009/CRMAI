@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -43,7 +44,7 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: cumulativeData });
   } catch (error) {
-    console.error("[API crm/stats/revenue-trend GET]", error);
+    logger.error("CrmRevenueTrend", "GET error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

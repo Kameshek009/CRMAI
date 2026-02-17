@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/chats/[id]/messages
@@ -80,7 +81,7 @@ export async function GET(
       messages: messages || [],
     });
   } catch (error) {
-    console.error("[api/chats/[id]/messages] GET error:", error);
+    logger.error("ChatMessages", "Failed to fetch messages", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch messages" },
       { status: 500 }
@@ -198,7 +199,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, message });
   } catch (error) {
-    console.error("[api/chats/[id]/messages] POST error:", error);
+    logger.error("ChatMessages", "Failed to send message", error);
     return NextResponse.json(
       { success: false, error: "Failed to send message" },
       { status: 500 }

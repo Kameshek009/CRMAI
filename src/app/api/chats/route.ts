@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/chats
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
       .order("updated_at", { ascending: false });
 
     if (chatsError) {
-      console.error("[api/chats] Error fetching chats:", chatsError);
+      logger.error("Chats", "Error fetching chats", chatsError);
       return NextResponse.json(
         { success: false, error: "Failed to fetch chats" },
         { status: 500 }
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, chats: chats || [] });
   } catch (error) {
-    console.error("[api/chats] Error:", error);
+    logger.error("Chats", "GET error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (chatError) {
-      console.error("[api/chats] Error creating chat:", chatError);
+      logger.error("Chats", "Error creating chat", chatError);
       return NextResponse.json(
         { success: false, error: "Failed to create chat" },
         { status: 500 }
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, chat });
   } catch (error) {
-    console.error("[api/chats] Error:", error);
+    logger.error("Chats", "POST error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
@@ -201,7 +202,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", chatId);
 
     if (deleteError) {
-      console.error("[api/chats] Error deleting chat:", deleteError);
+      logger.error("Chats", "Error deleting chat", deleteError);
       return NextResponse.json(
         { success: false, error: "Failed to delete chat" },
         { status: 500 }
@@ -210,7 +211,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true, deleted: true });
   } catch (error) {
-    console.error("[api/chats] Error:", error);
+    logger.error("Chats", "DELETE error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

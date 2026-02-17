@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/chats/[id]/stream
@@ -164,7 +165,7 @@ export async function GET(
           const { data: newMessages, error } = await query;
 
           if (error) {
-            console.error("[SSE] Message poll error:", error);
+            logger.error("ChatStream", "Message poll error", error);
             return;
           }
 
@@ -179,7 +180,7 @@ export async function GET(
             }
           }
         } catch (err) {
-          console.error("[SSE] Message poll exception:", err);
+          logger.error("ChatStream", "Message poll exception", err);
         }
       };
 

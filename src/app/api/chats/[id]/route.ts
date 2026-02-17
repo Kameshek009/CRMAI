@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/chats/[id]
@@ -72,7 +73,7 @@ export async function GET(
       .order("created_at", { ascending: true });
 
     if (messagesError) {
-      console.error("[api/chats/[id]] Error fetching messages:", messagesError);
+      logger.error("ChatDetail", "Error fetching messages", messagesError);
       throw messagesError;
     }
 
@@ -96,7 +97,7 @@ export async function GET(
       visionBoard,
     });
   } catch (error) {
-    console.error("[api/chats/[id]] Error:", error);
+    logger.error("ChatDetail", "GET error", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch chat" },
       { status: 500 }
@@ -179,7 +180,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, chat });
   } catch (error) {
-    console.error("[api/chats/[id]] PATCH error:", error);
+    logger.error("ChatDetail", "PATCH error", error);
     return NextResponse.json(
       { success: false, error: "Failed to update chat" },
       { status: 500 }
@@ -254,7 +255,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, deleted: true });
   } catch (error) {
-    console.error("[api/chats/[id]] DELETE error:", error);
+    logger.error("ChatDetail", "DELETE error", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete chat" },
       { status: 500 }
