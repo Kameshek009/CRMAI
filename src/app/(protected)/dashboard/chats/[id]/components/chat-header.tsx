@@ -19,7 +19,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { AgentStatusBadge } from '@/components/ui/agent-status-badge';
 import { toast } from 'sonner';
 import type { Chat } from '@/lib/supabase/types';
 
@@ -119,11 +118,10 @@ export function ChatHeader({ chat, onChatUpdate, onDelete, onSearchToggle }: Cha
               <h1 className="font-semibold text-foreground text-sm sm:text-base truncate">
                 {chat.title || 'New Chat'}
               </h1>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                   {chat.mode === 'chat' ? 'AI Chat' : chat.mode === 'agent' ? 'Agent' : 'Auto'}
                 </span>
-                <AgentStatusBadge compact />
               </div>
             </>
           )}
