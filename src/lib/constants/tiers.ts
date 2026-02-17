@@ -48,6 +48,16 @@ export const TIER_PRICES: Record<SubscriptionTier, number> = {
 };
 
 /**
+ * Max team members per tier
+ */
+export const TIER_MAX_MEMBERS: Record<SubscriptionTier, number> = {
+  free: 1,
+  pro: 5,
+  max: 999,       // Unlimited
+  enterprise: 999, // Unlimited
+};
+
+/**
  * Get tier from token limit
  */
 export function getTierFromLimit(limit: number): SubscriptionTier {

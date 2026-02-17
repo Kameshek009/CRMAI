@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getAccountId } from "@/lib/crm/helpers";
 import { createTeamSchema } from "@/lib/crm/team-validation";
+import { TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
+import type { SubscriptionTier } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,13 +26,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: rpcError.message }, { status: 500 });
     }
 
-    // Update description if provided
+    // Get account tier to set correct max_members
+    const { data: account } = await supabase
+      .from("accounts")
+      .select("tier")
+      .eq("id", accountId)
+      .single();
+
+    const tier = (account?.tier || "free") as SubscriptionTier;
+    const maxMembers = TIER_MAX_MEMBERS[tier] || TIER_MAX_MEMBERS.free;
+
+    // Update team with correct max_members and description
+    const updateData: Record<string, unknown> = { max_members: maxMembers };
     if (parsed.data.description) {
-      await supabase
-        .from("teams")
-        .update({ description: parsed.data.description })
-        .eq("id", teamId);
+      updateData.description = parsed.data.description;
     }
+
+    await supabase
+      .from("teams")
+      .update(updateData)
+      .eq("id", teamId);
 
     const { data: team } = await supabase
       .from("teams")

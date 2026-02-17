@@ -22,7 +22,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getCheckoutSession } from "@/lib/stripe/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
+import { TIER_TOKEN_LIMITS, TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
 import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 
@@ -107,6 +107,13 @@ export async function GET(request: NextRequest) {
               logger.error("Checkout", "[Verify] FALLBACK: Database update failed:", updateError);
             } else {
               logger.info("Checkout", `[Verify] FALLBACK: Successfully updated account ${accountId} to ${targetTier}`);
+
+              // Update max_members on all teams owned by this account
+              const maxMembers = TIER_MAX_MEMBERS[targetTier] || TIER_MAX_MEMBERS.free;
+              await supabase
+                .from("teams")
+                .update({ max_members: maxMembers })
+                .eq("owner_account_id", accountId);
             }
           } else {
             logger.info("Checkout", `[Verify] Account ${accountId} already has tier=${targetTier}, no update needed`);

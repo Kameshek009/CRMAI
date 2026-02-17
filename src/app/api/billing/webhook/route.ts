@@ -14,8 +14,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe, getTierFromPriceId, CREDIT_AMOUNTS, TIER_TOKEN_LIMITS } from "@/lib/stripe/server";
+import { TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import type Stripe from "stripe";
+import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 
 const relevantEvents = new Set([
@@ -176,6 +178,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     logger.info("Webhook", `[Webhook] Successfully updated account ${account.id} to tier="${tier}" with token_limit=${tokenLimit}`);
+
+    // Update max_members on all teams owned by this account
+    const maxMembers = TIER_MAX_MEMBERS[tier as SubscriptionTier] || TIER_MAX_MEMBERS.free;
+    await supabase
+      .from("teams")
+      .update({ max_members: maxMembers })
+      .eq("owner_account_id", account.id);
+
+    logger.info("Webhook", `[Webhook] Updated team max_members to ${maxMembers} for account ${account.id}`);
 
     // Log activity
     await supabase.from("activity_logs").insert({
@@ -338,6 +349,17 @@ async function handleSubscriptionChange(
     return;
   }
 
+  // Update max_members on all teams owned by this account
+  if (oldTier !== tier) {
+    const maxMembers = TIER_MAX_MEMBERS[tier as SubscriptionTier] || TIER_MAX_MEMBERS.free;
+    await supabase
+      .from("teams")
+      .update({ max_members: maxMembers })
+      .eq("owner_account_id", account.id);
+
+    logger.info("Webhook", `[Webhook] Updated team max_members to ${maxMembers} for account ${account.id}`);
+  }
+
   // Log activity if tier actually changed
   if (oldTier !== tier) {
     const eventTypeLog = isUpgrade ? "tier_upgraded" : isDowngrade ? "tier_downgraded" : "info";
@@ -446,6 +468,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     logger.error("Webhook", "[Webhook] Failed to downgrade account:", updateError);
     return;
   }
+
+  // Downgrade max_members on all teams owned by this account
+  await supabase
+    .from("teams")
+    .update({ max_members: TIER_MAX_MEMBERS.free })
+    .eq("owner_account_id", account.id);
 
   // Log activity
   await supabase.from("activity_logs").insert({
