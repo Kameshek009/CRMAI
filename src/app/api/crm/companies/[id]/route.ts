@@ -12,7 +12,7 @@ export async function GET(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "companies", "read");
+    const permError = requirePermission(context.permissions, "companies", "read", context.isDirector);
     if (permError) return permError;
 
     const { id } = await params;
@@ -69,7 +69,7 @@ export async function PATCH(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "companies", "update");
+    const permError = requirePermission(context.permissions, "companies", "update", context.isDirector);
     if (permError) return permError;
 
     const { id } = await params;
@@ -120,7 +120,7 @@ export async function DELETE(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "companies", "delete");
+    const permError = requirePermission(context.permissions, "companies", "delete", context.isDirector);
     if (permError) return permError;
 
     const { id } = await params;

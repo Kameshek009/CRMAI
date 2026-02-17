@@ -13,7 +13,7 @@ export async function POST() {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "contacts", "write");
+    const permError = requirePermission(context.permissions, "contacts", "write", context.isDirector);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();

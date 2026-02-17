@@ -9,7 +9,7 @@ export async function GET() {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "pipeline", "read");
+    const permError = requirePermission(context.permissions, "pipeline", "read", context.isDirector);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "pipeline", "manage");
+    const permError = requirePermission(context.permissions, "pipeline", "manage", context.isDirector);
     if (permError) return permError;
 
     const body = await request.json();
@@ -103,7 +103,7 @@ export async function PATCH(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "pipeline", "manage");
+    const permError = requirePermission(context.permissions, "pipeline", "manage", context.isDirector);
     if (permError) return permError;
 
     const body = await request.json();

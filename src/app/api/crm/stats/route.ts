@@ -7,7 +7,7 @@ export async function GET() {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "analytics", "read");
+    const permError = requirePermission(context.permissions, "analytics", "read", context.isDirector);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();

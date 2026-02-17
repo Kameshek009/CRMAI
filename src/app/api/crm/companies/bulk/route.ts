@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { action, ids } = parsed.data;
 
     if (action === "delete") {
-      const permError = requirePermission(context.permissions, "companies", "delete");
+      const permError = requirePermission(context.permissions, "companies", "delete", context.isDirector);
       if (permError) return permError;
 
       const { error: dbError } = await supabase

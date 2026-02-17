@@ -11,7 +11,7 @@ export async function PATCH(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "deals", "update");
+    const permError = requirePermission(context.permissions, "deals", "update", context.isDirector);
     if (permError) return permError;
 
     const { id } = await params;

@@ -97,13 +97,16 @@ export async function getTeamContext(): Promise<
 }
 
 /**
- * Check if a user has a specific permission
+ * Check if a user has a specific permission.
+ * Directors always have all permissions.
  */
 export function hasPermission(
   permissions: TeamPermissions,
   resource: keyof TeamPermissions,
-  action: string
+  action: string,
+  isDirector?: boolean
 ): boolean {
+  if (isDirector) return true;
   const resourcePerms = permissions[resource];
   if (!resourcePerms) return false;
   return (resourcePerms as Record<string, boolean>)[action] === true;
@@ -111,13 +114,15 @@ export function hasPermission(
 
 /**
  * Return 403 response if permission is denied, null if allowed.
+ * Directors always pass.
  */
 export function requirePermission(
   permissions: TeamPermissions,
   resource: keyof TeamPermissions,
-  action: string
+  action: string,
+  isDirector?: boolean
 ): NextResponse | null {
-  if (!hasPermission(permissions, resource, action)) {
+  if (!hasPermission(permissions, resource, action, isDirector)) {
     return NextResponse.json(
       { success: false, error: "Permission denied" },
       { status: 403 }

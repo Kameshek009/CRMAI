@@ -16,7 +16,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage");
+    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
     if (permError) return permError;
 
     const body = await request.json();
@@ -39,8 +39,8 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Role not found" }, { status: 404 });
     }
 
-    if (existing.is_system && parsed.data.name) {
-      return NextResponse.json({ success: false, error: "Cannot rename system roles" }, { status: 400 });
+    if (existing.is_system) {
+      return NextResponse.json({ success: false, error: "Cannot modify system roles" }, { status: 400 });
     }
 
     const { data, error: dbError } = await supabase
@@ -74,7 +74,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage");
+    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();

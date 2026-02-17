@@ -21,7 +21,7 @@ interface ConnectionData {
 }
 
 export default function TeamConnectionsPage() {
-  const { currentTeam, isDirector } = useTeam();
+  const { currentTeam, isDirector, can } = useTeam();
   const [connections, setConnections] = useState<ConnectionData[]>([]);
   const [connectCode, setConnectCode] = useState("");
   const [connecting, setConnecting] = useState(false);
@@ -81,7 +81,7 @@ export default function TeamConnectionsPage() {
     <PageContainer>
       <PageHeader title="Connections" description="Connect with other teams" />
 
-      {isDirector && currentTeam && (
+      {can("team_settings.manage") && currentTeam && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-base">Your Connection Code</CardTitle>
@@ -95,7 +95,7 @@ export default function TeamConnectionsPage() {
         </Card>
       )}
 
-      {isDirector && (
+      {can("team_settings.manage") && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-base">Connect to Another Team</CardTitle>
@@ -143,7 +143,7 @@ export default function TeamConnectionsPage() {
                 }>
                   {conn.status}
                 </Badge>
-                {isIncoming && conn.status === "pending" && isDirector && (
+                {isIncoming && conn.status === "pending" && can("team_settings.manage") && (
                   <div className="flex gap-1">
                     <Button size="icon" variant="ghost" className="size-8 text-green-600" onClick={() => handleRespond(conn.id, "accepted")}>
                       <Check className="size-4" />

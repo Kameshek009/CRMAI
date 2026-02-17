@@ -46,7 +46,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage");
+    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
     if (permError) return permError;
 
     const body = await request.json();

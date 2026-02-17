@@ -15,15 +15,19 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage");
+    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
 
-    // Generate new code via SQL
+    // Generate cryptographically strong invite code
+    const bytes = new Uint8Array(9);
+    crypto.getRandomValues(bytes);
+    const code = Array.from(bytes, (b) => b.toString(36).padStart(2, "0")).join("").slice(0, 12);
+
     const { data, error: dbError } = await supabase
       .from("teams")
-      .update({ invite_code: crypto.randomUUID().slice(0, 12) })
+      .update({ invite_code: code })
       .eq("id", id)
       .select("invite_code")
       .single();

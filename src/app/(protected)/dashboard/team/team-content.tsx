@@ -5,11 +5,12 @@ import { PageContainer, PageHeader } from "@/components/dashboard/page-container
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteCodeDisplay } from "@/components/team/invite-code-display";
 import { RoleBadge } from "@/components/team/role-badge";
-import { Users, Shield, Link2, Kanban } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Users, Shield, Link2, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export function TeamContent() {
-  const { currentTeam, teams, myRole, isDirector } = useTeam();
+  const { currentTeam, teams, myRole, isDirector, can } = useTeam();
   const [inviteCode, setInviteCode] = useState(currentTeam?.inviteCode || "");
   const [memberCount, setMemberCount] = useState<number | null>(null);
 
@@ -43,7 +44,16 @@ export function TeamContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{memberCount ?? "..."}</div>
-            <p className="text-xs text-muted-foreground">Max {currentTeam.maxMembers}</p>
+            <div className="mt-2 space-y-1">
+              {memberCount !== null && currentTeam.maxMembers <= 1000 ? (
+                <>
+                  <Progress value={Math.round((memberCount / currentTeam.maxMembers) * 100)} className="h-1.5" />
+                  <p className="text-xs text-muted-foreground">{memberCount} / {currentTeam.maxMembers} slots</p>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">Unlimited</p>
+              )}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -52,9 +62,12 @@ export function TeamContent() {
             <Shield className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{myRole?.name || "—"}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold">{myRole?.name || "—"}</span>
+              {currentMembership?.isDirector && <Crown className="size-4 text-amber-500" />}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Priority {myRole?.priority || 0}
+              {currentMembership?.isDirector ? "Director" : `Priority ${myRole?.priority || 0}`}
             </p>
           </CardContent>
         </Card>
@@ -70,19 +83,19 @@ export function TeamContent() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
-            <Kanban className="size-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Joined</CardTitle>
+            <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{currentMembership?.isDirector ? "Director" : "Member"}</div>
-            <p className="text-xs text-muted-foreground">
-              Joined {currentMembership?.joinedAt ? new Date(currentMembership.joinedAt).toLocaleDateString() : "—"}
-            </p>
+            <div className="text-2xl font-bold">
+              {currentMembership?.joinedAt ? new Date(currentMembership.joinedAt).toLocaleDateString() : "—"}
+            </div>
+            <p className="text-xs text-muted-foreground">Member since</p>
           </CardContent>
         </Card>
       </div>
 
-      {isDirector && (
+      {can("team_settings.manage") && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="text-base">Invite Code</CardTitle>

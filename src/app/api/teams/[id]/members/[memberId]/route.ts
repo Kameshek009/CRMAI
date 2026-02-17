@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateMemberRoleSchema } from "@/lib/crm/team-validation";
 
 export async function PATCH(
@@ -12,9 +12,12 @@ export async function PATCH(
     if (error) return error;
 
     const { id, memberId } = await params;
-    if (context.teamId !== id || !context.isDirector) {
-      return NextResponse.json({ success: false, error: "Only directors can change roles" }, { status: 403 });
+    if (context.teamId !== id) {
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
+
+    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    if (permError) return permError;
 
     const body = await request.json();
     const parsed = updateMemberRoleSchema.safeParse(body);

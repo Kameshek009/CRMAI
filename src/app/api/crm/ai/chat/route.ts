@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "ai_chat", "allowed");
+    const permError = requirePermission(context.permissions, "ai_chat", "allowed", context.isDirector);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();

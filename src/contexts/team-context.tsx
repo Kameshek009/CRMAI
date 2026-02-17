@@ -173,6 +173,8 @@ export function TeamProvider({ children }: TeamProviderProps) {
 
   const can = useCallback(
     (permission: string): boolean => {
+      // Directors always have all permissions
+      if (isDirector) return true;
       if (!permissions) return false;
       // permission format: "resource.action" e.g. "contacts.create", "pipeline.manage"
       const [resource, action] = permission.split(".");
@@ -180,7 +182,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
       if (!resourcePerms) return false;
       return (resourcePerms as Record<string, boolean>)[action] === true;
     },
-    [permissions]
+    [permissions, isDirector]
   );
 
   // Fetch on mount when account is available

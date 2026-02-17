@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { action, ids } = parsed.data;
 
     if (action === "delete") {
-      const permError = requirePermission(context.permissions, "contacts", "delete");
+      const permError = requirePermission(context.permissions, "contacts", "delete", context.isDirector);
       if (permError) return permError;
 
       const { error: dbError } = await supabase
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "update_status") {
-      const permError = requirePermission(context.permissions, "contacts", "update");
+      const permError = requirePermission(context.permissions, "contacts", "update", context.isDirector);
       if (permError) return permError;
 
       const { status } = parsed.data;

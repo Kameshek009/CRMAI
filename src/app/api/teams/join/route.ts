@@ -27,15 +27,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid invite code" }, { status: 404 });
     }
 
-    // Check if already a member
+    // Check if already a member (including suspended)
     const { data: existing } = await supabase
       .from("team_members")
-      .select("id")
+      .select("id, status")
       .eq("team_id", team.id)
       .eq("account_id", accountId)
       .single();
 
     if (existing) {
+      // Reactivate if previously kicked (suspended)
+      if (existing.status === "suspended") {
+        await supabase
+          .from("team_members")
+          .update({ status: "active" })
+          .eq("id", existing.id);
+
+        // Switch to this team
+        await supabase
+          .from("accounts")
+          .update({ current_team_id: team.id })
+          .eq("id", accountId);
+
+        return NextResponse.json({ success: true, data: { teamId: team.id, teamName: team.name } });
+      }
       return NextResponse.json({ success: false, error: "Already a member of this team" }, { status: 409 });
     }
 

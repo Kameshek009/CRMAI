@@ -15,7 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserMinus, Crown } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { UserMinus, Crown, Users } from "lucide-react";
 import { toast } from "sonner";
 
 interface MemberData {
@@ -27,7 +29,7 @@ interface MemberData {
 }
 
 export default function TeamMembersPage() {
-  const { currentTeam, isDirector } = useTeam();
+  const { currentTeam, can } = useTeam();
   const [members, setMembers] = useState<MemberData[]>([]);
   const [roles, setRoles] = useState<{ id: string; name: string; color: string }[]>([]);
   const [kickTarget, setKickTarget] = useState<{ id: string; name: string } | null>(null);
@@ -99,9 +101,31 @@ export default function TeamMembersPage() {
     return m.accounts?.email || "Unknown";
   };
 
+  const maxMembers = currentTeam?.maxMembers || 0;
+  const capacityPercent = maxMembers > 0 ? Math.round((members.length / maxMembers) * 100) : 0;
+  const isNearFull = capacityPercent >= 80;
+
   return (
     <PageContainer>
-      <PageHeader title="Members" description={`${members.length} team members`} />
+      <PageHeader title="Members" description={`${members.length} team members`}>
+        <Badge variant="outline" className="gap-1.5">
+          <Users className="size-3" />
+          {members.length} / {maxMembers > 1000 ? "∞" : maxMembers}
+        </Badge>
+      </PageHeader>
+
+      {/* Capacity indicator */}
+      {maxMembers <= 1000 && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Team capacity</span>
+            <span className={isNearFull ? "text-amber-500 font-medium" : ""}>
+              {capacityPercent}%
+            </span>
+          </div>
+          <Progress value={capacityPercent} className="h-1.5" />
+        </div>
+      )}
 
       <div className="space-y-2">
         {members.map((member) => (
@@ -125,7 +149,7 @@ export default function TeamMembersPage() {
                 </span>
               </div>
 
-              {isDirector && !member.is_director ? (
+              {can("team_settings.manage") && !member.is_director ? (
                 <Select
                   value={member.team_roles.id}
                   onValueChange={(val) => handleRoleChange(member.id, val)}
@@ -147,7 +171,7 @@ export default function TeamMembersPage() {
                 {new Date(member.joined_at).toLocaleDateString()}
               </span>
 
-              {isDirector && !member.is_director && (
+              {can("team_settings.manage") && !member.is_director && (
                 <Button
                   variant="ghost"
                   size="icon"

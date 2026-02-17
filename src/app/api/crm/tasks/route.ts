@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "tasks", "read");
+    const permError = requirePermission(context.permissions, "tasks", "read", context.isDirector);
     if (permError) return permError;
 
     const { searchParams } = new URL(request.url);
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "tasks", "create");
+    const permError = requirePermission(context.permissions, "tasks", "create", context.isDirector);
     if (permError) return permError;
 
     const body = await request.json();

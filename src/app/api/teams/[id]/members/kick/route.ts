@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { kickMemberSchema } from "@/lib/crm/team-validation";
 
 export async function POST(
@@ -12,9 +12,12 @@ export async function POST(
     if (error) return error;
 
     const { id } = await params;
-    if (context.teamId !== id || !context.isDirector) {
-      return NextResponse.json({ success: false, error: "Only directors can kick members" }, { status: 403 });
+    if (context.teamId !== id) {
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
+
+    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    if (permError) return permError;
 
     const body = await request.json();
     const parsed = kickMemberSchema.safeParse(body);
@@ -45,9 +48,10 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Cannot kick another director" }, { status: 403 });
     }
 
+    // Soft-delete: set status to suspended instead of hard delete
     const { error: dbError } = await supabase
       .from("team_members")
-      .delete()
+      .update({ status: "suspended" })
       .eq("id", parsed.data.member_id)
       .eq("team_id", id);
 
