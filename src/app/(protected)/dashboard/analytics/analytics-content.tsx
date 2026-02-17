@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -147,11 +146,7 @@ function MetricCard({
   delay?: number;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
-    >
+    <div>
       <Card className="glass-card gradient-border-card stat-card-hover">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
@@ -175,19 +170,9 @@ function MetricCard({
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12, scale: 0.98 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
-};
 
 export function AnalyticsContent() {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -368,14 +353,9 @@ export function AnalyticsContent() {
       </div>
 
       {/* Charts grid */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid gap-4 lg:grid-cols-2"
-      >
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Monthly Revenue Comparison */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -408,10 +388,10 @@ export function AnalyticsContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Pipeline Funnel */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -452,10 +432,10 @@ export function AnalyticsContent() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Daily Activity Trend */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -495,10 +475,10 @@ export function AnalyticsContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Win/Loss Analysis */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -546,10 +526,10 @@ export function AnalyticsContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Contact Distribution */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -598,10 +578,10 @@ export function AnalyticsContent() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Task Breakdown */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -647,10 +627,10 @@ export function AnalyticsContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Activity by Type */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -685,10 +665,10 @@ export function AnalyticsContent() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Company Health */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -747,10 +727,10 @@ export function AnalyticsContent() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Top Deals */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -789,10 +769,10 @@ export function AnalyticsContent() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Contact Sources */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -834,16 +814,12 @@ export function AnalyticsContent() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* AI Insights */}
       {insights.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-        >
+        <div>
           <Card className="glass-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -871,7 +847,7 @@ export function AnalyticsContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
     </PageContainer>
   );

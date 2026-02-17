@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -208,7 +207,7 @@ export function CompaniesContent() {
           {(Object.entries(healthStats) as [keyof typeof healthLabels, number][]).map(([key, value], i) => {
             const info = healthLabels[key];
             return (
-              <motion.div key={key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
+              <div key={key}>
                 <Card className="glass-card">
                   <CardContent className="p-3 flex items-center gap-3">
                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border", info.color)}>
@@ -220,7 +219,7 @@ export function CompaniesContent() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -256,7 +255,7 @@ export function CompaniesContent() {
         </div>
 
         {showFilters && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3">
             {industries.length > 0 && (
               <div className="flex gap-1 flex-wrap">
                 <span className="text-xs text-muted-foreground self-center mr-1">
@@ -296,7 +295,7 @@ export function CompaniesContent() {
                 </Badge>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
 
