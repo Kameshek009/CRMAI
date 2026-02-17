@@ -5,6 +5,9 @@ import { NextResponse } from "next/server";
 const isPublicRoute = createRouteMatcher([
   "/",
   "/pricing",
+  "/privacy",
+  "/terms",
+  "/security",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/billing_disabled/webhook",
