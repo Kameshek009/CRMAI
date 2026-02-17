@@ -74,8 +74,12 @@ export async function POST(request: NextRequest) {
       history?: { role: "user" | "assistant"; content: string }[];
     };
 
-    if (!message) {
+    if (!message || typeof message !== "string") {
       return NextResponse.json({ success: false, error: "Message required" }, { status: 400 });
+    }
+
+    if (message.length > 10000) {
+      return NextResponse.json({ success: false, error: "Message too long (max 10000 characters)" }, { status: 400 });
     }
 
     const messages = [

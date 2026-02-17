@@ -245,7 +245,11 @@ export function TeamProvider({ children }: TeamProviderProps) {
           fetchTeams();
         }
       )
-      .subscribe();
+      .subscribe((status: string, err?: Error) => {
+        if (err) {
+          console.error("[TeamContext] Realtime subscription error:", err.message);
+        }
+      });
 
     channelRef.current = channel;
 

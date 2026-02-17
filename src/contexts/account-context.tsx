@@ -273,8 +273,11 @@ export function AccountProvider({ children }: AccountProviderProps) {
           }
         }
       )
-      .subscribe((status: string) => {
+      .subscribe((status: string, err?: Error) => {
         setIsConnected(status === "SUBSCRIBED");
+        if (err) {
+          console.error("[AccountContext] Realtime subscription error:", err.message);
+        }
       });
 
     channelRef.current = channel;

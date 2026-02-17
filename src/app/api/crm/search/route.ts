@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext } from "@/lib/crm/team-helpers";
+import { sanitizeLike } from "@/lib/crm/helpers";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,8 +21,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Query too long" }, { status: 400 });
     }
 
-    // Sanitize query for ILIKE to prevent wildcard injection
-    const sq = q.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+    const sq = sanitizeLike(q);
 
     const supabase = createSupabaseAdmin();
     const results: { type: string; id: string; title: string; subtitle: string }[] = [];
@@ -83,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: results });
   } catch (error) {
-    console.error("[API crm/search GET]", error);
+    logger.error("Search", "GET error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

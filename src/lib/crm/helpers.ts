@@ -80,6 +80,13 @@ export function getContactDisplayName(firstName: string, lastName?: string | nul
 }
 
 /**
+ * Escape special LIKE/ILIKE characters to prevent wildcard injection
+ */
+export function sanitizeLike(input: string): string {
+  return input.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+}
+
+/**
  * Parse pagination params from URL search params
  */
 export function parsePagination(searchParams: URLSearchParams) {

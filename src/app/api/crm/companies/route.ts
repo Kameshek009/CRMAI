@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { parsePagination } from "@/lib/crm/helpers";
+import { parsePagination, sanitizeLike } from "@/lib/crm/helpers";
 import { createCompanySchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
-
-/** Escape special LIKE/ILIKE characters to prevent injection */
-function sanitizeLike(input: string): string {
-  return input.replace(/[%_\\]/g, (ch) => `\\${ch}`);
-}
 
 export async function GET(request: NextRequest) {
   try {

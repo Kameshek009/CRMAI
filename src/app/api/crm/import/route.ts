@@ -2,16 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
 
-interface CsvContact {
-  first_name: string;
-  last_name?: string;
-  email?: string;
-  phone?: string;
-  title?: string;
-  company?: string;
-  source?: string;
-}
+const csvContactSchema = z.object({
+  first_name: z.string().min(1).max(100),
+  last_name: z.string().max(100).optional(),
+  email: z.string().email().max(255).optional().or(z.literal("")),
+  phone: z.string().max(50).optional(),
+  title: z.string().max(200).optional(),
+  company: z.string().max(200).optional(),
+  source: z.string().max(50).optional(),
+});
+
+const importSchema = z.object({
+  contacts: z.array(csvContactSchema).min(1, "No contacts provided").max(1000, "Maximum 1000 contacts per import"),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,30 +27,12 @@ export async function POST(request: NextRequest) {
     if (permError) return permError;
 
     const body = await request.json();
-    const { contacts } = body as { contacts: CsvContact[] };
-
-    if (!Array.isArray(contacts) || contacts.length === 0) {
-      return NextResponse.json({ success: false, error: "No contacts provided" }, { status: 400 });
+    const parsed = importSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: "Invalid import data", details: parsed.error.issues }, { status: 400 });
     }
 
-    if (contacts.length > 1000) {
-      return NextResponse.json({ success: false, error: "Maximum 1000 contacts per import" }, { status: 400 });
-    }
-
-    // Validate email format before any DB operations
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const invalidEmails: string[] = [];
-    for (const c of contacts) {
-      if (c.email && !emailRegex.test(c.email)) {
-        invalidEmails.push(c.email);
-      }
-    }
-    if (invalidEmails.length > 0) {
-      return NextResponse.json(
-        { success: false, error: `Invalid email format: ${invalidEmails.slice(0, 5).join(", ")}${invalidEmails.length > 5 ? ` and ${invalidEmails.length - 5} more` : ""}` },
-        { status: 400 }
-      );
-    }
+    const { contacts } = parsed.data;
 
     const supabase = createSupabaseAdmin();
 
