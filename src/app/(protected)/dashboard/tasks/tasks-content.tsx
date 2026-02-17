@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -357,7 +356,7 @@ export function TasksContent() {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <div>
           <Card className={cn("glass-card", stats.overdue > 0 && "border-red-500/30")}>
             <CardContent className="p-3 flex items-center gap-3">
               <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", stats.overdue > 0 ? "bg-red-500/10" : "bg-muted")}>
@@ -369,8 +368,8 @@ export function TasksContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        </div>
+        <div>
           <Card className="glass-card">
             <CardContent className="p-3 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10">
@@ -382,8 +381,8 @@ export function TasksContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        </div>
+        <div>
           <Card className="glass-card">
             <CardContent className="p-3 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500/10">
@@ -395,8 +394,8 @@ export function TasksContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        </div>
+        <div>
           <Card className="glass-card">
             <CardContent className="p-3 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/10">
@@ -408,7 +407,7 @@ export function TasksContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -456,7 +455,7 @@ export function TasksContent() {
 
         {/* Advanced filters */}
         {showFilters && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3">
             <div className="flex gap-1">
               <span className="text-xs text-muted-foreground self-center mr-1">Priority:</span>
               {priorityFilters.map((f) => (
@@ -483,7 +482,7 @@ export function TasksContent() {
                 </Badge>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
 
