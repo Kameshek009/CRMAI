@@ -8,7 +8,7 @@
   /* Animations */
   --animate-spin: spin 1s linear infinite;
 
-  /* Generous Spacing System (matching serotonin.to) */
+  /* 32-Grid Spacing System (base: 8px, primary: 32px) */
   --spacing-0: 0px;
   --spacing-1: 4px;
   --spacing-2: 8px;
@@ -58,6 +58,13 @@
   --radius-2xl: 24px;
   --radius-full: 9999px;
 }
+
+/* ── 32-Grid Spacing Utilities ── */
+.grid-page     { padding: 32px; }
+.grid-section  { display: flex; flex-direction: column; gap: 32px; }
+.grid-card     { padding: 24px; }
+.grid-gap      { gap: 16px; }
+.grid-gap-sm   { gap: 8px; }
 
 /* Light Theme — white + soft orange */
 :root {

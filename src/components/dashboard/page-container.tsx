@@ -11,7 +11,7 @@ interface PageContainerProps {
 
 export function PageContainer({ children, className }: PageContainerProps) {
   return (
-    <div className={cn("p-6 sm:p-8 lg:p-10 page-gradient-bg min-h-full", className)}>
+    <div className={cn("p-8 page-gradient-bg min-h-full", className)}>
       <div className="mx-auto max-w-5xl space-y-8 relative z-[1]">
         {children}
       </div>
@@ -62,7 +62,7 @@ interface SectionProps {
 
 export function Section({ children, className, title, description }: SectionProps) {
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn("space-y-8", className)}>
       {(title || description) && (
         <div className="space-y-1.5 section-header-line">
           {title && <h2 className="text-lg font-semibold tracking-tight">{title}</h2>}

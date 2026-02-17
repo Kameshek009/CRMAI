@@ -282,7 +282,7 @@ export function ChatsContent() {
 
   if (accountLoading) {
     return (
-      <div className="space-y-4 p-4 sm:p-6">
+      <div className="space-y-8 p-8">
         <Skeleton className="h-8 sm:h-10 w-32 sm:w-64" />
         <div className="grid gap-2 sm:gap-3">
           {[1, 2, 3].map((i) => (
@@ -295,7 +295,7 @@ export function ChatsContent() {
 
   return (
     <motion.div
-      className="space-y-4 p-4 sm:space-y-6 sm:p-6"
+      className="space-y-8 p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

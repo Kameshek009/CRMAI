@@ -372,12 +372,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
   if (isLoading) {
     return (
-      <div className="p-6 sm:p-8 space-y-6 dashboard-gradient-bg">
+      <div className="p-8 space-y-8 dashboard-gradient-bg">
         <div className="space-y-2">
           <Skeleton className="h-8 w-80 rounded-lg" />
           <Skeleton className="h-4 w-56 rounded-lg" />
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-[120px] rounded-xl" />
           ))}
@@ -399,10 +399,10 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="header-shimmer border-b border-border px-4 sm:px-6 py-5"
+        className="header-shimmer border-b border-border px-8 py-5"
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -467,9 +467,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       </motion.div>
 
       {/* Overview content with gradient background */}
-      <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-5 dashboard-gradient-bg">
+      <div className="flex-1 overflow-auto p-8 space-y-8 dashboard-gradient-bg">
         {/* Stats row - animated cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <AnimatedStatCard
             href="/dashboard/pipeline"
             label="Open Deals"
@@ -521,7 +521,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         </div>
 
         {/* Extra metrics row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <AnimatedStatCard
             href="/dashboard/analytics"
             label="Win Rate"
@@ -1118,7 +1118,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           >
             <Card className="border-landing-accent/30 bg-gradient-to-r from-landing-accent/5 via-landing-accent/10 to-landing-accent/5">
               <CardContent className="p-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center shrink-0">
                     <Sparkles className="w-4.5 h-4.5 text-landing-accent-foreground" />
                   </div>
