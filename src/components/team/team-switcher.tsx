@@ -77,7 +77,7 @@ export function TeamSwitcher() {
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/join-team" className="gap-2">
+              <Link href="/dashboard/account" className="gap-2">
                 <Plus className="size-4" />
                 Create or Join Team
               </Link>
