@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "50");
-    const offset = parseInt(searchParams.get("offset") || "0");
-    const days = parseInt(searchParams.get("days") || "30");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
+    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
+    const days = Math.min(parseInt(searchParams.get("days") || "30"), 365);
 
     // Get account
     const { data: account, error: accountError } = await createSupabaseAdmin()

@@ -18,7 +18,7 @@ const permissionObj = z.object({
   delete: z.boolean().optional(),
   manage: z.boolean().optional(),
   allowed: z.boolean().optional(),
-}).passthrough();
+}).strict();
 
 export const createRoleSchema = z.object({
   name: z.string().min(1).max(50),

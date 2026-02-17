@@ -79,7 +79,7 @@ export async function POST(_request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Billing portal error:", error);
+    console.error("[BillingPortal]", error);
     return NextResponse.json(
       { success: false, error: "Failed to create portal session" },
       { status: 500 }
