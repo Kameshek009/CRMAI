@@ -403,7 +403,7 @@ export default function ChatDetailPage() {
             </span>
           </div>
           {visionBoard.current_task && (
-            <p className="text-xs text-muted-foreground mt-1 truncate">
+            <p className="text-xs text-muted-foreground mt-1 truncate max-w-3xl mx-auto">
               Current: {visionBoard.current_task}
             </p>
           )}

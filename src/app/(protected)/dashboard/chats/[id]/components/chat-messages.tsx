@@ -214,8 +214,8 @@ export function ChatMessages({
         ))}
 
         {/* Typing indicator */}
-        <AnimatePresence>
-          {isSending && chat.mode === 'chat' && <TypingIndicator />}
+        <AnimatePresence mode="wait">
+          {isSending && chat.mode === 'chat' && <TypingIndicator key="typing" />}
         </AnimatePresence>
 
         <div ref={messagesEndRef} />

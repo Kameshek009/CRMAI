@@ -90,8 +90,12 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
         <span className="code-block-lang">{language || 'code'}</span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 text-xs px-2 py-1 rounded transition-colors"
-          style={{ color: copied ? '#4ade80' : '#8b8fa3', background: 'transparent' }}
+          className={cn(
+            'flex items-center gap-1.5 text-xs px-2 py-1 rounded transition-colors',
+            copied
+              ? 'text-green-400'
+              : 'text-[#8b8fa3] hover:text-white hover:bg-white/10'
+          )}
         >
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? 'Copied' : 'Copy'}
