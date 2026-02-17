@@ -105,7 +105,14 @@ export async function POST(request: NextRequest) {
 
     if (toolCalls && toolCalls.length > 0) {
       for (const tc of toolCalls) {
-        const args = JSON.parse(tc.function.arguments);
+        let args;
+        try {
+          args = JSON.parse(tc.function.arguments);
+        } catch {
+          logger.error("CrmAI", "Failed to parse tool arguments", tc.function);
+          toolResults.push({ name: tc.function.name, result: "Error: invalid tool call format" });
+          continue;
+        }
         const result = await executeCrmToolCall(context.accountId, context.teamId, tc.function.name, args);
         toolResults.push({ name: tc.function.name, ...result });
       }
@@ -134,35 +141,35 @@ export async function POST(request: NextRequest) {
       responseContent = choice?.message?.content || "";
     }
 
-    // Deduct tokens from TEAM (not account)
-    if (totalTokensUsed > 0) {
-      const newTokensUsed = team.tokens_used + totalTokensUsed;
+    // Deduct tokens from TEAM atomically (prevents race conditions)
+    let finalTokensUsed = team.tokens_used;
+    let finalTokenLimit = team.token_limit;
 
+    if (totalTokensUsed > 0) {
       const dayStart = new Date(team.week_start_date);
       const now = new Date();
       const hoursSinceDayStart =
         (now.getTime() - dayStart.getTime()) / (1000 * 60 * 60);
 
-      let newDailyTokensUsed: number;
-      let newDayStartDate: string;
+      const newDailyTokensUsed = hoursSinceDayStart >= 24
+        ? totalTokensUsed
+        : team.weekly_tokens_used + totalTokensUsed;
+      const newDayStartDate = hoursSinceDayStart >= 24
+        ? now.toISOString()
+        : team.week_start_date;
 
-      if (hoursSinceDayStart >= 24) {
-        newDailyTokensUsed = totalTokensUsed;
-        newDayStartDate = now.toISOString();
-      } else {
-        newDailyTokensUsed = team.weekly_tokens_used + totalTokensUsed;
-        newDayStartDate = team.week_start_date;
+      // Atomic increment via RPC
+      const { data: rpcResult } = await supabase.rpc("increment_team_tokens", {
+        p_team_id: context.teamId,
+        p_tokens: totalTokensUsed,
+        p_daily_tokens: newDailyTokensUsed,
+        p_new_day_start: newDayStartDate,
+      });
+
+      if (rpcResult && rpcResult[0]) {
+        finalTokensUsed = rpcResult[0].new_tokens_used;
+        finalTokenLimit = rpcResult[0].token_limit;
       }
-
-      // Update team tokens
-      await supabase
-        .from("teams")
-        .update({
-          tokens_used: newTokensUsed,
-          weekly_tokens_used: newDailyTokensUsed,
-          week_start_date: newDayStartDate,
-        })
-        .eq("id", context.teamId);
 
       // Record in usage_records
       await supabase.from("usage_records").insert({
@@ -185,8 +192,8 @@ export async function POST(request: NextRequest) {
         toolResults,
         usage: {
           tokensUsed: totalTokensUsed,
-          teamTokensUsed: team.tokens_used + totalTokensUsed,
-          teamTokenLimit: team.token_limit,
+          teamTokensUsed: finalTokensUsed,
+          teamTokenLimit: finalTokenLimit,
         },
       },
     });

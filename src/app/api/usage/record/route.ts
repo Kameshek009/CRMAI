@@ -53,30 +53,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get team billing data
-    const { data: team, error: teamError } = await supabase
-      .from("teams")
-      .select("id, tokens_used, token_limit")
-      .eq("id", account.current_team_id)
-      .single();
+    // Atomically increment team tokens and check limit
+    const { data: rpcResult, error: rpcError } = await supabase.rpc("increment_team_tokens", {
+      p_team_id: account.current_team_id,
+      p_tokens: tokensConsumed,
+    });
 
-    if (teamError || !team) {
+    if (rpcError) {
+      console.error("Failed to increment team tokens:", rpcError);
       return NextResponse.json(
-        { success: false, error: "Team not found" },
-        { status: 404 }
+        { success: false, error: "Failed to update token count" },
+        { status: 500 }
       );
     }
 
-    // Check if team has enough tokens
-    const newTokensUsed = team.tokens_used + tokensConsumed;
-    if (newTokensUsed > team.token_limit) {
+    const result = rpcResult?.[0];
+    if (!result || !result.allowed) {
       return NextResponse.json(
         {
           success: false,
           error: "Token limit exceeded",
           data: {
-            tokensUsed: team.tokens_used,
-            tokenLimit: team.token_limit,
+            tokensUsed: result?.new_tokens_used || 0,
+            tokenLimit: result?.token_limit || 0,
             tokensRequested: tokensConsumed,
           },
         },
@@ -97,32 +96,14 @@ export async function POST(request: NextRequest) {
 
     if (recordError) {
       console.error("Failed to create usage record:", recordError);
-      return NextResponse.json(
-        { success: false, error: "Failed to record usage" },
-        { status: 500 }
-      );
-    }
-
-    // Update team tokens
-    const { error: updateError } = await supabase
-      .from("teams")
-      .update({ tokens_used: newTokensUsed })
-      .eq("id", team.id);
-
-    if (updateError) {
-      console.error("Failed to update team tokens:", updateError);
-      return NextResponse.json(
-        { success: false, error: "Failed to update token count" },
-        { status: 500 }
-      );
     }
 
     return NextResponse.json({
       success: true,
       data: {
-        tokensUsed: newTokensUsed,
-        tokenLimit: team.token_limit,
-        tokensRemaining: team.token_limit - newTokensUsed,
+        tokensUsed: result.new_tokens_used,
+        tokenLimit: result.token_limit,
+        tokensRemaining: result.token_limit - result.new_tokens_used,
       },
     });
   } catch (error) {

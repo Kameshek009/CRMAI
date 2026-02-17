@@ -213,17 +213,18 @@ export async function POST(request: NextRequest) {
     const toolCalls = choice?.message?.tool_calls;
     const tokensUsed = completion.usage?.total_tokens || 0;
 
-    // 5. Update team's token usage in database
-    const newTokensUsed = team.tokens_used + tokensUsed;
+    // 5. Atomically update team's token usage
+    let finalTokensUsed = team.tokens_used + tokensUsed;
+    let finalTokenLimit = team.token_limit;
 
-    const { error: updateError } = await supabase
-      .from("teams")
-      .update({ tokens_used: newTokensUsed })
-      .eq("id", team.id);
+    const { data: rpcResult } = await supabase.rpc("increment_team_tokens", {
+      p_team_id: team.id,
+      p_tokens: tokensUsed,
+    });
 
-    if (updateError) {
-      console.error("[LLM Chat] Failed to update usage:", updateError.message);
-      // Don't fail the request, just log the error
+    if (rpcResult && rpcResult[0]) {
+      finalTokensUsed = rpcResult[0].new_tokens_used;
+      finalTokenLimit = rpcResult[0].token_limit;
     }
 
     // 6. Return response
@@ -259,9 +260,9 @@ export async function POST(request: NextRequest) {
           total_tokens: tokensUsed,
         },
         account: {
-          tokens_used: newTokensUsed,
-          token_limit: team.token_limit,
-          tokens_remaining: team.token_limit - newTokensUsed,
+          tokens_used: finalTokensUsed,
+          token_limit: finalTokenLimit,
+          tokens_remaining: finalTokenLimit - finalTokensUsed,
         },
       },
     };
