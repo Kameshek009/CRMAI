@@ -288,7 +288,12 @@ export function ContactsContent() {
                 {sourceFilter && <Badge className="ml-1.5 h-4 px-1 text-[9px]">!</Badge>}
               </Button>
             )}
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+              aria-label="Sort contacts by"
+            >
               {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>

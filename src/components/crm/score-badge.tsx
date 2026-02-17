@@ -22,8 +22,17 @@ export function ScoreBadge({ score, label, size = "sm" }: ScoreBadgeProps) {
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference - (score / 100) * circumference;
 
+  const scoreLabel = score >= 70 ? "High" : score >= 40 ? "Medium" : "Low";
+
   return (
-    <div className={cn("score-ring relative", size === "sm" ? "w-9 h-9" : "w-11 h-11")}>
+    <div
+      className={cn("score-ring relative", size === "sm" ? "w-9 h-9" : "w-11 h-11")}
+      role="meter"
+      aria-valuenow={score}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`${label || "Score"}: ${score}% (${scoreLabel})`}
+    >
       <svg width={dimensions} height={dimensions} className="absolute inset-0">
         <circle
           cx={dimensions / 2}

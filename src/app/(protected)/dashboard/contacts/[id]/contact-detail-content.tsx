@@ -87,12 +87,17 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
   const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
+    const safeFetch = (url: string) =>
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : { success: false }))
+        .catch(() => ({ success: false }));
+
     Promise.all([
-      fetch(`/api/crm/contacts/${contactId}`).then((r) => r.json()),
-      fetch(`/api/crm/activities?contact_id=${contactId}&limit=20`).then((r) => r.json()),
-      fetch(`/api/crm/notes?contact_id=${contactId}&limit=20`).then((r) => r.json()),
-      fetch(`/api/crm/deals?contact_id=${contactId}&limit=10`).then((r) => r.json()),
-      fetch(`/api/crm/tasks?contact_id=${contactId}&limit=10`).then((r) => r.json()),
+      safeFetch(`/api/crm/contacts/${contactId}`),
+      safeFetch(`/api/crm/activities?contact_id=${contactId}&limit=20`),
+      safeFetch(`/api/crm/notes?contact_id=${contactId}&limit=20`),
+      safeFetch(`/api/crm/deals?contact_id=${contactId}&limit=10`),
+      safeFetch(`/api/crm/tasks?contact_id=${contactId}&limit=10`),
     ]).then(([contactRes, actRes, notesRes, dealsRes, tasksRes]) => {
       if (contactRes.success) setContact(contactRes.data);
       if (actRes.success) setActivities(actRes.data);

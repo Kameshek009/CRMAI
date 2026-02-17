@@ -33,15 +33,34 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
       return;
     }
 
+    if (lines.length > 1001) {
+      toast.error("Maximum 1,000 contacts per import");
+      return;
+    }
+
     const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
-    const rows = lines.slice(1).map((line) => {
-      const values = line.split(",").map((v) => v.trim());
-      const row: Record<string, string> = {};
-      headers.forEach((h, i) => {
-        row[h] = values[i] || "";
+
+    const hasNameColumn = headers.some((h) => ["first_name", "name", "email"].includes(h));
+    if (!hasNameColumn) {
+      toast.error("CSV must contain at least a 'first_name', 'name', or 'email' column");
+      return;
+    }
+
+    const rows = lines.slice(1)
+      .filter((line) => line.trim().length > 0)
+      .map((line) => {
+        const values = line.split(",").map((v) => v.trim());
+        const row: Record<string, string> = {};
+        headers.forEach((h, i) => {
+          row[h] = values[i] || "";
+        });
+        return row;
       });
-      return row;
-    });
+
+    if (rows.length === 0) {
+      toast.error("No valid data rows found");
+      return;
+    }
 
     setParsed(rows);
     setStep("preview");

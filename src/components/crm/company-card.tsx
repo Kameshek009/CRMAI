@@ -64,6 +64,7 @@ export function CompanyCard({
             checked={selected}
             onCheckedChange={() => onSelectToggle?.(id)}
             className="size-5 shrink-0 premium-checkbox"
+            aria-label={`Select ${name}`}
           />
         )}
         <Link

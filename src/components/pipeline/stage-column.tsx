@@ -66,6 +66,7 @@ export function StageColumn({
           size="icon"
           className="size-7 relative z-[1] hover:bg-muted/80"
           onClick={onAddDeal}
+          aria-label={`Add deal to ${stage.name}`}
         >
           <Plus className="size-4" />
         </Button>
@@ -75,7 +76,7 @@ export function StageColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex-1 p-2 space-y-2 min-h-[200px] rounded-b-xl border border-t-0 transition-all duration-200",
+          "flex-1 p-2 space-y-2 min-h-[120px] sm:min-h-[200px] rounded-b-xl border border-t-0 transition-all duration-200",
           isOver
             ? "bg-primary/5 border-primary/40 ring-2 ring-primary/20 shadow-inner"
             : "bg-muted/10 dark:bg-muted/5"

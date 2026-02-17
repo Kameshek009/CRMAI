@@ -5,28 +5,28 @@ import { z } from "zod";
 // ============================================================================
 
 export const createContactSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().optional(),
-  title: z.string().optional(),
+  first_name: z.string().min(1, "First name is required").max(100),
+  last_name: z.string().max(100).optional(),
+  email: z.string().email().max(254).optional().or(z.literal("")),
+  phone: z.string().max(30).optional(),
+  title: z.string().max(200).optional(),
   company_id: z.string().uuid().optional().nullable(),
   status: z.enum(["lead", "active", "inactive", "churned"]).optional(),
-  source: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  source: z.string().max(100).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
 export const updateContactSchema = z.object({
-  first_name: z.string().min(1).optional(),
-  last_name: z.string().optional().nullable(),
-  email: z.string().email().optional().nullable().or(z.literal("")),
-  phone: z.string().optional().nullable(),
-  title: z.string().optional().nullable(),
+  first_name: z.string().min(1).max(100).optional(),
+  last_name: z.string().max(100).optional().nullable(),
+  email: z.string().email().max(254).optional().nullable().or(z.literal("")),
+  phone: z.string().max(30).optional().nullable(),
+  title: z.string().max(200).optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
   status: z.enum(["lead", "active", "inactive", "churned"]).optional(),
-  source: z.string().optional().nullable(),
-  tags: z.array(z.string()).optional(),
-  ai_sentiment: z.string().optional().nullable(),
+  source: z.string().max(100).optional().nullable(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+  ai_sentiment: z.string().max(50).optional().nullable(),
   engagement_score: z.number().min(0).max(100).optional(),
 });
 
@@ -35,29 +35,29 @@ export const updateContactSchema = z.object({
 // ============================================================================
 
 export const createCompanySchema = z.object({
-  name: z.string().min(1, "Company name is required"),
-  domain: z.string().optional(),
-  industry: z.string().optional(),
-  size: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
-  address: z.string().optional(),
-  website: z.string().optional(),
-  description: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  name: z.string().min(1, "Company name is required").max(200),
+  domain: z.string().max(253).optional(),
+  industry: z.string().max(100).optional(),
+  size: z.string().max(50).optional(),
+  phone: z.string().max(30).optional(),
+  email: z.string().email().max(254).optional().or(z.literal("")),
+  address: z.string().max(500).optional(),
+  website: z.string().max(2000).optional(),
+  description: z.string().max(5000).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
 export const updateCompanySchema = z.object({
-  name: z.string().min(1).optional(),
-  domain: z.string().optional().nullable(),
-  industry: z.string().optional().nullable(),
-  size: z.string().optional().nullable(),
-  phone: z.string().optional().nullable(),
-  email: z.string().email().optional().nullable().or(z.literal("")),
-  address: z.string().optional().nullable(),
-  website: z.string().optional().nullable(),
-  description: z.string().optional().nullable(),
-  tags: z.array(z.string()).optional(),
+  name: z.string().min(1).max(200).optional(),
+  domain: z.string().max(253).optional().nullable(),
+  industry: z.string().max(100).optional().nullable(),
+  size: z.string().max(50).optional().nullable(),
+  phone: z.string().max(30).optional().nullable(),
+  email: z.string().email().max(254).optional().nullable().or(z.literal("")),
+  address: z.string().max(500).optional().nullable(),
+  website: z.string().max(2000).optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
   ai_health_score: z.number().min(0).max(100).optional(),
 });
 
@@ -66,30 +66,30 @@ export const updateCompanySchema = z.object({
 // ============================================================================
 
 export const createDealSchema = z.object({
-  title: z.string().min(1, "Deal title is required"),
+  title: z.string().min(1, "Deal title is required").max(200),
   value: z.number().min(0).optional(),
-  currency: z.string().optional(),
+  currency: z.string().max(3).optional(),
   stage_id: z.string().uuid(),
   contact_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
-  expected_close_date: z.string().optional().nullable(),
-  description: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  expected_close_date: z.string().max(30).optional().nullable(),
+  description: z.string().max(5000).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
 export const updateDealSchema = z.object({
-  title: z.string().min(1).optional(),
+  title: z.string().min(1).max(200).optional(),
   value: z.number().min(0).optional(),
-  currency: z.string().optional(),
+  currency: z.string().max(3).optional(),
   stage_id: z.string().uuid().optional(),
   contact_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
   status: z.enum(["open", "won", "lost"]).optional(),
   ai_win_probability: z.number().min(0).max(100).optional(),
-  expected_close_date: z.string().optional().nullable(),
-  actual_close_date: z.string().optional().nullable(),
-  description: z.string().optional().nullable(),
-  tags: z.array(z.string()).optional(),
+  expected_close_date: z.string().max(30).optional().nullable(),
+  actual_close_date: z.string().max(30).optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
 export const updateDealStageSchema = z.object({
@@ -101,29 +101,29 @@ export const updateDealStageSchema = z.object({
 // ============================================================================
 
 export const createTaskSchema = z.object({
-  title: z.string().min(1, "Task title is required"),
-  description: z.string().optional(),
+  title: z.string().min(1, "Task title is required").max(300),
+  description: z.string().max(5000).optional(),
   type: z.enum(["call", "email", "meeting", "follow_up", "other"]).optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
-  due_date: z.string().optional().nullable(),
+  due_date: z.string().max(30).optional().nullable(),
   contact_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
   is_ai_generated: z.boolean().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string().max(100), z.unknown()).optional(),
 });
 
 export const updateTaskSchema = z.object({
-  title: z.string().min(1).optional(),
-  description: z.string().optional().nullable(),
+  title: z.string().min(1).max(300).optional(),
+  description: z.string().max(5000).optional().nullable(),
   type: z.enum(["call", "email", "meeting", "follow_up", "other"]).optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
   status: z.enum(["todo", "in_progress", "done", "cancelled"]).optional(),
-  due_date: z.string().optional().nullable(),
+  due_date: z.string().max(30).optional().nullable(),
   contact_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string().max(100), z.unknown()).optional(),
 });
 
 // ============================================================================
@@ -131,7 +131,7 @@ export const updateTaskSchema = z.object({
 // ============================================================================
 
 export const createNoteSchema = z.object({
-  content: z.string().min(1, "Note content is required"),
+  content: z.string().min(1, "Note content is required").max(10000),
   contact_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
@@ -152,12 +152,12 @@ export const createActivitySchema = z.object({
     "note", "call", "email", "meeting", "deal_created", "deal_stage_changed",
     "deal_won", "deal_lost", "contact_created", "task_completed", "import",
   ]),
-  title: z.string().min(1),
-  description: z.string().optional(),
+  title: z.string().min(1).max(300),
+  description: z.string().max(5000).optional(),
   contact_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   company_id: z.string().uuid().optional().nullable(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string().max(100), z.unknown()).optional(),
 });
 
 // ============================================================================
@@ -171,9 +171,9 @@ export const searchSchema = z.object({
 });
 
 export const createPipelineStageSchema = z.object({
-  name: z.string().min(1),
-  position: z.number().min(0),
-  color: z.string().optional(),
+  name: z.string().min(1).max(100),
+  position: z.number().min(0).max(100),
+  color: z.string().max(20).optional(),
   is_won: z.boolean().optional(),
   is_lost: z.boolean().optional(),
 });

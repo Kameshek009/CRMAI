@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const MAX_NOTE_LENGTH = 10000;
 
 interface NoteEditorProps {
   onSubmit: (content: string) => Promise<void>;
@@ -14,11 +17,16 @@ export function NoteEditor({ onSubmit, placeholder = "Add a note..." }: NoteEdit
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const trimmed = content.trim();
+  const charCount = trimmed.length;
+  const isOverLimit = charCount > MAX_NOTE_LENGTH;
+  const canSubmit = charCount > 0 && !isOverLimit && !isSubmitting;
+
   const handleSubmit = async () => {
-    if (!content.trim() || isSubmitting) return;
+    if (!canSubmit) return;
     setIsSubmitting(true);
     try {
-      await onSubmit(content.trim());
+      await onSubmit(trimmed);
       setContent("");
     } finally {
       setIsSubmitting(false);
@@ -32,7 +40,8 @@ export function NoteEditor({ onSubmit, placeholder = "Add a note..." }: NoteEdit
         onChange={(e) => setContent(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="resize-none"
+        className={cn("resize-none", isOverLimit && "border-destructive focus-visible:ring-destructive")}
+        aria-label="Note content"
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
@@ -40,13 +49,19 @@ export function NoteEditor({ onSubmit, placeholder = "Add a note..." }: NoteEdit
           }
         }}
       />
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <span className={cn(
+          "text-xs",
+          isOverLimit ? "text-destructive" : charCount > MAX_NOTE_LENGTH * 0.9 ? "text-amber-500" : "text-muted-foreground"
+        )}>
+          {charCount > 0 && `${charCount.toLocaleString()} / ${MAX_NOTE_LENGTH.toLocaleString()}`}
+        </span>
         <Button
           size="sm"
           onClick={handleSubmit}
-          disabled={!content.trim() || isSubmitting}
+          disabled={!canSubmit}
         >
-          <Send className="size-4 mr-1" />
+          {isSubmitting ? <Loader2 className="size-4 mr-1 animate-spin" /> : <Send className="size-4 mr-1" />}
           Add Note
         </Button>
       </div>

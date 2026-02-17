@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface FormField {
   name: string;
@@ -32,6 +33,22 @@ interface EntityFormProps {
   submitLabel?: string;
 }
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateField(field: FormField, value: string): string | null {
+  const trimmed = value.trim();
+  if (field.required && !trimmed) {
+    return `${field.label} is required`;
+  }
+  if (field.type === "email" && trimmed && !EMAIL_REGEX.test(trimmed)) {
+    return "Invalid email address";
+  }
+  if (field.type === "tel" && trimmed && trimmed.length > 20) {
+    return "Phone number is too long";
+  }
+  return null;
+}
+
 export function EntityForm({
   open,
   onOpenChange,
@@ -43,18 +60,45 @@ export function EntityForm({
 }: EntityFormProps) {
   const [values, setValues] = useState<Record<string, string>>(initialValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const prevOpenRef = useRef(false);
 
   useEffect(() => {
     // Only reset values when dialog opens (false → true), not on every render
     if (open && !prevOpenRef.current) {
       setValues(initialValues);
+      setErrors({});
+      setTouched({});
     }
     prevOpenRef.current = open;
   }, [open, initialValues]);
 
+  const validateAll = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    fields.forEach((field) => {
+      const error = validateField(field, values[field.name] || "");
+      if (error) newErrors[field.name] = error;
+    });
+    setErrors(newErrors);
+    setTouched(Object.fromEntries(fields.map((f) => [f.name, true])));
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleBlur = (field: FormField) => {
+    setTouched((prev) => ({ ...prev, [field.name]: true }));
+    const error = validateField(field, values[field.name] || "");
+    setErrors((prev) => {
+      if (error) return { ...prev, [field.name]: error };
+      const next = { ...prev };
+      delete next[field.name];
+      return next;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateAll()) return;
     setIsSubmitting(true);
     try {
       await onSubmit(values);
@@ -73,23 +117,33 @@ export function EntityForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           {fields.map((field) => {
             const fieldId = `entity-form-${field.name}`;
+            const error = touched[field.name] ? errors[field.name] : undefined;
             return (
               <div key={field.name} className="space-y-1.5">
-                <label htmlFor={fieldId} className="text-sm font-medium">{field.label}</label>
+                <label htmlFor={fieldId} className="text-sm font-medium">
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-0.5">*</span>}
+                </label>
                 {field.type === "textarea" ? (
                   <Textarea
                     id={fieldId}
                     value={values[field.name] || ""}
                     onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
+                    onBlur={() => handleBlur(field)}
                     placeholder={field.placeholder}
                     rows={3}
+                    className={cn(error && "border-destructive focus-visible:ring-destructive")}
                   />
                 ) : field.type === "select" ? (
                   <select
                     id={fieldId}
                     value={values[field.name] || ""}
                     onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    onBlur={() => handleBlur(field)}
+                    className={cn(
+                      "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      error && "border-destructive focus-visible:ring-destructive"
+                    )}
                   >
                     <option value="">Select...</option>
                     {field.options?.map((opt) => (
@@ -104,9 +158,17 @@ export function EntityForm({
                     type={field.type}
                     value={values[field.name] || ""}
                     onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
+                    onBlur={() => handleBlur(field)}
                     placeholder={field.placeholder}
-                    required={field.required}
+                    className={cn(error && "border-destructive focus-visible:ring-destructive")}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? `${fieldId}-error` : undefined}
                   />
+                )}
+                {error && (
+                  <p id={`${fieldId}-error`} className="text-xs text-destructive" role="alert">
+                    {error}
+                  </p>
                 )}
               </div>
             );

@@ -65,12 +65,14 @@ export function TaskItem({
           checked={selected}
           onCheckedChange={() => onSelectToggle?.(id)}
           className="size-5 premium-checkbox"
+          aria-label={`Select task: ${title}`}
         />
       ) : (
         <Checkbox
           checked={isDone}
           onCheckedChange={(checked) => onToggle?.(id, !!checked)}
           className="size-5 premium-checkbox"
+          aria-label={isDone ? `Mark "${title}" as not done` : `Mark "${title}" as done`}
         />
       )}
       <div className="flex-1 min-w-0 relative z-[1]">
@@ -103,13 +105,14 @@ export function TaskItem({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover/task:opacity-100 transition-opacity">
+      <div className="flex items-center gap-0.5 shrink-0 sm:opacity-0 sm:group-hover/task:opacity-100 transition-opacity">
         {onEdit && (
           <Button
             variant="ghost"
             size="icon"
             className="size-8 text-muted-foreground hover:text-foreground hover:bg-muted/80"
             onClick={() => onEdit(id)}
+            aria-label="Edit task"
           >
             <Pencil className="size-3.5" />
           </Button>
@@ -120,6 +123,7 @@ export function TaskItem({
             size="icon"
             className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             onClick={() => onDelete(id)}
+            aria-label="Delete task"
           >
             <Trash2 className="size-3.5" />
           </Button>

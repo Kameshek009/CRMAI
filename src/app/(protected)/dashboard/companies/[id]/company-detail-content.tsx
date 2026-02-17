@@ -58,11 +58,16 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
   const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
+    const safeFetch = (url: string) =>
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : { success: false }))
+        .catch(() => ({ success: false }));
+
     Promise.all([
-      fetch(`/api/crm/companies/${companyId}`).then((r) => r.json()),
-      fetch(`/api/crm/contacts?company_id=${companyId}&limit=20`).then((r) => r.json()),
-      fetch(`/api/crm/activities?company_id=${companyId}&limit=20`).then((r) => r.json()),
-      fetch(`/api/crm/deals?company_id=${companyId}&limit=10`).then((r) => r.json()),
+      safeFetch(`/api/crm/companies/${companyId}`),
+      safeFetch(`/api/crm/contacts?company_id=${companyId}&limit=20`),
+      safeFetch(`/api/crm/activities?company_id=${companyId}&limit=20`),
+      safeFetch(`/api/crm/deals?company_id=${companyId}&limit=10`),
     ]).then(([companyRes, contactsRes, actRes, dealsRes]) => {
       if (companyRes.success) setCompany(companyRes.data);
       if (contactsRes.success) setContacts(contactsRes.data);

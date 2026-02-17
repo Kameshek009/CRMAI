@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreBadge } from "./score-badge";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Building2, Mail, Phone } from "lucide-react";
 
 interface ContactCardProps {
@@ -68,6 +69,7 @@ export function ContactCard({
           checked={selected}
           onCheckedChange={() => onSelectToggle?.(id)}
           className="size-5 shrink-0 premium-checkbox"
+          aria-label={`Select ${name}`}
         />
       )}
       <Link
@@ -91,26 +93,38 @@ export function ContactCard({
             </Badge>
           </div>
           {title && <p className="text-xs text-muted-foreground truncate mt-0.5">{title}</p>}
-          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
-            {companyName && (
-              <span className="flex items-center gap-1 hover:text-foreground transition-colors">
-                <Building2 className="size-3 shrink-0" />
-                <span className="truncate max-w-[120px]">{companyName}</span>
-              </span>
-            )}
-            {email && (
-              <span className="flex items-center gap-1 hover:text-foreground transition-colors">
-                <Mail className="size-3 shrink-0" />
-                <span className="truncate max-w-[140px]">{email}</span>
-              </span>
-            )}
-            {phone && (
-              <span className="flex items-center gap-1 hover:text-foreground transition-colors hidden sm:flex">
-                <Phone className="size-3 shrink-0" />
-                {phone}
-              </span>
-            )}
-          </div>
+          <TooltipProvider delayDuration={300}>
+            <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
+              {companyName && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="flex items-center gap-1 hover:text-foreground transition-colors">
+                      <Building2 className="size-3 shrink-0" />
+                      <span className="truncate max-w-[120px]">{companyName}</span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">{companyName}</TooltipContent>
+                </Tooltip>
+              )}
+              {email && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="flex items-center gap-1 hover:text-foreground transition-colors">
+                      <Mail className="size-3 shrink-0" />
+                      <span className="truncate max-w-[140px]">{email}</span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">{email}</TooltipContent>
+                </Tooltip>
+              )}
+              {phone && (
+                <span className="flex items-center gap-1 hover:text-foreground transition-colors hidden sm:flex">
+                  <Phone className="size-3 shrink-0" />
+                  {phone}
+                </span>
+              )}
+            </div>
+          </TooltipProvider>
         </div>
 
         <ScoreBadge score={engagementScore} />

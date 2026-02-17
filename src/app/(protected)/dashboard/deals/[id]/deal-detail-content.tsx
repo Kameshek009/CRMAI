@@ -73,12 +73,17 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
   const [tasks, setTasks] = useState<DealTask[]>([]);
 
   useEffect(() => {
+    const safeFetch = (url: string) =>
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : { success: false }))
+        .catch(() => ({ success: false }));
+
     Promise.all([
-      fetch(`/api/crm/deals/${dealId}`).then((r) => r.json()),
-      fetch(`/api/crm/activities?deal_id=${dealId}&limit=20`).then((r) => r.json()),
-      fetch(`/api/crm/notes?deal_id=${dealId}&limit=20`).then((r) => r.json()),
-      fetch(`/api/crm/pipeline`).then((r) => r.json()),
-      fetch(`/api/crm/tasks?deal_id=${dealId}&limit=10`).then((r) => r.json()),
+      safeFetch(`/api/crm/deals/${dealId}`),
+      safeFetch(`/api/crm/activities?deal_id=${dealId}&limit=20`),
+      safeFetch(`/api/crm/notes?deal_id=${dealId}&limit=20`),
+      safeFetch(`/api/crm/pipeline`),
+      safeFetch(`/api/crm/tasks?deal_id=${dealId}&limit=10`),
     ]).then(([dealRes, actRes, notesRes, stagesRes, tasksRes]) => {
       if (dealRes.success) setDeal(dealRes.data);
       if (actRes.success) setActivities(actRes.data);

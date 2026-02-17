@@ -115,6 +115,7 @@ export function DealCard({ deal }: { deal: DealForCard }) {
     <button
       {...attributes}
       {...listeners}
+      aria-label={`Drag deal: ${deal.title}`}
       className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0 hover:scale-110"
     >
       <GripVertical className="size-4" />
