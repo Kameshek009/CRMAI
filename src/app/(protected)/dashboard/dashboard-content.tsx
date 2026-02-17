@@ -135,15 +135,15 @@ const ACTIVITY_ICONS: Record<string, LucideIcon> = {
 };
 
 const ACTIVITY_COLORS: Record<string, string> = {
-  deal_created: "bg-landing-accent/10 text-landing-accent",
+  deal_created: "bg-muted/10 text-landing-accent",
   deal_stage_changed: "bg-orange-500/10 text-orange-500",
   deal_won: "bg-emerald-500/10 text-emerald-500",
   deal_lost: "bg-red-500/10 text-red-500",
-  contact_created: "bg-landing-accent/10 text-landing-accent",
+  contact_created: "bg-muted/10 text-landing-accent",
   task_completed: "bg-emerald-500/10 text-emerald-500",
-  note: "bg-landing-accent/10 text-landing-accent",
+  note: "bg-muted/10 text-landing-accent",
   call: "bg-orange-500/10 text-orange-500",
-  email: "bg-landing-accent/10 text-landing-accent",
+  email: "bg-muted/10 text-landing-accent",
   meeting: "bg-orange-500/10 text-orange-500",
   import: "bg-gray-500/10 text-gray-500",
 };
@@ -229,7 +229,7 @@ function AnimatedStatCard({
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
           <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", iconGradient)}>
-            <Icon className="w-4 h-4 text-landing-accent-foreground" />
+            <Icon className="w-4 h-4 text-muted-foreground" />
           </div>
         </div>
         <div className="text-2xl font-bold tracking-tight">
@@ -374,8 +374,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       <div className="border-b border-border px-8 py-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-landing-accent flex items-center justify-center">
-              <GreetingIcon className="w-5 h-5 text-landing-accent-foreground" />
+            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+              <GreetingIcon className="w-5 h-5 text-muted-foreground" />
             </div>
             <div>
               <h1 className="text-lg font-semibold">
@@ -427,7 +427,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.openDeals ?? 0}
             subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline`}
             icon={Handshake}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             delay={0.1}
           />
           <AnimatedStatCard
@@ -436,7 +436,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.tasksDueToday ?? 0}
             subtitle={crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
             icon={CheckSquare}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             trend={crmStats?.overdueTasksCount ? { direction: "down", text: `${crmStats.overdueTasksCount} late` } : undefined}
             delay={0.15}
           />
@@ -446,7 +446,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.totalContacts ?? 0}
             subtitle={`+${crmStats?.newContactsThisWeek ?? 0} this week`}
             icon={Users}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             trend={
               (crmStats?.newContactsThisWeek ?? 0) > 0
                 ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` }
@@ -461,7 +461,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`}
             subtitle={`${crmStats?.wonDealsThisMonth ?? 0} deal${(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed`}
             icon={DollarSign}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             trend={
               (crmStats?.wonDealsThisMonth ?? 0) > 0
                 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` }
@@ -485,7 +485,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               : 0}%`}
             subtitle="Closed deals ratio"
             icon={Target}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             delay={0.3}
           />
           <AnimatedStatCard
@@ -495,7 +495,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             formattedValue={`$${(crmStats?.weightedForecast ?? 0).toLocaleString()}`}
             subtitle="Weighted pipeline"
             icon={Zap}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             delay={0.35}
           />
           <AnimatedStatCard
@@ -504,7 +504,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.totalDeals ?? 0}
             subtitle="Total deals tracked"
             icon={Building2}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             delay={0.4}
           />
           <AnimatedStatCard
@@ -520,7 +520,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             }`}
             subtitle="Average won deal size"
             icon={BarChart3}
-            iconGradient="bg-landing-accent"
+            iconGradient="bg-muted"
             delay={0.45}
           />
         </div>
@@ -533,8 +533,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
-                      <Clock className="w-3 h-3 text-landing-accent-foreground" />
+                    <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
                     </div>
                     Recent
                   </span>
@@ -582,8 +582,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <Card className="h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
-                    <Sparkles className="w-3 h-3 text-landing-accent-foreground" />
+                  <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                    <Sparkles className="w-3 h-3 text-muted-foreground" />
                   </div>
                   AI Insights
                   <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto hover:bg-muted/80" asChild>
@@ -631,8 +631,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
-                      <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
+                    <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                      <CheckSquare className="w-3 h-3 text-muted-foreground" />
                     </div>
                     Upcoming Tasks
                   </span>
@@ -709,8 +709,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
-                    <Handshake className="w-3 h-3 text-landing-accent-foreground" />
+                  <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                    <Handshake className="w-3 h-3 text-muted-foreground" />
                   </div>
                   Deals
                 </CardTitle>
@@ -874,8 +874,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
-                  <TrendingUp className="w-3 h-3 text-landing-accent-foreground" />
+                <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                  <TrendingUp className="w-3 h-3 text-muted-foreground" />
                 </div>
                 Revenue Trend (30 Days)
               </CardTitle>
@@ -946,8 +946,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
-                  <Kanban className="w-3 h-3 text-landing-accent-foreground" />
+                <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                  <Kanban className="w-3 h-3 text-muted-foreground" />
                 </div>
                 Workload by Status
               </CardTitle>
@@ -1031,8 +1031,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <Card className="border-landing-accent/30 bg-gradient-to-r from-landing-accent/5 via-landing-accent/10 to-landing-accent/5">
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-lg bg-landing-accent flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4.5 h-4.5 text-landing-accent-foreground" />
+                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Sparkles className="w-4.5 h-4.5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">
@@ -1044,7 +1044,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         : `${Math.round(usage.percentUsed)}% used this month.`}
                     </p>
                   </div>
-                  <Button size="sm" className="bg-gradient-to-r from-landing-accent to-landing-accent text-landing-accent-foreground border-0 hover:opacity-90" asChild>
+                  <Button size="sm" className="bg-gradient-to-r from-landing-accent to-landing-accent text-muted-foreground border-0 hover:opacity-90" asChild>
                     <Link href="/dashboard/account/billing">
                       Upgrade
                       <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
