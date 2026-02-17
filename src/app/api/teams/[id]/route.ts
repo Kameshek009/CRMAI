@@ -98,19 +98,40 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
 
-    // Clear current_team_id for all members so they don't land on deleted team
+    // For each member whose current_team_id points to the deleted team,
+    // auto-switch them to their next available active team
     const { data: members } = await supabase
       .from("team_members")
       .select("account_id")
       .eq("team_id", id);
 
     if (members && members.length > 0) {
-      const accountIds = members.map((m) => m.account_id);
-      await supabase
-        .from("accounts")
-        .update({ current_team_id: null })
-        .in("id", accountIds)
-        .eq("current_team_id", id);
+      for (const member of members) {
+        // Check if this account is currently on the deleted team
+        const { data: acc } = await supabase
+          .from("accounts")
+          .select("current_team_id")
+          .eq("id", member.account_id)
+          .single();
+
+        if (acc?.current_team_id !== id) continue;
+
+        // Find another active team for this member
+        const { data: otherMembership } = await supabase
+          .from("team_members")
+          .select("team_id, teams!inner(deleted_at)")
+          .eq("account_id", member.account_id)
+          .eq("status", "active")
+          .neq("team_id", id)
+          .is("teams.deleted_at", null)
+          .limit(1)
+          .single();
+
+        await supabase
+          .from("accounts")
+          .update({ current_team_id: otherMembership?.team_id ?? null })
+          .eq("id", member.account_id);
+      }
     }
 
     return NextResponse.json({ success: true });

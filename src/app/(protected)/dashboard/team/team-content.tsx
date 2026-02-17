@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export function TeamContent() {
-  const { currentTeam, teams, deletedTeams, myRole, isDirector, can, refetch } = useTeam();
+  const { currentTeam, teams, deletedTeams, myRole, isDirector, can, refetch, switchTeam } = useTeam();
   const [inviteCode, setInviteCode] = useState(currentTeam?.inviteCode || "");
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [restoring, setRestoring] = useState<string | null>(null);
@@ -45,12 +45,13 @@ export function TeamContent() {
     }
   };
 
-  // Show restore banner if no current team but there are deleted teams
-  if (!currentTeam && deletedTeams.length > 0) {
+  // Show restore banner and/or team switcher when no current team
+  if (!currentTeam) {
     return (
       <PageContainer>
-        <PageHeader title="Team" description="Your team was deleted" />
+        <PageHeader title="Team" description={deletedTeams.length > 0 ? "Your team was deleted" : "No team selected"} />
         <div className="space-y-3 max-w-lg">
+          {/* Deleted teams — restore option */}
           {deletedTeams.map((dt) => {
             const deletedAt = new Date(dt.deletedAt).getTime();
             const expiresAt = deletedAt + 24 * 60 * 60 * 1000;
@@ -77,12 +78,34 @@ export function TeamContent() {
               </Card>
             );
           })}
+          {/* Other available teams — switch */}
+          {teams.length > 0 && (
+            <>
+              {deletedTeams.length > 0 && (
+                <p className="text-sm text-muted-foreground pt-2">Or switch to an active team:</p>
+              )}
+              {teams.map((tm) => (
+                <Card key={tm.team.id}>
+                  <CardContent className="flex items-center justify-between gap-4 p-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{tm.team.name}</p>
+                      <p className="text-xs text-muted-foreground">{tm.role.name}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => { switchTeam(tm.team.id).then(() => refetch()); }}
+                    >
+                      Switch
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </>
+          )}
         </div>
       </PageContainer>
     );
   }
-
-  if (!currentTeam) return null;
 
   const currentMembership = teams.find((t) => t.team.id === currentTeam.id);
 
