@@ -274,14 +274,15 @@ export function ChatComposer({
             ref={fileInputRef}
             type="file"
             accept={ACCEPT_TYPES}
-            className="hidden"
+            className="sr-only"
             onChange={handleFileSelect}
           />
 
           {/* Bottom bar inside composer */}
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+          <div className="absolute bottom-2 left-2 right-2 z-10 flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
                 className={cn(
