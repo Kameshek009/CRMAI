@@ -43,6 +43,7 @@ import {
   Pencil,
   Plus,
   Loader2,
+  ArrowDownUp,
 } from "lucide-react";
 import type { SubscriptionTier } from "@/types";
 
@@ -90,6 +91,7 @@ export function AdminContent() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
   const [dialogType, setDialogType] = useState<DialogType>(null);
   const [dialogUserId, setDialogUserId] = useState<string | null>(null);
   const [dialogValue, setDialogValue] = useState("");
@@ -157,6 +159,28 @@ export function AdminContent() {
     performAction(accountId, "reset_usage", "");
   };
 
+  const handleSyncTiers = async () => {
+    try {
+      setSyncing(true);
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountId: "_", action: "sync_all_tiers", value: "" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Synced ${data.data.synced} of ${data.data.total} accounts`);
+        await fetchUsers();
+      } else {
+        toast.error(data.error || "Sync failed");
+      }
+    } catch {
+      toast.error("Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const openDialog = (type: DialogType, userId: string) => {
     setDialogType(type);
     setDialogUserId(userId);
@@ -217,6 +241,19 @@ export function AdminContent() {
           <Shield className="size-3" />
           Admin
         </Badge>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSyncTiers}
+          disabled={syncing}
+        >
+          {syncing ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : (
+            <ArrowDownUp className="mr-2 size-4" />
+          )}
+          Sync Limits
+        </Button>
         <Button variant="outline" size="sm" onClick={fetchUsers}>
           <RefreshCw className="mr-2 size-4" />
           Refresh

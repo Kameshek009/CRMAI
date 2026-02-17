@@ -274,6 +274,48 @@ export async function PATCH(request: NextRequest) {
         break;
       }
 
+      case "sync_all_tiers": {
+        // Fetch all accounts and sync token_limit from current TIER_TOKEN_LIMITS
+        const { data: allAccounts, error: fetchErr } = await supabase
+          .from("accounts")
+          .select("id, tier, token_limit");
+
+        if (fetchErr) {
+          return NextResponse.json(
+            { success: false, error: fetchErr.message },
+            { status: 500 }
+          );
+        }
+
+        let synced = 0;
+        for (const acc of allAccounts || []) {
+          const expectedLimit =
+            TIER_TOKEN_LIMITS[acc.tier as SubscriptionTier] ??
+            TIER_TOKEN_LIMITS.free;
+          if (acc.token_limit !== expectedLimit) {
+            await supabase
+              .from("accounts")
+              .update({
+                token_limit: expectedLimit,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", acc.id);
+
+            await supabase
+              .from("teams")
+              .update({ token_limit: expectedLimit })
+              .eq("owner_account_id", acc.id);
+
+            synced++;
+          }
+        }
+
+        return NextResponse.json({
+          success: true,
+          data: { synced, total: allAccounts?.length ?? 0 },
+        });
+      }
+
       default:
         return NextResponse.json(
           { success: false, error: `Unknown action: ${action}` },
