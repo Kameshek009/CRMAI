@@ -38,11 +38,11 @@ const tierConfig: Record<
     name: "Pro",
     description: "For professionals who need more power",
     features: [
-      "10M tokens per month",
+      "500K tokens per month",
+      "100K tokens/day limit",
       "Priority AI processing",
       "Priority support",
       "Advanced features",
-      "Weekly cap protection",
     ],
     popular: true,
   },
@@ -50,11 +50,11 @@ const tierConfig: Record<
     name: "Max",
     description: "Maximum power for power users",
     features: [
-      "100M tokens per month",
+      "1.5M tokens per month",
+      "300K tokens/day limit",
       "Fastest AI processing",
       "Dedicated support",
       "All Pro features",
-      "Early access to new features",
     ],
   },
 };
