@@ -242,7 +242,7 @@ function AnimatedStatCard({
           <p className="text-xs text-muted-foreground">{subtitle}</p>
           {trend && (
             <div className={cn(
-              "flex items-center gap-0.5 text-[10px] font-medium",
+              "flex items-center gap-1 text-xs font-medium",
               trend.direction === "up" ? "text-emerald-500" : "text-red-500"
             )}>
               {trend.direction === "up" ? (
@@ -556,7 +556,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                       return (
                         <div
                           key={a.id}
-                          className="flex items-start gap-2.5 pb-3 relative"
+                          className="flex items-start gap-2 pb-3 relative"
                         >
                           <div className={cn(
                             "w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 z-10 ring-2 ring-background",
@@ -566,7 +566,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-foreground truncate">{a.title}</p>
-                            <p className="text-[10px] text-muted-foreground">{timeAgo(a.created_at)}</p>
+                            <p className="text-xs text-muted-foreground">{timeAgo(a.created_at)}</p>
                           </div>
                         </div>
                       );
@@ -600,21 +600,21 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                     <p className="text-xs text-muted-foreground">No insights yet. Add data to get AI-powered tips.</p>
                   </div>
                 ) : (
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {insights.slice(0, 4).map((insight) => {
                       const Icon = insightIcons[insight.type] || Info;
                       const color = insightColors[insight.type] || insightColors.info;
                       return (
                         <div
                           key={insight.id}
-                          className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                          className="flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                         >
                           <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", color)}>
                             <Icon className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-foreground">{insight.title}</p>
-                            <p className="text-[10px] text-muted-foreground line-clamp-2">{insight.description}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2">{insight.description}</p>
                           </div>
                         </div>
                       );
@@ -657,7 +657,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         <div
                           key={task.id}
                           className={cn(
-                            "flex items-start gap-2.5 p-2 rounded-lg transition-all hover:bg-muted/50",
+                            "flex items-start gap-2 p-2 rounded-lg transition-all hover:bg-muted/50",
                             isOverdue && "bg-red-500/5"
                           )}
                         >
@@ -674,7 +674,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate">{task.title}</p>
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               {task.due_date
                                 ? new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
                                 : "No due date"}
@@ -686,7 +686,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           <Badge
                             variant="secondary"
                             className={cn(
-                              "text-[10px] shrink-0",
+                              "text-xs shrink-0",
                               task.priority === "urgent" && "bg-red-500/10 text-red-600 border-red-500/20",
                               task.priority === "high" && "bg-orange-500/10 text-orange-600 border-orange-500/20",
                             )}
@@ -715,7 +715,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   Deals
                 </CardTitle>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-[10px]">
+                  <Badge variant="secondary" className="text-xs">
                     {deals.length} total
                   </Badge>
                   <Button variant="outline" size="sm" className="h-7 text-xs group/btn" asChild>
@@ -730,18 +730,18 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardContent className="pt-0">
               {/* Table header - Desktop (6 columns) */}
               <div className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-3 pb-2 border-b border-border">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Close</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stage</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Close</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
               </div>
               {/* Table header - Mobile (3 columns) */}
               <div className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-3 pb-2 border-b border-border">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
               </div>
 
               {deals.length === 0 ? (
@@ -776,7 +776,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                               />
                               <span className="text-xs font-medium text-foreground truncate">{deal.title}</span>
                               {deal.companies?.name && (
-                                <span className="text-[10px] text-muted-foreground truncate hidden sm:inline">
+                                <span className="text-xs text-muted-foreground truncate hidden sm:inline">
                                   {deal.companies.name}
                                 </span>
                               )}
@@ -784,7 +784,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                             <div>
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] font-normal"
+                                className="text-xs font-normal"
                                 style={{
                                   borderColor: stageColor + "30",
                                   color: stageColor,
@@ -804,12 +804,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                                   }}
                                 />
                               </div>
-                              <span className="text-[10px] text-muted-foreground w-8 text-right">{progress}%</span>
+                              <span className="text-xs text-muted-foreground w-8 text-right">{progress}%</span>
                             </div>
                             <span className="text-xs font-medium text-foreground">
                               ${deal.value.toLocaleString()}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {deal.expected_close_date
                                 ? new Date(deal.expected_close_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
                                 : "\u2014"}
@@ -837,7 +837,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                               <span className="text-xs font-medium text-foreground truncate block">{deal.title}</span>
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] font-normal mt-1"
+                                className="text-xs font-normal mt-1"
                                 style={{
                                   borderColor: stageColor + "30",
                                   color: stageColor,
@@ -997,7 +997,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         key={entry.name}
                         className="flex items-center justify-between group"
                       >
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2">
                           <div
                             className="w-3 h-3 rounded-full transition-transform group-hover:scale-125"
                             style={{ backgroundColor: entry.color, boxShadow: `0 0 8px ${entry.color}40` }}

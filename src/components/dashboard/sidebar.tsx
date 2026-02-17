@@ -85,7 +85,7 @@ export function Sidebar() {
             </span>
             <ExternalLink className="w-3 h-3 text-muted-foreground" />
           </div>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground mt-1">
             {tierName} Plan · {user.primaryEmailAddress?.emailAddress}
           </p>
         </div>

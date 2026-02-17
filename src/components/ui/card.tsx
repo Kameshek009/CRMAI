@@ -17,7 +17,7 @@ function Card({
         "flex flex-col rounded-2xl border transition-all duration-250 ease-out",
         variant === "glass"
           ? "glass-card text-card-foreground"
-          : "bg-card text-card-foreground shadow-sm hover:shadow-md hover:-translate-y-0.5",
+          : "bg-card text-card-foreground",
         className
       )}
       {...props}
