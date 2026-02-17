@@ -193,14 +193,22 @@ export function AnalyticsContent() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/crm/stats/analytics").then((r) => r.json()),
-      fetch("/api/crm/ai/insights").then((r) => r.json()),
+      fetch("/api/crm/ai/insights").then((r) => r.json()).catch(() => ({ success: false })),
     ]).then(([analyticsRes, insightsRes]) => {
-      if (analyticsRes.success) setData(analyticsRes.data);
-      if (insightsRes.success) setInsights(insightsRes.data);
+      if (analyticsRes.success) {
+        setData(analyticsRes.data);
+      } else {
+        setError(analyticsRes.error || "Failed to load analytics");
+      }
+      if (insightsRes.success) setInsights(insightsRes.data || []);
+      setIsLoading(false);
+    }).catch(() => {
+      setError("Failed to load analytics data");
       setIsLoading(false);
     });
   }, []);
@@ -219,36 +227,52 @@ export function AnalyticsContent() {
     );
   }
 
+  if (error) {
+    return (
+      <PageContainer>
+        <PageHeader title="Analytics" description="Comprehensive CRM performance insights" />
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <AlertCircle className="size-10 text-muted-foreground mb-3" />
+            <p className="text-lg font-medium">Failed to load analytics</p>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
+
   if (!data) return null;
 
-  const contactStatusData = data.contactsByStatus.map((c) => ({
+  const contactStatusData = (data.contactsByStatus || []).map((c) => ({
     name: c.status.charAt(0).toUpperCase() + c.status.slice(1),
     value: c.count,
     fill: STATUS_COLORS[c.status] || "#a1a1aa",
   }));
 
-  const taskStatusData = data.tasksByStatus.map((t) => ({
+  const taskStatusData = (data.tasksByStatus || []).map((t) => ({
     name: t.status === "in_progress" ? "In Progress" : t.status.charAt(0).toUpperCase() + t.status.slice(1),
     value: t.count,
     fill: TASK_STATUS_COLORS[t.status] || "#a1a1aa",
   }));
 
-  const taskPriorityData = data.tasksByPriority.map((t) => ({
+  const taskPriorityData = (data.tasksByPriority || []).map((t) => ({
     name: t.priority.charAt(0).toUpperCase() + t.priority.slice(1),
     value: t.count,
     fill: PRIORITY_COLORS[t.priority] || "#a1a1aa",
   }));
 
+  const hb = data.healthBuckets || { excellent: 0, good: 0, fair: 0, poor: 0 };
   const healthData = [
-    { name: "Excellent", value: data.healthBuckets.excellent, fill: HEALTH_COLORS.excellent },
-    { name: "Good", value: data.healthBuckets.good, fill: HEALTH_COLORS.good },
-    { name: "Fair", value: data.healthBuckets.fair, fill: HEALTH_COLORS.fair },
-    { name: "Poor", value: data.healthBuckets.poor, fill: HEALTH_COLORS.poor },
+    { name: "Excellent", value: hb.excellent, fill: HEALTH_COLORS.excellent },
+    { name: "Good", value: hb.good, fill: HEALTH_COLORS.good },
+    { name: "Fair", value: hb.fair, fill: HEALTH_COLORS.fair },
+    { name: "Poor", value: hb.poor, fill: HEALTH_COLORS.poor },
   ].filter((d) => d.value > 0);
 
-  const funnelData = data.stageConversion.filter((s) => !s.isWon && !s.isLost);
+  const funnelData = (data.stageConversion || []).filter((s) => !s.isWon && !s.isLost);
 
-  const activityData = data.activityByType
+  const activityData = (data.activityByType || [])
     .map((a) => ({ name: ACTIVITY_LABELS[a.type] || a.type, count: a.count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
@@ -364,7 +388,7 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               <div className="h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.monthlyRevenue}>
+                  <BarChart data={data.monthlyRevenue || []}>
                     <defs>
                       <linearGradient id="revenueBarGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#f4a261" stopOpacity={0.9} />
@@ -445,7 +469,7 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               <div className="h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data.dailyActivity}>
+                  <AreaChart data={data.dailyActivity || []}>
                     <defs>
                       <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#f4a261" stopOpacity={0.3} />
@@ -707,11 +731,11 @@ export function AnalyticsContent() {
                     </div>
                   </div>
                   {/* Industry breakdown */}
-                  {data.companiesByIndustry.length > 0 && (
+                  {(data.companiesByIndustry || []).length > 0 && (
                     <div>
                       <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Top Industries</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {data.companiesByIndustry.slice(0, 6).map((ind) => (
+                        {(data.companiesByIndustry || []).slice(0, 6).map((ind) => (
                           <Badge key={ind.industry} variant="secondary" className="text-[10px]">
                             {ind.industry}: {ind.count}
                           </Badge>
@@ -737,14 +761,14 @@ export function AnalyticsContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {data.topDeals.length === 0 ? (
+              {(data.topDeals || []).length === 0 ? (
                 <div className="text-center py-12">
                   <Handshake className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
                   <p className="text-sm text-muted-foreground">No open deals</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {data.topDeals.map((deal, i) => (
+                  {(data.topDeals || []).map((deal, i) => (
                     <div key={deal.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">{i + 1}</div>
                       <div className="flex-1 min-w-0">
@@ -779,14 +803,14 @@ export function AnalyticsContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {data.contactsBySource.length === 0 ? (
+              {(data.contactsBySource || []).length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
                   <p className="text-sm text-muted-foreground">No source data available</p>
                 </div>
               ) : (
                 <div className="space-y-2.5">
-                  {data.contactsBySource.sort((a, b) => b.count - a.count).slice(0, 8).map((source, i) => {
+                  {(data.contactsBySource || []).sort((a, b) => b.count - a.count).slice(0, 8).map((source, i) => {
                     const pct = data.totalContacts > 0 ? Math.round((source.count / data.totalContacts) * 100) : 0;
                     return (
                       <div key={source.source} className="space-y-1">
