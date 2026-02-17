@@ -157,7 +157,7 @@ function MetricCard({
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
             <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", gradient)}>
-              <Icon className="w-4 h-4 text-white" />
+              <Icon className="w-4 h-4 text-landing-accent-foreground" />
             </div>
           </div>
           <div className="text-2xl font-bold tracking-tight">{value}</div>
@@ -356,7 +356,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <DollarSign className="w-3 h-3 text-white" />
+                  <DollarSign className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Monthly Revenue
               </CardTitle>
@@ -392,7 +392,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <Handshake className="w-3 h-3 text-white" />
+                  <Handshake className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Pipeline Funnel
               </CardTitle>
@@ -436,7 +436,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <Activity className="w-3 h-3 text-white" />
+                  <Activity className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Activity Trend (30 Days)
                 <Badge variant="secondary" className="text-[10px] ml-auto">{data.totalActivities} total</Badge>
@@ -479,7 +479,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-500 to-landing-accent flex items-center justify-center">
-                  <Target className="w-3 h-3 text-white" />
+                  <Target className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Win/Loss Analysis
               </CardTitle>
@@ -530,7 +530,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                  <Users className="w-3 h-3 text-white" />
+                  <Users className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Contact Distribution
                 <Badge variant="secondary" className="text-[10px] ml-auto">{data.totalContacts} total</Badge>
@@ -582,7 +582,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <CheckSquare className="w-3 h-3 text-white" />
+                  <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Task Breakdown
                 <Badge variant="secondary" className="text-[10px] ml-auto">{data.completedThisWeek} done this week</Badge>
@@ -631,7 +631,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-500 to-landing-accent flex items-center justify-center">
-                  <Zap className="w-3 h-3 text-white" />
+                  <Zap className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Activity Breakdown
               </CardTitle>
@@ -669,7 +669,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <Building2 className="w-3 h-3 text-white" />
+                  <Building2 className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Company Health
                 <Badge variant="secondary" className="text-[10px] ml-auto">{data.totalCompanies} companies</Badge>
@@ -731,7 +731,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <TrendingUp className="w-3 h-3 text-white" />
+                  <TrendingUp className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Top Open Deals
               </CardTitle>
@@ -773,7 +773,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                  <Users className="w-3 h-3 text-white" />
+                  <Users className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Contact Sources
               </CardTitle>
@@ -824,7 +824,7 @@ export function AnalyticsContent() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <Sparkles className="w-3 h-3 text-white" />
+                  <Sparkles className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 AI Insights
               </CardTitle>
