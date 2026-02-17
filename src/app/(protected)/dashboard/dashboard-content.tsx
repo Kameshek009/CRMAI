@@ -225,7 +225,7 @@ function AnimatedStatCard({
 
   return (
     <Link href={href}>
-      <Card className="p-4 cursor-pointer border-0 shadow-none hover:bg-muted/50 transition-colors group">
+      <Card className="p-4 cursor-pointer hover:bg-muted/50 transition-colors group">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
           <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", iconGradient)}>
