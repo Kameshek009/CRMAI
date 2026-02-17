@@ -19,8 +19,8 @@ const stats: StatItem[] = [
     suffix: "x",
     label: "More Deals Closed",
     description: "Teams using Nexxus CRM close 3x more deals on average",
-    gradient: "from-[#818cf8] to-[#a78bfa]",
-    gradientColors: ["#a78bfa", "#a78bfa"],
+    gradient: "from-landing-accent to-landing-accent",
+    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
     progress: 95,
   },
   {
@@ -28,8 +28,8 @@ const stats: StatItem[] = [
     suffix: "%",
     label: "Less Manual Work",
     description: "AI automations eliminate repetitive data entry and follow-ups",
-    gradient: "from-[#a78bfa] to-[#f472b6]",
-    gradientColors: ["#a78bfa", "#f472b6"],
+    gradient: "from-landing-accent to-landing-accent",
+    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
     progress: 85,
   },
   {
@@ -37,8 +37,8 @@ const stats: StatItem[] = [
     suffix: "%",
     label: "Faster Sales Cycle",
     description: "Shorten your pipeline with AI-powered insights and scoring",
-    gradient: "from-[#f472b6] to-[#e879f9]",
-    gradientColors: ["#f472b6", "#e879f9"],
+    gradient: "from-landing-accent to-landing-accent",
+    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
     progress: 72,
   },
   {
@@ -46,8 +46,8 @@ const stats: StatItem[] = [
     suffix: "K+",
     label: "Teams Trust Us",
     description: "Growing businesses worldwide choose Nexxus CRM",
-    gradient: "from-[#818cf8] to-[#a78bfa]",
-    gradientColors: ["#818cf8", "#a78bfa"],
+    gradient: "from-landing-accent to-landing-accent",
+    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
     progress: 88,
   },
 ];
@@ -184,13 +184,13 @@ function StatCard({ stat, index, inView }: { stat: StatItem; index: number; inVi
       }}
       style={{ rotateX, rotateY, transformPerspective: 800 }}
       whileHover={{ y: -6, scale: 1.03 }}
-      className="group relative text-center p-8 sm:p-10 rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.02] dark:bg-white/[0.02] backdrop-blur-xl hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/5"
+      className="group relative text-center p-8 sm:p-10 rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.02] dark:bg-white/[0.02] backdrop-blur-xl hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-landing-accent/5"
     >
       {/* Mouse-following glow */}
       <motion.div
         className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(250px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.10), transparent 60%)`,
+          background: `radial-gradient(250px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(var(--landing-accent-rgb),0.10), transparent 60%)`,
         }}
       />
 
@@ -241,7 +241,7 @@ export function StatsSection() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[1000px] rounded-full"
           style={{
             background:
-              "radial-gradient(ellipse, rgba(167,139,250,0.08) 0%, rgba(167,139,250,0.04) 40%, transparent 70%)",
+              "radial-gradient(ellipse, rgba(var(--landing-accent-rgb),0.08) 0%, rgba(var(--landing-accent-rgb),0.04) 40%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
@@ -270,7 +270,7 @@ export function StatsSection() {
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             The numbers speak
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#818cf8] via-[#a78bfa] to-[#a78bfa] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
               for themselves
             </span>
           </h2>

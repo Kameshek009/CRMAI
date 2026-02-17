@@ -801,7 +801,7 @@ body {
     135deg,
     transparent 20%,
     rgba(var(--landing-accent-rgb), 0.08) 30%,
-    rgba(192, 132, 252, 0.08) 40%,
+    rgba(var(--landing-accent-rgb), 0.08) 40%,
     transparent 50%
   );
   background-size: 300% 300%;
@@ -1158,7 +1158,7 @@ body {
     transparent,
     rgba(var(--landing-accent-rgb), 0.35),
     rgba(var(--landing-accent-rgb), 0.4),
-    rgba(192, 132, 252, 0.35),
+    rgba(var(--landing-accent-rgb), 0.35),
     transparent
   );
   background-size: 200% 100%;

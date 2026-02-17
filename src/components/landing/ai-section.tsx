@@ -69,7 +69,7 @@ function AIChatMockup() {
           <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
         </div>
         <div className="flex items-center gap-1.5 ml-2">
-          <Bot className="w-3.5 h-3.5 text-[#a78bfa]" />
+          <Bot className="w-3.5 h-3.5 text-landing-accent" />
           <span className="text-[11px] text-muted-foreground font-medium">Nexxus AI Assistant</span>
         </div>
         <div className="ml-auto flex items-center gap-1">
@@ -92,14 +92,14 @@ function AIChatMockup() {
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-gradient-to-r from-[#818cf8] to-[#a78bfa] text-white rounded-br-md shadow-lg shadow-purple-500/10"
+                    ? "bg-landing-accent text-white rounded-br-md shadow-lg shadow-landing-accent/10"
                     : "bg-white/[0.05] dark:bg-white/[0.05] border border-white/10 dark:border-white/10 text-foreground rounded-bl-md"
                 }`}
               >
                 {msg.role === "ai" && (
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <Sparkles className="w-3 h-3 text-[#a78bfa]" />
-                    <span className="text-[10px] font-semibold text-[#a78bfa]">AI</span>
+                    <Sparkles className="w-3 h-3 text-landing-accent" />
+                    <span className="text-[10px] font-semibold text-landing-accent">AI</span>
                   </div>
                 )}
                 {msg.text}
@@ -122,7 +122,7 @@ function AIChatMockup() {
                   key={i}
                   animate={{ y: [0, -4, 0] }}
                   transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                  className="w-1.5 h-1.5 rounded-full bg-[#a78bfa]/50"
+                  className="w-1.5 h-1.5 rounded-full bg-landing-accent/50"
                 />
               ))}
             </div>
@@ -134,9 +134,9 @@ function AIChatMockup() {
       {/* Input bar */}
       <div className="px-4 pb-4">
         <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
-          <Wand2 className="w-4 h-4 text-[#a78bfa]/50" />
+          <Wand2 className="w-4 h-4 text-landing-accent/50" />
           <span className="text-[12px] text-muted-foreground/40 flex-1">Ask AI anything about your CRM...</span>
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-[#818cf8] to-[#a78bfa] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-landing-accent flex items-center justify-center">
             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
@@ -194,8 +194,8 @@ function NeuralNetworkBg() {
         ))}
         <defs>
           <linearGradient id="neural-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#a78bfa" />
-            <stop offset="100%" stopColor="#a78bfa" />
+            <stop offset="0%" stopColor="var(--landing-accent)" />
+            <stop offset="100%" stopColor="var(--landing-accent)" />
           </linearGradient>
         </defs>
       </svg>
@@ -208,7 +208,7 @@ const capabilities = [
     icon: Target,
     title: "AI Lead Scoring",
     description: "Automatically rank leads based on behavior, engagement, and fit. Focus on deals that matter most.",
-    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent to-landing-accent",
     stat: "94%",
     statLabel: "Accuracy",
   },
@@ -216,7 +216,7 @@ const capabilities = [
     icon: MessageSquare,
     title: "Smart Follow-ups",
     description: "AI drafts personalized emails based on conversation history, deal stage, and contact preferences.",
-    gradient: "from-[#a78bfa] to-[#f472b6]",
+    gradient: "from-landing-accent to-landing-accent",
     stat: "3x",
     statLabel: "Response rate",
   },
@@ -224,7 +224,7 @@ const capabilities = [
     icon: TrendingUp,
     title: "Revenue Forecasting",
     description: "Predict monthly revenue with AI that learns from your historical data and win rates.",
-    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent to-landing-accent",
     stat: "±5%",
     statLabel: "Variance",
   },
@@ -232,7 +232,7 @@ const capabilities = [
     icon: Brain,
     title: "Deal Insights",
     description: "Get AI-powered recommendations on next steps, risk alerts, and deal health analysis.",
-    gradient: "from-[#f472b6] to-[#e879f9]",
+    gradient: "from-landing-accent to-landing-accent",
     stat: "24/7",
     statLabel: "Monitoring",
   },
@@ -253,14 +253,14 @@ export function AISection() {
         <div
           className="absolute top-[-10%] right-[-10%] h-[600px] w-[600px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(167,139,250,0.10) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.10) 0%, transparent 70%)",
             filter: "blur(120px)",
           }}
         />
         <div
           className="absolute bottom-[-10%] left-[-10%] h-[400px] w-[400px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 70%)",
             filter: "blur(100px)",
           }}
         />
@@ -276,14 +276,14 @@ export function AISection() {
           transition={{ type: "spring", stiffness: 100, damping: 20 }}
           className="text-center mb-16 sm:mb-20"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#a78bfa]/20 bg-[#a78bfa]/10 px-5 py-2 text-xs font-semibold tracking-wide text-[#a78bfa] backdrop-blur-xl mb-6">
+          <span className="inline-flex items-center gap-2 rounded-full border border-landing-accent/20 bg-landing-accent/10 px-5 py-2 text-xs font-semibold tracking-wide text-landing-accent backdrop-blur-xl mb-6">
             <Brain className="w-3.5 h-3.5" />
             AI-Powered
           </span>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             Your AI sales assistant
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#f472b6] to-[#a78bfa] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
               that never sleeps
             </span>
           </h2>
@@ -307,7 +307,7 @@ export function AISection() {
             <div
               className="absolute -inset-8 -z-10 rounded-3xl"
               style={{
-                background: "radial-gradient(ellipse at center, rgba(167,139,250,0.12) 0%, transparent 70%)",
+                background: "radial-gradient(ellipse at center, rgba(var(--landing-accent-rgb),0.12) 0%, transparent 70%)",
                 filter: "blur(40px)",
               }}
             />
@@ -330,7 +330,7 @@ export function AISection() {
                     damping: 20,
                   }}
                   whileHover={{ y: -6, scale: 1.02 }}
-                  className="group relative rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10"
+                  className="group relative rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-landing-accent/10"
                 >
                   {/* Hover glow */}
                   <div
@@ -387,8 +387,8 @@ export function AISection() {
                 transition={{ delay: 0.4 + i * 0.08 }}
                 className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-4"
               >
-                <div className="w-9 h-9 rounded-xl bg-[#a78bfa]/10 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-[#a78bfa]" />
+                <div className="w-9 h-9 rounded-xl bg-landing-accent/10 flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-landing-accent" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-foreground">{metric.value}</p>

@@ -29,7 +29,7 @@ const plans: PlanCard[] = [
     cta: "Get Started",
     ctaHref: "/sign-up",
     icon: Sparkles,
-    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent to-landing-accent",
     features: [
       "50K AI tokens / month",
       "10K tokens / week",
@@ -52,7 +52,7 @@ const plans: PlanCard[] = [
     cta: "Upgrade to Pro",
     ctaHref: "/sign-up",
     icon: Zap,
-    gradient: "from-[#a78bfa] to-[#f472b6]",
+    gradient: "from-landing-accent to-landing-accent",
     inheritLabel: "Everything from Free, plus:",
     features: [
       "500K AI tokens / month",
@@ -77,7 +77,7 @@ const plans: PlanCard[] = [
     cta: "Upgrade to Max",
     ctaHref: "/sign-up",
     icon: Crown,
-    gradient: "from-[#f472b6] to-[#e879f9]",
+    gradient: "from-landing-accent to-landing-accent",
     inheritLabel: "Everything from Pro, plus:",
     features: [
       "1.5M AI tokens / month",
@@ -101,7 +101,7 @@ const plans: PlanCard[] = [
     cta: "Contact Sales",
     ctaHref: "mailto:sales@nexxuscrm.com",
     icon: Building2,
-    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent to-landing-accent",
     inheritLabel: "Everything from Max, plus:",
     features: [
       "Unlimited AI tokens (credit-based)",
@@ -158,15 +158,15 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       className={cn(
         "group relative flex flex-col rounded-3xl border p-5 sm:p-6 transition-all duration-300 backdrop-blur-xl overflow-hidden",
         plan.popular
-          ? "border-[#a78bfa]/30 bg-white/[0.04] dark:bg-white/[0.04] shadow-2xl shadow-purple-500/10"
-          : "border-white/10 dark:border-white/10 bg-white/[0.02] dark:bg-white/[0.02] hover:border-white/20 hover:shadow-xl hover:shadow-purple-500/5"
+          ? "border-landing-accent/30 bg-white/[0.04] dark:bg-white/[0.04] shadow-2xl shadow-landing-accent/10"
+          : "border-white/10 dark:border-white/10 bg-white/[0.02] dark:bg-white/[0.02] hover:border-white/20 hover:shadow-xl hover:shadow-landing-accent/5"
       )}
     >
       {/* Mouse-following glow */}
       <motion.div
         className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(350px circle at ${smoothX}px ${smoothY}px, rgba(167,139,250,0.10), transparent 60%)`,
+          background: `radial-gradient(350px circle at ${smoothX}px ${smoothY}px, rgba(var(--landing-accent-rgb),0.10), transparent 60%)`,
         }}
       />
 
@@ -174,7 +174,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       {plan.popular && (
         <div className="absolute inset-0 rounded-3xl landing-gradient-border p-px pointer-events-none"
           style={{
-            background: "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #818cf8, #a78bfa)",
+            background: "linear-gradient(135deg, var(--landing-accent), var(--landing-accent), var(--landing-accent), var(--landing-accent), var(--landing-accent))",
             backgroundSize: "400% 400%",
             mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
             WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -190,7 +190,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       {/* Popular badge */}
       {plan.badge && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#a78bfa] to-[#f472b6] px-4 py-1 text-xs font-semibold text-white shadow-lg shadow-purple-500/20">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-landing-accent px-4 py-1 text-xs font-semibold text-white shadow-lg shadow-landing-accent/20">
             <Sparkles className="size-3" />
             {plan.badge}
           </span>
@@ -223,7 +223,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       {/* Token highlight */}
       {plan.tokenHighlight && (
         <div className="mb-4 flex items-center gap-2 rounded-xl bg-white/[0.03] border border-white/10 px-3 py-2 relative z-10">
-          <Sparkles className={cn("size-3.5 shrink-0", plan.popular ? "text-[#a78bfa]" : "text-muted-foreground/50")} />
+          <Sparkles className={cn("size-3.5 shrink-0", plan.popular ? "text-landing-accent" : "text-muted-foreground/50")} />
           <span className="text-xs font-semibold text-foreground">AI: {plan.tokenHighlight}</span>
         </div>
       )}
@@ -235,7 +235,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
           className={cn(
             "flex items-center justify-center h-11 rounded-xl text-sm font-semibold transition-all mb-5",
             plan.popular
-              ? "bg-gradient-to-r from-[#a78bfa] to-[#f472b6] text-white hover:shadow-lg hover:shadow-purple-500/20"
+              ? "bg-landing-accent text-white hover:shadow-lg hover:shadow-landing-accent/20"
               : "border border-white/15 bg-white/5 text-foreground hover:bg-white/10"
           )}
         >
@@ -255,7 +255,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
             <Check
               className={cn(
                 "size-4 shrink-0 mt-0.5",
-                plan.popular ? "text-[#a78bfa]" : "text-emerald-500/70"
+                plan.popular ? "text-landing-accent" : "text-emerald-500/70"
               )}
               strokeWidth={2.5}
             />
@@ -285,7 +285,7 @@ export function PricingSection() {
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             Choose your
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
               perfect plan
             </span>
           </h1>
@@ -319,11 +319,11 @@ export function PricingSection() {
 
       {/* Background gradient orbs */}
       <div className="pointer-events-none absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full" style={{
-        background: "radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.06) 0%, transparent 70%)",
         filter: "blur(80px)",
       }} />
       <div className="pointer-events-none absolute -bottom-32 -left-32 h-[400px] w-[400px] rounded-full" style={{
-        background: "radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.05) 0%, transparent 70%)",
         filter: "blur(80px)",
       }} />
     </section>

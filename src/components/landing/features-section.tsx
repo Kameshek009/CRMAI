@@ -27,8 +27,8 @@ const features: BentoFeature[] = [
     title: "AI-Powered CRM",
     description:
       "Let artificial intelligence score leads, predict outcomes, and draft follow-ups. Your AI co-pilot works 24/7 so you never miss an opportunity.",
-    gradient: "from-[#a78bfa]/20 via-[#a78bfa]/10 to-transparent",
-    iconGradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+    iconGradient: "from-landing-accent to-landing-accent",
     size: "lg",
   },
   {
@@ -36,8 +36,8 @@ const features: BentoFeature[] = [
     title: "Pipeline Management",
     description:
       "Drag-and-drop deals through custom stages. Visualize your entire funnel with real-time updates and automated transitions.",
-    gradient: "from-[#a78bfa]/20 via-[#f472b6]/10 to-transparent",
-    iconGradient: "from-[#a78bfa] to-[#f472b6]",
+    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+    iconGradient: "from-landing-accent to-landing-accent",
     size: "md",
   },
   {
@@ -45,8 +45,8 @@ const features: BentoFeature[] = [
     title: "Team Collaboration",
     description:
       "Share pipelines, assign deals, mention teammates, and keep everyone aligned in real time.",
-    gradient: "from-[#f472b6]/20 via-[#818cf8]/10 to-transparent",
-    iconGradient: "from-[#f472b6] to-[#e879f9]",
+    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+    iconGradient: "from-landing-accent to-landing-accent",
     size: "sm",
   },
   {
@@ -54,8 +54,8 @@ const features: BentoFeature[] = [
     title: "Analytics & Insights",
     description:
       "Beautiful dashboards with conversion rates, revenue forecasts, and performance metrics that update in real time.",
-    gradient: "from-[#818cf8]/20 via-[#a78bfa]/10 to-transparent",
-    iconGradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+    iconGradient: "from-landing-accent to-landing-accent",
     size: "sm",
   },
   {
@@ -63,8 +63,8 @@ const features: BentoFeature[] = [
     title: "Smart Automation",
     description:
       "Create triggers and workflows that eliminate repetitive tasks. Auto-assign leads, send follow-ups, update stages — hands free.",
-    gradient: "from-[#e879f9]/20 via-[#f472b6]/10 to-transparent",
-    iconGradient: "from-[#e879f9] to-[#f472b6]",
+    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+    iconGradient: "from-landing-accent to-landing-accent",
     size: "md",
   },
   {
@@ -72,8 +72,8 @@ const features: BentoFeature[] = [
     title: "Real-time Sync",
     description:
       "Instant sync across all devices. Connect with Gmail, Outlook, Slack, Zapier, and 50+ tools seamlessly.",
-    gradient: "from-[#a78bfa]/20 via-[#818cf8]/10 to-transparent",
-    iconGradient: "from-[#a78bfa] to-[#818cf8]",
+    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+    iconGradient: "from-landing-accent to-landing-accent",
     size: "lg",
   },
 ];
@@ -121,7 +121,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
       }}
       style={{ rotateX, rotateY, transformPerspective: 1000 }}
       whileHover={{ y: -6, scale: 1.02 }}
-      className={`landing-glass-card group relative overflow-hidden rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-8 transition-all duration-300 hover:border-white/20 dark:hover:border-white/20 hover:shadow-2xl hover:shadow-purple-500/10 ${
+      className={`landing-glass-card group relative overflow-hidden rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-8 transition-all duration-300 hover:border-white/20 dark:hover:border-white/20 hover:shadow-2xl hover:shadow-landing-accent/10 ${
         feature.size === "lg"
           ? "md:col-span-2 md:row-span-2"
           : feature.size === "md"
@@ -133,7 +133,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
       <motion.div
         className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(400px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.12), rgba(167,139,250,0.06), transparent 60%)`,
+          background: `radial-gradient(400px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(var(--landing-accent-rgb),0.12), rgba(var(--landing-accent-rgb),0.06), transparent 60%)`,
         }}
       />
 
@@ -145,7 +145,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
       {/* Hover glow border effect */}
       <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: "linear-gradient(135deg, rgba(167,139,250,0.1) 0%, rgba(167,139,250,0.05) 50%, rgba(244,114,182,0.1) 100%)",
+          background: "linear-gradient(135deg, rgba(var(--landing-accent-rgb),0.1) 0%, rgba(var(--landing-accent-rgb),0.05) 50%, rgba(var(--landing-accent-rgb),0.1) 100%)",
         }}
       />
 
@@ -217,14 +217,14 @@ export function FeaturesSection() {
         <div
           className="absolute top-[10%] left-1/2 -translate-x-1/2 h-[800px] w-[800px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 70%)",
             filter: "blur(100px)",
           }}
         />
         <div
           className="absolute bottom-[10%] right-[10%] h-[500px] w-[500px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.05) 0%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
@@ -246,7 +246,7 @@ export function FeaturesSection() {
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
             Everything you need to
             <br />
-            <span className="landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+            <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
               close more deals
             </span>
           </h2>
