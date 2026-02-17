@@ -19,7 +19,7 @@ function AuroraBackground() {
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         className="absolute -top-[40%] -left-[20%] h-[600px] w-[800px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(167,139,250,0.25) 0%, rgba(167,139,250,0.1) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(var(--landing-accent-rgb),0.25) 0%, rgba(var(--landing-accent-rgb),0.1) 40%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -32,7 +32,7 @@ function AuroraBackground() {
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }}
         className="absolute -bottom-[30%] -right-[15%] h-[500px] w-[700px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(167,139,250,0.2) 0%, rgba(244,114,182,0.08) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(var(--landing-accent-rgb),0.2) 0%, rgba(var(--landing-accent-rgb),0.08) 40%, transparent 70%)",
           filter: "blur(100px)",
         }}
       />
@@ -45,7 +45,7 @@ function AuroraBackground() {
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 5 }}
         className="absolute top-[10%] right-[20%] h-[400px] w-[400px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(244,114,182,0.15) 0%, rgba(129,140,248,0.06) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(var(--landing-accent-rgb),0.15) 0%, rgba(var(--landing-accent-rgb),0.06) 40%, transparent 70%)",
           filter: "blur(90px)",
         }}
       />
@@ -57,7 +57,7 @@ function AuroraBackground() {
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 8 }}
         className="absolute bottom-[20%] left-[30%] h-[300px] w-[500px] rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(129,140,248,0.12) 0%, rgba(167,139,250,0.05) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(var(--landing-accent-rgb),0.12) 0%, rgba(var(--landing-accent-rgb),0.05) 40%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -72,10 +72,10 @@ function CTAGradientMesh() {
       <motion.div
         animate={{
           background: [
-            "radial-gradient(at 10% 20%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
-            "radial-gradient(at 50% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 20% 30%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 80% 20%, rgba(129,140,248,0.08) 0%, transparent 50%)",
-            "radial-gradient(at 80% 40%, rgba(244,114,182,0.10) 0%, transparent 50%), radial-gradient(at 30% 70%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 60% 10%, rgba(167,139,250,0.08) 0%, transparent 50%)",
-            "radial-gradient(at 10% 20%, rgba(167,139,250,0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(167,139,250,0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.08) 0%, transparent 50%)",
+            "radial-gradient(at 10% 20%, rgba(var(--landing-accent-rgb),0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(var(--landing-accent-rgb),0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 50%)",
+            "radial-gradient(at 50% 80%, rgba(var(--landing-accent-rgb),0.10) 0%, transparent 50%), radial-gradient(at 20% 30%, rgba(var(--landing-accent-rgb),0.12) 0%, transparent 50%), radial-gradient(at 80% 20%, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 50%)",
+            "radial-gradient(at 80% 40%, rgba(var(--landing-accent-rgb),0.10) 0%, transparent 50%), radial-gradient(at 30% 70%, rgba(var(--landing-accent-rgb),0.12) 0%, transparent 50%), radial-gradient(at 60% 10%, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 50%)",
+            "radial-gradient(at 10% 20%, rgba(var(--landing-accent-rgb),0.12) 0%, transparent 50%), radial-gradient(at 90% 80%, rgba(var(--landing-accent-rgb),0.10) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
@@ -193,7 +193,7 @@ function FloatingParticles() {
             height: p.size,
             left: `${p.x}%`,
             top: `${p.y}%`,
-            background: `rgba(167, 139, 250, ${p.opacity})`,
+            background: `rgba(var(--landing-accent-rgb), ${p.opacity})`,
           }}
           animate={{
             y: [0, -40, 15, -25, 0],
@@ -236,7 +236,7 @@ export function CTASection() {
             className="absolute inset-0 rounded-[2rem] landing-gradient-border"
             style={{
               background:
-                "linear-gradient(135deg, #a78bfa, #a78bfa, #f472b6, #818cf8, #a78bfa)",
+                "linear-gradient(135deg, var(--landing-accent), var(--landing-accent), var(--landing-accent), var(--landing-accent), var(--landing-accent))",
               backgroundSize: "400% 400%",
             }}
           />
@@ -267,7 +267,7 @@ export function CTASection() {
               className="relative z-10"
             >
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#a78bfa]/30 bg-[#a78bfa]/10 px-5 py-2 text-xs font-semibold text-[#a78bfa] mb-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-landing-accent/30 bg-landing-accent/10 px-5 py-2 text-xs font-semibold text-landing-accent mb-8">
                 <Sparkles className="w-3.5 h-3.5" />
                 Start for free today
               </div>
@@ -279,7 +279,7 @@ export function CTASection() {
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground mb-6">
                 Ready to supercharge
                 <br className="hidden sm:block" />
-                <span className="landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+                <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
                   {" "}your sales?
                 </span>
               </h2>
@@ -298,7 +298,7 @@ export function CTASection() {
                 >
                   <Link
                     href="/sign-up"
-                    className="landing-pulse-button group relative inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] text-white shadow-2xl shadow-purple-500/25 transition-shadow hover:shadow-purple-500/40"
+                    className="landing-pulse-button group relative inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent text-white shadow-2xl shadow-landing-accent/25 transition-shadow hover:shadow-landing-accent/40"
                   >
                     Get Started Free
                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />

@@ -112,7 +112,7 @@ const TIER_DISPLAY_NAMES: Record<string, string> = {
 const TIER_COLORS: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
   pro: "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600 border-blue-200/50 dark:border-blue-800/30",
-  max: "bg-gradient-to-r from-violet-500/10 to-purple-500/10 text-violet-600 border-violet-200/50 dark:border-violet-800/30",
+  max: "bg-gradient-to-r from-landing-accent/10 to-landing-accent/10 text-landing-accent border-landing-accent/20 dark:border-landing-accent/20",
   enterprise: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-600 border-amber-200/50 dark:border-amber-800/30",
 };
 
@@ -213,7 +213,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard" className="group/logo">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#818cf8]/15 to-[#c084fc]/15 dark:from-[#818cf8]/20 dark:to-[#c084fc]/20 transition-all duration-300 group-hover/logo:from-[#818cf8]/25 group-hover/logo:to-[#c084fc]/25 group-hover/logo:shadow-md group-hover/logo:shadow-[#a78bfa]/10">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-gradient-to-br from-landing-accent/15 to-landing-accent/15 dark:from-landing-accent/20 dark:to-landing-accent/20 transition-all duration-300 group-hover/logo:from-landing-accent/25 group-hover/logo:to-landing-accent/25 group-hover/logo:shadow-md group-hover/logo:shadow-landing-accent/10">
                   <Logo size={20} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">

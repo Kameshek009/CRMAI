@@ -18,7 +18,7 @@ const badgeVariants = cva(
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [a&]:hover:shadow-sm",
         gradient:
-          "border-transparent text-white bg-gradient-to-r from-[#818cf8] to-[#c084fc] [a&]:hover:shadow-md [a&]:hover:shadow-[rgba(167,139,250,0.25)]",
+          "border-transparent text-white bg-landing-accent [a&]:hover:shadow-md [a&]:hover:shadow-landing-accent/25",
         success:
           "border-transparent bg-[var(--success)]/15 text-[var(--success)] dark:bg-[var(--success)]/20 [a&]:hover:shadow-sm [a&]:hover:shadow-[var(--success)]/15",
         warning:

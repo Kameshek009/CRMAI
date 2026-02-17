@@ -29,7 +29,7 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
         <div className="flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-muted to-muted/60 empty-state-icon">
           <Icon className="size-9 text-muted-foreground/60" />
         </div>
-        <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-[#818cf8]/5 to-[#c084fc]/5 blur-xl -z-10" />
+        <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-landing-accent/5 to-landing-accent/5 blur-xl -z-10" />
       </motion.div>
       <motion.h3
         initial={{ opacity: 0, y: 8 }}

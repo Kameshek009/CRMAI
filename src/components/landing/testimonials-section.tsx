@@ -10,7 +10,7 @@ const testimonials = [
     role: "VP of Sales",
     company: "TechFlow",
     avatar: "SM",
-    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "Nexxus CRM transformed how our team sells. The AI insights alone helped us identify $200K in pipeline we were about to lose. We closed 40% more deals in Q1.",
     stars: 5,
   },
@@ -19,7 +19,7 @@ const testimonials = [
     role: "Head of Growth",
     company: "ScaleUp Inc",
     avatar: "JR",
-    gradient: "from-[#a78bfa] to-[#f472b6]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "We tried Salesforce, HubSpot, and Pipedrive. Nexxus CRM is the first CRM our sales team actually enjoys using. The AI assistant is like having an extra team member.",
     stars: 5,
   },
@@ -28,7 +28,7 @@ const testimonials = [
     role: "CEO",
     company: "Sparkline",
     avatar: "LP",
-    gradient: "from-[#f472b6] to-[#e879f9]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "The pipeline view and AI scoring are game-changers. We went from spreadsheets to a real sales machine. Our conversion rate jumped 35% in two months.",
     stars: 5,
   },
@@ -37,7 +37,7 @@ const testimonials = [
     role: "Sales Director",
     company: "CloudBase",
     avatar: "MC",
-    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "Finally a CRM that doesn't feel like it was built in 2005. Clean, fast, and the AI actually delivers on its promises. My reps save 2 hours daily.",
     stars: 5,
   },
@@ -46,7 +46,7 @@ const testimonials = [
     role: "Founder",
     company: "GrowthLab",
     avatar: "AW",
-    gradient: "from-[#e879f9] to-[#f472b6]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "As a startup, we needed something powerful but simple. Nexxus CRM gave us enterprise features without the enterprise complexity. Best investment this year.",
     stars: 5,
   },
@@ -55,7 +55,7 @@ const testimonials = [
     role: "CRO",
     company: "FinBridge",
     avatar: "DK",
-    gradient: "from-[#a78bfa] to-[#818cf8]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "The revenue forecasting is scary accurate. We planned our entire hiring roadmap based on Nexxus CRM predictions and hit targets within 5% variance.",
     stars: 5,
   },
@@ -64,7 +64,7 @@ const testimonials = [
     role: "Sales Manager",
     company: "NovaTech",
     avatar: "EV",
-    gradient: "from-[#818cf8] to-[#a78bfa]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "Onboarding new sales reps used to take weeks. With Nexxus CRM's AI assistant, new team members are productive from day one. Absolute game changer.",
     stars: 5,
   },
@@ -73,7 +73,7 @@ const testimonials = [
     role: "COO",
     company: "FlexPay",
     avatar: "TB",
-    gradient: "from-[#f472b6] to-[#818cf8]",
+    gradient: "from-landing-accent to-landing-accent",
     text: "We switched from a $50k/year enterprise CRM to Nexxus and our team's productivity actually increased. The AI insights are unmatched at this price point.",
     stars: 5,
   },
@@ -110,13 +110,13 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ rotateX, rotateY, transformPerspective: 800 }}
-      className="group relative flex-shrink-0 w-[340px] sm:w-[380px] rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-7 hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/5"
+      className="group relative flex-shrink-0 w-[340px] sm:w-[380px] rounded-3xl border border-white/10 dark:border-white/10 bg-white/[0.03] dark:bg-white/[0.03] backdrop-blur-xl p-6 sm:p-7 hover:border-white/20 dark:hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:shadow-landing-accent/5"
     >
       {/* Mouse-following glow */}
       <motion.div
         className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(300px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(167,139,250,0.10), transparent 60%)`,
+          background: `radial-gradient(300px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(var(--landing-accent-rgb),0.10), transparent 60%)`,
         }}
       />
 
@@ -126,7 +126,7 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
       />
 
       {/* Quote icon */}
-      <Quote className="absolute top-5 right-5 w-8 h-8 text-white/5 group-hover:text-[#a78bfa]/10 transition-colors duration-300" />
+      <Quote className="absolute top-5 right-5 w-8 h-8 text-white/5 group-hover:text-landing-accent/10 transition-colors duration-300" />
 
       {/* Stars */}
       <div className="flex gap-0.5 mb-4 relative z-10">
@@ -196,7 +196,7 @@ export function TestimonialsSection() {
         <div
           className="absolute top-[20%] left-1/2 -translate-x-1/2 h-[600px] w-[800px] rounded-full"
           style={{
-            background: "radial-gradient(ellipse, rgba(244,114,182,0.06) 0%, rgba(167,139,250,0.03) 40%, transparent 70%)",
+            background: "radial-gradient(ellipse, rgba(var(--landing-accent-rgb),0.06) 0%, rgba(var(--landing-accent-rgb),0.03) 40%, transparent 70%)",
             filter: "blur(100px)",
           }}
         />
@@ -216,7 +216,7 @@ export function TestimonialsSection() {
         <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
           Don&apos;t take our
           <br />
-          <span className="landing-gradient-text bg-gradient-to-r from-[#f472b6] via-[#a78bfa] to-[#a78bfa] bg-clip-text text-transparent">
+          <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
             word for it
           </span>
         </h2>

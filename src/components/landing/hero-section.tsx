@@ -37,7 +37,7 @@ function FloatingOrbs() {
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-[-15%] left-[40%] h-[700px] w-[700px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(167,139,250,0.18) 0%, rgba(167,139,250,0.10) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.18) 0%, rgba(var(--landing-accent-rgb),0.10) 50%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -46,7 +46,7 @@ function FloatingOrbs() {
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         className="absolute top-[10%] left-[10%] h-[500px] w-[500px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(167,139,250,0.15) 0%, rgba(244,114,182,0.08) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.15) 0%, rgba(var(--landing-accent-rgb),0.08) 50%, transparent 70%)",
           filter: "blur(100px)",
         }}
       />
@@ -55,7 +55,7 @@ function FloatingOrbs() {
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 4 }}
         className="absolute top-[20%] right-[5%] h-[400px] w-[400px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(244,114,182,0.12) 0%, rgba(129,140,248,0.06) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.12) 0%, rgba(var(--landing-accent-rgb),0.06) 50%, transparent 70%)",
           filter: "blur(90px)",
         }}
       />
@@ -64,7 +64,7 @@ function FloatingOrbs() {
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 6 }}
         className="absolute bottom-[5%] left-[25%] h-[350px] w-[350px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(129,140,248,0.10) 0%, rgba(167,139,250,0.05) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(var(--landing-accent-rgb),0.10) 0%, rgba(var(--landing-accent-rgb),0.05) 50%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -97,28 +97,28 @@ function BeamRays() {
         animate={{ opacity: [0, 0.4, 0], x: ["-100%", "200%"] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0 }}
         className="absolute top-[20%] left-0 h-[1px] w-[300px]"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, rgba(var(--landing-accent-rgb),0.6), transparent)" }}
       />
       {/* Beam 2 - top right diagonal */}
       <motion.div
         animate={{ opacity: [0, 0.3, 0], x: ["200%", "-100%"] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
         className="absolute top-[35%] right-0 h-[1px] w-[400px]"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(167,139,250,0.5), transparent)", transform: "rotate(-15deg)" }}
+        style={{ background: "linear-gradient(90deg, transparent, rgba(var(--landing-accent-rgb),0.5), transparent)", transform: "rotate(-15deg)" }}
       />
       {/* Beam 3 - vertical subtle */}
       <motion.div
         animate={{ opacity: [0, 0.2, 0], y: ["-100%", "200%"] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 5 }}
         className="absolute top-0 left-[60%] w-[1px] h-[200px]"
-        style={{ background: "linear-gradient(180deg, transparent, rgba(244,114,182,0.4), transparent)" }}
+        style={{ background: "linear-gradient(180deg, transparent, rgba(var(--landing-accent-rgb),0.4), transparent)" }}
       />
       {/* Wide beam glow */}
       <motion.div
         animate={{ opacity: [0, 0.15, 0], rotate: [0, 3, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-[-20%] left-[30%] w-[2px] h-[140%]"
-        style={{ background: "linear-gradient(180deg, transparent, rgba(167,139,250,0.3), rgba(167,139,250,0.2), transparent)", filter: "blur(4px)" }}
+        style={{ background: "linear-gradient(180deg, transparent, rgba(var(--landing-accent-rgb),0.3), rgba(var(--landing-accent-rgb),0.2), transparent)", filter: "blur(4px)" }}
       />
     </div>
   );
@@ -131,10 +131,10 @@ function GradientMesh() {
       <motion.div
         animate={{
           background: [
-            "radial-gradient(at 20% 30%, rgba(167,139,250,0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.04) 0%, transparent 50%)",
-            "radial-gradient(at 40% 60%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 60% 30%, rgba(167,139,250,0.08) 0%, transparent 50%), radial-gradient(at 30% 80%, rgba(244,114,182,0.06) 0%, transparent 50%)",
-            "radial-gradient(at 70% 40%, rgba(167,139,250,0.07) 0%, transparent 50%), radial-gradient(at 30% 50%, rgba(167,139,250,0.05) 0%, transparent 50%), radial-gradient(at 60% 70%, rgba(129,140,248,0.05) 0%, transparent 50%)",
-            "radial-gradient(at 20% 30%, rgba(167,139,250,0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(167,139,250,0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(244,114,182,0.04) 0%, transparent 50%)",
+            "radial-gradient(at 20% 30%, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(var(--landing-accent-rgb),0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(var(--landing-accent-rgb),0.04) 0%, transparent 50%)",
+            "radial-gradient(at 40% 60%, rgba(var(--landing-accent-rgb),0.06) 0%, transparent 50%), radial-gradient(at 60% 30%, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 50%), radial-gradient(at 30% 80%, rgba(var(--landing-accent-rgb),0.06) 0%, transparent 50%)",
+            "radial-gradient(at 70% 40%, rgba(var(--landing-accent-rgb),0.07) 0%, transparent 50%), radial-gradient(at 30% 50%, rgba(var(--landing-accent-rgb),0.05) 0%, transparent 50%), radial-gradient(at 60% 70%, rgba(var(--landing-accent-rgb),0.05) 0%, transparent 50%)",
+            "radial-gradient(at 20% 30%, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(var(--landing-accent-rgb),0.06) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(var(--landing-accent-rgb),0.04) 0%, transparent 50%)",
           ],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
@@ -155,7 +155,7 @@ function MouseSpotlight() {
   const backgroundValue = useTransform(
     [smoothX, smoothY],
     ([x, y]) =>
-      `radial-gradient(600px circle at ${x}px ${y}px, rgba(167,139,250,0.06), rgba(167,139,250,0.03), transparent 60%)`
+      `radial-gradient(600px circle at ${x}px ${y}px, rgba(var(--landing-accent-rgb),0.06), rgba(var(--landing-accent-rgb),0.03), transparent 60%)`
   );
 
   useEffect(() => {
@@ -216,7 +216,7 @@ function ProductPreview3D() {
     >
       {/* Glow behind */}
       <div className="absolute -inset-8 -z-10 rounded-3xl" style={{
-        background: "radial-gradient(ellipse at center, rgba(167,139,250,0.15) 0%, rgba(167,139,250,0.08) 30%, transparent 70%)",
+        background: "radial-gradient(ellipse at center, rgba(var(--landing-accent-rgb),0.15) 0%, rgba(var(--landing-accent-rgb),0.08) 30%, transparent 70%)",
         filter: "blur(50px)",
       }} />
 
@@ -247,7 +247,7 @@ function ProductPreview3D() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1 + i * 0.1 }}
-                className={`w-8 h-8 rounded-xl flex items-center justify-center ${i === 0 ? "bg-gradient-to-br from-[#818cf8] to-[#a78bfa] shadow-lg" : "hover:bg-white/5"} transition-colors`}
+                className={`w-8 h-8 rounded-xl flex items-center justify-center ${i === 0 ? "bg-gradient-to-br from-landing-accent to-landing-accent shadow-lg" : "hover:bg-white/5"} transition-colors`}
               >
                 <Icon className={`w-4 h-4 ${i === 0 ? "text-white" : "text-muted-foreground/50"}`} />
               </motion.div>
@@ -259,9 +259,9 @@ function ProductPreview3D() {
             {/* Top stats */}
             <div className="grid grid-cols-3 gap-3 mb-4">
               {[
-                { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-[#818cf8] to-[#a78bfa]" },
-                { label: "Deals Won", value: "148", change: "+24%", color: "from-[#a78bfa] to-[#f472b6]" },
-                { label: "Conversion", value: "68%", change: "+7%", color: "from-[#818cf8] to-[#a78bfa]" },
+                { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-landing-accent to-landing-accent" },
+                { label: "Deals Won", value: "148", change: "+24%", color: "from-landing-accent to-landing-accent" },
+                { label: "Conversion", value: "68%", change: "+7%", color: "from-landing-accent to-landing-accent" },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -322,7 +322,7 @@ function ProductPreview3D() {
                     initial={{ height: 0 }}
                     animate={{ height: `${h}%` }}
                     transition={{ delay: 1.5 + i * 0.05, duration: 0.5, ease: "easeOut" }}
-                    className="flex-1 rounded-sm bg-gradient-to-t from-[#818cf8]/40 to-[#a78bfa]/60"
+                    className="flex-1 rounded-sm bg-gradient-to-t from-landing-accent/40 to-landing-accent/60"
                   />
                 ))}
               </div>
@@ -341,11 +341,11 @@ function ProductPreview3D() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 2 }}
-              className="mt-auto rounded-xl bg-gradient-to-br from-[#a78bfa]/10 to-[#f472b6]/10 border border-[#a78bfa]/20 p-3"
+              className="mt-auto rounded-xl bg-gradient-to-br from-landing-accent/10 to-landing-accent/10 border border-landing-accent/20 p-3"
             >
               <div className="flex items-center gap-1.5 mb-1">
-                <Sparkles className="w-3 h-3 text-[#a78bfa]" />
-                <span className="text-[9px] font-bold text-[#a78bfa]">AI INSIGHT</span>
+                <Sparkles className="w-3 h-3 text-landing-accent" />
+                <span className="text-[9px] font-bold text-landing-accent">AI INSIGHT</span>
               </div>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
                 3 deals need follow-up this week. Expected close rate: 78%
@@ -358,7 +358,7 @@ function ProductPreview3D() {
       {/* Reflection effect */}
       <div className="hidden sm:block absolute -bottom-12 left-[5%] right-[5%] h-16 rounded-full"
         style={{
-          background: "radial-gradient(ellipse, rgba(167,139,250,0.08) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(var(--landing-accent-rgb),0.08) 0%, transparent 70%)",
           filter: "blur(20px)",
         }}
       />
@@ -416,7 +416,7 @@ function TypedText({ words }: { words: string[] }) {
             filter: i === currentIndex ? "blur(0px)" : "blur(8px)",
           }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className={`landing-gradient-text bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent ${i === currentIndex ? "relative" : "absolute left-0 top-0"}`}
+          className={`landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent ${i === currentIndex ? "relative" : "absolute left-0 top-0"}`}
         >
           {word}
         </motion.span>
@@ -452,7 +452,7 @@ export function HeroSection() {
         <motion.div variants={itemVariants}>
           <motion.span
             className="landing-glass-badge inline-flex items-center gap-2.5 rounded-full border border-white/10 dark:border-white/10 bg-white/5 dark:bg-white/5 px-5 py-2 text-xs font-semibold tracking-wide text-muted-foreground backdrop-blur-xl shadow-lg cursor-default"
-            whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(167,139,250,0.15)" }}
+            whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(var(--landing-accent-rgb),0.15)" }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <span className="relative flex h-2 w-2">
@@ -485,7 +485,7 @@ export function HeroSection() {
           <span className="text-foreground font-medium relative">
             close more deals
             <motion.span
-              className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] rounded-full"
+              className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent rounded-full"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
               transition={{ delay: 1.5, duration: 0.8, ease: "easeOut" }}
@@ -503,7 +503,7 @@ export function HeroSection() {
           >
             <Link
               href="/sign-up"
-              className="landing-glow-button group relative inline-flex items-center gap-2.5 h-14 px-10 rounded-2xl text-base font-semibold bg-gradient-to-r from-[#a78bfa] via-[#a78bfa] to-[#f472b6] text-white shadow-2xl shadow-purple-500/25 transition-shadow hover:shadow-purple-500/40"
+              className="landing-glow-button group relative inline-flex items-center gap-2.5 h-14 px-10 rounded-2xl text-base font-semibold bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent text-white shadow-2xl shadow-landing-accent/25 transition-shadow hover:shadow-landing-accent/40"
             >
               Get Started Free
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

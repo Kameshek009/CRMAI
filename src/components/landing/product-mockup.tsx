@@ -116,7 +116,7 @@ export function ProductMockup() {
       </motion.div>
 
       {/* Glow effect behind */}
-      <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-transparent blur-2xl" />
+      <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-landing-accent/10 via-landing-accent/5 to-transparent blur-2xl" />
     </motion.div>
   );
 }
