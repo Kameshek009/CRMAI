@@ -22,16 +22,16 @@ const typeIcons: Record<string, typeof MessageSquare> = {
 };
 
 const typeColors: Record<string, string> = {
-  note: "bg-blue-500/10 text-blue-600",
-  call: "bg-green-500/10 text-green-600",
-  email: "bg-purple-500/10 text-purple-600",
+  note: "bg-landing-accent/10 text-landing-accent",
+  call: "bg-landing-accent/10 text-landing-accent",
+  email: "bg-landing-accent/10 text-landing-accent",
   meeting: "bg-orange-500/10 text-orange-600",
-  deal_created: "bg-indigo-500/10 text-indigo-600",
-  deal_stage_changed: "bg-amber-500/10 text-amber-600",
+  deal_created: "bg-landing-accent/10 text-landing-accent",
+  deal_stage_changed: "bg-orange-500/10 text-orange-600",
   deal_won: "bg-emerald-500/10 text-emerald-600",
   deal_lost: "bg-red-500/10 text-red-600",
-  contact_created: "bg-cyan-500/10 text-cyan-600",
-  task_completed: "bg-teal-500/10 text-teal-600",
+  contact_created: "bg-landing-accent/10 text-landing-accent",
+  task_completed: "bg-emerald-500/10 text-emerald-600",
   import: "bg-gray-500/10 text-gray-600",
 };
 

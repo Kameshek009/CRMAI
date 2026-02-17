@@ -57,14 +57,14 @@ interface ContactDetailContentProps {
 }
 
 const statusConfig: Record<string, { color: string; dot: string }> = {
-  lead: { color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", dot: "bg-indigo-500" },
+  lead: { color: "bg-landing-accent/10 text-orange-600 border-landing-accent/20", dot: "bg-landing-accent" },
   active: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", dot: "bg-emerald-500" },
   inactive: { color: "bg-gray-500/10 text-gray-500 border-gray-500/20", dot: "bg-gray-400" },
   churned: { color: "bg-red-500/10 text-red-600 border-red-500/20", dot: "bg-red-500" },
 };
 
 const avatarGradients: Record<string, string> = {
-  lead: "from-indigo-500/20 to-purple-500/20",
+  lead: "from-landing-accent/20 to-orange-500/20",
   active: "from-emerald-500/20 to-teal-500/20",
   inactive: "from-gray-400/20 to-gray-500/20",
   churned: "from-red-500/20 to-orange-500/20",
@@ -226,7 +226,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
           <Card className="glass-card lg:col-span-1">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
                   <Mail className="w-3 h-3 text-white" />
                 </div>
                 Contact Info
@@ -235,8 +235,8 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
             <CardContent className="space-y-3">
               {contact.email && (
                 <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
-                    <Mail className="size-4 text-sky-500" />
+                  <div className="w-8 h-8 rounded-lg bg-landing-accent/10 flex items-center justify-center shrink-0">
+                    <Mail className="size-4 text-landing-accent" />
                   </div>
                   <a href={`mailto:${contact.email}`} className="hover:underline text-foreground truncate">{String(contact.email)}</a>
                 </div>
@@ -251,8 +251,8 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               )}
               {contact.title && (
                 <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
-                    <Briefcase className="size-4 text-violet-500" />
+                  <div className="w-8 h-8 rounded-lg bg-landing-accent/10 flex items-center justify-center shrink-0">
+                    <Briefcase className="size-4 text-landing-accent" />
                   </div>
                   <span>{String(contact.title)}</span>
                 </div>
@@ -291,7 +291,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
             <Card className="glass-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                     <FileText className="w-3 h-3 text-white" />
                   </div>
                   Notes
@@ -327,7 +327,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               <Card className="glass-card">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                       <Handshake className="w-3 h-3 text-white" />
                     </div>
                     Deals
@@ -365,7 +365,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               <Card className="glass-card">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                       <CheckSquare className="w-3 h-3 text-white" />
                     </div>
                     Tasks
@@ -421,7 +421,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
             <Card className="glass-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
                     <Calendar className="w-3 h-3 text-white" />
                   </div>
                   Activity

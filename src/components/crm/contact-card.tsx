@@ -24,14 +24,14 @@ interface ContactCardProps {
 }
 
 const statusConfig: Record<string, { color: string; dot: string }> = {
-  lead: { color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", dot: "bg-indigo-500" },
+  lead: { color: "bg-landing-accent/10 text-orange-600 border-landing-accent/20", dot: "bg-landing-accent" },
   active: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", dot: "bg-emerald-500" },
   inactive: { color: "bg-gray-500/10 text-gray-500 border-gray-500/20", dot: "bg-gray-400" },
   churned: { color: "bg-red-500/10 text-red-600 border-red-500/20", dot: "bg-red-500" },
 };
 
 const avatarGradients: Record<string, string> = {
-  lead: "from-indigo-500/20 to-purple-500/20",
+  lead: "from-landing-accent/20 to-orange-500/20",
   active: "from-emerald-500/20 to-teal-500/20",
   inactive: "from-gray-400/20 to-gray-500/20",
   churned: "from-red-500/20 to-orange-500/20",

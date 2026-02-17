@@ -88,30 +88,30 @@ interface AnalyticsData {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  lead: "#6366f1",
+  lead: "#f4a261",
   active: "#22c55e",
   inactive: "#a1a1aa",
   churned: "#ef4444",
 };
 
 const TASK_STATUS_COLORS: Record<string, string> = {
-  todo: "#6366f1",
-  in_progress: "#3b82f6",
+  todo: "#f4a261",
+  in_progress: "#e76f51",
   done: "#22c55e",
   cancelled: "#a1a1aa",
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: "#3b82f6",
-  medium: "#f59e0b",
-  high: "#f97316",
+  low: "#f9c49a",
+  medium: "#f4a261",
+  high: "#e76f51",
   urgent: "#ef4444",
 };
 
 const HEALTH_COLORS: Record<string, string> = {
   excellent: "#22c55e",
-  good: "#3b82f6",
-  fair: "#f59e0b",
+  good: "#f4a261",
+  fair: "#e76f51",
   poor: "#ef4444",
 };
 
@@ -278,7 +278,7 @@ export function AnalyticsContent() {
           value={`${data.winRate}%`}
           subtitle={`${data.wonCount}W / ${data.lostCount}L`}
           icon={Target}
-          gradient="bg-gradient-to-br from-emerald-500 to-green-600"
+          gradient="bg-gradient-to-br from-landing-accent to-orange-500"
           delay={0.05}
         />
         <MetricCard
@@ -286,7 +286,7 @@ export function AnalyticsContent() {
           value={`$${data.pipelineValue.toLocaleString()}`}
           subtitle={`${data.openCount} open deals`}
           icon={Handshake}
-          gradient="bg-gradient-to-br from-indigo-500 to-purple-600"
+          gradient="bg-gradient-to-br from-landing-accent to-orange-500"
           delay={0.1}
         />
         <MetricCard
@@ -294,7 +294,7 @@ export function AnalyticsContent() {
           value={`$${data.thisMonthRevenue.toLocaleString()}`}
           subtitle={data.revenueGrowth >= 0 ? "Revenue" : "Revenue declined"}
           icon={DollarSign}
-          gradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+          gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
           trend={{
             direction: data.revenueGrowth >= 0 ? "up" : "down",
             text: `${Math.abs(data.revenueGrowth)}% vs last month`,
@@ -306,7 +306,7 @@ export function AnalyticsContent() {
           value={`$${data.weightedForecast.toLocaleString()}`}
           subtitle="Weighted pipeline"
           icon={TrendingUp}
-          gradient="bg-gradient-to-br from-amber-500 to-orange-600"
+          gradient="bg-gradient-to-br from-orange-500 to-landing-accent"
           delay={0.2}
         />
         <MetricCard
@@ -314,7 +314,7 @@ export function AnalyticsContent() {
           value={`$${data.avgWonValue.toLocaleString()}`}
           subtitle="Won deals average"
           icon={BarChart3}
-          gradient="bg-gradient-to-br from-violet-500 to-purple-600"
+          gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
           delay={0.25}
         />
         <MetricCard
@@ -322,7 +322,7 @@ export function AnalyticsContent() {
           value={`$${data.salesVelocity.toLocaleString()}`}
           subtitle="Per day potential"
           icon={Zap}
-          gradient="bg-gradient-to-br from-rose-500 to-pink-600"
+          gradient="bg-gradient-to-br from-orange-500 to-landing-accent"
           delay={0.3}
         />
         <MetricCard
@@ -330,7 +330,7 @@ export function AnalyticsContent() {
           value={`${data.avgDaysToClose}d`}
           subtitle="Days to close"
           icon={Timer}
-          gradient="bg-gradient-to-br from-teal-500 to-emerald-600"
+          gradient="bg-gradient-to-br from-landing-accent to-orange-500"
           delay={0.35}
         />
         <MetricCard
@@ -338,7 +338,7 @@ export function AnalyticsContent() {
           value={`${data.avgEngagement}/100`}
           subtitle={`${data.totalContacts} contacts`}
           icon={Users}
-          gradient="bg-gradient-to-br from-sky-500 to-blue-600"
+          gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
           delay={0.4}
         />
       </div>
@@ -355,7 +355,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <DollarSign className="w-3 h-3 text-white" />
                 </div>
                 Monthly Revenue
@@ -367,8 +367,8 @@ export function AnalyticsContent() {
                   <BarChart data={data.monthlyRevenue}>
                     <defs>
                       <linearGradient id="revenueBarGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#22c55e" stopOpacity={0.9} />
-                        <stop offset="100%" stopColor="#22c55e" stopOpacity={0.4} />
+                        <stop offset="0%" stopColor="#f4a261" stopOpacity={0.9} />
+                        <stop offset="100%" stopColor="#f4a261" stopOpacity={0.4} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
@@ -391,7 +391,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Handshake className="w-3 h-3 text-white" />
                 </div>
                 Pipeline Funnel
@@ -435,7 +435,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Activity className="w-3 h-3 text-white" />
                 </div>
                 Activity Trend (30 Days)
@@ -448,8 +448,8 @@ export function AnalyticsContent() {
                   <AreaChart data={data.dailyActivity}>
                     <defs>
                       <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                        <stop offset="0%" stopColor="#f4a261" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="#f4a261" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
@@ -465,7 +465,7 @@ export function AnalyticsContent() {
                       contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
                       labelFormatter={(label) => new Date(String(label)).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
                     />
-                    <Area type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={2} fill="url(#activityGradient)" activeDot={{ r: 4, fill: "#8b5cf6", strokeWidth: 2, stroke: "var(--card)" }} />
+                    <Area type="monotone" dataKey="count" stroke="#f4a261" strokeWidth={2} fill="url(#activityGradient)" activeDot={{ r: 4, fill: "#f4a261", strokeWidth: 2, stroke: "var(--card)" }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -478,7 +478,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-500 to-landing-accent flex items-center justify-center">
                   <Target className="w-3 h-3 text-white" />
                 </div>
                 Win/Loss Analysis
@@ -529,7 +529,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
                   <Users className="w-3 h-3 text-white" />
                 </div>
                 Contact Distribution
@@ -581,7 +581,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <CheckSquare className="w-3 h-3 text-white" />
                 </div>
                 Task Breakdown
@@ -630,7 +630,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-500 to-landing-accent flex items-center justify-center">
                   <Zap className="w-3 h-3 text-white" />
                 </div>
                 Activity Breakdown
@@ -652,7 +652,7 @@ export function AnalyticsContent() {
                       <Tooltip contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px" }} />
                       <Bar dataKey="count" radius={[0, 6, 6, 0]}>
                         {activityData.map((_, i) => (
-                          <Cell key={i} fill={`hsl(${250 + i * 20}, 70%, 60%)`} fillOpacity={0.8} />
+                          <Cell key={i} fill={`hsl(${20 + i * 8}, 80%, ${55 + i * 3}%)`} fillOpacity={0.8} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -668,7 +668,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Building2 className="w-3 h-3 text-white" />
                 </div>
                 Company Health
@@ -730,7 +730,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <TrendingUp className="w-3 h-3 text-white" />
                 </div>
                 Top Open Deals
@@ -772,7 +772,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
                   <Users className="w-3 h-3 text-white" />
                 </div>
                 Contact Sources
@@ -799,7 +799,7 @@ export function AnalyticsContent() {
                             className="h-full rounded-full transition-all duration-700"
                             style={{
                               width: `${pct}%`,
-                              background: `hsl(${180 + i * 30}, 60%, 50%)`,
+                              background: `hsl(${20 + i * 8}, 75%, ${55 + i * 3}%)`,
                             }}
                           />
                         </div>
@@ -823,7 +823,7 @@ export function AnalyticsContent() {
           <Card className="glass-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Sparkles className="w-3 h-3 text-white" />
                 </div>
                 AI Insights

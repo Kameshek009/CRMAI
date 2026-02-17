@@ -25,7 +25,7 @@ interface TaskItemProps {
 const priorityConfig: Record<string, { color: string; badge: string; dot: string }> = {
   urgent: { color: "border-red-200 dark:border-red-900/40", badge: "bg-red-500/10 text-red-600 border-red-200 dark:border-red-800/40", dot: "bg-red-500" },
   high: { color: "border-orange-200 dark:border-orange-900/40", badge: "bg-orange-500/10 text-orange-600 border-orange-200 dark:border-orange-800/40", dot: "bg-orange-500" },
-  medium: { color: "border-blue-200 dark:border-blue-900/40", badge: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800/40", dot: "bg-blue-500" },
+  medium: { color: "border-orange-200 dark:border-orange-900/40", badge: "bg-landing-accent/10 text-orange-600 border-orange-200 dark:border-orange-800/40", dot: "bg-landing-accent" },
   low: { color: "border-gray-200 dark:border-gray-800", badge: "bg-gray-500/10 text-gray-600 border-gray-200 dark:border-gray-800", dot: "bg-gray-400" },
 };
 
@@ -53,7 +53,7 @@ export function TaskItem({
     <div className={cn(
       "premium-card flex items-center gap-3 rounded-xl border p-3.5 bg-card group/task",
       isDone && "opacity-50",
-      isInProgress && "border-blue-200/60 bg-blue-50/30 dark:border-blue-800/30 dark:bg-blue-950/10",
+      isInProgress && "border-orange-200/60 bg-orange-50/30 dark:border-orange-800/30 dark:bg-orange-950/10",
       isOverdue && !isInProgress && "border-red-200/60 bg-red-50/30 dark:border-red-900/20 dark:bg-red-950/10",
       selected && "ring-2 ring-primary/40 bg-primary/5 shadow-md"
     )}>
@@ -77,13 +77,13 @@ export function TaskItem({
         <div className="flex items-center gap-2">
           <span className={cn("text-sm font-medium truncate", isDone && "line-through text-muted-foreground")}>{title}</span>
           {isInProgress && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800/40 badge-shimmer">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-landing-accent/10 text-orange-600 border-orange-200 dark:border-orange-800/40 badge-shimmer">
               <Clock className="size-2.5 mr-0.5" />
               In Progress
             </Badge>
           )}
           {isAiGenerated && (
-            <Sparkles className="size-3 text-purple-500 shrink-0 animate-pulse-glow" />
+            <Sparkles className="size-3 text-landing-accent shrink-0 animate-pulse-glow" />
           )}
         </div>
         <div className="flex items-center gap-2 mt-1.5">
