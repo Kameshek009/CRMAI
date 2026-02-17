@@ -74,7 +74,7 @@ export function FooterSection() {
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-10 h-10 rounded-xl bg-landing-accent flex items-center justify-center shadow-lg shadow-landing-accent/20">
-                <span className="text-white text-sm font-bold">N</span>
+                <span className="text-landing-accent-foreground text-sm font-bold">N</span>
               </div>
               <span className="text-lg font-bold text-foreground">Nexxus CRM</span>
             </div>
@@ -92,7 +92,7 @@ export function FooterSection() {
                 placeholder="Enter your email"
                 className="h-11 px-4 rounded-xl border border-white/10 bg-white/5 text-sm text-foreground placeholder:text-muted-foreground/50 backdrop-blur-xl focus:outline-none focus:border-landing-accent/50 transition-colors w-full lg:w-64"
               />
-              <button className="h-11 px-6 rounded-xl bg-landing-accent text-white text-sm font-semibold shrink-0 hover:shadow-lg hover:shadow-landing-accent/20 transition-shadow">
+              <button className="h-11 px-6 rounded-xl bg-landing-accent text-landing-accent-foreground text-sm font-semibold shrink-0 hover:shadow-lg hover:shadow-landing-accent/20 transition-shadow">
                 Subscribe
               </button>
             </div>
@@ -143,7 +143,7 @@ export function FooterSection() {
         >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-landing-accent flex items-center justify-center shadow-lg">
-              <span className="text-white text-xs font-bold">N</span>
+              <span className="text-landing-accent-foreground text-xs font-bold">N</span>
             </div>
             <span className="text-sm font-semibold text-foreground">
               Nexxus CRM

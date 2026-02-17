@@ -320,7 +320,7 @@ export function PublicAuthHeader() {
             </Link>
             <Link
               href="/sign-up"
-              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-landing-accent text-white hover:shadow-lg hover:shadow-landing-accent/20 transition-all duration-200"
+              className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-landing-accent text-landing-accent-foreground hover:shadow-lg hover:shadow-landing-accent/20 transition-all duration-200"
             >
               Get started
             </Link>

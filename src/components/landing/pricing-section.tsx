@@ -190,7 +190,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       {/* Popular badge */}
       {plan.badge && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-landing-accent px-4 py-1 text-xs font-semibold text-white shadow-lg shadow-landing-accent/20">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-landing-accent px-4 py-1 text-xs font-semibold text-landing-accent-foreground shadow-lg shadow-landing-accent/20">
             <Sparkles className="size-3" />
             {plan.badge}
           </span>
@@ -201,7 +201,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       <div className={cn("mb-5 relative z-10", plan.badge && "mt-2")}>
         <div className="flex items-center gap-3 mb-3">
           <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center shadow-lg`}>
-            <Icon className="w-5 h-5 text-white" />
+            <Icon className="w-5 h-5 text-landing-accent-foreground" />
           </div>
           <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
         </div>
@@ -235,7 +235,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
           className={cn(
             "flex items-center justify-center h-11 rounded-xl text-sm font-semibold transition-all mb-5",
             plan.popular
-              ? "bg-landing-accent text-white hover:shadow-lg hover:shadow-landing-accent/20"
+              ? "bg-landing-accent text-landing-accent-foreground hover:shadow-lg hover:shadow-landing-accent/20"
               : "border border-white/15 bg-white/5 text-foreground hover:bg-white/10"
           )}
         >

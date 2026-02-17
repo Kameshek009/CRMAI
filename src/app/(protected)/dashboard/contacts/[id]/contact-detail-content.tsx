@@ -227,7 +227,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                  <Mail className="w-3 h-3 text-white" />
+                  <Mail className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Contact Info
               </CardTitle>
@@ -292,7 +292,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                    <FileText className="w-3 h-3 text-white" />
+                    <FileText className="w-3 h-3 text-landing-accent-foreground" />
                   </div>
                   Notes
                 </CardTitle>
@@ -328,7 +328,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                      <Handshake className="w-3 h-3 text-white" />
+                      <Handshake className="w-3 h-3 text-landing-accent-foreground" />
                     </div>
                     Deals
                     <Badge variant="secondary" className="text-[10px] ml-1">{deals.length}</Badge>
@@ -366,7 +366,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                      <CheckSquare className="w-3 h-3 text-white" />
+                      <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
                     </div>
                     Tasks
                     <Badge variant="secondary" className="text-[10px] ml-1">{tasks.length}</Badge>
@@ -422,7 +422,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                    <Calendar className="w-3 h-3 text-white" />
+                    <Calendar className="w-3 h-3 text-landing-accent-foreground" />
                   </div>
                   Activity
                 </CardTitle>

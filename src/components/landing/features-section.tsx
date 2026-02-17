@@ -153,7 +153,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
         {/* Icon with pulse ring */}
         <div className="relative mb-5 sm:mb-6">
           <div className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${feature.iconGradient} shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-landing-accent-foreground" />
           </div>
           {/* Animated ring on hover */}
           <div className={`absolute inset-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${feature.iconGradient} opacity-0 group-hover:opacity-30 group-hover:scale-[1.6] transition-all duration-700 blur-md`} />

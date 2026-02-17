@@ -298,7 +298,7 @@ export function CTASection() {
                 >
                   <Link
                     href="/sign-up"
-                    className="landing-pulse-button group relative inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent text-white shadow-2xl shadow-landing-accent/25 transition-shadow hover:shadow-landing-accent/40"
+                    className="landing-pulse-button group relative inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent text-landing-accent-foreground shadow-2xl shadow-landing-accent/25 transition-shadow hover:shadow-landing-accent/40"
                   >
                     Get Started Free
                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />

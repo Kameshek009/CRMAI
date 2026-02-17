@@ -85,6 +85,7 @@
   /* Landing accent (soft orange for light, white for dark) */
   --landing-accent: #f4a261;
   --landing-accent-rgb: 244, 162, 97;
+  --landing-accent-foreground: #ffffff;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -139,6 +140,7 @@
   /* Landing accent — white for dark mode */
   --landing-accent: #ffffff;
   --landing-accent-rgb: 255, 255, 255;
+  --landing-accent-foreground: #000000;
 
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
@@ -524,6 +526,7 @@ body {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-landing-accent: var(--landing-accent);
+  --color-landing-accent-foreground: var(--landing-accent-foreground);
 }
 
 @layer base {

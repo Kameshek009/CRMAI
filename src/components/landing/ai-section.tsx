@@ -92,7 +92,7 @@ function AIChatMockup() {
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-landing-accent text-white rounded-br-md shadow-lg shadow-landing-accent/10"
+                    ? "bg-landing-accent text-landing-accent-foreground rounded-br-md shadow-lg shadow-landing-accent/10"
                     : "bg-white/[0.05] dark:bg-white/[0.05] border border-white/10 dark:border-white/10 text-foreground rounded-bl-md"
                 }`}
               >
@@ -137,7 +137,7 @@ function AIChatMockup() {
           <Wand2 className="w-4 h-4 text-landing-accent/50" />
           <span className="text-[12px] text-muted-foreground/40 flex-1">Ask AI anything about your CRM...</span>
           <div className="w-7 h-7 rounded-lg bg-landing-accent flex items-center justify-center">
-            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg className="w-3.5 h-3.5 text-landing-accent-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
           </div>
@@ -342,7 +342,7 @@ export function AISection() {
                       <div
                         className={`w-11 h-11 rounded-xl bg-gradient-to-br ${cap.gradient} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow`}
                       >
-                        <Icon className="w-5 h-5 text-white" />
+                        <Icon className="w-5 h-5 text-landing-accent-foreground" />
                       </div>
                       <div className={`absolute inset-0 w-11 h-11 rounded-xl bg-gradient-to-br ${cap.gradient} opacity-0 group-hover:opacity-30 group-hover:scale-150 transition-all duration-700 blur-md`} />
                     </div>
