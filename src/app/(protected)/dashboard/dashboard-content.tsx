@@ -485,7 +485,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               : 0}%`}
             subtitle="Closed deals ratio"
             icon={Target}
-            iconGradient="bg-gradient-to-br from-orange-500 to-landing-accent"
+            iconGradient="bg-landing-accent"
             delay={0.3}
           />
           <AnimatedStatCard
