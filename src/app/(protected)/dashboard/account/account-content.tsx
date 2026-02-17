@@ -13,7 +13,7 @@ import { CustomerBillingCard, InvoiceHistory } from "@/components/billing";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Loader2, Crown, Settings, CreditCard, AlertTriangle, ArrowRight, Palette, Users, Plus } from "lucide-react";
+import { Check, Loader2, Crown, Settings, CreditCard, AlertTriangle, ArrowRight, Palette, Users, Plus, Pencil } from "lucide-react";
 import { ThemeToggleSlider } from "@/components/theme-toggle-slider";
 import { TeamCreateWizard } from "@/components/team/team-create-wizard";
 import { useTeam } from "@/contexts/team-context";
@@ -196,10 +196,14 @@ function TeamCard() {
   );
 }
 
-export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
+export function AccountContent({ email, name: initialName, imageUrl }: AccountContentProps) {
   const [billingData, setBillingData] = useState<BillingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState(initialName);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(initialName);
+  const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
     async function fetchBillingData() {
@@ -223,8 +227,37 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
     fetchBillingData();
   }, []);
 
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed || trimmed === displayName) {
+      setEditingName(false);
+      setNameInput(displayName);
+      return;
+    }
+    setSavingName(true);
+    try {
+      const res = await fetch("/api/account/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setDisplayName(trimmed);
+        setEditingName(false);
+        toast.success("Name updated");
+      } else {
+        toast.error(json.error || "Failed to update name");
+      }
+    } catch {
+      toast.error("Failed to update name");
+    } finally {
+      setSavingName(false);
+    }
+  };
+
   const tierInfo = billingData ? getTierInfo(billingData.account.tier) : null;
-  const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  const initials = displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <PageContainer>
@@ -240,15 +273,72 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             <Settings className="size-4" />
             Profile
           </CardTitle>
+          <CardDescription>
+            Your display name is visible to team members
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <Avatar className="size-16">
-              <AvatarImage src={imageUrl} alt={name} />
+              <AvatarImage src={imageUrl} alt={displayName} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <div>
-              <p className="text-lg font-medium">{name}</p>
+            <div className="flex-1 space-y-1">
+              {editingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveName();
+                      if (e.key === "Escape") {
+                        setEditingName(false);
+                        setNameInput(displayName);
+                      }
+                    }}
+                    className="h-8 max-w-[240px]"
+                    autoFocus
+                    disabled={savingName}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSaveName}
+                    disabled={savingName || !nameInput.trim()}
+                  >
+                    {savingName ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Check className="size-3.5" />
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setEditingName(false);
+                      setNameInput(displayName);
+                    }}
+                    disabled={savingName}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <p className="text-lg font-medium">{displayName}</p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    onClick={() => {
+                      setNameInput(displayName);
+                      setEditingName(true);
+                    }}
+                  >
+                    <Pencil className="size-3.5" />
+                  </Button>
+                </div>
+              )}
               <p className="text-sm text-muted-foreground">{email}</p>
             </div>
           </div>

@@ -1,0 +1,53 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { createSupabaseAdmin } from "@/lib/supabase/server";
+
+/**
+ * PATCH /api/account/profile
+ * Update the current user's display name
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { name } = body as { name?: string };
+
+    if (!name || typeof name !== "string" || name.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Name is required" },
+        { status: 400 }
+      );
+    }
+
+    const trimmedName = name.trim().slice(0, 100);
+
+    const supabase = createSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("accounts")
+      .update({ name: trimmedName })
+      .eq("clerk_user_id", userId)
+      .select("id, name, email")
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

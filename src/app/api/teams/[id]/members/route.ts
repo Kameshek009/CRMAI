@@ -22,7 +22,7 @@ export async function GET(
     const supabase = createSupabaseAdmin();
     const { data: members, error: dbError } = await supabase
       .from("team_members")
-      .select("*, team_roles(*), accounts(id, clerk_user_id, first_name, last_name, email, avatar_url)")
+      .select("*, team_roles(*), accounts(id, clerk_user_id, name, email)")
       .eq("team_id", id)
       .neq("status", "suspended")
       .order("is_director", { ascending: false })

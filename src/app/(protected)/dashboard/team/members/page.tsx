@@ -23,7 +23,7 @@ interface MemberData {
   is_director: boolean;
   joined_at: string;
   team_roles: { id: string; name: string; color: string; priority: number };
-  accounts: { id: string; first_name?: string; last_name?: string; email?: string };
+  accounts: { id: string; name?: string; email?: string };
 }
 
 export default function TeamMembersPage() {
@@ -93,8 +93,8 @@ export default function TeamMembersPage() {
   };
 
   const getMemberName = (m: MemberData) => {
-    if (m.accounts?.first_name) {
-      return `${m.accounts.first_name} ${m.accounts.last_name || ""}`.trim();
+    if (m.accounts?.name) {
+      return m.accounts.name;
     }
     return m.accounts?.email || "Unknown";
   };

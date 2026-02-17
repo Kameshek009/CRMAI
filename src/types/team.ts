@@ -106,7 +106,7 @@ export interface TeamMember {
   updatedAt: string;
   // Joined fields
   role?: TeamRole;
-  account?: { id: string; clerk_user_id: string; first_name?: string; last_name?: string; email?: string; avatar_url?: string };
+  account?: { id: string; clerk_user_id: string; name?: string; email?: string };
 }
 
 export interface TeamMemberRow {

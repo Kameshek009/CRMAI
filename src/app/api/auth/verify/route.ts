@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 
@@ -38,6 +38,19 @@ export async function POST(request: NextRequest) {
     // If no account exists, create one
     if (!account) {
       const supabaseAdmin = createSupabaseAdmin();
+
+      // Fetch Clerk user data for name & email
+      let clerkName: string | null = null;
+      let clerkEmail: string | null = null;
+      try {
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        clerkName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null;
+        clerkEmail = clerkUser.emailAddresses[0]?.emailAddress || null;
+      } catch {
+        // Continue without Clerk data
+      }
+
       const { data: newAccount, error: createError } = await supabaseAdmin
         .from("accounts")
         .insert({
@@ -46,6 +59,8 @@ export async function POST(request: NextRequest) {
           token_limit: 50000,
           tokens_used: 0,
           billing_cycle_start: new Date().toISOString(),
+          name: clerkName,
+          email: clerkEmail,
         })
         .select()
         .single();
@@ -82,6 +97,29 @@ export async function POST(request: NextRequest) {
           account: updatedAccount || newAccount,
         },
       });
+    }
+
+    // Sync name & email from Clerk if missing
+    if (!account.name || !account.email) {
+      try {
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        const clerkName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null;
+        const clerkEmail = clerkUser.emailAddresses[0]?.emailAddress || null;
+
+        const updates: Record<string, string | null> = {};
+        if (!account.name && clerkName) updates.name = clerkName;
+        if (!account.email && clerkEmail) updates.email = clerkEmail;
+
+        if (Object.keys(updates).length > 0) {
+          await createSupabaseAdmin()
+            .from("accounts")
+            .update(updates)
+            .eq("id", account.id);
+        }
+      } catch (syncErr) {
+        logger.error("Auth", "Failed to sync Clerk data:", syncErr);
+      }
     }
 
     return NextResponse.json({
