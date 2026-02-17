@@ -151,10 +151,16 @@ export async function PATCH(request: NextRequest) {
           );
         }
 
-        // Update max_members on all teams owned by this account
+        // Update teams owned by this account (tier, token_limit, usage reset, max_members)
         await supabase
           .from("teams")
-          .update({ max_members: maxMembers })
+          .update({
+            tier,
+            token_limit: tokenLimit,
+            tokens_used: 0,
+            weekly_tokens_used: 0,
+            max_members: maxMembers,
+          })
           .eq("owner_account_id", accountId);
 
         // Log activity
