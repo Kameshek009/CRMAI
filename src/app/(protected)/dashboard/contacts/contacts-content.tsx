@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -247,7 +246,7 @@ export function ContactsContent() {
             const Icon = statusIcons[status] || Users;
             const color = statusColors[status] || "text-muted-foreground bg-muted";
             return (
-              <motion.div key={status} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
+              <div key={status}>
                 <Card
                   className={cn("glass-card cursor-pointer transition-all", statusFilter === status && "ring-1 ring-primary")}
                   onClick={() => setStatusFilter(statusFilter === status ? "" : status)}
@@ -262,7 +261,7 @@ export function ContactsContent() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -313,7 +312,7 @@ export function ContactsContent() {
         </div>
 
         {showFilters && sources.length > 0 && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1">
             <span className="text-xs text-muted-foreground self-center mr-1">Source:</span>
             <Badge
               variant={sourceFilter === "" ? "default" : "outline"}
@@ -332,7 +331,7 @@ export function ContactsContent() {
                 {src}
               </Badge>
             ))}
-          </motion.div>
+          </div>
         )}
       </div>
 
