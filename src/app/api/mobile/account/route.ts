@@ -74,9 +74,28 @@ export async function POST(request: NextRequest) {
           .eq("id", existingAccount.id);
       }
 
+      // Enrich with team billing data
+      let accountWithBilling = existingAccount;
+      if (existingAccount.current_team_id) {
+        const { data: team } = await supabase
+          .from("teams")
+          .select("tier, token_limit, tokens_used, weekly_tokens_used")
+          .eq("id", existingAccount.current_team_id)
+          .single();
+        if (team) {
+          accountWithBilling = {
+            ...existingAccount,
+            tier: team.tier,
+            token_limit: team.token_limit,
+            tokens_used: team.tokens_used,
+            weekly_tokens_used: team.weekly_tokens_used,
+          };
+        }
+      }
+
       return NextResponse.json({
         success: true,
-        account: existingAccount,
+        account: accountWithBilling,
         created: false,
       });
     }
@@ -181,9 +200,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Enrich with team billing data
+    let accountWithBilling = account;
+    if (account.current_team_id) {
+      const { data: team } = await supabase
+        .from("teams")
+        .select("tier, token_limit, tokens_used, weekly_tokens_used")
+        .eq("id", account.current_team_id)
+        .single();
+      if (team) {
+        accountWithBilling = {
+          ...account,
+          tier: team.tier,
+          token_limit: team.token_limit,
+          tokens_used: team.tokens_used,
+          weekly_tokens_used: team.weekly_tokens_used,
+        };
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      account,
+      account: accountWithBilling,
     });
   } catch (error) {
     console.error("[mobile/account] GET error:", error);

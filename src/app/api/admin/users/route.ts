@@ -198,6 +198,12 @@ export async function PATCH(request: NextRequest) {
           );
         }
 
+        // Sync to teams
+        await supabase
+          .from("teams")
+          .update({ token_limit: limit })
+          .eq("owner_account_id", accountId);
+
         break;
       }
 
@@ -218,6 +224,15 @@ export async function PATCH(request: NextRequest) {
             { status: 500 }
           );
         }
+
+        // Sync to teams
+        await supabase
+          .from("teams")
+          .update({
+            tokens_used: 0,
+            weekly_tokens_used: 0,
+          })
+          .eq("owner_account_id", accountId);
 
         break;
       }

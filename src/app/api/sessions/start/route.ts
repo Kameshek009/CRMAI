@@ -35,10 +35,12 @@ export async function POST(request: NextRequest) {
 
     const { summary, metadata } = parsed.data;
 
+    const supabase = createSupabaseAdmin();
+
     // Get account
-    const { data: account, error: accountError } = await createSupabaseAdmin()
+    const { data: account, error: accountError } = await supabase
       .from("accounts")
-      .select("id, tokens_used, token_limit")
+      .select("id, current_team_id")
       .eq("clerk_user_id", userId)
       .single();
 
@@ -49,8 +51,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user has tokens available
-    if (account.tokens_used >= account.token_limit) {
+    // Get team billing data
+    const { data: team } = await supabase
+      .from("teams")
+      .select("tokens_used, token_limit")
+      .eq("id", account.current_team_id)
+      .single();
+
+    const teamTokensUsed = team?.tokens_used || 0;
+    const teamTokenLimit = team?.token_limit || 0;
+
+    // Check if team has tokens available
+    if (teamTokensUsed >= teamTokenLimit) {
       return NextResponse.json(
         { success: false, error: "Token limit reached" },
         { status: 429 }
@@ -58,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session
-    const { data: session, error: sessionError } = await createSupabaseAdmin()
+    const { data: session, error: sessionError } = await supabase
       .from("sessions")
       .insert({
         account_id: account.id,
@@ -79,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log activity
-    await createSupabaseAdmin().from("activity_logs").insert({
+    await supabase.from("activity_logs").insert({
       account_id: account.id,
       session_id: session.id,
       event_type: "session_start",
@@ -93,7 +105,7 @@ export async function POST(request: NextRequest) {
         sessionId: session.id,
         status: session.status,
         startedAt: session.started_at,
-        tokensAvailable: account.token_limit - account.tokens_used,
+        tokensAvailable: teamTokenLimit - teamTokensUsed,
       },
     });
   } catch (error) {

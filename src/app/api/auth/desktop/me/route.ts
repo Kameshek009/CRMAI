@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     const { data: account, error: accountError } = await supabase
       .from("accounts")
-      .select("*")
+      .select("id, current_team_id, billing_cycle_start, stripe_customer_id, stripe_subscription_id")
       .eq("id", tokenData.account_id)
       .single();
 
@@ -60,6 +60,13 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Get team billing data
+    const { data: team } = await supabase
+      .from("teams")
+      .select("tier, token_limit, tokens_used")
+      .eq("id", account.current_team_id)
+      .single();
 
     // Get session info to check it's still valid
     const { data: session, error: sessionError } = await supabase
@@ -104,9 +111,9 @@ export async function GET(request: NextRequest) {
         },
         account: {
           id: account.id,
-          tier: account.tier,
-          token_limit: account.token_limit,
-          tokens_used: account.tokens_used,
+          tier: team?.tier || "free",
+          token_limit: team?.token_limit || 0,
+          tokens_used: team?.tokens_used || 0,
           billing_cycle_start: account.billing_cycle_start,
           stripe_customer_id: account.stripe_customer_id,
           stripe_subscription_id: account.stripe_subscription_id,

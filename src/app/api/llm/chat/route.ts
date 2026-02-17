@@ -110,12 +110,12 @@ export async function POST(request: NextRequest) {
 
     const { messages, model, temperature, max_tokens, tools } = parsed.data;
 
-    // 3. Get account and check quota
+    // 3. Get account and team billing data
     const supabase = createSupabaseAdmin();
 
     const { data: account, error: accountError } = await supabase
       .from("accounts")
-      .select("id, tokens_used, token_limit, tier")
+      .select("id, current_team_id")
       .eq("id", tokenData.account_id)
       .single();
 
@@ -127,14 +127,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check token quota
-    if (account.tokens_used >= account.token_limit) {
+    // Get team billing data
+    const { data: team, error: teamError } = await supabase
+      .from("teams")
+      .select("id, tokens_used, token_limit, tier")
+      .eq("id", account.current_team_id)
+      .single();
+
+    if (teamError || !team) {
+      console.error("[LLM Chat] Team not found:", teamError?.message);
+      return NextResponse.json(
+        { success: false, error: "Team not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check token quota against team
+    if (team.tokens_used >= team.token_limit) {
       return NextResponse.json(
         {
           success: false,
           error: "Token limit exceeded. Please upgrade your plan.",
-          tokens_used: account.tokens_used,
-          token_limit: account.token_limit,
+          tokens_used: team.tokens_used,
+          token_limit: team.token_limit,
         },
         { status: 429 }
       );
@@ -198,13 +213,13 @@ export async function POST(request: NextRequest) {
     const toolCalls = choice?.message?.tool_calls;
     const tokensUsed = completion.usage?.total_tokens || 0;
 
-    // 5. Update user's token usage in database
-    const newTokensUsed = account.tokens_used + tokensUsed;
+    // 5. Update team's token usage in database
+    const newTokensUsed = team.tokens_used + tokensUsed;
 
     const { error: updateError } = await supabase
-      .from("accounts")
+      .from("teams")
       .update({ tokens_used: newTokensUsed })
-      .eq("id", account.id);
+      .eq("id", team.id);
 
     if (updateError) {
       console.error("[LLM Chat] Failed to update usage:", updateError.message);
@@ -245,8 +260,8 @@ export async function POST(request: NextRequest) {
         },
         account: {
           tokens_used: newTokensUsed,
-          token_limit: account.token_limit,
-          tokens_remaining: account.token_limit - newTokensUsed,
+          token_limit: team.token_limit,
+          tokens_remaining: team.token_limit - newTokensUsed,
         },
       },
     };

@@ -122,11 +122,31 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Enrich with team billing data
+    let enrichedAccount = account;
+    if (account.current_team_id) {
+      const { data: team } = await createSupabaseAdmin()
+        .from("teams")
+        .select("tier, token_limit, tokens_used, weekly_tokens_used, week_start_date")
+        .eq("id", account.current_team_id)
+        .single();
+      if (team) {
+        enrichedAccount = {
+          ...account,
+          tier: team.tier,
+          token_limit: team.token_limit,
+          tokens_used: team.tokens_used,
+          weekly_tokens_used: team.weekly_tokens_used,
+          week_start_date: team.week_start_date,
+        };
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         userId,
-        account,
+        account: enrichedAccount,
       },
     });
   } catch (error) {

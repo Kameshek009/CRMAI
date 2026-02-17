@@ -37,10 +37,12 @@ export async function POST(request: NextRequest) {
 
     const { tokensConsumed, actionType, sessionId, metadata } = parsed.data;
 
+    const supabase = createSupabaseAdmin();
+
     // Get account
-    const { data: account, error: accountError } = await createSupabaseAdmin()
+    const { data: account, error: accountError } = await supabase
       .from("accounts")
-      .select("id, tokens_used, token_limit")
+      .select("id, current_team_id")
       .eq("clerk_user_id", userId)
       .single();
 
@@ -51,16 +53,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user has enough tokens
-    const newTokensUsed = account.tokens_used + tokensConsumed;
-    if (newTokensUsed > account.token_limit) {
+    // Get team billing data
+    const { data: team, error: teamError } = await supabase
+      .from("teams")
+      .select("id, tokens_used, token_limit")
+      .eq("id", account.current_team_id)
+      .single();
+
+    if (teamError || !team) {
+      return NextResponse.json(
+        { success: false, error: "Team not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if team has enough tokens
+    const newTokensUsed = team.tokens_used + tokensConsumed;
+    if (newTokensUsed > team.token_limit) {
       return NextResponse.json(
         {
           success: false,
           error: "Token limit exceeded",
           data: {
-            tokensUsed: account.tokens_used,
-            tokenLimit: account.token_limit,
+            tokensUsed: team.tokens_used,
+            tokenLimit: team.token_limit,
             tokensRequested: tokensConsumed,
           },
         },
@@ -69,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create usage record
-    const { error: recordError } = await createSupabaseAdmin()
+    const { error: recordError } = await supabase
       .from("usage_records")
       .insert({
         account_id: account.id,
@@ -87,14 +103,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update account tokens
-    const { error: updateError } = await createSupabaseAdmin()
-      .from("accounts")
-      .update({ tokens_used: newTokensUsed, updated_at: new Date().toISOString() })
-      .eq("id", account.id);
+    // Update team tokens
+    const { error: updateError } = await supabase
+      .from("teams")
+      .update({ tokens_used: newTokensUsed })
+      .eq("id", team.id);
 
     if (updateError) {
-      console.error("Failed to update account:", updateError);
+      console.error("Failed to update team tokens:", updateError);
       return NextResponse.json(
         { success: false, error: "Failed to update token count" },
         { status: 500 }
@@ -105,8 +121,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         tokensUsed: newTokensUsed,
-        tokenLimit: account.token_limit,
-        tokensRemaining: account.token_limit - newTokensUsed,
+        tokenLimit: team.token_limit,
+        tokensRemaining: team.token_limit - newTokensUsed,
       },
     });
   } catch (error) {

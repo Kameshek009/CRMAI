@@ -135,15 +135,24 @@ export async function POST(request: NextRequest) {
 
     console.log("[desktop/authorize] Using account:", account.id);
 
-    // Step 4: Generate access + refresh tokens
+    // Step 4: Get team billing data
+    let teamBilling = { tier: account.tier, token_limit: account.token_limit, tokens_used: account.tokens_used };
+    if (account.current_team_id) {
+      const { data: team } = await supabase
+        .from("teams")
+        .select("tier, token_limit, tokens_used")
+        .eq("id", account.current_team_id)
+        .single();
+      if (team) {
+        teamBilling = { tier: team.tier, token_limit: team.token_limit, tokens_used: team.tokens_used };
+      }
+    }
+
+    // Step 5: Generate access + refresh tokens
     const tokens = await generateDesktopTokens(
       userId,
       account.id,
-      {
-        tier: account.tier,
-        token_limit: account.token_limit,
-        tokens_used: account.tokens_used,
-      },
+      teamBilling,
       device_name,
       device_id,
       request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
@@ -171,9 +180,9 @@ export async function POST(request: NextRequest) {
       },
       account: {
         id: account.id,
-        tier: account.tier,
-        token_limit: account.token_limit,
-        tokens_used: account.tokens_used,
+        tier: teamBilling.tier,
+        token_limit: teamBilling.token_limit,
+        tokens_used: teamBilling.tokens_used,
         billing_cycle_start: account.billing_cycle_start,
       },
     });

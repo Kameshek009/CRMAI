@@ -114,7 +114,7 @@ export async function validateAuthCode(
 export async function generateDesktopTokens(
   clerkUserId: string,
   accountId: string,
-  account: {
+  billing: {
     tier: string;
     token_limit: number;
     tokens_used: number;
@@ -176,9 +176,9 @@ export async function generateDesktopTokens(
       sub: clerkUserId,
       account_id: accountId,
       session_id: session.id,
-      tier: account.tier,
-      token_limit: account.token_limit,
-      tokens_used: account.tokens_used,
+      tier: billing.tier,
+      token_limit: billing.token_limit,
+      tokens_used: billing.tokens_used,
     },
     JWT_SECRET,
     {
@@ -238,11 +238,20 @@ export async function refreshDesktopToken(
   const account = session.accounts as {
     id: string;
     clerk_user_id: string;
-    tier: string;
-    token_limit: number;
-    tokens_used: number;
+    current_team_id: string;
     billing_cycle_start: string;
   };
+
+  // Get team billing data
+  const { data: team } = await supabase
+    .from("teams")
+    .select("tier, token_limit, tokens_used")
+    .eq("id", account.current_team_id)
+    .single();
+
+  const tier = team?.tier || "free";
+  const tokenLimit = team?.token_limit || 0;
+  const tokensUsed = team?.tokens_used || 0;
 
   // Update last_used_at
   await supabase
@@ -250,16 +259,16 @@ export async function refreshDesktopToken(
     .update({ last_used_at: new Date().toISOString() })
     .eq("id", session.id);
 
-  // Generate new access token
+  // Generate new access token with team billing data
   const accessTokenExpiry = new Date(Date.now() + ACCESS_TOKEN_EXPIRY * 1000);
   const accessToken = jwt.sign(
     {
       sub: account.clerk_user_id,
       account_id: account.id,
       session_id: session.id,
-      tier: account.tier,
-      token_limit: account.token_limit,
-      tokens_used: account.tokens_used,
+      tier,
+      token_limit: tokenLimit,
+      tokens_used: tokensUsed,
     },
     JWT_SECRET,
     {
@@ -274,9 +283,9 @@ export async function refreshDesktopToken(
     expiresAt: accessTokenExpiry.toISOString(),
     account: {
       id: account.id,
-      tier: account.tier,
-      token_limit: account.token_limit,
-      tokens_used: account.tokens_used,
+      tier,
+      token_limit: tokenLimit,
+      tokens_used: tokensUsed,
       billing_cycle_start: account.billing_cycle_start,
     },
   };
@@ -334,10 +343,11 @@ export function validateAccessToken(accessToken: string): {
 }
 
 /**
- * Get or create account for a Clerk user
+ * Get or create account for a Clerk user, with team billing data
  */
 export async function getOrCreateAccount(clerkUserId: string): Promise<{
   id: string;
+  current_team_id: string;
   tier: string;
   token_limit: number;
   tokens_used: number;
@@ -348,13 +358,30 @@ export async function getOrCreateAccount(clerkUserId: string): Promise<{
   const supabase = createSupabaseAdmin();
 
   // Try to get existing account
-  const { data: account, error } = await supabase
+  const { data: account } = await supabase
     .from("accounts")
     .select("*")
     .eq("clerk_user_id", clerkUserId)
     .single();
 
   if (account) {
+    // Enrich with team billing data
+    if (account.current_team_id) {
+      const { data: team } = await supabase
+        .from("teams")
+        .select("tier, token_limit, tokens_used")
+        .eq("id", account.current_team_id)
+        .single();
+
+      if (team) {
+        return {
+          ...account,
+          tier: team.tier,
+          token_limit: team.token_limit,
+          tokens_used: team.tokens_used,
+        };
+      }
+    }
     return account;
   }
 
@@ -364,7 +391,7 @@ export async function getOrCreateAccount(clerkUserId: string): Promise<{
     .insert({
       clerk_user_id: clerkUserId,
       tier: "free",
-      token_limit: 10000,
+      token_limit: 50000,
       tokens_used: 0,
       billing_cycle_start: new Date().toISOString(),
     })

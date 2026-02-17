@@ -164,6 +164,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const accountIdRef = useRef<string | null>(null);
+  const teamIdRef = useRef<string | null>(null);
 
   /**
    * Fetch account data from API
@@ -204,7 +205,8 @@ export function AccountProvider({ children }: AccountProviderProps) {
         const transformedAccount = transformAccount(result.data.account);
         setAccount(transformedAccount);
         accountIdRef.current = transformedAccount.id;
-        // Account loaded successfully
+        // Store current_team_id for Realtime subscription
+        teamIdRef.current = result.data.account.current_team_id || null;
       } else {
         throw new Error("No account data in response");
       }
@@ -217,11 +219,11 @@ export function AccountProvider({ children }: AccountProviderProps) {
   }, [user?.id]);
 
   /**
-   * Subscribe to Supabase Realtime updates
+   * Subscribe to Supabase Realtime updates on the team table
+   * (billing data lives on teams after per-seat migration)
    */
   const subscribeToRealtime = useCallback(() => {
-    if (!accountIdRef.current) {
-      // No account ID yet
+    if (!accountIdRef.current || !account) {
       return;
     }
 
@@ -230,47 +232,53 @@ export function AccountProvider({ children }: AccountProviderProps) {
       supabase.removeChannel(channelRef.current);
     }
 
-    const accountId = accountIdRef.current;
-    // Subscribe to realtime for this account
+    // We need the current_team_id to subscribe to team changes.
+    // The account-context fetches from /api/auth/verify which returns
+    // the account enriched with team billing. We rely on the raw API
+    // response storing current_team_id in a ref set during fetchAccount.
+    const teamId = teamIdRef.current;
+    if (!teamId) return;
 
     const channel = supabase
-      .channel(`account:${accountId}`)
+      .channel(`account-team:${teamId}`)
       .on(
         "postgres_changes",
         {
           event: "UPDATE",
           schema: "public",
-          table: "accounts",
-          filter: `id=eq.${accountId}`,
+          table: "teams",
+          filter: `id=eq.${teamId}`,
         },
         (payload: { new: Record<string, unknown> | null }) => {
-          // Realtime update received
-
-          if (payload.new) {
-            const updatedAccount = transformAccount(payload.new as {
-              id: string;
-              clerk_user_id: string;
-              tier: SubscriptionTier;
-              token_limit: number;
-              tokens_used: number;
+          if (payload.new && account) {
+            // Merge team billing updates into account data
+            const teamData = payload.new as {
+              tier?: SubscriptionTier;
+              token_limit?: number;
+              tokens_used?: number;
               weekly_tokens_used?: number;
               week_start_date?: string;
-              token_credits?: number;
-              billing_cycle_start: string;
-              stripe_customer_id: string | null;
-              stripe_subscription_id: string | null;
+            };
+            setAccount((prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                tier: (teamData.tier as SubscriptionTier) || prev.tier,
+                tokenLimit: teamData.token_limit ?? prev.tokenLimit,
+                tokensUsed: teamData.tokens_used ?? prev.tokensUsed,
+                weeklyTokensUsed: teamData.weekly_tokens_used ?? prev.weeklyTokensUsed,
+                weekStartDate: teamData.week_start_date ? new Date(teamData.week_start_date) : prev.weekStartDate,
+              };
             });
-            setAccount(updatedAccount);
           }
         }
       )
       .subscribe((status: string) => {
-        // Update connection status
         setIsConnected(status === "SUBSCRIBED");
       });
 
     channelRef.current = channel;
-  }, []);
+  }, [account]);
 
   /**
    * Refetch account data manually

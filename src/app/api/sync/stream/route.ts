@@ -107,72 +107,80 @@ export async function GET(request: NextRequest) {
         }
       };
 
-      // Send initial connected event with current account data
+      // Send initial connected event with current team billing data
       supabase
         .from("accounts")
-        .select("*")
+        .select("current_team_id")
         .eq("id", account_id)
         .single()
-        .then(({ data: account, error }) => {
-          if (error || !account) {
+        .then(async ({ data: acc, error: accErr }) => {
+          if (accErr || !acc?.current_team_id) {
             sendEvent("error", { message: "Account not found" });
+            return;
+          }
+
+          const teamId = acc.current_team_id;
+
+          const { data: team, error: teamErr } = await supabase
+            .from("teams")
+            .select("id, tier, token_limit, tokens_used")
+            .eq("id", teamId)
+            .single();
+
+          if (teamErr || !team) {
+            sendEvent("error", { message: "Team not found" });
             return;
           }
 
           sendEvent("connected", {
             status: "ok",
             account: {
-              id: account.id,
-              tier: account.tier,
-              token_limit: account.token_limit,
-              tokens_used: account.tokens_used,
-              billing_cycle_start: account.billing_cycle_start,
+              id: account_id,
+              tier: team.tier,
+              token_limit: team.token_limit,
+              tokens_used: team.tokens_used,
             },
           });
-        });
 
-      // Subscribe to Supabase Realtime for account changes
-      channel = supabase
-        .channel(`desktop-sync:${account_id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "accounts",
-            filter: `id=eq.${account_id}`,
-          },
-          (payload) => {
-            logger.info("Sync",`[SSE] Account updated: ${account_id}`);
+          // Subscribe to Supabase Realtime for team billing changes
+          channel = supabase
+            .channel(`desktop-sync:${account_id}`)
+            .on(
+              "postgres_changes",
+              {
+                event: "UPDATE",
+                schema: "public",
+                table: "teams",
+                filter: `id=eq.${teamId}`,
+              },
+              (payload) => {
+                logger.info("Sync",`[SSE] Team updated: ${teamId}`);
 
-            if (payload.new) {
-              const account = payload.new as {
-                id: string;
-                tier: string;
-                token_limit: number;
-                tokens_used: number;
-                billing_cycle_start: string;
-                stripe_customer_id: string | null;
-                stripe_subscription_id: string | null;
-              };
+                if (payload.new) {
+                  const updatedTeam = payload.new as {
+                    id: string;
+                    tier: string;
+                    token_limit: number;
+                    tokens_used: number;
+                  };
 
-              sendEvent("account-updated", {
-                id: account.id,
-                tier: account.tier,
-                token_limit: account.token_limit,
-                tokens_used: account.tokens_used,
-                billing_cycle_start: account.billing_cycle_start,
-              });
-            }
-          }
-        )
-        .subscribe((status) => {
-          logger.info("Sync",`[SSE] Realtime subscription status: ${status}`);
-          if (status === "SUBSCRIBED") {
-            logger.info("Sync",`[SSE] Successfully subscribed to account ${account_id}`);
-          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            sendEvent("error", { message: "Realtime subscription failed" });
-          }
+                  sendEvent("account-updated", {
+                    id: account_id,
+                    tier: updatedTeam.tier,
+                    token_limit: updatedTeam.token_limit,
+                    tokens_used: updatedTeam.tokens_used,
+                  });
+                }
+              }
+            )
+            .subscribe((status) => {
+              logger.info("Sync",`[SSE] Realtime subscription status: ${status}`);
+              if (status === "SUBSCRIBED") {
+                logger.info("Sync",`[SSE] Successfully subscribed to team ${teamId}`);
+              } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+                sendEvent("error", { message: "Realtime subscription failed" });
+              }
+            });
         });
 
       // Start heartbeat interval
