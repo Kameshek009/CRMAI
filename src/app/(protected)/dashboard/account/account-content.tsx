@@ -18,7 +18,7 @@ import { ThemeToggleSlider } from "@/components/theme-toggle-slider";
 import { TeamCreateWizard } from "@/components/team/team-create-wizard";
 import { useTeam } from "@/contexts/team-context";
 import { toast } from "sonner";
-import type { Account, UsageStats } from "@/types";
+import type { UsageStats } from "@/types";
 import type { CustomerBillingInfoData, InvoiceInfo } from "@/components/billing";
 
 interface AccountContentProps {
@@ -27,8 +27,16 @@ interface AccountContentProps {
   imageUrl: string;
 }
 
+interface TeamInfo {
+  id: string;
+  name: string;
+  tier: string;
+  seatCount: number;
+  isDirector: boolean;
+}
+
 interface BillingData {
-  account: Account;
+  team: TeamInfo;
   usageStats: UsageStats;
   paymentHistory: unknown[];
   stripeBilling: CustomerBillingInfoData | null;
@@ -256,7 +264,7 @@ export function AccountContent({ email, name: initialName, imageUrl }: AccountCo
     }
   };
 
-  const tierInfo = billingData ? getTierInfo(billingData.account.tier) : null;
+  const tierInfo = billingData ? getTierInfo(billingData.team.tier) : null;
   const initials = displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
@@ -405,12 +413,12 @@ export function AccountContent({ email, name: initialName, imageUrl }: AccountCo
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {billingData.account.tier === "enterprise"
-                    ? `${formatTokens(billingData.account.tokenCredits)} credits remaining`
-                    : `${formatTokens(billingData.account.tokenLimit)} tokens per month`}
+                  {billingData.team.tier === "enterprise"
+                    ? "Unlimited tokens (credit-based)"
+                    : `${formatTokens(billingData.usageStats.tokenLimit)} tokens per month`}
                 </p>
               </div>
-              {billingData.account.tier === "free" && (
+              {billingData.team.tier === "free" && (
                 <Button asChild>
                   <Link href="/dashboard/account/billing">
                     Upgrade
@@ -418,7 +426,7 @@ export function AccountContent({ email, name: initialName, imageUrl }: AccountCo
                   </Link>
                 </Button>
               )}
-              {billingData.account.tier !== "free" && (
+              {billingData.team.tier !== "free" && (
                 <Button variant="outline" asChild>
                   <Link href="/dashboard/account/billing">
                     Manage Plan
