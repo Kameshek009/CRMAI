@@ -29,6 +29,28 @@ interface ChatWithMessages extends Chat {
   messages: Array<{ id: string; content: string; created_at: string }>;
 }
 
+function getLastVisit(chatId: string): string | null {
+  try {
+    return localStorage.getItem(`chat_last_visit_${chatId}`);
+  } catch {
+    return null;
+  }
+}
+
+function markChatVisited(chatId: string) {
+  try {
+    localStorage.setItem(`chat_last_visit_${chatId}`, new Date().toISOString());
+  } catch { /* ignore */ }
+}
+
+function isUnread(chat: ChatListItem): boolean {
+  const updatedAt = chat.updated_at || chat.created_at;
+  if (!updatedAt || chat.message_count === 0) return false;
+  const lastVisit = getLastVisit(chat.id);
+  if (!lastVisit) return true;
+  return new Date(updatedAt).getTime() > new Date(lastVisit).getTime();
+}
+
 export function ChatsContent() {
   const router = useRouter();
   const { account, isLoading: accountLoading } = useAccount();
@@ -318,6 +340,27 @@ export function ChatsContent() {
             <Skeleton key={i} className="h-16 sm:h-20 w-full rounded-xl" />
           ))}
         </div>
+      ) : filteredChats.length === 0 && searchQuery ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-10 sm:py-16 px-4">
+              <div className="rounded-full bg-muted/50 p-3 sm:p-4 mb-3 sm:mb-4">
+                <Search className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+              </div>
+              <CardTitle className="mb-2 text-base sm:text-lg">No results</CardTitle>
+              <CardDescription className="text-center mb-4 sm:mb-6 max-w-sm text-sm">
+                No chats found for &quot;{searchQuery}&quot;
+              </CardDescription>
+              <Button onClick={() => setSearchQuery('')} variant="ghost" className="gap-2 h-10">
+                Clear search
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : filteredChats.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -360,7 +403,10 @@ export function ChatsContent() {
               >
                 <Card
                   className="cursor-pointer group border-border/50 hover:border-border hover:bg-accent/30 active:bg-accent/50 transition-all duration-200"
-                  onClick={() => router.push(`/dashboard/chats/${chat.id}`)}
+                  onClick={() => {
+                    markChatVisited(chat.id);
+                    router.push(`/dashboard/chats/${chat.id}`);
+                  }}
                 >
                   <CardContent className="flex items-center justify-between p-3 sm:p-4">
                     <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
@@ -369,6 +415,9 @@ export function ChatsContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 sm:gap-3 mb-0.5">
+                          {isUnread(chat) && (
+                            <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+                          )}
                           <h3 className="font-medium text-foreground truncate text-sm sm:text-[15px]">
                             {chat.title || 'New Chat'}
                           </h3>

@@ -60,12 +60,16 @@ export async function GET(
       );
     }
 
-    // Fetch messages
+    // Fetch messages (capped at 500 for performance)
+    const { searchParams } = new URL(request.url);
+    const msgLimit = Math.min(parseInt(searchParams.get("limit") || "500"), 500);
+
     const { data: messages, error: messagesError } = await supabase
       .from("messages")
       .select("*")
       .eq("chat_id", chatId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(msgLimit);
 
     if (messagesError) {
       throw messagesError;
@@ -164,9 +168,32 @@ export async function POST(
     }
 
     // Update chat's updated_at
+    const updateData: Record<string, string> = { updated_at: new Date().toISOString() };
+
+    // Auto-generate title from first user message if chat has no title
+    if (role === "user") {
+      const { data: chatData } = await supabase
+        .from("chats")
+        .select("title")
+        .eq("id", chatId)
+        .single();
+
+      if (!chatData?.title) {
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("chat_id", chatId)
+          .eq("role", "user");
+
+        if (count === 1) {
+          updateData.title = content.length > 47 ? content.slice(0, 47) + "..." : content;
+        }
+      }
+    }
+
     await supabase
       .from("chats")
-      .update({ updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq("id", chatId);
 
     return NextResponse.json({ success: true, message });

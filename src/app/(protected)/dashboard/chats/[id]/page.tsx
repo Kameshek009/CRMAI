@@ -4,108 +4,74 @@
  * Chat Detail Page
  *
  * Displays a single chat with messages and allows sending new messages.
- * Supports real-time updates and agent task visualization.
+ * Supports real-time updates via SSE and agent task visualization.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAccount } from '@/contexts/account-context';
-import {
-  ArrowLeft,
-  Send,
-  Bot,
-  User,
-  Loader2,
-  MoreVertical,
-  Trash2,
-  Edit2,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-} from 'lucide-react';
+import { AlertCircle, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Markdown } from '@/components/ui/markdown';
-import { AgentStatusBadge } from '@/components/ui/agent-status-badge';
 import { useAgentStatus } from '@/hooks/use-agent-status';
 import type { Chat, Message, VisionBoard } from '@/lib/supabase/types';
+
+import { ChatHeader } from './components/chat-header';
+import { ChatMessages } from './components/chat-messages';
+import { ChatComposer } from './components/chat-composer';
+import { ChatSearch } from './components/chat-search';
 
 export default function ChatDetailPage() {
   const params = useParams();
   const router = useRouter();
   const chatId = params.id as string;
   const { account } = useAccount();
-  const { isOnline: isAgentOnline, mode: agentMode } = useAgentStatus();
+  const { isOnline: isAgentOnline } = useAgentStatus();
 
   const [chat, setChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [visionBoard, setVisionBoard] = useState<VisionBoard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [input, setInput] = useState('');
   const [rateLimitResetsAt, setRateLimitResetsAt] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState('');
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Search state
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
 
-  // Live countdown timer for daily limit reset
-  useEffect(() => {
-    if (!rateLimitResetsAt) {
-      setCountdown('');
-      return;
-    }
+  // SSE reconnect state
+  const lastSSETimestamp = useRef<string | null>(null);
 
-    const updateCountdown = () => {
-      const now = Date.now();
-      const resetTime = new Date(rateLimitResetsAt).getTime();
-      const diff = resetTime - now;
+  // Search logic
+  const searchMatches = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return messages.filter((m) => m.content.toLowerCase().includes(q)).map((m) => m.id);
+  }, [messages, searchQuery]);
 
-      if (diff <= 0) {
-        setRateLimitResetsAt(null);
-        setCountdown('');
-        return;
-      }
+  const highlightedIds = useMemo(() => new Set(searchMatches), [searchMatches]);
 
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  const currentHighlightId = searchMatches[currentMatchIndex] || null;
 
-      if (hours > 0) {
-        setCountdown(`${hours}h ${minutes}m ${seconds}s`);
-      } else if (minutes > 0) {
-        setCountdown(`${minutes}m ${seconds}s`);
-      } else {
-        setCountdown(`${seconds}s`);
-      }
-    };
+  const handleSearchNext = useCallback(() => {
+    if (searchMatches.length === 0) return;
+    setCurrentMatchIndex((prev) => (prev + 1) % searchMatches.length);
+  }, [searchMatches.length]);
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, [rateLimitResetsAt]);
+  const handleSearchPrev = useCallback(() => {
+    if (searchMatches.length === 0) return;
+    setCurrentMatchIndex((prev) => (prev - 1 + searchMatches.length) % searchMatches.length);
+  }, [searchMatches.length]);
 
-  // Scroll to bottom
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  // Fetch chat data via API (server-side auth)
+  // Fetch chat data
   const fetchChat = useCallback(async () => {
     if (!chatId || !account?.id) return;
 
     try {
       setIsLoading(true);
-
-      // Use API route instead of direct Supabase (server-side auth)
       const response = await fetch(`/api/chats/${chatId}`);
       const result = await response.json();
 
@@ -116,6 +82,12 @@ export default function ChatDetailPage() {
       setChat(result.chat);
       setMessages(result.messages || []);
       setVisionBoard(result.visionBoard || null);
+
+      // Track last message timestamp for SSE reconnect
+      const msgs = result.messages || [];
+      if (msgs.length > 0) {
+        lastSSETimestamp.current = msgs[msgs.length - 1].created_at;
+      }
     } catch (err) {
       console.error('Error fetching chat:', err);
       toast.error('Failed to load chat');
@@ -128,33 +100,37 @@ export default function ChatDetailPage() {
     fetchChat();
   }, [fetchChat]);
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
-
-  // Real-time subscription for messages via SSE
-  // Uses /api/chats/[id]/stream endpoint which bypasses RLS issues
-  // Note: Deduplication checks both id AND local_id to prevent race condition
-  // between optimistic update and SSE
+  // SSE with auto-reconnect and exponential backoff
   useEffect(() => {
     if (!chatId) return;
 
     let eventSource: EventSource | null = null;
     let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    let isCancelled = false;
 
     const connectSSE = () => {
-      eventSource = new EventSource(`/api/chats/${chatId}/stream`);
+      if (isCancelled) return;
+
+      const sinceParam = lastSSETimestamp.current
+        ? `?since=${encodeURIComponent(lastSSETimestamp.current)}`
+        : '';
+      eventSource = new EventSource(`/api/chats/${chatId}/stream${sinceParam}`);
+
+      eventSource.addEventListener('connected', () => {
+        reconnectAttempts = 0; // Reset backoff on successful connect
+      });
 
       eventSource.addEventListener('message:new', (event) => {
         try {
           const newMessage = JSON.parse(event.data) as Message;
+          // Track timestamp for reconnect
+          if (newMessage.created_at) {
+            lastSSETimestamp.current = newMessage.created_at;
+          }
           setMessages((prev) => {
-            // Skip if message already exists by id
             if (prev.some((m) => m.id === newMessage.id)) return prev;
-            // Skip if message exists by local_id (handles optimistic update race)
             if (newMessage.local_id && prev.some((m) => m.local_id === newMessage.local_id)) return prev;
-            // Skip temp messages that haven't been replaced yet
             if (prev.some((m) => m.id.startsWith('temp-') && m.content === newMessage.content)) return prev;
             return [...prev, newMessage];
           });
@@ -163,38 +139,45 @@ export default function ChatDetailPage() {
         }
       });
 
+      eventSource.addEventListener('disconnected', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.reason === 'max_duration_exceeded') {
+            // Immediate reconnect — not an error
+            eventSource?.close();
+            reconnectTimeout = setTimeout(connectSSE, 500);
+            return;
+          }
+        } catch { /* ignore parse errors */ }
+      });
+
       eventSource.onerror = () => {
-        console.warn('[Chat] SSE connection error, reconnecting...');
         eventSource?.close();
-        // Reconnect after 3 seconds
-        reconnectTimeout = setTimeout(connectSSE, 3000);
+        if (isCancelled) return;
+
+        // Exponential backoff: 3s, 6s, 12s, max 30s
+        const delay = Math.min(3000 * Math.pow(2, reconnectAttempts), 30000);
+        reconnectAttempts++;
+        reconnectTimeout = setTimeout(connectSSE, delay);
       };
     };
 
     connectSSE();
 
     return () => {
-      if (eventSource) {
-        eventSource.close();
-      }
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-      }
+      isCancelled = true;
+      eventSource?.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
     };
   }, [chatId]);
 
   // Send message
-  const handleSend = async () => {
-    if (!input.trim() || !chatId || isSending) return;
+  const handleSend = useCallback(async (content: string) => {
+    if (!chatId || isSending) return;
 
-    const content = input.trim();
-    setInput('');
     setIsSending(true);
-
-    // Generate a unique local_id for deduplication
     const localId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-    // Optimistic update
     const optimisticMessage: Message = {
       id: `temp-${Date.now()}`,
       chat_id: chatId,
@@ -211,84 +194,67 @@ export default function ChatDetailPage() {
     setMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      // Store user message
       const response = await fetch(`/api/chats/${chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          role: 'user',
-          content,
-          message_type: 'text',
-        }),
+        body: JSON.stringify({ role: 'user', content, message_type: 'text' }),
       });
       const result = await response.json();
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to send message');
-      }
+      if (!result.success) throw new Error(result.error || 'Failed to send message');
 
       // Replace optimistic with real
-      setMessages((prev) =>
-        prev.map((m) => (m.local_id === localId ? result.message : m))
-      );
+      setMessages((prev) => prev.map((m) => (m.local_id === localId ? result.message : m)));
 
-      // For chat mode: call CRM AI and store response
+      // Update last timestamp
+      if (result.message.created_at) {
+        lastSSETimestamp.current = result.message.created_at;
+      }
+
+      // For chat mode: call CRM AI
       if (chat?.mode === 'chat') {
-        // Build history from previous messages (exclude current one to avoid duplicate)
         const recentMessages = messages
           .filter((m) => !m.id.startsWith('temp-'))
           .slice(-10)
-          .map((m) => ({
-            role: m.role as 'user' | 'assistant',
-            content: m.content,
-          }));
+          .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
         const aiRes = await fetch('/api/crm/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: content,
-            history: recentMessages,
-          }),
+          body: JSON.stringify({ message: content, history: recentMessages }),
         });
         const aiJson = await aiRes.json();
 
         let aiContent: string;
         if (aiJson.success) {
           aiContent = aiJson.data.response;
-          // Append token usage info
           if (aiJson.data.usage) {
             const { tokensUsed, accountTokensUsed, accountTokenLimit } = aiJson.data.usage;
             const remaining = Math.max(0, accountTokenLimit - accountTokensUsed);
-            const formatT = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}K` : String(n);
+            const formatT = (n: number) =>
+              n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}K` : String(n);
             aiContent += `\n\n---\n*Tokens: -${formatT(tokensUsed)} | Remaining: ${formatT(remaining)} / ${formatT(accountTokenLimit)}*`;
           }
-          // Clear any previous rate limit
           setRateLimitResetsAt(null);
         } else if (aiJson.reason === 'weekly_cap_exceeded' || aiJson.reason === 'monthly_cap_exceeded') {
-          // Set timer for countdown
-          if (aiJson.resetsAt) {
-            setRateLimitResetsAt(aiJson.resetsAt);
-          }
+          if (aiJson.resetsAt) setRateLimitResetsAt(aiJson.resetsAt);
           aiContent = 'Daily token limit reached. The limit will reset automatically — see the timer below.';
         } else {
           aiContent = 'Sorry, something went wrong. Please try again.';
         }
 
-        // Store AI response as a message
         const aiMsgRes = await fetch(`/api/chats/${chatId}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            role: 'assistant',
-            content: aiContent,
-            message_type: 'text',
-          }),
+          body: JSON.stringify({ role: 'assistant', content: aiContent, message_type: 'text' }),
         });
         const aiMsgResult = await aiMsgRes.json();
 
         if (aiMsgResult.success) {
           setMessages((prev) => [...prev, aiMsgResult.message]);
+          if (aiMsgResult.message.created_at) {
+            lastSSETimestamp.current = aiMsgResult.message.created_at;
+          }
         }
       }
     } catch (err) {
@@ -298,45 +264,41 @@ export default function ChatDetailPage() {
     } finally {
       setIsSending(false);
     }
-  };
+  }, [chatId, isSending, chat?.mode, messages]);
 
-  // Handle keyboard submit
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  // Delete message (optimistic)
+  const handleDeleteMessage = useCallback(async (messageId: string) => {
+    const deleted = messages.find((m) => m.id === messageId);
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
 
-  // Delete chat via API
-  const handleDeleteChat = async () => {
     try {
-      const response = await fetch(`/api/chats/${chatId}`, {
-        method: 'DELETE',
-      });
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to delete chat');
+      const res = await fetch(`/api/chats/${chatId}/messages/${messageId}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (!result.success) throw new Error();
+    } catch {
+      // Restore on failure
+      if (deleted) {
+        setMessages((prev) => [...prev, deleted].sort(
+          (a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime()
+        ));
       }
+      toast.error('Failed to delete message');
+    }
+  }, [chatId, messages]);
 
+  // Delete chat
+  const handleDeleteChat = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/chats/${chatId}`, { method: 'DELETE' });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error || 'Failed to delete chat');
       toast.success('Chat deleted');
       router.push('/dashboard/chats');
     } catch (err) {
       console.error('Error deleting chat:', err);
       toast.error('Failed to delete chat');
     }
-  };
-
-  // Format time
-  const formatTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
+  }, [chatId, router]);
 
   if (isLoading) {
     return (
@@ -361,7 +323,6 @@ export default function ChatDetailPage() {
           This chat may have been deleted or you don&apos;t have access.
         </p>
         <Button onClick={() => router.push('/dashboard/chats')} className="h-10">
-          <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Chats
         </Button>
       </div>
@@ -370,40 +331,36 @@ export default function ChatDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => router.push('/dashboard/chats')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="min-w-0">
-            <h1 className="font-semibold text-foreground text-sm sm:text-base truncate">
-              {chat.title || 'New Chat'}
-            </h1>
-            <div className="flex items-center gap-2">
-              <AgentStatusBadge compact />
-            </div>
-          </div>
-        </div>
+      <ChatHeader
+        chat={chat}
+        onChatUpdate={setChat}
+        onDelete={handleDeleteChat}
+        onSearchToggle={() => {
+          setSearchOpen((prev) => !prev);
+          if (searchOpen) {
+            setSearchQuery('');
+            setCurrentMatchIndex(0);
+          }
+        }}
+      />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Edit2 className="mr-2 h-4 w-4" />
-              Rename
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={handleDeleteChat}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <ChatSearch
+        isOpen={searchOpen}
+        onClose={() => {
+          setSearchOpen(false);
+          setSearchQuery('');
+          setCurrentMatchIndex(0);
+        }}
+        query={searchQuery}
+        onQueryChange={(q) => {
+          setSearchQuery(q);
+          setCurrentMatchIndex(0);
+        }}
+        matchCount={searchMatches.length}
+        currentMatch={currentMatchIndex}
+        onNext={handleSearchNext}
+        onPrev={handleSearchPrev}
+      />
 
       {/* Vision Board Status */}
       {visionBoard && (
@@ -436,161 +393,24 @@ export default function ChatDetailPage() {
         </div>
       )}
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <Bot className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-            <h3 className="text-base sm:text-lg font-medium mb-2">
-              {chat?.mode === 'chat' ? 'CRM AI Assistant' : 'Start a conversation'}
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-sm">
-              {chat?.mode === 'chat'
-                ? 'Try: "Add contact John Smith" or "Show pipeline summary"'
-                : 'Describe a task for the agent to complete on your desktop.'}
-            </p>
-          </div>
-        ) : (
-          messages.map((message, index) => (
-            <div
-              key={message.id}
-              className={cn(
-                'flex gap-3',
-                message.role === 'user' ? 'justify-end' : 'justify-start',
-                // Add animation for new messages (last 2 messages)
-                index >= messages.length - 2 && message.role === 'user'
-                  ? 'message-animate-in-right'
-                  : index >= messages.length - 2 && message.role !== 'user'
-                  ? 'message-animate-in-left'
-                  : ''
-              )}
-            >
-              {message.role !== 'user' && (
-                <div
-                  className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
-                    message.message_type === 'error'
-                      ? 'bg-destructive/20'
-                      : message.message_type === 'result'
-                      ? 'bg-success/20'
-                      : 'bg-muted'
-                  )}
-                >
-                  {message.message_type === 'error' ? (
-                    <AlertCircle className="h-4 w-4 text-destructive" />
-                  ) : message.message_type === 'result' ? (
-                    <CheckCircle className="h-4 w-4 text-success" />
-                  ) : (
-                    <Bot className="h-4 w-4 text-chart-1" />
-                  )}
-                </div>
-              )}
+      <ChatMessages
+        messages={messages}
+        chat={chat}
+        isSending={isSending}
+        searchQuery={searchQuery}
+        highlightedIds={highlightedIds}
+        currentHighlightId={currentHighlightId}
+        onDeleteMessage={handleDeleteMessage}
+        onQuickSend={handleSend}
+      />
 
-              <div
-                className={cn(
-                  'max-w-[85%] sm:max-w-[75%] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3',
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : message.message_type === 'error'
-                    ? 'bg-destructive/10 border border-destructive/30'
-                    : message.message_type === 'result'
-                    ? 'bg-success/10 border border-success/30'
-                    : message.message_type === 'plan' || message.message_type === 'action'
-                    ? 'bg-warning/10 border border-warning/30'
-                    : 'bg-muted'
-                )}
-              >
-                {message.message_type !== 'text' && message.role !== 'user' && (
-                  <p className="text-xs font-medium uppercase mb-1 opacity-70">
-                    {message.message_type}
-                  </p>
-                )}
-                {message.role === 'user' ? (
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                ) : (
-                  <Markdown content={message.content} />
-                )}
-                <p
-                  className={cn(
-                    'text-xs mt-2',
-                    message.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
-                  )}
-                >
-                  {formatTime(message.created_at || new Date().toISOString())}
-                  {(message.tokens_used ?? 0) > 0 && ` · ${message.tokens_used} tokens`}
-                </p>
-              </div>
-
-              {message.role === 'user' && (
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-                  <User className="h-4 w-4 text-primary-foreground" />
-                </div>
-              )}
-            </div>
-          ))
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Composer */}
-      <div className="px-3 sm:px-6 py-3 sm:py-4 border-t">
-        {/* Daily limit countdown */}
-        {rateLimitResetsAt && countdown && (
-          <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-destructive/10 border border-destructive/30">
-            <div className="flex items-center gap-2 min-w-0">
-              <Clock className="h-4 w-4 text-destructive shrink-0" />
-              <p className="text-xs sm:text-sm text-destructive">
-                Daily limit reached. Resets in <span className="font-mono font-semibold">{countdown}</span>
-              </p>
-            </div>
-            <a
-              href="/dashboard/upgrade"
-              className="text-xs font-medium text-destructive hover:underline shrink-0"
-            >
-              Upgrade
-            </a>
-          </div>
-        )}
-        {/* Offline warning */}
-        {!isAgentOnline && (
-          <div className="flex items-center gap-2 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-warning/10 border border-warning/30">
-            <AlertCircle className="h-4 w-4 text-warning shrink-0" />
-            <p className="text-xs sm:text-sm text-warning">
-              Agent offline. Messages will be queued.
-            </p>
-          </div>
-        )}
-        <div className="flex gap-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              chat?.mode === 'chat'
-                ? 'Ask CRM AI anything...'
-                : !isAgentOnline
-                ? 'Agent offline - message will be queued...'
-                : chat?.mode === 'agent'
-                ? 'Describe a task for the agent...'
-                : 'Send a message...'
-            }
-            className="min-h-[44px] max-h-32 resize-none text-sm sm:text-base"
-            disabled={isSending}
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isSending}
-            size="icon"
-            className="h-11 w-11 shrink-0"
-          >
-            {isSending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </div>
+      <ChatComposer
+        chat={chat}
+        isSending={isSending}
+        isAgentOnline={isAgentOnline}
+        rateLimitResetsAt={rateLimitResetsAt}
+        onSend={handleSend}
+      />
     </div>
   );
 }

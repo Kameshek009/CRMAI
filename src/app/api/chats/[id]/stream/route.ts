@@ -76,19 +76,24 @@ export async function GET(
   }
 
   // Track last message timestamp for polling
-  let lastMessageTimestamp: string | null = null;
+  // Support ?since= param for seamless reconnects
+  const { searchParams } = new URL(request.url);
+  const sinceParam = searchParams.get("since");
+  let lastMessageTimestamp: string | null = sinceParam || null;
 
-  // Get initial last message timestamp
-  const { data: latestMessage } = await supabase
-    .from("messages")
-    .select("created_at")
-    .eq("chat_id", chatId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+  // Get initial last message timestamp (only if no since param)
+  if (!lastMessageTimestamp) {
+    const { data: latestMessage } = await supabase
+      .from("messages")
+      .select("created_at")
+      .eq("chat_id", chatId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
 
-  if (latestMessage) {
-    lastMessageTimestamp = latestMessage.created_at;
+    if (latestMessage) {
+      lastMessageTimestamp = latestMessage.created_at;
+    }
   }
 
   // Create SSE stream
