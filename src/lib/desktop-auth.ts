@@ -8,6 +8,7 @@
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { createSupabaseAdmin } from "./supabase/server";
+import { logger } from "./logger";
 
 // Configuration
 // Validate JWT secret: prefer DESKTOP_JWT_SECRET, fall back to CLERK_SECRET_KEY
@@ -15,18 +16,12 @@ const DESKTOP_SECRET = process.env.DESKTOP_JWT_SECRET;
 const CLERK_SECRET = process.env.CLERK_SECRET_KEY;
 
 if (!DESKTOP_SECRET) {
-  console.warn(
-    "[desktop-auth] DESKTOP_JWT_SECRET is not set. Falling back to CLERK_SECRET_KEY for JWT signing. " +
-    "Set DESKTOP_JWT_SECRET in production for better security isolation."
-  );
+  logger.warn("DesktopAuth", "DESKTOP_JWT_SECRET not set, falling back to CLERK_SECRET_KEY");
 }
 
 const JWT_SECRET: string = DESKTOP_SECRET || CLERK_SECRET || "";
 if (!JWT_SECRET) {
-  console.error(
-    "[desktop-auth] Neither DESKTOP_JWT_SECRET nor CLERK_SECRET_KEY is set. " +
-    "Desktop authentication will not work."
-  );
+  logger.error("DesktopAuth", "No JWT secret configured — desktop auth will not work");
 }
 const ACCESS_TOKEN_EXPIRY = parseInt(process.env.DESKTOP_TOKEN_EXPIRY || "3600"); // 1 hour default
 const REFRESH_TOKEN_EXPIRY_DAYS = 365; // 1 year
@@ -69,7 +64,7 @@ export async function generateAuthCode(
   });
 
   if (error) {
-    console.error("Failed to store auth code:", error);
+    logger.error("DesktopAuth", "Failed to store auth code", error);
     throw new Error("Failed to generate authorization code");
   }
 
@@ -97,7 +92,7 @@ export async function validateAuthCode(
     .single();
 
   if (error || !authCode) {
-    console.log("Auth code not found, expired, or already used:", error?.message);
+    logger.info("DesktopAuth", "Auth code invalid/expired/used", error?.message);
     return null;
   }
 
@@ -165,7 +160,7 @@ export async function generateDesktopTokens(
     .single();
 
   if (error || !session) {
-    console.error("Failed to create desktop session:", error);
+    logger.error("DesktopAuth", "Failed to create session", error);
     throw new Error("Failed to create session");
   }
 
@@ -223,13 +218,13 @@ export async function refreshDesktopToken(
     .single();
 
   if (sessionError || !session) {
-    console.log("Session not found or revoked:", sessionError?.message);
+    logger.info("DesktopAuth", "Session not found or revoked", sessionError?.message);
     return null;
   }
 
   // Check if session is expired
   if (session.expires_at && new Date(session.expires_at) < new Date()) {
-    console.log("Session expired");
+    logger.info("DesktopAuth", "Session expired");
     // Mark as revoked
     await supabase.from("desktop_sessions").update({ revoked: true }).eq("id", session.id);
     return null;
@@ -303,7 +298,7 @@ export async function revokeRefreshToken(refreshToken: string): Promise<boolean>
     .eq("refresh_token", refreshToken);
 
   if (error) {
-    console.error("Failed to revoke token:", error);
+    logger.error("DesktopAuth", "Failed to revoke token", error);
     return false;
   }
 
@@ -337,7 +332,7 @@ export function validateAccessToken(accessToken: string): {
 
     return decoded;
   } catch (error) {
-    console.log("Access token validation failed:", (error as Error).message);
+    logger.info("DesktopAuth", "Token validation failed", (error as Error).message);
     return null;
   }
 }
@@ -399,7 +394,7 @@ export async function getOrCreateAccount(clerkUserId: string): Promise<{
     .single();
 
   if (createError || !newAccount) {
-    console.error("Failed to create account:", createError);
+    logger.error("DesktopAuth", "Failed to create account", createError);
     throw new Error("Failed to create account");
   }
 

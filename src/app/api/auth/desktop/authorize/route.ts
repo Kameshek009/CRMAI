@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { generateDesktopTokens } from "@/lib/desktop-auth";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/auth/desktop/authorize
@@ -31,28 +32,28 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
 
     if (!userId) {
-      console.log("[desktop/authorize] No userId - not authenticated");
+      logger.info("DesktopAuth", "Authorize: not authenticated");
       return NextResponse.json(
         { success: false, error: "Not authenticated" },
         { status: 401 }
       );
     }
 
-    console.log("[desktop/authorize] Authenticated user:", userId);
+    logger.info("DesktopAuth", "Authorize: authenticated", userId);
 
     // Step 2: Validate request body
     const body = await request.json();
     const { state, device_name, device_id } = body;
 
     if (!state) {
-      console.log("[desktop/authorize] Missing state parameter");
+      logger.info("DesktopAuth", "Authorize: missing state");
       return NextResponse.json(
         { success: false, error: "State parameter is required" },
         { status: 400 }
       );
     }
 
-    console.log("[desktop/authorize] Device:", device_name, "ID:", device_id);
+    logger.info("DesktopAuth", "Authorize: device", { device_name, device_id });
 
     // Step 3: Get user info from Clerk (needed for account creation/update)
     const user = await currentUser();
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Step 4: Get or create account in Supabase
     const supabase = createSupabaseAdmin();
 
-    console.log("[desktop/authorize] Looking for account with clerk_user_id:", userId);
+    logger.info("DesktopAuth", "Authorize: looking up account", userId);
 
     const { data: existingAccount, error: selectError } = await supabase
       .from("accounts")
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (selectError && selectError.code !== "PGRST116") {
-      console.error("[desktop/authorize] Database select error:", selectError);
+      logger.error("DesktopAuth", "DB select error", selectError);
       return NextResponse.json(
         { success: false, error: "Database error" },
         { status: 500 }
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
     let account = existingAccount;
 
     if (!account) {
-      console.log("[desktop/authorize] Creating new account for user:", userId);
+      logger.info("DesktopAuth", "Creating new account", userId);
 
       const { data: newAccount, error: insertError } = await supabase
         .from("accounts")
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
             .single();
           account = retryAccount;
         } else {
-          console.error("[desktop/authorize] Failed to create account:", insertError);
+          logger.error("DesktopAuth", "Failed to create account", insertError);
           return NextResponse.json(
             { success: false, error: "Failed to create account" },
             { status: 500 }
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("[desktop/authorize] Using account:", account.id);
+    logger.info("DesktopAuth", "Using account", account.id);
 
     // Step 4: Get team billing data
     let teamBilling = { tier: account.tier, token_limit: account.token_limit, tokens_used: account.tokens_used };
@@ -159,9 +160,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("user-agent") || undefined
     );
 
-    console.log("[desktop/authorize] Generated tokens, session:", tokens.sessionId);
-    console.log("[desktop/authorize] Authorization successful for user:", userId);
-    console.log("[desktop/authorize] User email:", email);
+    logger.info("DesktopAuth", "Authorization successful", { userId, sessionId: tokens.sessionId });
 
     return NextResponse.json({
       success: true,
@@ -187,7 +186,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[desktop/authorize] Unexpected error:", error);
+    logger.error("DesktopAuth", "Authorize error", error);
     return NextResponse.json(
       {
         success: false,

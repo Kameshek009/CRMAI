@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parsePagination } from "@/lib/crm/helpers";
 import { createContactSchema } from "@/lib/crm/validation";
+import { logger } from "@/lib/logger";
 
 /** Escape special LIKE/ILIKE characters to prevent injection */
 function sanitizeLike(input: string): string {
@@ -43,12 +44,13 @@ export async function GET(request: NextRequest) {
     const { data, error: dbError, count } = await query;
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Contacts", "Failed to fetch contacts", dbError);
+      return NextResponse.json({ success: false, error: "Failed to fetch contacts" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data, total: count });
   } catch (error) {
-    console.error("[API crm/contacts GET]", error);
+    logger.error("Contacts", "GET error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -75,7 +77,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Contacts", "Failed to create contact", dbError);
+      return NextResponse.json({ success: false, error: "Failed to create contact" }, { status: 500 });
     }
 
     // Log activity
@@ -88,11 +91,11 @@ export async function POST(request: NextRequest) {
         type: "contact_created",
         title: `Contact created: ${data.first_name} ${data.last_name || ""}`.trim(),
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) { logger.warn("Contacts", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("[API crm/contacts POST]", error);
+    logger.error("Contacts", "POST error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

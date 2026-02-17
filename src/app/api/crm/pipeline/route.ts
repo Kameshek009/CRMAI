@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { ensureDealStages } from "@/lib/crm/helpers";
 import { createPipelineStageSchema, reorderStagesSchema } from "@/lib/crm/validation";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -23,7 +24,8 @@ export async function GET() {
       .order("position", { ascending: true });
 
     if (stagesError) {
-      return NextResponse.json({ success: false, error: stagesError.message }, { status: 500 });
+      logger.error("Pipeline", "Failed to fetch stages", stagesError);
+      return NextResponse.json({ success: false, error: "Failed to fetch stages" }, { status: 500 });
     }
 
     // Get all open deals for pipeline view
@@ -61,7 +63,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("[API crm/pipeline GET]", error);
+    logger.error("Pipeline", "GET error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -88,12 +90,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Pipeline", "Failed to create stage", dbError);
+      return NextResponse.json({ success: false, error: "Failed to create stage" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("[API crm/pipeline POST]", error);
+    logger.error("Pipeline", "POST error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -114,18 +117,20 @@ export async function PATCH(request: NextRequest) {
 
     const supabase = createSupabaseAdmin();
 
-    // Update positions in order
-    for (const stage of parsed.data.stages) {
-      await supabase
-        .from("deal_stages")
-        .update({ position: stage.position })
-        .eq("id", stage.id)
-        .eq("team_id", context.teamId);
-    }
+    // Batch update positions using Promise.all instead of sequential N+1
+    await Promise.all(
+      parsed.data.stages.map((stage) =>
+        supabase
+          .from("deal_stages")
+          .update({ position: stage.position })
+          .eq("id", stage.id)
+          .eq("team_id", context.teamId)
+      )
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[API crm/pipeline PATCH]", error);
+    logger.error("Pipeline", "PATCH error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

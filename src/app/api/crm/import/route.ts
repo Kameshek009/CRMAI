@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { logger } from "@/lib/logger";
 
 interface CsvContact {
   first_name: string;
@@ -31,38 +32,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Maximum 1000 contacts per import" }, { status: 400 });
     }
 
-    const supabase = createSupabaseAdmin();
-
-    // Collect unique company names
-    const companyNames = [...new Set(contacts.map((c) => c.company).filter(Boolean))] as string[];
-    const companyMap = new Map<string, string>();
-
-    // Find or create companies
-    for (const name of companyNames) {
-      const { data: existing } = await supabase
-        .from("companies")
-        .select("id")
-        .eq("team_id", context.teamId)
-        .ilike("name", name)
-        .eq("is_deleted", false)
-        .limit(1)
-        .single();
-
-      if (existing) {
-        companyMap.set(name.toLowerCase(), existing.id);
-      } else {
-        const { data: created } = await supabase
-          .from("companies")
-          .insert({ account_id: context.accountId, team_id: context.teamId, name })
-          .select("id")
-          .single();
-        if (created) {
-          companyMap.set(name.toLowerCase(), created.id);
-        }
-      }
-    }
-
-    // Validate email format
+    // Validate email format before any DB operations
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const invalidEmails: string[] = [];
     for (const c of contacts) {
@@ -75,6 +45,47 @@ export async function POST(request: NextRequest) {
         { success: false, error: `Invalid email format: ${invalidEmails.slice(0, 5).join(", ")}${invalidEmails.length > 5 ? ` and ${invalidEmails.length - 5} more` : ""}` },
         { status: 400 }
       );
+    }
+
+    const supabase = createSupabaseAdmin();
+
+    // Collect unique company names
+    const companyNames = [...new Set(contacts.map((c) => c.company).filter(Boolean))] as string[];
+    const companyMap = new Map<string, string>();
+
+    if (companyNames.length > 0) {
+      // Batch fetch existing companies in one query instead of N+1
+      const { data: existingCompanies } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false)
+        .in("name", companyNames);
+
+      if (existingCompanies) {
+        for (const company of existingCompanies) {
+          companyMap.set(company.name.toLowerCase(), company.id);
+        }
+      }
+
+      // Create missing companies in a single batch insert
+      const missingNames = companyNames.filter((n) => !companyMap.has(n.toLowerCase()));
+      if (missingNames.length > 0) {
+        const { data: created } = await supabase
+          .from("companies")
+          .insert(missingNames.map((name) => ({
+            account_id: context.accountId,
+            team_id: context.teamId,
+            name,
+          })))
+          .select("id, name");
+
+        if (created) {
+          for (const company of created) {
+            companyMap.set(company.name.toLowerCase(), company.id);
+          }
+        }
+      }
     }
 
     // Insert contacts
@@ -96,7 +107,8 @@ export async function POST(request: NextRequest) {
       .select("id");
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Import", "Failed to import contacts", dbError);
+      return NextResponse.json({ success: false, error: "Failed to import contacts" }, { status: 500 });
     }
 
     // Log activity
@@ -108,7 +120,9 @@ export async function POST(request: NextRequest) {
         title: `Imported ${imported?.length || 0} contacts`,
         metadata: { count: imported?.length || 0, companies: companyNames.length },
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) {
+      logger.warn("Import", "Failed to log import activity", e);
+    }
 
     return NextResponse.json({
       success: true,
@@ -118,7 +132,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[API crm/import POST]", error);
+    logger.error("Import", "Unexpected error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
