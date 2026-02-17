@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
-    logger.error("Webhook", "[Webhook] Signature verification failed:", err);
+    logger.error("Webhook", "Signature verification failed", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -54,7 +54,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  logger.info("Webhook", `[Webhook] Processing event: ${event.type}`);
+  // Idempotency: skip already-processed events
+  const supabaseTop = createSupabaseAdmin();
+  const { error: dupError } = await supabaseTop
+    .from("stripe_webhook_events")
+    .insert({ event_id: event.id, event_type: event.type });
+
+  if (dupError?.code === "23505") {
+    logger.info("Webhook", `Duplicate event ${event.id}, skipping`);
+    return NextResponse.json({ received: true });
+  }
+
+  logger.info("Webhook", `Processing event: ${event.type}`);
 
   try {
     switch (event.type) {
@@ -92,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    logger.error("Webhook", "[Webhook] Handler error:", error);
+    logger.error("Webhook", "Handler error", error);
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 }
@@ -112,15 +123,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const customerId = session.customer as string;
   const subscriptionId = session.subscription as string;
 
-  logger.info("Webhook", `[Webhook] Checkout completed: team=${teamId}, tier=${tier}, metadata=${JSON.stringify(metadata)}`);
+  logger.info("Webhook", `Checkout completed: team=${teamId}, tier=${tier}`);
 
   if (!teamId) {
-    logger.error("Webhook", "[Webhook] No team_id in session metadata");
+    logger.error("Webhook", "No team_id in session metadata");
     return;
   }
 
   if (!subscriptionId || !tier) {
-    logger.error("Webhook", "[Webhook] Missing subscription or tier in checkout session");
+    logger.error("Webhook", "Missing subscription or tier in checkout session");
     return;
   }
 
@@ -147,11 +158,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .eq("id", teamId);
 
   if (updateError) {
-    logger.error("Webhook", "[Webhook] Failed to update team:", updateError);
+    logger.error("Webhook", "Failed to update team:", updateError);
     return;
   }
 
-  logger.info("Webhook", `[Webhook] Team ${teamId} upgraded to ${tier} (${seatCount} seats)`);
+  logger.info("Webhook", `Team ${teamId} upgraded to ${tier} (${seatCount} seats)`);
 
   // Log activity
   if (accountId) {
@@ -195,7 +206,7 @@ async function handleSubscriptionChange(
   const priceId = subscription.items.data[0]?.price.id;
   const quantity = subscription.items.data[0]?.quantity || 1;
 
-  logger.info("Webhook", `[Webhook] Subscription ${eventType}: customer=${customerId}, priceId=${priceId}, quantity=${quantity}`);
+  logger.info("Webhook", `Subscription ${eventType}: customer=${customerId}, priceId=${priceId}, quantity=${quantity}`);
 
   // Resolve tier
   let tier = getTierFromPriceId(priceId);
@@ -203,7 +214,7 @@ async function handleSubscriptionChange(
     tier = subscription.metadata.tier as SubscriptionTier;
   }
   if (!tier) {
-    logger.warn("Webhook", `[Webhook] Unknown price ID: ${priceId} - skipping`);
+    logger.warn("Webhook", `Unknown price ID: ${priceId} - skipping`);
     return;
   }
 
@@ -218,7 +229,7 @@ async function handleSubscriptionChange(
     .single();
 
   if (!team) {
-    logger.error("Webhook", "[Webhook] Team not found for customer:", customerId);
+    logger.error("Webhook", "Team not found for customer:", customerId);
     return;
   }
 
@@ -236,7 +247,7 @@ async function handleSubscriptionChange(
     .eq("id", team.id);
 
   if (updateError) {
-    logger.error("Webhook", "[Webhook] Failed to update team:", updateError);
+    logger.error("Webhook", "Failed to update team:", updateError);
     return;
   }
 
@@ -258,7 +269,7 @@ async function handleSubscriptionChange(
     });
   }
 
-  logger.info("Webhook", `[Webhook] Team ${team.id}: ${oldTier} → ${tier} (${quantity} seats)`);
+  logger.info("Webhook", `Team ${team.id}: ${oldTier} → ${tier} (${quantity} seats)`);
 }
 
 /**
@@ -269,7 +280,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
   const deletedSubscriptionId = subscription.id;
 
-  logger.info("Webhook", `[Webhook] Subscription deleted: ${deletedSubscriptionId}`);
+  logger.info("Webhook", `Subscription deleted: ${deletedSubscriptionId}`);
 
   // Find team
   const { data: team } = await supabase
@@ -280,13 +291,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .single();
 
   if (!team) {
-    logger.error("Webhook", "[Webhook] Team not found for cancelled subscription");
+    logger.error("Webhook", "Team not found for cancelled subscription");
     return;
   }
 
   // Check if this is the current subscription
   if (team.stripe_subscription_id && team.stripe_subscription_id !== deletedSubscriptionId) {
-    logger.info("Webhook", `[Webhook] Deleted sub ${deletedSubscriptionId} is not current (${team.stripe_subscription_id}). Skipping downgrade.`);
+    logger.info("Webhook", `Deleted sub ${deletedSubscriptionId} is not current (${team.stripe_subscription_id}). Skipping downgrade.`);
     return;
   }
 
@@ -299,11 +310,11 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     });
 
     if (activeSubs.data.length > 0) {
-      logger.info("Webhook", `[Webhook] Customer ${customerId} has active sub. Skipping downgrade.`);
+      logger.info("Webhook", `Customer ${customerId} has active sub. Skipping downgrade.`);
       return;
     }
   } catch (err) {
-    logger.error("Webhook", "[Webhook] Failed to check active subs:", err);
+    logger.error("Webhook", "Failed to check active subs:", err);
   }
 
   const oldTier = team.tier;
@@ -319,7 +330,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .eq("id", team.id);
 
   if (updateError) {
-    logger.error("Webhook", "[Webhook] Failed to downgrade team:", updateError);
+    logger.error("Webhook", "Failed to downgrade team:", updateError);
     return;
   }
 
@@ -337,7 +348,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     });
   }
 
-  logger.info("Webhook", `[Webhook] Team ${team.id} downgraded to free`);
+  logger.info("Webhook", `Team ${team.id} downgraded to free`);
 }
 
 /**
@@ -360,7 +371,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     .single();
 
   if (!team) {
-    logger.error("Webhook", "[Webhook] Team not found for invoice:", invoice.id);
+    logger.error("Webhook", "Team not found for invoice:", invoice.id);
     return;
   }
 
@@ -376,7 +387,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     .eq("id", team.id);
 
   if (updateError) {
-    logger.error("Webhook", "[Webhook] Failed to reset team tokens:", updateError);
+    logger.error("Webhook", "Failed to reset team tokens:", updateError);
     return;
   }
 
@@ -406,7 +417,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     });
   }
 
-  logger.info("Webhook", `[Webhook] Team ${team.id} tokens reset on renewal`);
+  logger.info("Webhook", `Team ${team.id} tokens reset on renewal`);
 }
 
 /**
@@ -416,7 +427,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   const supabase = createSupabaseAdmin();
   const customerId = invoice.customer as string;
 
-  logger.warn("Webhook", `[Webhook] Payment failed for customer: ${customerId}`);
+  logger.warn("Webhook", `Payment failed for customer: ${customerId}`);
 
   const { data: team } = await supabase
     .from("teams")

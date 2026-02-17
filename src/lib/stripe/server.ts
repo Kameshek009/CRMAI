@@ -45,16 +45,6 @@ export function getSeatPrices() {
   };
 }
 
-/** @deprecated Use getSeatPrices() */
-export const SUBSCRIPTION_PRICES = {
-  get pro() { return process.env.STRIPE_PRICE_PRO_SEAT || ""; },
-  get max() { return process.env.STRIPE_PRICE_MAX_SEAT || ""; },
-} as const;
-
-/** @deprecated Use getSeatPrices() */
-export function getSubscriptionPrices() {
-  return getSeatPrices();
-}
 
 /**
  * Map Stripe price ID to tier
@@ -186,9 +176,6 @@ export async function createPerSeatCheckout({
 
   return stripe.checkout.sessions.create(sessionParams);
 }
-
-/** @deprecated Use createPerSeatCheckout */
-export const createSubscriptionCheckout = createPerSeatCheckout;
 
 /**
  * Retrieve a checkout session with expanded data
