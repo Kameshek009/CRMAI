@@ -247,11 +247,11 @@ export default function ChatDetailPage() {
         if (aiJson.success) {
           aiContent = aiJson.data.response;
           if (aiJson.data.usage) {
-            const { tokensUsed, accountTokensUsed, accountTokenLimit } = aiJson.data.usage;
-            const remaining = Math.max(0, accountTokenLimit - accountTokensUsed);
+            const { tokensUsed, teamTokensUsed, teamTokenLimit } = aiJson.data.usage;
+            const remaining = Math.max(0, (teamTokenLimit || 0) - (teamTokensUsed || 0));
             const formatT = (n: number) =>
               n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}K` : String(n);
-            aiContent += `\n\n---\n*Tokens: -${formatT(tokensUsed)} | Remaining: ${formatT(remaining)} / ${formatT(accountTokenLimit)}*`;
+            aiContent += `\n\n---\n*Tokens: -${formatT(tokensUsed)} | Remaining: ${formatT(remaining)} / ${formatT(teamTokenLimit || 0)}*`;
           }
           setRateLimitResetsAt(null);
         } else if (aiJson.reason === 'weekly_cap_exceeded' || aiJson.reason === 'monthly_cap_exceeded') {
