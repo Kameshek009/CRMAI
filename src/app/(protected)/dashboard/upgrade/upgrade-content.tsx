@@ -98,7 +98,7 @@ const comparisonRows: ComparisonRow[] = [
   { label: "Custom fields", free: false, pro: false, max: true, enterprise: true },
   { label: "Advanced analytics", free: false, pro: false, max: true, enterprise: true },
   { label: "API access", free: false, pro: true, max: true, enterprise: true },
-  { label: "Team members", free: "1", pro: "5", max: "Unlimited", enterprise: "Unlimited" },
+  { label: "Team members", free: "3", pro: "Unlimited", max: "Unlimited", enterprise: "Unlimited" },
   { label: "Activity history", free: "3 days", pro: "30 days", max: "Unlimited", enterprise: "Unlimited" },
   { label: "SSO / SAML", free: false, pro: false, max: false, enterprise: true },
   { label: "Dedicated support", free: false, pro: false, max: true, enterprise: true },

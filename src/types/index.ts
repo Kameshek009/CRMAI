@@ -29,6 +29,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       "1 company",
       "Basic pipeline (2 stages)",
       "Up to 20 tasks",
+      "Up to 3 team members",
       "Community support",
       "3-day activity history",
     ],
@@ -51,6 +52,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       "30-day activity history",
       "Usage analytics",
       "API access",
+      "Unlimited team members",
     ],
   },
   max: {
