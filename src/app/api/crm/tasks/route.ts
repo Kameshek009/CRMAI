@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parsePagination } from "@/lib/crm/helpers";
 import { createTaskSchema } from "@/lib/crm/validation";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,12 +38,13 @@ export async function GET(request: NextRequest) {
     const { data, error: dbError, count } = await query;
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Tasks", "DB error", dbError);
+      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data, total: count });
   } catch (error) {
-    console.error("[API crm/tasks GET]", error);
+    logger.error("Tasks", "GET error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -69,7 +71,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Tasks", "DB error", dbError);
+      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
     }
 
     // Log activity
@@ -82,11 +85,11 @@ export async function POST(request: NextRequest) {
         type: "task_created",
         title: `Task created: ${data.title}`,
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) { logger.warn("Tasks", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("[API crm/tasks POST]", error);
+    logger.error("Tasks", "POST error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateNoteSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
+import { logger } from "@/lib/logger";
 
 export async function PATCH(
   request: NextRequest,
@@ -48,11 +49,11 @@ export async function PATCH(
         type: "note_updated",
         title: "Note updated",
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) { logger.warn("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("[API crm/notes/[id] PATCH]", error);
+    logger.error("Notes", "PATCH error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -88,7 +89,8 @@ export async function DELETE(
       .eq("team_id", context.teamId);
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Notes", "DB error", dbError);
+      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
     }
 
     try {
@@ -101,11 +103,11 @@ export async function DELETE(
         type: "note_deleted",
         title: "Note deleted",
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) { logger.warn("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[API crm/notes/[id] DELETE]", error);
+    logger.error("Notes", "DELETE error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

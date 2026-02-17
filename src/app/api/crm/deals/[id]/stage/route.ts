@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateDealStageSchema } from "@/lib/crm/validation";
+import { logger } from "@/lib/logger";
 
 export async function PATCH(
   request: NextRequest,
@@ -68,7 +69,8 @@ export async function PATCH(
       .single();
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Deals", "Failed to update stage", dbError);
+      return NextResponse.json({ success: false, error: "Failed to update stage" }, { status: 500 });
     }
 
     // Log activity
@@ -85,11 +87,11 @@ export async function PATCH(
           value: deal.value,
         },
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
-    console.error("[API crm/deals/[id]/stage PATCH]", error);
+    logger.error("Deals", "Stage update error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

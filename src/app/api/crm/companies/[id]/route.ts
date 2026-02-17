@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateCompanySchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -56,7 +57,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("[API crm/companies/[id] GET]", error);
+    logger.error("Companies", "GET error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -103,11 +104,11 @@ export async function PATCH(
         type: "company_updated",
         title: `Company updated: ${data.name}`,
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) { logger.warn("Companies", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("[API crm/companies/[id] PATCH]", error);
+    logger.error("Companies", "PATCH error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -143,7 +144,8 @@ export async function DELETE(
       .eq("team_id", context.teamId);
 
     if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+      logger.error("Companies", "DB error", dbError);
+      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
     }
 
     try {
@@ -154,11 +156,11 @@ export async function DELETE(
         type: "company_deleted",
         title: `Company deleted: ${existing?.name || "Unknown"}`,
       });
-    } catch { /* activity logging is non-critical */ }
+    } catch (e) { logger.warn("Companies", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[API crm/companies/[id] DELETE]", error);
+    logger.error("Companies", "DELETE error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
