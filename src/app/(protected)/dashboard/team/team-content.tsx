@@ -3,16 +3,19 @@
 import { useTeam } from "@/contexts/team-context";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { InviteCodeDisplay } from "@/components/team/invite-code-display";
 import { RoleBadge } from "@/components/team/role-badge";
 import { Progress } from "@/components/ui/progress";
-import { Users, Shield, Link2, Crown } from "lucide-react";
+import { Users, Shield, Link2, Crown, Undo2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export function TeamContent() {
-  const { currentTeam, teams, myRole, isDirector, can } = useTeam();
+  const { currentTeam, teams, deletedTeams, myRole, isDirector, can, refetch } = useTeam();
   const [inviteCode, setInviteCode] = useState(currentTeam?.inviteCode || "");
   const [memberCount, setMemberCount] = useState<number | null>(null);
+  const [restoring, setRestoring] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentTeam?.id) return;
@@ -25,6 +28,59 @@ export function TeamContent() {
       })
       .catch(() => {});
   }, [currentTeam?.id]);
+
+  const handleRestore = async (teamId: string) => {
+    setRestoring(teamId);
+    try {
+      const res = await fetch(`/api/teams/${teamId}/restore`, { method: "POST" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Team restored!");
+        await refetch();
+      } else {
+        toast.error(json.error || "Failed to restore");
+      }
+    } finally {
+      setRestoring(null);
+    }
+  };
+
+  // Show restore banner if no current team but there are deleted teams
+  if (!currentTeam && deletedTeams.length > 0) {
+    return (
+      <PageContainer>
+        <PageHeader title="Team" description="Your team was deleted" />
+        <div className="space-y-3 max-w-lg">
+          {deletedTeams.map((dt) => {
+            const deletedAt = new Date(dt.deletedAt).getTime();
+            const expiresAt = deletedAt + 24 * 60 * 60 * 1000;
+            const hoursLeft = Math.max(0, Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60)));
+            return (
+              <Card key={dt.team.id} className="border-warning/50">
+                <CardContent className="flex items-center justify-between gap-4 p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{dt.team.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Deleted — restore available for {hoursLeft}h
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRestore(dt.team.id)}
+                    disabled={restoring === dt.team.id}
+                  >
+                    <Undo2 className="size-3.5 mr-1.5" />
+                    {restoring === dt.team.id ? "Restoring..." : "Restore"}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </PageContainer>
+    );
+  }
 
   if (!currentTeam) return null;
 

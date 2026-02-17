@@ -83,17 +83,25 @@ export default function TeamSettingsPage() {
     }
   };
 
+  const [deleting, setDeleting] = useState(false);
+
   const handleDeleteTeam = async () => {
     if (!currentTeam) return;
-    if (!confirm("Are you sure? This will permanently delete the team and all its data.")) return;
+    if (!confirm("Are you sure? You can restore the team within 24 hours.")) return;
 
-    const res = await fetch(`/api/teams/${currentTeam.id}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      toast.success("Team deleted");
-      router.push("/join-team");
-    } else {
-      toast.error(json.error || "Failed to delete");
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/teams/${currentTeam.id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Team deleted. You can restore it within 24 hours.");
+        await refetch();
+        router.push("/dashboard/team");
+      } else {
+        toast.error(json.error || "Failed to delete");
+      }
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -187,10 +195,10 @@ export default function TeamSettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Delete Team</p>
-                <p className="text-xs text-muted-foreground">Permanently delete this team and all its data.</p>
+                <p className="text-xs text-muted-foreground">Delete this team. You can restore it within 24 hours.</p>
               </div>
-              <Button variant="destructive" size="sm" onClick={handleDeleteTeam}>
-                Delete Team
+              <Button variant="destructive" size="sm" onClick={handleDeleteTeam} disabled={deleting}>
+                {deleting ? "Deleting..." : "Delete Team"}
               </Button>
             </div>
           </CardContent>

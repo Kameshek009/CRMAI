@@ -52,6 +52,29 @@ export async function getTeamContext(): Promise<
     };
   }
 
+  // Ensure team is not soft-deleted
+  const { data: team } = await supabase
+    .from("teams")
+    .select("id, deleted_at")
+    .eq("id", account.current_team_id)
+    .single();
+
+  if (!team || team.deleted_at) {
+    // Clear stale current_team_id
+    await supabase
+      .from("accounts")
+      .update({ current_team_id: null })
+      .eq("id", account.id);
+
+    return {
+      context: null,
+      error: NextResponse.json(
+        { success: false, error: "No team selected" },
+        { status: 400 }
+      ),
+    };
+  }
+
   // Get team membership with role
   const { data: member, error: memberError } = await supabase
     .from("team_members")

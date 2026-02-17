@@ -40,9 +40,15 @@ interface TeamMembership {
   joinedAt: string;
 }
 
+interface DeletedTeamInfo {
+  team: TeamData;
+  deletedAt: string;
+}
+
 interface TeamContextValue {
   currentTeam: TeamData | null;
   teams: TeamMembership[];
+  deletedTeams: DeletedTeamInfo[];
   myRole: TeamMembership["role"] | null;
   permissions: TeamPermissions | null;
   isDirector: boolean;
@@ -98,6 +104,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
   const { account } = useAccount();
   const [currentTeam, setCurrentTeam] = useState<TeamData | null>(null);
   const [teams, setTeams] = useState<TeamMembership[]>([]);
+  const [deletedTeams, setDeletedTeams] = useState<DeletedTeamInfo[]>([]);
   const [myRole, setMyRole] = useState<TeamMembership["role"] | null>(null);
   const [permissions, setPermissions] = useState<TeamPermissions | null>(null);
   const [isDirector, setIsDirector] = useState(false);
@@ -134,6 +141,15 @@ export function TeamProvider({ children }: TeamProviderProps) {
         })
       );
       setTeams(teamMemberships);
+
+      // Deleted teams that can be restored
+      const deleted: DeletedTeamInfo[] = (data.deletedTeams || []).map(
+        (d: { team: Record<string, unknown>; deletedAt: string }) => ({
+          team: transformTeam(d.team),
+          deletedAt: d.deletedAt,
+        })
+      );
+      setDeletedTeams(deleted);
 
       // Set current team
       if (data.currentTeam) {
@@ -231,6 +247,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
     () => ({
       currentTeam,
       teams,
+      deletedTeams,
       myRole,
       permissions: permissions || DEFAULT_PERMISSIONS,
       isDirector,
@@ -241,7 +258,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
       refetch: fetchTeams,
       can,
     }),
-    [currentTeam, teams, myRole, permissions, isDirector, memberId, isLoading, error, switchTeam, fetchTeams, can]
+    [currentTeam, teams, deletedTeams, myRole, permissions, isDirector, memberId, isLoading, error, switchTeam, fetchTeams, can]
   );
 
   return (

@@ -1245,6 +1245,7 @@ export type Database = {
       teams: {
         Row: {
           created_at: string
+          deleted_at: string | null
           description: string | null
           id: string
           invite_code: string
@@ -1257,6 +1258,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           invite_code?: string
@@ -1269,6 +1271,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           invite_code?: string

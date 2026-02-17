@@ -87,10 +87,30 @@ export async function DELETE(
     }
 
     const supabase = createSupabaseAdmin();
-    const { error: dbError } = await supabase.from("teams").delete().eq("id", id);
+
+    // Soft-delete: set deleted_at instead of hard delete
+    const { error: dbError } = await supabase
+      .from("teams")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", id);
 
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+    }
+
+    // Clear current_team_id for all members so they don't land on deleted team
+    const { data: members } = await supabase
+      .from("team_members")
+      .select("account_id")
+      .eq("team_id", id);
+
+    if (members && members.length > 0) {
+      const accountIds = members.map((m) => m.account_id);
+      await supabase
+        .from("accounts")
+        .update({ current_team_id: null })
+        .in("id", accountIds)
+        .eq("current_team_id", id);
     }
 
     return NextResponse.json({ success: true });
