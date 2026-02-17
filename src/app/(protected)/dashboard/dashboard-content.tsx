@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -224,65 +224,41 @@ function AnimatedStatCard({
   const animatedValue = useAnimatedNumber(value);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <Link href={href}>
-        <Card className="p-4 cursor-pointer glass-card gradient-border-card stat-card-hover group">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
-            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", iconGradient)}>
-              <Icon className="w-4 h-4 text-landing-accent-foreground" />
+    <Link href={href}>
+      <Card className="p-4 cursor-pointer border-0 shadow-none hover:bg-muted/50 transition-colors group">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+          <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", iconGradient)}>
+            <Icon className="w-4 h-4 text-landing-accent-foreground" />
+          </div>
+        </div>
+        <div className="text-2xl font-bold tracking-tight">
+          {formattedValue
+            ? formattedValue.replace(/[\d,]+/, animatedValue.toLocaleString())
+            : animatedValue.toLocaleString()
+          }
+        </div>
+        <div className="flex items-center justify-between mt-1.5">
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
+          {trend && (
+            <div className={cn(
+              "flex items-center gap-0.5 text-[10px] font-medium",
+              trend.direction === "up" ? "text-emerald-500" : "text-red-500"
+            )}>
+              {trend.direction === "up" ? (
+                <TrendingUp className="w-3 h-3" />
+              ) : (
+                <TrendingDown className="w-3 h-3" />
+              )}
+              {trend.text}
             </div>
-          </div>
-          <div className="text-2xl font-bold tracking-tight">
-            {formattedValue
-              ? formattedValue.replace(/[\d,]+/, animatedValue.toLocaleString())
-              : animatedValue.toLocaleString()
-            }
-          </div>
-          <div className="flex items-center justify-between mt-1.5">
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
-            {trend && (
-              <div className={cn(
-                "flex items-center gap-0.5 text-[10px] font-medium",
-                trend.direction === "up" ? "text-emerald-500" : "text-red-500"
-              )}>
-                {trend.direction === "up" ? (
-                  <TrendingUp className="w-3 h-3" />
-                ) : (
-                  <TrendingDown className="w-3 h-3" />
-                )}
-                {trend.text}
-              </div>
-            )}
-          </div>
-        </Card>
-      </Link>
-    </motion.div>
+          )}
+        </div>
+      </Card>
+    </Link>
   );
 }
 
-// Stagger container animation
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12, scale: 0.98 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
-  },
-};
 
 export function DashboardContent({ userName }: DashboardContentProps) {
   const { account, usage, isLoading: accountLoading } = useAccount();
@@ -372,7 +348,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-8 dashboard-gradient-bg">
+      <div className="p-8 space-y-8">
         <div className="space-y-2">
           <Skeleton className="h-8 w-80 rounded-lg" />
           <Skeleton className="h-4 w-56 rounded-lg" />
@@ -394,50 +370,25 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Workspace header with shimmer line */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="header-shimmer border-b border-border px-8 py-5"
-      >
+      {/* Workspace header */}
+      <div className="border-b border-border px-8 py-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-landing-accent via-landing-accent to-landing-accent flex items-center justify-center"
-            >
+            <div className="w-10 h-10 rounded-xl bg-landing-accent flex items-center justify-center">
               <GreetingIcon className="w-5 h-5 text-landing-accent-foreground" />
-            </motion.div>
+            </div>
             <div>
-              <motion.h1
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.15 }}
-                className="text-lg font-semibold"
-              >
+              <h1 className="text-lg font-semibold">
                 {greeting.text},{" "}
-                <span className="greeting-gradient-text">{userName}</span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="text-sm text-muted-foreground"
-              >
+                <span>{userName}</span>
+              </h1>
+              <p className="text-sm text-muted-foreground">
                 {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                 {crmStats && ` \u00B7 ${crmStats.tasksDueToday} tasks due today \u00B7 ${crmStats.openDeals} open deals`}
-              </motion.p>
+              </p>
             </div>
           </div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            className="flex items-center gap-2"
-          >
+          <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="group/btn hidden sm:inline-flex" asChild>
               <Link href="/dashboard/contacts">
                 <Users className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
@@ -462,12 +413,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 AI Chat
               </Link>
             </Button>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Overview content with gradient background */}
-      <div className="flex-1 overflow-auto p-8 space-y-8 dashboard-gradient-bg">
+      {/* Overview content */}
+      <div className="flex-1 overflow-auto p-8 space-y-8">
         {/* Stats row - animated cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <AnimatedStatCard
@@ -476,7 +427,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.openDeals ?? 0}
             subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline`}
             icon={Handshake}
-            iconGradient="bg-gradient-to-br from-landing-accent to-landing-accent"
+            iconGradient="bg-landing-accent"
             delay={0.1}
           />
           <AnimatedStatCard
@@ -485,7 +436,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.tasksDueToday ?? 0}
             subtitle={crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
             icon={CheckSquare}
-            iconGradient="bg-gradient-to-br from-landing-accent to-landing-accent"
+            iconGradient="bg-landing-accent"
             trend={crmStats?.overdueTasksCount ? { direction: "down", text: `${crmStats.overdueTasksCount} late` } : undefined}
             delay={0.15}
           />
@@ -495,7 +446,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.totalContacts ?? 0}
             subtitle={`+${crmStats?.newContactsThisWeek ?? 0} this week`}
             icon={Users}
-            iconGradient="bg-gradient-to-br from-landing-accent to-orange-500"
+            iconGradient="bg-landing-accent"
             trend={
               (crmStats?.newContactsThisWeek ?? 0) > 0
                 ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` }
@@ -510,7 +461,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`}
             subtitle={`${crmStats?.wonDealsThisMonth ?? 0} deal${(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed`}
             icon={DollarSign}
-            iconGradient="bg-gradient-to-br from-landing-accent to-landing-accent"
+            iconGradient="bg-landing-accent"
             trend={
               (crmStats?.wonDealsThisMonth ?? 0) > 0
                 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` }
@@ -544,7 +495,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             formattedValue={`$${(crmStats?.weightedForecast ?? 0).toLocaleString()}`}
             subtitle="Weighted pipeline"
             icon={Zap}
-            iconGradient="bg-gradient-to-br from-landing-accent to-landing-accent"
+            iconGradient="bg-landing-accent"
             delay={0.35}
           />
           <AnimatedStatCard
@@ -553,7 +504,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             value={crmStats?.totalDeals ?? 0}
             subtitle="Total deals tracked"
             icon={Building2}
-            iconGradient="bg-gradient-to-br from-landing-accent to-orange-500"
+            iconGradient="bg-landing-accent"
             delay={0.4}
           />
           <AnimatedStatCard
@@ -569,25 +520,20 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             }`}
             subtitle="Average won deal size"
             icon={BarChart3}
-            iconGradient="bg-gradient-to-br from-landing-accent to-landing-accent"
+            iconGradient="bg-landing-accent"
             delay={0.45}
           />
         </div>
 
         {/* Top row: Recent + AI Insights + Upcoming Tasks */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-3 gap-4"
-        >
-          {/* Recent Activity - Timeline style */}
-          <motion.div variants={itemVariants}>
-            <Card className="glass-card h-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Recent Activity */}
+          <div>
+            <Card className="h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
                       <Clock className="w-3 h-3 text-landing-accent-foreground" />
                     </div>
                     Recent
@@ -604,15 +550,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   <p className="text-sm text-muted-foreground text-center py-6">No recent activity yet</p>
                 ) : (
                   <div className="space-y-0 timeline-line">
-                    {activities.slice(0, 5).map((a, index) => {
+                    {activities.slice(0, 5).map((a) => {
                       const Icon = ACTIVITY_ICONS[a.type] || Info;
                       const colorClass = ACTIVITY_COLORS[a.type] || "bg-muted text-muted-foreground";
                       return (
-                        <motion.div
+                        <div
                           key={a.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: 0.4 + index * 0.08 }}
                           className="flex items-start gap-2.5 pb-3 relative"
                         >
                           <div className={cn(
@@ -625,21 +568,21 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                             <p className="text-xs font-medium text-foreground truncate">{a.title}</p>
                             <p className="text-[10px] text-muted-foreground">{timeAgo(a.created_at)}</p>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
                 )}
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* AI Insights */}
-          <motion.div variants={itemVariants}>
-            <Card className="glass-card h-full">
+          <div>
+            <Card className="h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
                     <Sparkles className="w-3 h-3 text-landing-accent-foreground" />
                   </div>
                   AI Insights
@@ -653,25 +596,17 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardContent className="pt-0">
                 {insights.length === 0 ? (
                   <div className="text-center py-6">
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <Sparkles className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
-                    </motion.div>
+                    <Sparkles className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
                     <p className="text-xs text-muted-foreground">No insights yet. Add data to get AI-powered tips.</p>
                   </div>
                 ) : (
                   <div className="space-y-2.5">
-                    {insights.slice(0, 4).map((insight, index) => {
+                    {insights.slice(0, 4).map((insight) => {
                       const Icon = insightIcons[insight.type] || Info;
                       const color = insightColors[insight.type] || insightColors.info;
                       return (
-                        <motion.div
+                        <div
                           key={insight.id}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.4 + index * 0.08 }}
                           className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                         >
                           <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", color)}>
@@ -681,22 +616,22 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                             <p className="text-xs font-medium text-foreground">{insight.title}</p>
                             <p className="text-[10px] text-muted-foreground line-clamp-2">{insight.description}</p>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
                 )}
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
-          {/* Upcoming Tasks - Enhanced */}
-          <motion.div variants={itemVariants}>
-            <Card className="glass-card h-full">
+          {/* Upcoming Tasks */}
+          <div>
+            <Card className="h-full">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
                       <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
                     </div>
                     Upcoming Tasks
@@ -716,14 +651,11 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {upcomingTasks.map((task, index) => {
+                    {upcomingTasks.map((task) => {
                       const isOverdue = task.due_date && new Date(task.due_date) < new Date();
                       return (
-                        <motion.div
+                        <div
                           key={task.id}
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: 0.4 + index * 0.08 }}
                           className={cn(
                             "flex items-start gap-2.5 p-2 rounded-lg transition-all hover:bg-muted/50",
                             isOverdue && "bg-red-500/5"
@@ -761,27 +693,23 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           >
                             {task.type}
                           </Badge>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Deals table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.45 }}
-        >
-          <Card className="glass-card">
+        <div>
+          <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
                     <Handshake className="w-3 h-3 text-landing-accent-foreground" />
                   </div>
                   Deals
@@ -831,16 +759,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 <div>
                   {deals.map((deal, index) => {
                     const progress = dealProgress(deal);
-                    const stageColor = deal.deal_stages?.color || "#f4a261";
+                    const stageColor = deal.deal_stages?.color || "#cbc3b4";
                     const winProb = deal.ai_win_probability;
                     return (
                       <React.Fragment key={deal.id}>
                         {/* Desktop view (6 columns) */}
-                        <motion.div
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: 0.5 + index * 0.04 }}
-                        >
+                        <div>
                           <Link
                             href={`/dashboard/deals/${deal.id}`}
                             className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-3 py-2.5 deal-row-hover rounded-lg items-center"
@@ -898,7 +822,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                               {winProb}%
                             </span>
                           </Link>
-                        </motion.div>
+                        </div>
                         {/* Mobile view (3 columns) */}
                         <Link
                           href={`/dashboard/deals/${deal.id}`}
@@ -942,20 +866,15 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Bottom row: Revenue Trend + Workload */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.55 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
-        >
-          {/* Revenue Trend Chart - with gradient area fill */}
-          <Card className="glass-card">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Revenue Trend Chart */}
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
                   <TrendingUp className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Revenue Trend (30 Days)
@@ -1023,11 +942,11 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </CardContent>
           </Card>
 
-          {/* Workload by Status - Pie Chart with glass card */}
-          <Card className="glass-card">
+          {/* Workload by Status */}
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-landing-accent flex items-center justify-center">
                   <Kanban className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Workload by Status
@@ -1073,12 +992,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                     </ResponsiveContainer>
                   </div>
                   <div className="space-y-3 flex-1">
-                    {taskStatusData.map((entry, index) => (
-                      <motion.div
+                    {taskStatusData.map((entry) => (
+                      <div
                         key={entry.name}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: 0.7 + index * 0.08 }}
                         className="flex items-center justify-between group"
                       >
                         <div className="flex items-center gap-2.5">
@@ -1100,26 +1016,22 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           </div>
                           <span className="text-xs font-semibold text-foreground w-6 text-right">{entry.value}</span>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Plan info for free users */}
         {!accountLoading && account?.tier === "free" && usage && usage.percentUsed >= 80 && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.6 }}
-          >
+          <div>
             <Card className="border-landing-accent/30 bg-gradient-to-r from-landing-accent/5 via-landing-accent/10 to-landing-accent/5">
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-landing-accent flex items-center justify-center shrink-0">
                     <Sparkles className="w-4.5 h-4.5 text-landing-accent-foreground" />
                   </div>
                   <div className="flex-1">
@@ -1141,7 +1053,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         )}
       </div>
 

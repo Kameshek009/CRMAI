@@ -66,34 +66,34 @@
 .grid-gap      { gap: 16px; }
 .grid-gap-sm   { gap: 8px; }
 
-/* Light Theme — white + soft orange */
+/* Light Theme — warm beige palette */
 :root {
-  --background: #fafafa;
+  --background: #f5f3f0;
   --foreground: #111111;
-  --card: #ffffff;
+  --card: #f5f3f0;
   --card-foreground: #111111;
   --primary: #111111;
-  --primary-foreground: #fafafa;
-  --secondary: #f4f4f5;
+  --primary-foreground: #f5f3f0;
+  --secondary: #eae7e1;
   --secondary-foreground: #111111;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
+  --muted: #eae7e1;
+  --muted-foreground: #8a857d;
+  --accent: #eae7e1;
   --accent-foreground: #111111;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #a1a1aa;
+  --border: #e0dbd2;
+  --input: #e0dbd2;
+  --ring: #cbc3b4;
 
-  /* NexusCRM accent colors — Soft orange palette */
-  --accent-blue: #f4a261;
-  --accent-orange: #e76f51;
-  --accent-green: #f9c49a;
-  --link: #f4a261;
+  /* NexusCRM accent colors — warm beige palette */
+  --accent-blue: #cbc3b4;
+  --accent-orange: #d5cfc3;
+  --accent-green: #eae7e1;
+  --link: #cbc3b4;
 
-  /* Landing accent (soft orange for light, white for dark) */
-  --landing-accent: #f4a261;
-  --landing-accent-rgb: 244, 162, 97;
-  --landing-accent-foreground: #ffffff;
+  /* Landing accent (warm beige for light, white for dark) */
+  --landing-accent: #cbc3b4;
+  --landing-accent-rgb: 203, 195, 180;
+  --landing-accent-foreground: #111111;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -102,23 +102,23 @@
 
   --radius: 12px;
 
-  --popover: #ffffff;
+  --popover: #f5f3f0;
   --popover-foreground: #111111;
 
-  --chart-1: #f4a261;
-  --chart-2: #e76f51;
-  --chart-3: #f9c49a;
-  --chart-4: #d45d3a;
-  --chart-5: #fcd5b5;
+  --chart-1: #cbc3b4;
+  --chart-2: #b5ad9e;
+  --chart-3: #d5cfc3;
+  --chart-4: #9f9788;
+  --chart-5: #e0dbd2;
 
-  --sidebar: #fafafa;
+  --sidebar: #f5f3f0;
   --sidebar-foreground: #111111;
   --sidebar-primary: #111111;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #f4f4f5;
+  --sidebar-primary-foreground: #f5f3f0;
+  --sidebar-accent: #eae7e1;
   --sidebar-accent-foreground: #111111;
-  --sidebar-border: #e4e4e7;
-  --sidebar-ring: #a1a1aa;
+  --sidebar-border: #e0dbd2;
+  --sidebar-ring: #cbc3b4;
 }
 
 /* Dark Theme — pure black + white only */
