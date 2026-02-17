@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMobileAuth } from "@/lib/auth/mobile";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/mobile/chats/[id]
@@ -53,7 +54,7 @@ export async function GET(
       .order("created_at", { ascending: true });
 
     if (messagesError) {
-      console.error("[mobile/chats/[id]] Error fetching messages:", messagesError);
+      logger.error("MobileChatDetail", "Error fetching messages", messagesError);
       throw messagesError;
     }
 
@@ -76,7 +77,7 @@ export async function GET(
       visionBoard,
     });
   } catch (error) {
-    console.error("[mobile/chats/[id]] Error:", error);
+    logger.error("MobileChatDetail", "GET error", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch chat" },
       { status: 500 }
@@ -146,7 +147,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, chat });
   } catch (error) {
-    console.error("[mobile/chats/[id]] PATCH error:", error);
+    logger.error("MobileChatDetail", "PATCH error", error);
     return NextResponse.json(
       { success: false, error: "Failed to update chat" },
       { status: 500 }
@@ -208,7 +209,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, deleted: true });
   } catch (error) {
-    console.error("[mobile/chats/[id]] DELETE error:", error);
+    logger.error("MobileChatDetail", "DELETE error", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete chat" },
       { status: 500 }

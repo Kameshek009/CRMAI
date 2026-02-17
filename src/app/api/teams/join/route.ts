@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getAccountId } from "@/lib/crm/helpers";
 import { joinTeamSchema } from "@/lib/crm/team-validation";
 import { updateSubscriptionQuantity } from "@/lib/stripe/server";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
           .update({ seat_count: newSeatCount })
           .eq("id", team.id);
       } catch (err) {
-        console.error("[TeamJoin] Failed to update Stripe quantity:", err);
+        logger.error("TeamJoin", "Failed to update Stripe quantity", err);
       }
     }
 

@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { kickMemberSchema } from "@/lib/crm/team-validation";
 import { updateSubscriptionQuantity } from "@/lib/stripe/server";
+import { logger } from "@/lib/logger";
 
 export async function POST(
   request: NextRequest,
@@ -76,7 +77,7 @@ export async function POST(
           .update({ seat_count: newSeatCount })
           .eq("id", id);
       } catch (err) {
-        console.error("[TeamKick] Failed to update Stripe quantity:", err);
+        logger.error("TeamKick", "Failed to update Stripe quantity", err);
       }
     }
 

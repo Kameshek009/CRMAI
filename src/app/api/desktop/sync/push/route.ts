@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/desktop/sync/push
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error("[desktop/sync/push] error:", error);
+    logger.error("DesktopSyncPush", "Push error", error);
     return NextResponse.json(
       { success: false, error: "Sync push failed" },
       { status: 500 }
@@ -124,7 +125,7 @@ async function handleChatSync(
         .single();
 
       if (error) throw error;
-      console.log("[desktop/sync/push] Created chat:", chat.id);
+      logger.info("DesktopSyncPush", `Created chat: ${chat.id}`);
       return NextResponse.json({ success: true, data: chat, action: "created" });
     }
 
@@ -198,7 +199,7 @@ async function handleChatSync(
         .eq("id", chatId);
 
       if (error) throw error;
-      console.log("[desktop/sync/push] Deleted chat:", chatId);
+      logger.info("DesktopSyncPush", `Deleted chat: ${chatId}`);
       return NextResponse.json({ success: true, action: "deleted" });
     }
 

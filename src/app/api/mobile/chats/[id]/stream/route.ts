@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifyToken } from "@clerk/backend";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/mobile/chats/[id]/stream
@@ -48,7 +49,7 @@ export async function GET(
     });
     clerkUserId = verified.sub;
   } catch (verifyError) {
-    console.error("[mobile/stream] Token verification failed:", verifyError);
+    logger.error("MobileStream", "Token verification failed", verifyError);
     return new Response(JSON.stringify({ error: "Invalid token" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
@@ -144,7 +145,7 @@ export async function GET(
           const { data: newMessages, error } = await query;
 
           if (error) {
-            console.error("[mobile/stream] Message poll error:", error);
+            logger.error("MobileStream", "Message poll error", error);
             return;
           }
 
@@ -159,7 +160,7 @@ export async function GET(
             }
           }
         } catch (err) {
-          console.error("[mobile/stream] Message poll exception:", err);
+          logger.error("MobileStream", "Message poll exception", err);
         }
       };
 

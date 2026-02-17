@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMobileAuth } from "@/lib/auth/mobile";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/mobile/chats
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
       .order("updated_at", { ascending: false });
 
     if (error) {
-      console.error("[mobile/chats] List error:", error);
+      logger.error("MobileChats", "List error", error);
       return NextResponse.json(
         { error: "Failed to fetch chats" },
         { status: 500 }
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
       chats: chatList,
     });
   } catch (error) {
-    console.error("[mobile/chats] GET error:", error);
+    logger.error("MobileChats", "GET error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -113,21 +114,21 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("[mobile/chats] Create error:", error);
+      logger.error("MobileChats", "Create error", error);
       return NextResponse.json(
         { error: "Failed to create chat" },
         { status: 500 }
       );
     }
 
-    console.log("[mobile/chats] Created chat:", chat.id);
+    logger.info("MobileChats", `Created chat: ${chat.id}`);
 
     return NextResponse.json({
       success: true,
       chat,
     });
   } catch (error) {
-    console.error("[mobile/chats] POST error:", error);
+    logger.error("MobileChats", "POST error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -190,7 +191,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", chat_id);
 
     if (error) {
-      console.error("[mobile/chats] Delete error:", error);
+      logger.error("MobileChats", "Delete error", error);
       return NextResponse.json(
         { error: "Failed to delete chat" },
         { status: 500 }
@@ -201,7 +202,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
     });
   } catch (error) {
-    console.error("[mobile/chats] DELETE error:", error);
+    logger.error("MobileChats", "DELETE error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

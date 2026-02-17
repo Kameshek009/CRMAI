@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { refreshDesktopToken } from "@/lib/desktop-auth";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/auth/desktop/refresh
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Token refresh error:", error);
+    logger.error("DesktopAuthRefresh", "Token refresh error", error);
     return NextResponse.json(
       { success: false, error: "Failed to refresh token" },
       { status: 500 }

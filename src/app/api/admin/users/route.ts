@@ -13,6 +13,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/constants/admin";
 import { TIER_TOKEN_LIMITS, TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
 import type { SubscriptionTier } from "@/types";
+import { logger } from "@/lib/logger";
 
 const VALID_TIERS: SubscriptionTier[] = ["free", "pro", "max", "enterprise"];
 
@@ -85,7 +86,7 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: enrichedAccounts });
   } catch (error) {
-    console.error("[Admin Users GET]", error);
+    logger.error("AdminUsers", "GET error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
@@ -289,7 +290,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
-    console.error("[Admin Users PATCH]", error);
+    logger.error("AdminUsers", "PATCH error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

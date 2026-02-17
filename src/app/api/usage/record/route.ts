@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const recordUsageSchema = z.object({
   tokensConsumed: z.number().positive(),
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (rpcError) {
-      console.error("Failed to increment team tokens:", rpcError);
+      logger.error("UsageRecord", "Failed to increment team tokens", rpcError);
       return NextResponse.json(
         { success: false, error: "Failed to update token count" },
         { status: 500 }
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (recordError) {
-      console.error("Failed to create usage record:", recordError);
+      logger.error("UsageRecord", "Failed to create usage record", recordError);
     }
 
     return NextResponse.json({
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Usage recording error:", error);
+    logger.error("UsageRecord", "Usage recording error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

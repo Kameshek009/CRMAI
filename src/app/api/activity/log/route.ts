@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const logActivitySchema = z.object({
   eventType: z.enum(["session_start", "session_end", "action_executed", "error", "warning", "info"]),
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (logError) {
-      console.error("Failed to create activity log:", logError);
+      logger.error("ActivityLog", "Failed to create activity log", logError);
       return NextResponse.json(
         { success: false, error: "Failed to log activity" },
         { status: 500 }
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Activity logging error:", error);
+    logger.error("ActivityLog", "Activity logging error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
@@ -166,7 +167,7 @@ export async function GET(request: NextRequest) {
     const { data: logs, error, count } = await query;
 
     if (error) {
-      console.error("Failed to fetch activity logs:", error);
+      logger.error("ActivityLog", "Failed to fetch activity logs", error);
       return NextResponse.json(
         { success: false, error: "Failed to fetch logs" },
         { status: 500 }
@@ -185,7 +186,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Activity fetch error:", error);
+    logger.error("ActivityLog", "Activity fetch error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

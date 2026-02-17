@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateTeamSchema } from "@/lib/crm/team-validation";
 import { cancelSubscriptionImmediately } from "@/lib/stripe/server";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   _request: NextRequest,
@@ -100,7 +101,7 @@ export async function DELETE(
       try {
         await cancelSubscriptionImmediately(teamData.stripe_subscription_id);
       } catch (err) {
-        console.error("[TeamDelete] Failed to cancel subscription:", err);
+        logger.error("TeamDelete", "Failed to cancel subscription", err);
       }
     }
 

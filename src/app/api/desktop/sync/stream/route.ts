@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/desktop/sync/stream
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
                 }
               }
             } catch (err) {
-              console.error("[SSE] Error processing message event:", err);
+              logger.error("DesktopSyncStream", "Error processing message event", err);
             }
           }
         )
@@ -129,17 +130,17 @@ export async function GET(request: NextRequest) {
         )
         .subscribe((status) => {
           if (status === "SUBSCRIBED") {
-            console.log(`[SSE] Subscribed to realtime for account ${accountId}`);
+            logger.info("DesktopSyncStream", `Subscribed to realtime for account ${accountId}`);
             sendEvent("subscribed", { status: "active" });
           } else if (status === "CHANNEL_ERROR") {
-            console.error(`[SSE] Channel error for account ${accountId}`);
+            logger.error("DesktopSyncStream", `Channel error for account ${accountId}`);
             sendEvent("error", { message: "Subscription error" });
           }
         });
 
       // Handle client disconnect
       request.signal.addEventListener("abort", () => {
-        console.log(`[SSE] Client disconnected: ${accountId}`);
+        logger.info("DesktopSyncStream", `Client disconnected: ${accountId}`);
         clearInterval(pingInterval);
         if (supabaseChannel) {
           supabase.removeChannel(supabaseChannel);

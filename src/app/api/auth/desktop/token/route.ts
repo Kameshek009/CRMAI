@@ -5,6 +5,7 @@ import {
   generateDesktopTokens,
   getOrCreateAccount,
 } from "@/lib/desktop-auth";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/auth/desktop/token
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Token exchange error:", error);
+    logger.error("DesktopAuthToken", "Token exchange error", error);
     return NextResponse.json(
       { success: false, error: "Failed to exchange token" },
       { status: 500 }

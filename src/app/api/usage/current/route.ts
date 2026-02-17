@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { calculatePercentage, getDaysRemaining, getBillingCycleEnd } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/usage/current
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Database error:", error);
+      logger.error("UsageCurrent", "Database error", error);
       return NextResponse.json(
         { success: false, error: "Account not found" },
         { status: 404 }
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
       data: usageStats,
     });
   } catch (error) {
-    console.error("Usage fetch error:", error);
+    logger.error("UsageCurrent", "Usage fetch error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

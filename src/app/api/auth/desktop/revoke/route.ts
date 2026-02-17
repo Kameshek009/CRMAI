@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revokeRefreshToken } from "@/lib/desktop-auth";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/auth/desktop/revoke
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       success: true,
     });
   } catch (error) {
-    console.error("Token revoke error:", error);
+    logger.error("DesktopAuthRevoke", "Token revoke error", error);
     return NextResponse.json(
       { success: false, error: "Failed to revoke token" },
       { status: 500 }

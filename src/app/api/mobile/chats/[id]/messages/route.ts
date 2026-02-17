@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMobileAuth } from "@/lib/auth/mobile";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/mobile/chats/[id]/messages
@@ -67,7 +68,7 @@ export async function GET(
       messages: messages || [],
     });
   } catch (error) {
-    console.error("[mobile/chats/[id]/messages] GET error:", error);
+    logger.error("MobileMessages", "GET error", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch messages" },
       { status: 500 }
@@ -157,7 +158,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, message });
   } catch (error) {
-    console.error("[mobile/chats/[id]/messages] POST error:", error);
+    logger.error("MobileMessages", "POST error", error);
     return NextResponse.json(
       { success: false, error: "Failed to send message" },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/agent/status/stream
@@ -133,7 +134,7 @@ export async function GET(request: NextRequest) {
             }
           }
         } catch (err) {
-          console.error("[SSE] Status check error:", err);
+          logger.error("AgentStatusStream", "Status check error", err);
         }
       };
 

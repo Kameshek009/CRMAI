@@ -3,6 +3,7 @@ import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import Groq from "groq-sdk";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/llm/chat
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (accountError || !account) {
-      console.error("[LLM Chat] Account not found:", accountError?.message);
+      logger.error("LlmChat", "Account not found", accountError?.message);
       return NextResponse.json(
         { success: false, error: "Account not found" },
         { status: 404 }
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (teamError || !team) {
-      console.error("[LLM Chat] Team not found:", teamError?.message);
+      logger.error("LlmChat", "Team not found", teamError?.message);
       return NextResponse.json(
         { success: false, error: "Team not found" },
         { status: 404 }
@@ -181,7 +182,7 @@ export async function POST(request: NextRequest) {
       completion = await groq.chat.completions.create(requestBody);
     } catch (groqError: unknown) {
       const error = groqError as { status?: number; message?: string };
-      console.error("[LLM Chat] Groq API error:", error.message);
+      logger.error("LlmChat", "Groq API error", error.message);
 
       // Handle Groq-specific errors
       if (error.status === 429) {
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (error.status === 401) {
-        console.error("[LLM Chat] Invalid Groq API key");
+        logger.error("LlmChat", "Invalid Groq API key");
         return NextResponse.json(
           { success: false, error: "LLM service configuration error" },
           { status: 500 }
@@ -275,7 +276,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error: unknown) {
     const err = error as { message?: string };
-    console.error("[LLM Chat] Unexpected error:", err.message);
+    logger.error("LlmChat", "Unexpected error", err.message);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/desktop/sync/messages
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, messages: messages || [] });
   } catch (error) {
-    console.error("[desktop/sync/messages] GET error:", error);
+    logger.error("DesktopSyncMessages", "GET error", error);
     return NextResponse.json(
       { success: false, error: "Failed to get messages" },
       { status: 500 }
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message, action: "created" });
   } catch (error) {
-    console.error("[desktop/sync/messages] POST error:", error);
+    logger.error("DesktopSyncMessages", "POST error", error);
     return NextResponse.json(
       { success: false, error: "Failed to sync message" },
       { status: 500 }

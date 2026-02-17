@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/desktop/heartbeat
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("[desktop/heartbeat] accounts error:", error);
+      logger.error("DesktopHeartbeat", "Accounts update error", error);
       return NextResponse.json(
         { success: false, error: "Failed to update heartbeat" },
         { status: 500 }
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
 
       if (sessionError) {
         // Log but don't fail - account update is more important for agent status
-        console.warn("[desktop/heartbeat] session update warning:", sessionError);
+        logger.warn("DesktopHeartbeat", "Session update warning", sessionError);
       }
     }
 
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[desktop/heartbeat] error:", error);
+    logger.error("DesktopHeartbeat", "Heartbeat error", error);
     return NextResponse.json(
       { success: false, error: "Heartbeat failed" },
       { status: 500 }
@@ -145,7 +146,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", tokenData.account_id);
 
     if (error) {
-      console.error("[desktop/heartbeat] DELETE error:", error);
+      logger.error("DesktopHeartbeat", "DELETE error", error);
       return NextResponse.json(
         { success: false, error: "Failed to mark offline" },
         { status: 500 }
@@ -154,7 +155,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[desktop/heartbeat] DELETE error:", error);
+    logger.error("DesktopHeartbeat", "DELETE error", error);
     return NextResponse.json(
       { success: false, error: "Failed to mark offline" },
       { status: 500 }

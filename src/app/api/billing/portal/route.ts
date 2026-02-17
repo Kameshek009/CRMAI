@@ -11,6 +11,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { createPortalSession } from "@/lib/stripe/server";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
+import { logger } from "@/lib/logger";
 
 export async function POST(_request: NextRequest) {
   try {
@@ -93,7 +94,7 @@ export async function POST(_request: NextRequest) {
       data: { url: portalSession.url },
     });
   } catch (error) {
-    console.error("[BillingPortal]", error);
+    logger.error("BillingPortal", "Failed to create portal session", error);
     return NextResponse.json(
       { success: false, error: "Failed to create portal session" },
       { status: 500 }

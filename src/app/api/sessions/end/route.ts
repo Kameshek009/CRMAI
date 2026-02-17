@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const endSessionSchema = z.object({
   sessionId: z.string().uuid(),
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error("Failed to end session:", updateError);
+      logger.error("SessionEnd", "Failed to end session", updateError);
       return NextResponse.json(
         { success: false, error: "Failed to end session" },
         { status: 500 }
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Session end error:", error);
+    logger.error("SessionEnd", "Session end error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

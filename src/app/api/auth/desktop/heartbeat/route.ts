@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/auth/desktop/heartbeat
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
       .eq("revoked", false);
 
     if (sessionError) {
-      console.error("Heartbeat session update error:", sessionError);
+      logger.error("DesktopAuthHeartbeat", "Session update error", sessionError);
       return NextResponse.json(
         { success: false, error: "Failed to update session" },
         { status: 500 }
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
       data: { last_used_at: now },
     });
   } catch (error) {
-    console.error("Heartbeat error:", error);
+    logger.error("DesktopAuthHeartbeat", "Heartbeat error", error);
     return NextResponse.json(
       { success: false, error: "Heartbeat failed" },
       { status: 500 }

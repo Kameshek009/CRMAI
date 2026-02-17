@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/usage/history
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error("Failed to fetch usage history:", error);
+      logger.error("UsageHistory", "Failed to fetch usage history", error);
       return NextResponse.json(
         { success: false, error: "Failed to fetch history" },
         { status: 500 }
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Usage history error:", error);
+    logger.error("UsageHistory", "Usage history error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

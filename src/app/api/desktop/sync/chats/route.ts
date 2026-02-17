@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/desktop/sync/chats
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, chats: chats || [] });
   } catch (error) {
-    console.error("[desktop/sync/chats] GET error:", error);
+    logger.error("DesktopSyncChats", "GET error", error);
     return NextResponse.json(
       { success: false, error: "Failed to get chats" },
       { status: 500 }
@@ -165,11 +166,11 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    console.log("[desktop/sync/chats] Created chat:", chat.id);
+    logger.info("DesktopSyncChats", `Created chat: ${chat.id}`);
 
     return NextResponse.json({ success: true, chat, action: "created" });
   } catch (error) {
-    console.error("[desktop/sync/chats] POST error:", error);
+    logger.error("DesktopSyncChats", "POST error", error);
     return NextResponse.json(
       { success: false, error: "Failed to sync chat" },
       { status: 500 }
@@ -242,11 +243,11 @@ export async function DELETE(request: NextRequest) {
 
     if (error) throw error;
 
-    console.log("[desktop/sync/chats] Deleted chat:", chatId);
+    logger.info("DesktopSyncChats", `Deleted chat: ${chatId}`);
 
     return NextResponse.json({ success: true, deleted: true });
   } catch (error) {
-    console.error("[desktop/sync/chats] DELETE error:", error);
+    logger.error("DesktopSyncChats", "DELETE error", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete chat" },
       { status: 500 }

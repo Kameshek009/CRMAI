@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const startSessionSchema = z.object({
   summary: z.string().optional(),
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (sessionError) {
-      console.error("Failed to create session:", sessionError);
+      logger.error("SessionStart", "Failed to create session", sessionError);
       return NextResponse.json(
         { success: false, error: "Failed to create session" },
         { status: 500 }
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Session start error:", error);
+    logger.error("SessionStart", "Session start error", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

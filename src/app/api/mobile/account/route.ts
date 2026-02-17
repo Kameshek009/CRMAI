@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { verifyToken } from "@clerk/backend";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/mobile/account
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
         secretKey: process.env.CLERK_SECRET_KEY,
       });
     } catch (verifyError) {
-      console.error("[mobile/account] Token verification failed:", verifyError);
+      logger.error("MobileAccount", "Token verification failed", verifyError);
       return NextResponse.json(
         { error: "Invalid token" },
         { status: 401 }
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (selectError && selectError.code !== "PGRST116") {
-      console.error("[mobile/account] Database error:", selectError);
+      logger.error("MobileAccount", "Database error", selectError);
       return NextResponse.json(
         { error: "Database error" },
         { status: 500 }
@@ -131,14 +132,14 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      console.error("[mobile/account] Insert error:", insertError);
+      logger.error("MobileAccount", "Insert error", insertError);
       return NextResponse.json(
         { error: "Failed to create account" },
         { status: 500 }
       );
     }
 
-    console.log("[mobile/account] Created new account:", newAccount.id);
+    logger.info("MobileAccount", "Created new account", newAccount.id);
 
     return NextResponse.json({
       success: true,
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
       created: true,
     });
   } catch (error) {
-    console.error("[mobile/account] Unexpected error:", error);
+    logger.error("MobileAccount", "Unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -224,7 +225,7 @@ export async function GET(request: NextRequest) {
       account: accountWithBilling,
     });
   } catch (error) {
-    console.error("[mobile/account] GET error:", error);
+    logger.error("MobileAccount", "GET error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
