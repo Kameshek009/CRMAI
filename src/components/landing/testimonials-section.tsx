@@ -142,7 +142,7 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
 
       {/* Author */}
       <div className="flex items-center gap-3 pt-5 border-t border-white/10 dark:border-white/10 relative z-10">
-        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-lg`}>
+        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-landing-accent-foreground shrink-0 shadow-lg`}>
           {t.avatar}
         </div>
         <div>

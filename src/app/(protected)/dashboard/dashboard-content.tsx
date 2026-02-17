@@ -234,7 +234,7 @@ function AnimatedStatCard({
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
             <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", iconGradient)}>
-              <Icon className="w-4 h-4 text-white" />
+              <Icon className="w-4 h-4 text-landing-accent-foreground" />
             </div>
           </div>
           <div className="text-2xl font-bold tracking-tight">
@@ -409,7 +409,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               transition={{ duration: 0.6, delay: 0.2, type: "spring", stiffness: 200 }}
               className="w-10 h-10 rounded-xl bg-gradient-to-br from-landing-accent via-landing-accent to-landing-accent flex items-center justify-center"
             >
-              <GreetingIcon className="w-5 h-5 text-white" />
+              <GreetingIcon className="w-5 h-5 text-landing-accent-foreground" />
             </motion.div>
             <div>
               <motion.h1
@@ -588,7 +588,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                      <Clock className="w-3 h-3 text-white" />
+                      <Clock className="w-3 h-3 text-landing-accent-foreground" />
                     </div>
                     Recent
                   </span>
@@ -640,7 +640,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
                   <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                    <Sparkles className="w-3 h-3 text-white" />
+                    <Sparkles className="w-3 h-3 text-landing-accent-foreground" />
                   </div>
                   AI Insights
                   <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto hover:bg-muted/80" asChild>
@@ -697,7 +697,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                      <CheckSquare className="w-3 h-3 text-white" />
+                      <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
                     </div>
                     Upcoming Tasks
                   </span>
@@ -782,7 +782,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                    <Handshake className="w-3 h-3 text-white" />
+                    <Handshake className="w-3 h-3 text-landing-accent-foreground" />
                   </div>
                   Deals
                 </CardTitle>
@@ -956,7 +956,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                  <TrendingUp className="w-3 h-3 text-white" />
+                  <TrendingUp className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Revenue Trend (30 Days)
               </CardTitle>
@@ -1028,7 +1028,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                  <Kanban className="w-3 h-3 text-white" />
+                  <Kanban className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Workload by Status
               </CardTitle>
@@ -1120,7 +1120,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4.5 h-4.5 text-white" />
+                    <Sparkles className="w-4.5 h-4.5 text-landing-accent-foreground" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">
@@ -1132,7 +1132,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         : `${Math.round(usage.percentUsed)}% used this month.`}
                     </p>
                   </div>
-                  <Button size="sm" className="bg-gradient-to-r from-landing-accent to-landing-accent text-white border-0 hover:opacity-90" asChild>
+                  <Button size="sm" className="bg-gradient-to-r from-landing-accent to-landing-accent text-landing-accent-foreground border-0 hover:opacity-90" asChild>
                     <Link href="/dashboard/account/billing">
                       Upgrade
                       <ArrowRight className="w-3.5 h-3.5 ml-1.5" />

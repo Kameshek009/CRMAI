@@ -249,7 +249,7 @@ function ProductPreview3D() {
                 transition={{ delay: 1 + i * 0.1 }}
                 className={`w-8 h-8 rounded-xl flex items-center justify-center ${i === 0 ? "bg-gradient-to-br from-landing-accent to-landing-accent shadow-lg" : "hover:bg-white/5"} transition-colors`}
               >
-                <Icon className={`w-4 h-4 ${i === 0 ? "text-white" : "text-muted-foreground/50"}`} />
+                <Icon className={`w-4 h-4 ${i === 0 ? "text-landing-accent-foreground" : "text-muted-foreground/50"}`} />
               </motion.div>
             ))}
           </div>
