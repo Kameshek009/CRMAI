@@ -6,6 +6,8 @@ import {
   AlertCircle,
   CheckCircle,
   Trash2,
+  FileText,
+  Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Markdown } from '@/components/ui/markdown';
@@ -29,9 +31,31 @@ function formatTime(dateString: string): string {
   });
 }
 
+function formatFileSize(bytes: number): string {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+interface AttachmentInfo {
+  id: string;
+  url: string;
+  filename: string;
+  mime_type: string;
+  size: number;
+}
+
 export function MessageBubble({ message, isNew, isHighlighted, onDelete, userImageUrl }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const messageType = message.message_type;
+  const metadata = message.metadata as Record<string, unknown> | null;
+  const attachments: AttachmentInfo[] = (metadata?.attachments as AttachmentInfo[]) || [];
+
+  // Strip "[Attached file: ...]" from display for user messages
+  const displayContent = isUser
+    ? message.content.replace(/\n?\[Attached file: [^\]]+\]$/, '').trim()
+    : message.content;
 
   return (
     <motion.div
@@ -94,9 +118,43 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
           </span>
         )}
         {isUser ? (
-          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{message.content}</p>
+          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{displayContent}</p>
         ) : (
           <Markdown content={message.content} />
+        )}
+        {/* Attachments */}
+        {attachments.length > 0 && (
+          <div className="mt-2.5 space-y-2">
+            {attachments.map((att) => (
+              att.mime_type?.startsWith('image/') ? (
+                <a key={att.id} href={att.url} target="_blank" rel="noreferrer" className="block">
+                  <img
+                    src={att.url}
+                    alt={att.filename}
+                    className="max-w-xs sm:max-w-sm rounded-xl border border-border/50 hover:border-border transition-colors"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <a
+                  key={att.id}
+                  href={att.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-border hover:bg-muted/30 transition-all max-w-xs"
+                >
+                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{att.filename}</p>
+                    <p className="text-xs text-muted-foreground">{formatFileSize(att.size)}</p>
+                  </div>
+                  <Download className="h-4 w-4 text-muted-foreground shrink-0" />
+                </a>
+              )
+            ))}
+          </div>
         )}
       </div>
 

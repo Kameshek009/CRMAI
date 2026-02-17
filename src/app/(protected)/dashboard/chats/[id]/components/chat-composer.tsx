@@ -1,21 +1,40 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowUp, Loader2, Clock, AlertCircle, Paperclip } from 'lucide-react';
+import { ArrowUp, Loader2, Clock, AlertCircle, Paperclip, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { Chat } from '@/lib/supabase/types';
+
+interface AttachmentPreview {
+  file: File;
+  previewUrl?: string;
+  isImage: boolean;
+}
+
+export interface AttachmentData {
+  id: string;
+  url: string;
+  filename: string;
+  mime_type: string;
+  size: number;
+}
 
 interface ChatComposerProps {
   chat: Chat;
+  chatId: string;
   isSending: boolean;
   isAgentOnline: boolean;
   rateLimitResetsAt: string | null;
-  onSend: (content: string) => void;
+  onSend: (content: string, attachment?: AttachmentData) => void;
 }
+
+const ACCEPT_TYPES = 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml,application/pdf,text/plain,text/csv,application/json,.doc,.docx';
 
 export function ChatComposer({
   chat,
+  chatId,
   isSending,
   isAgentOnline,
   rateLimitResetsAt,
@@ -23,7 +42,10 @@ export function ChatComposer({
 }: ChatComposerProps) {
   const [input, setInput] = useState('');
   const [countdown, setCountdown] = useState('');
+  const [attachment, setAttachment] = useState<AttachmentPreview | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Live countdown timer for daily limit reset
   useEffect(() => {
@@ -60,10 +82,69 @@ export function ChatComposer({
     return () => clearInterval(interval);
   }, [rateLimitResetsAt]);
 
-  const handleSend = () => {
-    if (!input.trim() || isSending) return;
-    onSend(input.trim());
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File too large. Maximum 10MB');
+      return;
+    }
+
+    const isImage = file.type.startsWith('image/');
+    const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
+
+    setAttachment({ file, previewUrl, isImage });
+
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeAttachment = () => {
+    if (attachment?.previewUrl) {
+      URL.revokeObjectURL(attachment.previewUrl);
+    }
+    setAttachment(null);
+  };
+
+  const handleSend = async () => {
+    if ((!input.trim() && !attachment) || isSending || isUploading) return;
+
+    let uploadedAttachment: AttachmentData | undefined;
+
+    // Upload file first if attached
+    if (attachment) {
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', attachment.file);
+
+        const res = await fetch(`/api/chats/${chatId}/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await res.json();
+
+        if (!result.success) {
+          toast.error(result.error || 'Failed to upload file');
+          setIsUploading(false);
+          return;
+        }
+
+        uploadedAttachment = result.attachment;
+      } catch {
+        toast.error('Failed to upload file');
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
+    const text = input.trim();
+    onSend(text, uploadedAttachment);
     setInput('');
+    removeAttachment();
+
     // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -85,6 +166,15 @@ export function ChatComposer({
       ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
     }
   };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const isDisabled = isSending || isUploading;
+  const canSend = (input.trim() || attachment) && !isDisabled;
 
   return (
     <div className="px-4 pb-4 pt-2">
@@ -123,13 +213,46 @@ export function ChatComposer({
           'focus-within:border-ring focus-within:shadow-md',
           'focus-within:ring-2 focus-within:ring-ring/20',
         )}>
+          {/* Attachment preview */}
+          {attachment && (
+            <div className="px-3 pt-3">
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 border border-border/50">
+                {attachment.isImage && attachment.previewUrl ? (
+                  <img
+                    src={attachment.previewUrl}
+                    alt={attachment.file.name}
+                    className="h-12 w-12 rounded-lg object-cover shrink-0"
+                  />
+                ) : (
+                  <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{attachment.file.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatFileSize(attachment.file.size)}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                  onClick={removeAttachment}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           <textarea
             ref={textareaRef}
             value={input}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             placeholder={
-              chat.mode === 'chat'
+              attachment
+                ? 'Add a message (optional)...'
+                : chat.mode === 'chat'
                 ? 'Message AI assistant...'
                 : !isAgentOnline
                 ? 'Agent offline — message will be queued...'
@@ -143,7 +266,16 @@ export function ChatComposer({
               'placeholder:text-muted-foreground/50',
               'focus:outline-none focus:ring-0',
             )}
-            disabled={isSending}
+            disabled={isDisabled}
+          />
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPT_TYPES}
+            className="hidden"
+            onChange={handleFileSelect}
           />
 
           {/* Bottom bar inside composer */}
@@ -152,25 +284,35 @@ export function ChatComposer({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground/50"
-                disabled
+                className={cn(
+                  'h-8 w-8 transition-colors',
+                  attachment
+                    ? 'text-foreground'
+                    : 'text-muted-foreground/50 hover:text-muted-foreground'
+                )}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isDisabled}
               >
-                <Paperclip className="h-4 w-4" />
+                {attachment ? (
+                  <ImageIcon className="h-4 w-4" />
+                ) : (
+                  <Paperclip className="h-4 w-4" />
+                )}
               </Button>
             </div>
 
             <Button
               onClick={handleSend}
-              disabled={!input.trim() || isSending}
+              disabled={!canSend}
               size="icon"
               className={cn(
                 'h-8 w-8 rounded-lg transition-all',
-                input.trim() && !isSending
+                canSend
                   ? 'bg-foreground text-background hover:bg-foreground/90'
                   : 'bg-muted text-muted-foreground'
               )}
             >
-              {isSending ? (
+              {isUploading || isSending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <ArrowUp className="h-4 w-4" />

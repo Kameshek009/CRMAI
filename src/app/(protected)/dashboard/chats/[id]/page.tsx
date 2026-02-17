@@ -17,11 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useAgentStatus } from '@/hooks/use-agent-status';
-import type { Chat, Message, VisionBoard } from '@/lib/supabase/types';
+import type { Chat, Message, VisionBoard, Json } from '@/lib/supabase/types';
 
 import { ChatHeader } from './components/chat-header';
 import { ChatMessages } from './components/chat-messages';
-import { ChatComposer } from './components/chat-composer';
+import { ChatComposer, type AttachmentData } from './components/chat-composer';
 import { ChatSearch } from './components/chat-search';
 
 export default function ChatDetailPage() {
@@ -174,8 +174,19 @@ export default function ChatDetailPage() {
   }, [chatId]);
 
   // Send message
-  const handleSend = useCallback(async (content: string) => {
+  const handleSend = useCallback(async (content: string, attachment?: AttachmentData) => {
     if (!chatId || isSending) return;
+
+    // Build content with attachment note for AI
+    let messageContent = content;
+    if (attachment) {
+      const fileNote = `[Attached file: ${attachment.filename}]`;
+      messageContent = content ? `${content}\n${fileNote}` : fileNote;
+    }
+
+    const messageMetadata = (attachment
+      ? { attachments: [attachment] }
+      : {}) as Json;
 
     setIsSending(true);
     const localId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -184,8 +195,8 @@ export default function ChatDetailPage() {
       id: `temp-${Date.now()}`,
       chat_id: chatId,
       role: 'user',
-      content,
-      metadata: {},
+      content: messageContent,
+      metadata: messageMetadata,
       message_type: 'text',
       tokens_used: 0,
       local_id: localId,
@@ -199,7 +210,12 @@ export default function ChatDetailPage() {
       const response = await fetch(`/api/chats/${chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'user', content, message_type: 'text' }),
+        body: JSON.stringify({
+          role: 'user',
+          content: messageContent,
+          message_type: 'text',
+          metadata: messageMetadata,
+        }),
       });
       const result = await response.json();
 
@@ -424,6 +440,7 @@ export default function ChatDetailPage() {
 
       <ChatComposer
         chat={chat}
+        chatId={chatId}
         isSending={isSending}
         isAgentOnline={isAgentOnline}
         rateLimitResetsAt={rateLimitResetsAt}
