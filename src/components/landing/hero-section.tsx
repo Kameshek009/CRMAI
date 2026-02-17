@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useMotionValue, useTransform, animate, useSpring } from "framer-motion";
-import { ArrowRight, Sparkles, Play, TrendingUp, Users, DollarSign, BarChart3, Zap } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingUp, Users, DollarSign, BarChart3, Zap } from "lucide-react";
 
 /* ---------- animated counter ---------- */
 function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -405,7 +405,7 @@ function TypedText({ words }: { words: string[] }) {
   }, [words.length]);
 
   return (
-    <span className="relative inline-block min-w-[200px] sm:min-w-[280px]">
+    <span className="relative inline-block min-w-[200px] sm:min-w-[280px]" aria-live="polite" aria-atomic="true">
       {words.map((word, i) => (
         <motion.span
           key={word}
@@ -518,8 +518,7 @@ export function HeroSection() {
               href="#features"
               className="group relative inline-flex items-center gap-2.5 h-14 px-10 rounded-2xl text-base font-semibold border border-white/15 dark:border-white/15 bg-white/5 dark:bg-white/5 text-foreground backdrop-blur-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all"
             >
-              <Play className="w-4 h-4" />
-              Watch Demo
+              See Features
             </Link>
           </motion.div>
         </motion.div>

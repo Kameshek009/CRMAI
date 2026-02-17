@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Sparkles, Clock, Users, Zap } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 /* ---------- aurora background ---------- */
 function AuroraBackground() {
@@ -85,93 +85,9 @@ function CTAGradientMesh() {
   );
 }
 
-/* ---------- urgency countdown ---------- */
-function UrgencyCountdown() {
-  const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 59, seconds: 59 });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { hours, minutes, seconds } = prev;
-        seconds--;
-        if (seconds < 0) { seconds = 59; minutes--; }
-        if (minutes < 0) { minutes = 59; hours--; }
-        if (hours < 0) { hours = 23; minutes = 59; seconds = 59; }
-        return { hours, minutes, seconds };
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const pad = (n: number) => n.toString().padStart(2, "0");
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="flex items-center justify-center gap-3 mb-8"
-    >
-      <div className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-2 backdrop-blur-xl">
-        <Clock className="w-3.5 h-3.5 text-amber-400" />
-        <span className="text-xs font-semibold text-amber-400">Limited offer ends in:</span>
-        <div className="flex items-center gap-1 font-mono text-sm font-bold text-foreground">
-          <span className="bg-white/10 rounded-md px-1.5 py-0.5">{pad(timeLeft.hours)}</span>
-          <span className="text-amber-400">:</span>
-          <span className="bg-white/10 rounded-md px-1.5 py-0.5">{pad(timeLeft.minutes)}</span>
-          <span className="text-amber-400">:</span>
-          <span className="bg-white/10 rounded-md px-1.5 py-0.5">{pad(timeLeft.seconds)}</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ---------- live counter ---------- */
-function LiveCounter() {
-  const [count, setCount] = useState(10847);
-  const tickRef = useRef(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      tickRef.current += 1;
-      // Deterministic increment based on tick count (avoids Math.random in render)
-      const increment = (tickRef.current % 3) + 1;
-      setCount((prev) => prev + increment);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.8 }}
-      className="flex items-center justify-center gap-6 sm:gap-8 mt-8"
-    >
-      <div className="flex items-center gap-2">
-        <div className="relative flex items-center">
-          <span className="absolute inline-flex h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-        </div>
-        <span className="text-sm font-medium text-foreground">{count.toLocaleString()}</span>
-        <span className="text-sm text-muted-foreground">teams signed up</span>
-      </div>
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Users className="w-3.5 h-3.5" />
-        <span>47 joined today</span>
-      </div>
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Zap className="w-3.5 h-3.5 text-amber-400" />
-        <span>Free forever</span>
-      </div>
-    </motion.div>
-  );
-}
-
 /* ---------- floating particles ---------- */
 // Pre-computed particle positions to avoid Math.random() during SSR/hydration
-const PARTICLES = Array.from({ length: 40 }, (_, i) => ({
+const PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   id: i,
   x: ((i * 37 + 13) % 100),
   y: ((i * 53 + 7) % 100),
@@ -272,9 +188,6 @@ export function CTASection() {
                 Start for free today
               </div>
 
-              {/* Urgency countdown */}
-              <UrgencyCountdown />
-
               {/* Heading */}
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground mb-6">
                 Ready to supercharge
@@ -326,24 +239,20 @@ export function CTASection() {
                 className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground/60"
               >
                 {[
-                  { text: "No credit card", icon: "💳" },
-                  { text: "Free forever", icon: "✨" },
-                  { text: "Setup in 2 min", icon: "⚡" },
-                  { text: "Cancel anytime", icon: "🔓" },
+                  { text: "No credit card" },
+                  { text: "Free forever" },
+                  { text: "Setup in 2 min" },
+                  { text: "Cancel anytime" },
                 ].map((item) => (
                   <motion.span
                     key={item.text}
                     whileHover={{ scale: 1.05, y: -2 }}
                     className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl cursor-default"
                   >
-                    <span>{item.icon}</span>
                     <span className="font-medium">{item.text}</span>
                   </motion.span>
                 ))}
               </motion.div>
-
-              {/* Live counter */}
-              <LiveCounter />
             </motion.div>
           </div>
         </div>

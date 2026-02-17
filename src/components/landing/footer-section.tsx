@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 const footerLinks = [
   {
@@ -17,8 +19,7 @@ const footerLinks = [
   {
     title: "Company",
     links: [
-      { label: "About", href: "/#stats" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "About", href: "/#about" },
       { label: "Get Started", href: "/sign-up" },
       { label: "Sign In", href: "/sign-in" },
     ],
@@ -61,6 +62,15 @@ function WaveDivider() {
 }
 
 export function FooterSection() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    toast.success("Thanks for subscribing!");
+    setEmail("");
+  };
+
   return (
     <footer className="relative border-t border-white/10 dark:border-white/10">
       <WaveDivider />
@@ -85,17 +95,22 @@ export function FooterSection() {
 
           {/* Newsletter */}
           <div className="w-full lg:w-auto">
-            <p className="text-sm font-semibold text-foreground mb-3">Stay in the loop</p>
-            <div className="flex gap-2">
+            <p className="text-sm font-semibold text-foreground mb-3" id="newsletter-label">Stay in the loop</p>
+            <form onSubmit={handleSubscribe} className="flex gap-2" aria-labelledby="newsletter-label">
+              <label htmlFor="newsletter-email" className="sr-only">Email address</label>
               <input
+                id="newsletter-email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
+                required
                 className="h-11 px-4 rounded-xl border border-white/10 bg-white/5 text-sm text-foreground placeholder:text-muted-foreground/50 backdrop-blur-xl focus:outline-none focus:border-landing-accent/50 transition-colors w-full lg:w-64"
               />
-              <button className="h-11 px-6 rounded-xl bg-landing-accent text-landing-accent-foreground text-sm font-semibold shrink-0 hover:shadow-lg hover:shadow-landing-accent/20 transition-shadow">
+              <button type="submit" className="h-11 px-6 rounded-xl bg-landing-accent text-landing-accent-foreground text-sm font-semibold shrink-0 hover:shadow-lg hover:shadow-landing-accent/20 transition-shadow">
                 Subscribe
               </button>
-            </div>
+            </form>
           </div>
         </div>
 

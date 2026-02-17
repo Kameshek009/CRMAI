@@ -51,7 +51,7 @@ export function TrustedBySection() {
         className="max-w-6xl mx-auto"
       >
         <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground/60 mb-8 sm:mb-12">
-          Trusted by industry leaders
+          Built for teams at companies like
         </p>
 
         <div className="flex flex-col gap-4">

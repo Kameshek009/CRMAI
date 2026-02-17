@@ -201,7 +201,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
           >
             <div className="flex items-center justify-between">
               <NexusBrandHeader />
-              <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted transition-colors">
+              <button onClick={onClose} aria-label="Close menu" className="p-2 rounded-lg hover:bg-muted transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -332,6 +332,7 @@ export function PublicAuthHeader() {
           <ThemeToggleSlider />
           <button
             onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
             className="p-2 rounded-lg hover:bg-muted transition-colors"
           >
             <Menu className="w-5 h-5" />

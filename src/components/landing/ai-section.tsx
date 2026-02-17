@@ -4,33 +4,6 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Brain, Sparkles, MessageSquare, Target, TrendingUp, Bot, Wand2, Shield, Clock } from "lucide-react";
 
-/* ---------- typewriter text ---------- */
-function TypewriterText({ text, delay = 0, speed = 20, onDone }: {
-  text: string; delay?: number; speed?: number; onDone?: () => void;
-}) {
-  const [displayed, setDisplayed] = useState("");
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setStarted(true), delay);
-    return () => clearTimeout(timeout);
-  }, [delay]);
-
-  useEffect(() => {
-    if (!started) return;
-    if (displayed.length < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayed(text.slice(0, displayed.length + 1));
-      }, speed);
-      return () => clearTimeout(timeout);
-    } else {
-      onDone?.();
-    }
-  }, [started, displayed, text, speed, onDone]);
-
-  return <>{displayed}<span className="animate-pulse">|</span></>;
-}
-
 /* ---------- chat messages ---------- */
 const chatMessages = [
   { role: "user" as const, text: "Show me deals closing this month over $10k" },
