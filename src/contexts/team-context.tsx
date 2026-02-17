@@ -23,6 +23,13 @@ interface TeamData {
   inviteCode: string;
   maxMembers: number;
   ownerAccountId: string;
+  tier: string;
+  tokenLimit: number;
+  tokensUsed: number;
+  weeklyTokensUsed: number;
+  seatCount: number;
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
 }
 
 interface TeamMembership {
@@ -82,6 +89,13 @@ function transformTeam(raw: Record<string, unknown>): TeamData {
     inviteCode: raw.invite_code as string,
     maxMembers: raw.max_members as number,
     ownerAccountId: raw.owner_account_id as string,
+    tier: (raw.tier as string) || "free",
+    tokenLimit: (raw.token_limit as number) || 0,
+    tokensUsed: (raw.tokens_used as number) || 0,
+    weeklyTokensUsed: (raw.weekly_tokens_used as number) || 0,
+    seatCount: (raw.seat_count as number) || 1,
+    stripeSubscriptionId: (raw.stripe_subscription_id as string) || null,
+    stripeCustomerId: (raw.stripe_customer_id as string) || null,
   };
 }
 

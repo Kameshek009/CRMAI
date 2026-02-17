@@ -1,8 +1,7 @@
 import Stripe from "stripe";
 import type { SubscriptionTier } from "@/types";
 
-// Re-export from constants for backward compatibility
-export { TIER_TOKEN_LIMITS, CREDIT_AMOUNTS } from "@/lib/constants/tiers";
+export { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
 
 // ============================================================================
 // Stripe Client (Lazy Initialization)
@@ -10,10 +9,6 @@ export { TIER_TOKEN_LIMITS, CREDIT_AMOUNTS } from "@/lib/constants/tiers";
 
 let _stripe: Stripe | null = null;
 
-/**
- * Get Stripe client with lazy initialization.
- * Only initializes when first called, preventing module load errors.
- */
 function getStripe(): Stripe {
   if (!_stripe) {
     const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -30,10 +25,6 @@ function getStripe(): Stripe {
   return _stripe;
 }
 
-/**
- * Stripe client accessor.
- * Use this for all Stripe API calls.
- */
 export const stripe = new Proxy({} as Stripe, {
   get(_, prop) {
     return getStripe()[prop as keyof Stripe];
@@ -41,74 +32,37 @@ export const stripe = new Proxy({} as Stripe, {
 });
 
 // ============================================================================
-// Price IDs Configuration
+// Per-Seat Price IDs
 // ============================================================================
 
 /**
- * Get subscription price IDs (lazy to avoid undefined at module load)
+ * Get per-seat subscription price IDs
  */
-export function getSubscriptionPrices() {
+export function getSeatPrices() {
   return {
-    pro: process.env.STRIPE_PRICE_PRO_MONTHLY || "",
-    max: process.env.STRIPE_PRICE_MAX_MONTHLY || "",
+    pro: process.env.STRIPE_PRICE_PRO_SEAT || "",
+    max: process.env.STRIPE_PRICE_MAX_SEAT || "",
   };
 }
 
-/**
- * Subscription price IDs for recurring billing
- * @deprecated Use getSubscriptionPrices() instead
- */
+/** @deprecated Use getSeatPrices() */
 export const SUBSCRIPTION_PRICES = {
-  get pro() { return process.env.STRIPE_PRICE_PRO_MONTHLY || ""; },
-  get max() { return process.env.STRIPE_PRICE_MAX_MONTHLY || ""; },
+  get pro() { return process.env.STRIPE_PRICE_PRO_SEAT || ""; },
+  get max() { return process.env.STRIPE_PRICE_MAX_SEAT || ""; },
 } as const;
 
-/**
- * Get credit package price IDs (lazy to avoid undefined at module load)
- */
-export function getCreditPrices() {
-  return {
-    credits_100k: process.env.STRIPE_PRICE_CREDITS_100K || "",
-    credits_250k: process.env.STRIPE_PRICE_CREDITS_250K || "",
-    credits_600k: process.env.STRIPE_PRICE_CREDITS_600K || "",
-    credits_1500k: process.env.STRIPE_PRICE_CREDITS_1500K || "",
-  };
+/** @deprecated Use getSeatPrices() */
+export function getSubscriptionPrices() {
+  return getSeatPrices();
 }
-
-/**
- * Credit package price IDs for one-time purchases
- * @deprecated Use getCreditPrices() instead
- */
-export const CREDIT_PRICES = {
-  get credits_100k() { return process.env.STRIPE_PRICE_CREDITS_100K || ""; },
-  get credits_250k() { return process.env.STRIPE_PRICE_CREDITS_250K || ""; },
-  get credits_600k() { return process.env.STRIPE_PRICE_CREDITS_600K || ""; },
-  get credits_1500k() { return process.env.STRIPE_PRICE_CREDITS_1500K || ""; },
-} as const;
 
 /**
  * Map Stripe price ID to tier
  */
 export function getTierFromPriceId(priceId: string): SubscriptionTier | null {
-  const proPriceId = SUBSCRIPTION_PRICES.pro;
-  const maxPriceId = SUBSCRIPTION_PRICES.max;
-
-  console.log(`[getTierFromPriceId] Comparing priceId="${priceId}" with pro="${proPriceId}", max="${maxPriceId}"`);
-
-  if (priceId === proPriceId) return "pro";
-  if (priceId === maxPriceId) return "max";
-
-  console.warn(`[getTierFromPriceId] No match found for priceId="${priceId}"`);
-  return null;
-}
-
-/**
- * Map Stripe price ID to credit package ID
- */
-export function getCreditPackageFromPriceId(priceId: string): string | null {
-  for (const [packageId, pId] of Object.entries(CREDIT_PRICES)) {
-    if (pId === priceId) return packageId;
-  }
+  const prices = getSeatPrices();
+  if (priceId === prices.pro) return "pro";
+  if (priceId === prices.max) return "max";
   return null;
 }
 
@@ -116,19 +70,18 @@ export function getCreditPackageFromPriceId(priceId: string): string | null {
 // Customer Management
 // ============================================================================
 
-/**
- * Create a Stripe customer with metadata for cross-referencing
- */
 export async function createCustomer({
   email,
   name,
   accountId,
   clerkUserId,
+  teamId,
 }: {
   email: string;
   name?: string;
   accountId: string;
   clerkUserId: string;
+  teamId?: string;
 }) {
   return stripe.customers.create({
     email,
@@ -136,14 +89,12 @@ export async function createCustomer({
     metadata: {
       supabase_account_id: accountId,
       clerk_user_id: clerkUserId,
-      created_from: "serotonin_dashboard",
+      team_id: teamId || "",
+      created_from: "nexxus_crm",
     },
   });
 }
 
-/**
- * Update customer metadata
- */
 export async function updateCustomer(
   customerId: string,
   data: {
@@ -155,27 +106,26 @@ export async function updateCustomer(
   return stripe.customers.update(customerId, data);
 }
 
-/**
- * Get customer by ID
- */
 export async function getCustomer(customerId: string) {
   return stripe.customers.retrieve(customerId);
 }
 
 // ============================================================================
-// Checkout Sessions
+// Per-Seat Checkout
 // ============================================================================
 
 /**
- * Create a checkout session for subscriptions
- * Supports both hosted (redirect) and embedded modes
+ * Create a per-seat subscription checkout.
+ * quantity = number of active seats in the team.
  */
-export async function createSubscriptionCheckout({
+export async function createPerSeatCheckout({
   customerId,
   customerEmail,
   priceId,
+  seatCount,
   accountId,
   clerkUserId,
+  teamId,
   tier,
   returnUrl,
   hosted = false,
@@ -183,8 +133,10 @@ export async function createSubscriptionCheckout({
   customerId?: string;
   customerEmail?: string;
   priceId: string;
+  seatCount: number;
   accountId: string;
   clerkUserId: string;
+  teamId: string;
   tier: SubscriptionTier;
   returnUrl: string;
   hosted?: boolean;
@@ -194,12 +146,13 @@ export async function createSubscriptionCheckout({
     line_items: [
       {
         price: priceId,
-        quantity: 1,
+        quantity: seatCount,
       },
     ],
     metadata: {
       account_id: accountId,
       clerk_user_id: clerkUserId,
+      team_id: teamId,
       tier: tier,
       type: "subscription",
     },
@@ -207,87 +160,18 @@ export async function createSubscriptionCheckout({
       metadata: {
         account_id: accountId,
         clerk_user_id: clerkUserId,
+        team_id: teamId,
         tier: tier,
       },
     },
-    // Payment method options for full suite support
-    payment_method_types: ["card", "link"],
-    // Allow promotion codes
-    allow_promotion_codes: true,
-  };
-
-  if (hosted) {
-    // Hosted checkout - redirects to Stripe's hosted page
-    sessionParams.success_url = `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`;
-    sessionParams.cancel_url = `${returnUrl}?canceled=true`;
-  } else {
-    // Embedded checkout - for in-page checkout
-    sessionParams.ui_mode = "embedded";
-    sessionParams.redirect_on_completion = "if_required";
-    sessionParams.return_url = `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`;
-  }
-
-  // Use existing customer or create one via email
-  if (customerId) {
-    sessionParams.customer = customerId;
-  } else if (customerEmail) {
-    sessionParams.customer_email = customerEmail;
-    sessionParams.customer_creation = "always";
-  }
-
-  return stripe.checkout.sessions.create(sessionParams);
-}
-
-/**
- * Create a checkout session for credit purchases (one-time)
- * Supports both hosted (redirect) and embedded modes
- */
-export async function createCreditsCheckout({
-  customerId,
-  customerEmail,
-  priceId,
-  packageId,
-  tokenAmount,
-  accountId,
-  clerkUserId,
-  returnUrl,
-  hosted = false,
-}: {
-  customerId?: string;
-  customerEmail?: string;
-  priceId: string;
-  packageId: string;
-  tokenAmount: number;
-  accountId: string;
-  clerkUserId: string;
-  returnUrl: string;
-  hosted?: boolean;
-}) {
-  const sessionParams: Stripe.Checkout.SessionCreateParams = {
-    mode: "payment",
-    line_items: [
-      {
-        price: priceId,
-        quantity: 1,
-      },
-    ],
-    metadata: {
-      account_id: accountId,
-      clerk_user_id: clerkUserId,
-      package_id: packageId,
-      token_amount: tokenAmount.toString(),
-      type: "credit_package",
-    },
     payment_method_types: ["card", "link"],
     allow_promotion_codes: true,
   };
 
   if (hosted) {
-    // Hosted checkout - redirects to Stripe's hosted page
     sessionParams.success_url = `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`;
     sessionParams.cancel_url = `${returnUrl}?canceled=true`;
   } else {
-    // Embedded checkout - for in-page checkout
     sessionParams.ui_mode = "embedded";
     sessionParams.redirect_on_completion = "if_required";
     sessionParams.return_url = `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`;
@@ -302,6 +186,9 @@ export async function createCreditsCheckout({
 
   return stripe.checkout.sessions.create(sessionParams);
 }
+
+/** @deprecated Use createPerSeatCheckout */
+export const createSubscriptionCheckout = createPerSeatCheckout;
 
 /**
  * Retrieve a checkout session with expanded data
@@ -316,9 +203,6 @@ export async function getCheckoutSession(sessionId: string) {
 // Subscription Management
 // ============================================================================
 
-/**
- * Get subscription details
- */
 export async function getSubscription(subscriptionId: string) {
   return stripe.subscriptions.retrieve(subscriptionId, {
     expand: ["default_payment_method", "latest_invoice"],
@@ -326,14 +210,36 @@ export async function getSubscription(subscriptionId: string) {
 }
 
 /**
- * Update subscription (change plan)
+ * Update subscription seat count (per-seat billing).
+ * Stripe automatically prorates the charge.
+ */
+export async function updateSubscriptionQuantity(
+  subscriptionId: string,
+  newQuantity: number
+) {
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const itemId = subscription.items.data[0]?.id;
+  if (!itemId) throw new Error("No subscription item found");
+
+  return stripe.subscriptions.update(subscriptionId, {
+    items: [
+      {
+        id: itemId,
+        quantity: newQuantity,
+      },
+    ],
+    proration_behavior: "create_prorations",
+  });
+}
+
+/**
+ * Update subscription plan (change tier)
  */
 export async function updateSubscription(
   subscriptionId: string,
   newPriceId: string,
   metadata?: Record<string, string>
 ) {
-  // Get current subscription
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   return stripe.subscriptions.update(subscriptionId, {
@@ -348,27 +254,18 @@ export async function updateSubscription(
   });
 }
 
-/**
- * Cancel subscription at period end
- */
 export async function cancelSubscription(subscriptionId: string) {
   return stripe.subscriptions.update(subscriptionId, {
     cancel_at_period_end: true,
   });
 }
 
-/**
- * Reactivate cancelled subscription
- */
 export async function reactivateSubscription(subscriptionId: string) {
   return stripe.subscriptions.update(subscriptionId, {
     cancel_at_period_end: false,
   });
 }
 
-/**
- * Cancel subscription immediately
- */
 export async function cancelSubscriptionImmediately(subscriptionId: string) {
   return stripe.subscriptions.cancel(subscriptionId);
 }
@@ -377,9 +274,6 @@ export async function cancelSubscriptionImmediately(subscriptionId: string) {
 // Customer Portal
 // ============================================================================
 
-/**
- * Create a Stripe customer portal session
- */
 export async function createPortalSession({
   customerId,
   returnUrl,
@@ -397,9 +291,6 @@ export async function createPortalSession({
 // Invoices & Payment History
 // ============================================================================
 
-/**
- * Get customer invoices
- */
 export async function getCustomerInvoices(
   customerId: string,
   limit: number = 10
@@ -410,16 +301,12 @@ export async function getCustomerInvoices(
   });
 }
 
-/**
- * Get upcoming invoice (for proration preview)
- */
 export async function getUpcomingInvoice(customerId: string) {
   try {
     return await stripe.invoices.createPreview({
       customer: customerId,
     });
   } catch {
-    // No upcoming invoice (no active subscription)
     return null;
   }
 }
@@ -428,9 +315,6 @@ export async function getUpcomingInvoice(customerId: string) {
 // Webhook Verification
 // ============================================================================
 
-/**
- * Construct and verify webhook event
- */
 export function constructWebhookEvent(
   payload: string | Buffer,
   signature: string
@@ -446,12 +330,8 @@ export function constructWebhookEvent(
 // Payment Methods
 // ============================================================================
 
-/**
- * Get customer's default payment method
- */
 export async function getDefaultPaymentMethod(customerId: string) {
   const customer = await stripe.customers.retrieve(customerId);
-
   if (customer.deleted) return null;
 
   if (customer.invoice_settings?.default_payment_method) {
@@ -463,9 +343,6 @@ export async function getDefaultPaymentMethod(customerId: string) {
   return null;
 }
 
-/**
- * List customer's payment methods
- */
 export async function listPaymentMethods(customerId: string) {
   return stripe.paymentMethods.list({
     customer: customerId,

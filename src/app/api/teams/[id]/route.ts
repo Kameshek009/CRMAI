@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateTeamSchema } from "@/lib/crm/team-validation";
+import { cancelSubscriptionImmediately } from "@/lib/stripe/server";
 
 export async function GET(
   _request: NextRequest,
@@ -87,6 +88,21 @@ export async function DELETE(
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Cancel Stripe subscription before deleting
+    const { data: teamData } = await supabase
+      .from("teams")
+      .select("stripe_subscription_id")
+      .eq("id", id)
+      .single();
+
+    if (teamData?.stripe_subscription_id) {
+      try {
+        await cancelSubscriptionImmediately(teamData.stripe_subscription_id);
+      } catch (err) {
+        console.error("[TeamDelete] Failed to cancel subscription:", err);
+      }
+    }
 
     // Soft-delete: set deleted_at instead of hard delete
     const { error: dbError } = await supabase

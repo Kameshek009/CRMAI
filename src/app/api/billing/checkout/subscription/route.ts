@@ -1,25 +1,24 @@
 /**
  * POST /api/billing/checkout/subscription
  *
- * Creates a checkout session for subscription upgrades (Pro/Max tiers).
- * Supports both hosted (redirect to Stripe) and embedded modes.
+ * Creates a per-seat checkout session for team subscription.
+ * Only the team director can upgrade. Quantity = active seats.
  *
  * Request body:
- * - tier: "pro" | "max" - the target subscription tier
- * - hosted: boolean (optional) - if true, returns URL for Stripe hosted checkout
+ * - tier: "pro" | "max"
+ * - hosted: boolean (optional)
  *
  * Returns:
- * - For hosted: url - redirect URL to Stripe checkout
- * - For embedded: clientSecret - for mounting EmbeddedCheckout
- * - sessionId: string - checkout session ID
+ * - For hosted: url + sessionId
+ * - For embedded: clientSecret + sessionId
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import {
-  createSubscriptionCheckout,
-  SUBSCRIPTION_PRICES,
+  createPerSeatCheckout,
+  getSeatPrices,
 } from "@/lib/stripe/server";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 import type { SubscriptionTier } from "@/types";
@@ -27,7 +26,6 @@ import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate user
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
@@ -36,7 +34,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user details from Clerk
     const user = await currentUser();
     if (!user) {
       return NextResponse.json(
@@ -45,11 +42,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body
     const body = await request.json();
     const { tier, hosted = false } = body as { tier: SubscriptionTier; hosted?: boolean };
 
-    // Validate tier
     if (!tier || !["pro", "max"].includes(tier)) {
       return NextResponse.json(
         { success: false, error: "Invalid tier. Must be 'pro' or 'max'" },
@@ -57,8 +52,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get price ID for tier
-    const priceId = SUBSCRIPTION_PRICES[tier as keyof typeof SUBSCRIPTION_PRICES];
+    const prices = getSeatPrices();
+    const priceId = prices[tier as keyof typeof prices];
     if (!priceId) {
       return NextResponse.json(
         { success: false, error: `Price ID not configured for tier: ${tier}` },
@@ -66,93 +61,96 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get account from Supabase
     const supabase = createSupabaseAdmin();
+
+    // Get account
     const { data: account, error: accountError } = await supabase
       .from("accounts")
-      .select("*")
+      .select("id, current_team_id, stripe_customer_id")
       .eq("clerk_user_id", userId)
       .single();
 
     if (accountError || !account) {
-      logger.error("Subscription", "[Checkout] Account not found:", accountError);
       return NextResponse.json(
         { success: false, error: "Account not found" },
         { status: 404 }
       );
     }
 
-    // Check if user already has an active subscription at this tier or higher
-    if (account.tier === tier) {
+    // Get the team owned by this account
+    const { data: team, error: teamError } = await supabase
+      .from("teams")
+      .select("id, tier, stripe_subscription_id, stripe_customer_id, owner_account_id, seat_count")
+      .eq("owner_account_id", account.id)
+      .is("deleted_at", null)
+      .single();
+
+    if (teamError || !team) {
       return NextResponse.json(
-        { success: false, error: `You are already on the ${tier} plan` },
+        { success: false, error: "You must own a team to upgrade" },
+        { status: 403 }
+      );
+    }
+
+    // Verify user is the director
+    if (team.owner_account_id !== account.id) {
+      return NextResponse.json(
+        { success: false, error: "Only the team director can upgrade" },
+        { status: 403 }
+      );
+    }
+
+    // Check if already on this tier
+    if (team.tier === tier) {
+      return NextResponse.json(
+        { success: false, error: `Team is already on the ${tier} plan` },
         { status: 400 }
       );
     }
 
     const tierOrder = ["free", "pro", "max", "enterprise"];
-    const currentTierIndex = tierOrder.indexOf(account.tier);
+    const currentTierIndex = tierOrder.indexOf(team.tier);
     const targetTierIndex = tierOrder.indexOf(tier);
 
-    if (currentTierIndex >= targetTierIndex && account.tier !== "free") {
+    if (currentTierIndex >= targetTierIndex && team.tier !== "free") {
       return NextResponse.json(
-        {
-          success: false,
-          error: `Cannot downgrade via checkout. Use subscription management instead.`,
-        },
+        { success: false, error: "Cannot downgrade via checkout. Use subscription management." },
         { status: 400 }
       );
     }
 
-    // Log account state for debugging
-    logger.info("Subscription", `[Checkout] ========== UPGRADE REQUEST ==========`);
-    logger.info("Subscription", `[Checkout] Target tier: ${tier}`);
-    logger.info("Subscription", `[Checkout] Account ID: ${account.id}`);
-    logger.info("Subscription", `[Checkout] Current tier: ${account.tier}`);
-    logger.info("Subscription", `[Checkout] stripe_subscription_id: ${account.stripe_subscription_id || 'NULL'}`);
-    logger.info("Subscription", `[Checkout] stripe_customer_id: ${account.stripe_customer_id || 'NULL'}`);
-    logger.info("Subscription", `[Checkout] =====================================`);
+    // Count active seats in the team
+    const { count: activeMembers } = await supabase
+      .from("team_members")
+      .select("id", { count: "exact", head: true })
+      .eq("team_id", team.id)
+      .eq("status", "active");
 
-    // If user has an existing subscription, we need to handle the upgrade carefully
-    // Option 1: Cancel old subscription and create new checkout for new tier
-    // Option 2: Use Stripe Billing Portal (but we want in-app experience)
-    // We'll go with Option 1: Cancel old and create new checkout
-    if (account.stripe_subscription_id) {
-      logger.info("Subscription", `[Checkout] User has existing subscription ${account.stripe_subscription_id}, will cancel and create new checkout for ${tier}`);
+    const seatCount = Math.max(activeMembers || 1, 1);
 
+    logger.info("Subscription", `[Checkout] Upgrade: team=${team.id}, tier=${tier}, seats=${seatCount}`);
+
+    // Cancel existing subscription if upgrading
+    if (team.stripe_subscription_id) {
       try {
-        // Cancel the existing subscription immediately so we can create a new one
         const { stripe: stripeClient } = await import("@/lib/stripe/server");
-
-        // First check subscription status
-        const existingSub = await stripeClient.subscriptions.retrieve(account.stripe_subscription_id);
-        logger.info("Subscription", `[Checkout] Existing subscription status: ${existingSub.status}`);
+        const existingSub = await stripeClient.subscriptions.retrieve(team.stripe_subscription_id);
 
         if (existingSub.status === "active" || existingSub.status === "trialing") {
-          // Cancel immediately to allow new subscription
-          await stripeClient.subscriptions.cancel(account.stripe_subscription_id);
-          logger.info("Subscription", `[Checkout] Cancelled existing subscription ${account.stripe_subscription_id}`);
+          await stripeClient.subscriptions.cancel(team.stripe_subscription_id);
+          logger.info("Subscription", `[Checkout] Cancelled existing subscription ${team.stripe_subscription_id}`);
         }
 
-        // Clear the subscription ID from database so checkout can proceed
         await supabase
-          .from("accounts")
-          .update({
-            stripe_subscription_id: null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", account.id);
-
-        logger.info("Subscription", `[Checkout] Cleared subscription ID from database, proceeding to create new checkout`);
-
-        // Fall through to create new checkout session below
+          .from("teams")
+          .update({ stripe_subscription_id: null })
+          .eq("id", team.id);
       } catch (cancelError) {
         logger.error("Subscription", "[Checkout] Failed to cancel existing subscription:", cancelError);
-        // Continue to checkout anyway - Stripe will handle it
       }
     }
 
-    // Get primary email from Clerk
+    // Get email from Clerk
     const primaryEmail = user.emailAddresses.find(
       (e) => e.id === user.primaryEmailAddressId
     )?.emailAddress;
@@ -164,51 +162,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get or create permanent Stripe customer BEFORE checkout
+    // Get or create Stripe customer
     const customerId = await getOrCreateStripeCustomer({
       accountId: account.id,
       clerkUserId: userId,
       email: primaryEmail,
       name: user.fullName || undefined,
-      existingStripeCustomerId: account.stripe_customer_id,
+      teamId: team.id,
+      existingStripeCustomerId: team.stripe_customer_id || account.stripe_customer_id,
     });
 
-    // Build return URL
     const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/account/billing/return`;
 
-    // Create checkout session (hosted or embedded)
-    const session = await createSubscriptionCheckout({
+    // Create per-seat checkout
+    const session = await createPerSeatCheckout({
       customerId,
       priceId,
+      seatCount,
       accountId: account.id,
       clerkUserId: userId,
+      teamId: team.id,
       tier,
       returnUrl,
       hosted,
     });
 
-    logger.info("Subscription", `[Checkout] Created ${hosted ? 'hosted' : 'embedded'} subscription session: ${session.id} for tier: ${tier}`);
+    logger.info("Subscription", `[Checkout] Created session: ${session.id}, ${seatCount} seats × ${tier}`);
 
-    // Return appropriate data based on checkout mode
     if (hosted) {
       return NextResponse.json({
         success: true,
-        data: {
-          url: session.url,
-          sessionId: session.id,
-        },
+        data: { url: session.url, sessionId: session.id },
       });
     }
 
     return NextResponse.json({
       success: true,
-      data: {
-        clientSecret: session.client_secret,
-        sessionId: session.id,
-      },
+      data: { clientSecret: session.client_secret, sessionId: session.id },
     });
   } catch (error) {
-    logger.error("Subscription", "[Checkout] Error creating subscription session:", error);
+    logger.error("Subscription", "[Checkout] Error:", error);
     return NextResponse.json(
       {
         success: false,

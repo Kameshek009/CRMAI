@@ -8,14 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Loader2, CreditCard, Zap, ExternalLink } from "lucide-react";
+import { AlertCircle, Loader2, CreditCard, Users } from "lucide-react";
 import {
   PlanCard,
-  CreditPackageGrid,
   BillingHistory,
   ManageSubscriptionButton,
 } from "@/components/billing";
-import type { Account, PaymentHistory, SubscriptionTier } from "@/types";
+import type { PaymentHistory, SubscriptionTier } from "@/types";
+import { TIER_LIMITS } from "@/types";
 
 interface UsageStats {
   tokensUsed: number;
@@ -26,37 +26,25 @@ interface UsageStats {
   weeklyTokenLimit: number;
   weeklyPercentUsed: number;
   daysRemaining: number;
-  daysIntoWeek: number;
-  billingCycleStart: string;
-  billingCycleEnd: string;
-  tokenCredits: number;
+  seatCount: number;
   isEnterprise: boolean;
 }
 
+interface TeamBillingInfo {
+  id: string;
+  name: string;
+  tier: SubscriptionTier;
+  seatCount: number;
+  isDirector: boolean;
+}
+
 interface BillingData {
-  account: Account;
+  team: TeamBillingInfo;
   usageStats: UsageStats;
   paymentHistory: PaymentHistory[];
 }
 
 type PageState = "loading" | "ready" | "error";
-
-function parseUpgradeParam(upgrade: string | null): {
-  type: "subscription" | "credits";
-  itemId: string;
-} | null {
-  if (!upgrade) return null;
-
-  if (upgrade.startsWith("credits_")) {
-    return { type: "credits", itemId: upgrade };
-  }
-
-  if (upgrade === "pro" || upgrade === "max") {
-    return { type: "subscription", itemId: upgrade };
-  }
-
-  return null;
-}
 
 function BillingPageContent() {
   const searchParams = useSearchParams();
@@ -64,40 +52,24 @@ function BillingPageContent() {
   const [state, setState] = useState<PageState>("loading");
   const [data, setData] = useState<BillingData | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const [urlParamProcessed, setUrlParamProcessed] = useState(false);
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
-  const redirectToCheckout = async (type: "subscription" | "credits", itemId: string) => {
+  const redirectToCheckout = async (tier: string) => {
     try {
-      setLoadingTier(itemId);
+      setLoadingTier(tier);
       setError(null);
 
-      const endpoint =
-        type === "subscription"
-          ? "/api/billing/checkout/subscription"
-          : "/api/billing/checkout/credits";
-
-      const body =
-        type === "subscription"
-          ? { tier: itemId, hosted: true }
-          : { packageId: itemId, hosted: true };
-
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/billing/checkout/subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ tier, hosted: true }),
       });
 
       const result = await response.json();
 
       if (!result.success) {
         throw new Error(result.error || "Failed to create checkout session");
-      }
-
-      if (result.data.upgraded) {
-        window.location.reload();
-        return;
       }
 
       if (result.data.url) {
@@ -114,10 +86,8 @@ function BillingPageContent() {
     if (urlParamProcessed || state !== "ready") return;
 
     const upgradeParam = searchParams.get("upgrade");
-    const parsed = parseUpgradeParam(upgradeParam);
-
-    if (parsed) {
-      redirectToCheckout(parsed.type, parsed.itemId);
+    if (upgradeParam && (upgradeParam === "pro" || upgradeParam === "max")) {
+      redirectToCheckout(upgradeParam);
       setUrlParamProcessed(true);
 
       const url = new URL(window.location.href);
@@ -149,19 +119,14 @@ function BillingPageContent() {
   }, []);
 
   const handleSubscriptionSelect = (tier: SubscriptionTier) => {
-    if (tier === "enterprise") return;
-    redirectToCheckout("subscription", tier);
+    if (tier === "enterprise" || tier === "free") return;
+    redirectToCheckout(tier);
   };
 
-  const handleCreditPurchase = (packageId: string) => {
-    redirectToCheckout("credits", packageId);
-  };
-
-  // Loading state
   if (state === "loading") {
     return (
       <PageContainer>
-        <PageHeader title="Billing" description="Manage your subscription and payments" />
+        <PageHeader title="Billing" description="Manage your team subscription and payments" />
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-32" />
@@ -171,24 +136,14 @@ function BillingPageContent() {
             <Skeleton className="h-24 w-full" />
           </CardContent>
         </Card>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-8">
-                <Skeleton className="h-48 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </PageContainer>
     );
   }
 
-  // Error state
   if (state === "error" || !data) {
     return (
       <PageContainer>
-        <PageHeader title="Billing" description="Manage your subscription and payments" />
+        <PageHeader title="Billing" description="Manage your team subscription and payments" />
         <Card>
           <CardContent className="p-8">
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -213,7 +168,10 @@ function BillingPageContent() {
     );
   }
 
-  const { account, usageStats } = data;
+  const { team, usageStats } = data;
+  const tierLimits = TIER_LIMITS[team.tier];
+  const perSeatPrice = tierLimits.priceMonthly;
+  const totalMonthly = perSeatPrice * team.seatCount;
 
   const formatTokens = (count: number) => {
     if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
@@ -223,8 +181,10 @@ function BillingPageContent() {
 
   return (
     <PageContainer>
-      <PageHeader title="Billing" description="Manage your subscription and payments">
-        <ManageSubscriptionButton customerId={account.stripeCustomerId ?? null} />
+      <PageHeader title="Billing" description={`Team: ${team.name}`}>
+        {team.isDirector && (
+          <ManageSubscriptionButton customerId={null} />
+        )}
       </PageHeader>
 
       {/* Current Plan Summary */}
@@ -237,16 +197,18 @@ function BillingPageContent() {
                 Current Plan
               </CardTitle>
               <CardDescription>
-                Your subscription and usage for this billing period
+                {team.isDirector
+                  ? "Your team subscription and usage"
+                  : "Team subscription (managed by director)"}
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-lg px-4 py-1.5 capitalize">
-              {account.tier}
+              {team.tier}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-4">
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Tokens Used</p>
               <p className="text-2xl font-bold">{formatTokens(usageStats.tokensUsed)}</p>
@@ -256,10 +218,28 @@ function BillingPageContent() {
               <p className="text-2xl font-bold">{formatTokens(usageStats.tokenLimit)}</p>
             </div>
             <div className="space-y-2">
+              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                <Users className="size-3.5" />
+                Seats
+              </p>
+              <p className="text-2xl font-bold">{team.seatCount}</p>
+            </div>
+            <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Days Remaining</p>
               <p className="text-2xl font-bold">{usageStats.daysRemaining}</p>
             </div>
           </div>
+
+          {/* Per-seat cost breakdown */}
+          {team.tier !== "free" && team.isDirector && (
+            <div className="rounded-xl bg-secondary p-4">
+              <p className="text-sm text-muted-foreground">Monthly Cost</p>
+              <p className="text-lg font-semibold mt-1">
+                {team.seatCount} seats × ${perSeatPrice}/seat = ${totalMonthly.toFixed(2)}/mo
+              </p>
+            </div>
+          )}
+
           <div className="space-y-3">
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{usageStats.percentUsed.toFixed(1)}% used</span>
@@ -282,38 +262,37 @@ function BillingPageContent() {
         </Card>
       )}
 
-      {/* Subscription Plans */}
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold">Subscription Plans</h2>
-          <p className="text-muted-foreground">
-            Choose the plan that works best for you
-          </p>
+      {/* Subscription Plans — only for directors */}
+      {team.isDirector && (
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Subscription Plans</h2>
+            <p className="text-muted-foreground">
+              Per-seat pricing — you pay for each member in your team
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <PlanCard
+              tier="free"
+              currentTier={team.tier}
+              onSelect={handleSubscriptionSelect}
+              isLoading={loadingTier === "free"}
+            />
+            <PlanCard
+              tier="pro"
+              currentTier={team.tier}
+              onSelect={handleSubscriptionSelect}
+              isLoading={loadingTier === "pro"}
+            />
+            <PlanCard
+              tier="max"
+              currentTier={team.tier}
+              onSelect={handleSubscriptionSelect}
+              isLoading={loadingTier === "max"}
+            />
+          </div>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <PlanCard
-            tier="free"
-            currentTier={account.tier}
-            onSelect={handleSubscriptionSelect}
-            isLoading={loadingTier === "free"}
-          />
-          <PlanCard
-            tier="pro"
-            currentTier={account.tier}
-            onSelect={handleSubscriptionSelect}
-            isLoading={loadingTier === "pro"}
-          />
-          <PlanCard
-            tier="max"
-            currentTier={account.tier}
-            onSelect={handleSubscriptionSelect}
-            isLoading={loadingTier === "max"}
-          />
-        </div>
-      </div>
-
-      {/* Credit Packages */}
-      <CreditPackageGrid onPurchase={handleCreditPurchase} loadingPackageId={loadingTier} />
+      )}
 
       {/* Billing History */}
       <BillingHistory payments={data.paymentHistory} />
@@ -326,7 +305,7 @@ export default function BillingPage() {
     <Suspense
       fallback={
         <PageContainer>
-          <PageHeader title="Billing" description="Manage your subscription and payments" />
+          <PageHeader title="Billing" description="Manage your team subscription and payments" />
           <div className="flex items-center justify-center py-20">
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
           </div>

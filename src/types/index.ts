@@ -7,11 +7,12 @@ export type SubscriptionTier = "free" | "pro" | "max" | "enterprise";
 export interface TierLimits {
   monthlyTokenLimit: number;
   weeklyTokenLimit: number;
-  priceMonthly: number;
+  /** Per-seat price */
   priceMonthlyCents: number;
+  priceMonthly: number;
   stripePriceId: string | null;
   features: string[];
-  isSubscription: boolean;  // false for enterprise (credit-based)
+  maxMembers: number;
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
@@ -21,10 +22,9 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     priceMonthly: 0,
     priceMonthlyCents: 0,
     stripePriceId: null,
-    isSubscription: false,
+    maxMembers: 3,
     features: [
-      "50K AI tokens/month",
-      "10K tokens/week limit",
+      "50K AI tokens/month (team pool)",
       "Up to 50 contacts",
       "1 company",
       "Basic pipeline (2 stages)",
@@ -39,10 +39,10 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     weeklyTokenLimit: 100_000,
     priceMonthly: 14.99,
     priceMonthlyCents: 1499,
-    stripePriceId: process.env.STRIPE_PRICE_PRO_MONTHLY || null,
-    isSubscription: true,
+    stripePriceId: process.env.STRIPE_PRICE_PRO_SEAT || null,
+    maxMembers: 5000,
     features: [
-      "500K AI tokens/month",
+      "500K AI tokens/month (team pool)",
       "Up to 200 contacts",
       "Up to 5 companies",
       "Unlimited pipeline stages",
@@ -60,10 +60,10 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     weeklyTokenLimit: 300_000,
     priceMonthly: 34.99,
     priceMonthlyCents: 3499,
-    stripePriceId: process.env.STRIPE_PRICE_MAX_MONTHLY || null,
-    isSubscription: true,
+    stripePriceId: process.env.STRIPE_PRICE_MAX_SEAT || null,
+    maxMembers: 5000,
     features: [
-      "1.5M AI tokens/month",
+      "1.5M AI tokens/month (team pool)",
       "Up to 500 contacts",
       "Up to 10 companies",
       "Advanced AI automation",
@@ -77,14 +77,14 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     ],
   },
   enterprise: {
-    monthlyTokenLimit: 0,  // Unlimited (credit-based)
-    weeklyTokenLimit: 0,   // No weekly cap for credits
-    priceMonthly: 0,       // Pay-per-use
+    monthlyTokenLimit: 0, // Unlimited
+    weeklyTokenLimit: 0,
+    priceMonthly: 0, // Custom per-seat
     priceMonthlyCents: 0,
     stripePriceId: null,
-    isSubscription: false,
+    maxMembers: 5000,
     features: [
-      "Unlimited AI tokens (credit-based)",
+      "Unlimited AI tokens (team pool)",
       "25+ companies",
       "Unlimited contacts",
       "White labeling",
@@ -93,58 +93,9 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       "Dedicated infrastructure",
       "24/7 priority support",
       "Custom SLA & onboarding",
-      "Volume discounts",
     ],
   },
 };
-
-// ============================================================================
-// Credit Packages (Enterprise)
-// ============================================================================
-
-export interface CreditPackage {
-  id: string;
-  tokenAmount: number;
-  priceCents: number;
-  priceDisplay: string;
-  displayName: string;
-  stripePriceId: string | null;
-}
-
-export const CREDIT_PACKAGES: CreditPackage[] = [
-  {
-    id: "credits_100k",
-    tokenAmount: 100_000,
-    priceCents: 1999,
-    priceDisplay: "$19.99",
-    displayName: "100K Tokens",
-    stripePriceId: process.env.STRIPE_PRICE_CREDITS_100K || null,
-  },
-  {
-    id: "credits_250k",
-    tokenAmount: 250_000,
-    priceCents: 4999,
-    priceDisplay: "$49.99",
-    displayName: "250K Tokens",
-    stripePriceId: process.env.STRIPE_PRICE_CREDITS_250K || null,
-  },
-  {
-    id: "credits_600k",
-    tokenAmount: 600_000,
-    priceCents: 9999,
-    priceDisplay: "$99.99",
-    displayName: "600K Tokens",
-    stripePriceId: process.env.STRIPE_PRICE_CREDITS_600K || null,
-  },
-  {
-    id: "credits_1500k",
-    tokenAmount: 1_500_000,
-    priceCents: 19998,
-    priceDisplay: "$199.98",
-    displayName: "1.5M Tokens",
-    stripePriceId: process.env.STRIPE_PRICE_CREDITS_1500K || null,
-  },
-];
 
 // ============================================================================
 // Account
@@ -158,7 +109,7 @@ export interface Account {
   tokensUsed: number;
   weeklyTokensUsed: number;
   weekStartDate: Date;
-  tokenCredits: number;  // For enterprise prepaid credits
+  tokenCredits: number;
   billingCycleStart: Date;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
@@ -206,6 +157,51 @@ export function transformAccountRow(row: AccountRow): Account {
 }
 
 // ============================================================================
+// Team Billing
+// ============================================================================
+
+export interface TeamBilling {
+  id: string;
+  tier: SubscriptionTier;
+  tokenLimit: number;
+  tokensUsed: number;
+  weeklyTokensUsed: number;
+  weekStartDate: string;
+  billingCycleStart: string;
+  seatCount: number;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+}
+
+export interface TeamBillingRow {
+  id: string;
+  tier: string;
+  token_limit: number;
+  tokens_used: number;
+  weekly_tokens_used: number;
+  week_start_date: string;
+  billing_cycle_start: string;
+  seat_count: number;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+}
+
+export function transformTeamBillingRow(row: TeamBillingRow): TeamBilling {
+  return {
+    id: row.id,
+    tier: row.tier as SubscriptionTier,
+    tokenLimit: row.token_limit,
+    tokensUsed: row.tokens_used,
+    weeklyTokensUsed: row.weekly_tokens_used,
+    weekStartDate: row.week_start_date,
+    billingCycleStart: row.billing_cycle_start,
+    seatCount: row.seat_count,
+    stripeCustomerId: row.stripe_customer_id,
+    stripeSubscriptionId: row.stripe_subscription_id,
+  };
+}
+
+// ============================================================================
 // Usage & Limits
 // ============================================================================
 
@@ -221,15 +217,13 @@ export interface UsageStats {
   daysIntoWeek: number;
   billingCycleStart: Date;
   billingCycleEnd: Date;
-  // For enterprise
-  tokenCredits: number;
+  seatCount: number;
   isEnterprise: boolean;
 }
 
 export type UsageBlockReason =
   | "weekly_cap_exceeded"
   | "monthly_cap_exceeded"
-  | "insufficient_credits"
   | "subscription_inactive";
 
 export interface UsageCheckResult {
@@ -239,20 +233,20 @@ export interface UsageCheckResult {
   weeklyLimit?: number;
   monthlyUsed?: number;
   monthlyLimit?: number;
-  creditsRemaining?: number;
-  upgradeOptions?: string[];  // tier IDs or package IDs
+  upgradeOptions?: string[];
 }
 
 // ============================================================================
 // Billing & Payments
 // ============================================================================
 
-export type PaymentType = "subscription" | "credit_package" | "upgrade" | "renewal";
+export type PaymentType = "subscription" | "upgrade" | "renewal";
 export type PaymentStatus = "pending" | "succeeded" | "failed" | "refunded";
 
 export interface PaymentHistory {
   id: string;
   accountId: string;
+  teamId: string | null;
   stripePaymentIntentId: string | null;
   stripeInvoiceId: string | null;
   stripeCheckoutSessionId: string | null;
@@ -266,10 +260,7 @@ export interface PaymentHistory {
 }
 
 export interface CheckoutSessionRequest {
-  type: "subscription" | "credits";
-  priceId?: string;
-  tier?: SubscriptionTier;
-  packageId?: string;
+  tier: SubscriptionTier;
 }
 
 export interface CheckoutSessionResponse {
@@ -320,7 +311,6 @@ export type ActivityEventType =
   | "subscription_cancelled"
   | "tier_upgraded"
   | "tier_downgraded"
-  | "credits_purchased"
   | "weekly_reset"
   | "monthly_reset"
   | "error"
@@ -365,7 +355,6 @@ export interface DashboardStats {
 export interface StripeWebhookMetadata {
   account_id?: string;
   clerk_user_id?: string;
+  team_id?: string;
   tier?: SubscriptionTier;
-  package_id?: string;
-  token_amount?: string;
 }

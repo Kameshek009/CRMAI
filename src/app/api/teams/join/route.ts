@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getAccountId } from "@/lib/crm/helpers";
 import { joinTeamSchema } from "@/lib/crm/team-validation";
+import { updateSubscriptionQuantity } from "@/lib/stripe/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,8 +20,9 @@ export async function POST(request: NextRequest) {
     // Find team by invite code
     const { data: team } = await supabase
       .from("teams")
-      .select("id, name, max_members")
+      .select("id, name, max_members, tier, stripe_subscription_id, seat_count")
       .eq("invite_code", parsed.data.invite_code)
+      .is("deleted_at", null)
       .single();
 
     if (!team) {
@@ -97,6 +99,20 @@ export async function POST(request: NextRequest) {
       .from("accounts")
       .update({ current_team_id: team.id })
       .eq("id", accountId);
+
+    // Update Stripe subscription quantity (per-seat billing)
+    if (team.stripe_subscription_id && team.tier !== "free") {
+      const newSeatCount = (team.seat_count || 1) + 1;
+      try {
+        await updateSubscriptionQuantity(team.stripe_subscription_id, newSeatCount);
+        await supabase
+          .from("teams")
+          .update({ seat_count: newSeatCount })
+          .eq("id", team.id);
+      } catch (err) {
+        console.error("[TeamJoin] Failed to update Stripe quantity:", err);
+      }
+    }
 
     return NextResponse.json({ success: true, data: { teamId: team.id, teamName: team.name } });
   } catch {

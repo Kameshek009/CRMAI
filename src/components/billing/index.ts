@@ -7,7 +7,7 @@
 export { EmbeddedCheckout, CheckoutModal } from "./EmbeddedCheckout";
 export { PaymentModal } from "./PaymentForm";
 export { PlanCard } from "./PlanCard";
-export { CreditPackageCard, CreditPackageGrid } from "./CreditPackageCard";
+// CreditPackageCard removed — per-seat billing only
 export { UsageSummary, CompactUsage } from "./UsageSummary";
 export { BillingHistory, ManageSubscriptionButton } from "./BillingHistory";
 export { CustomerBillingCard } from "./CustomerBillingCard";

@@ -19,7 +19,7 @@ import {
   ChevronUp,
   HelpCircle,
 } from "lucide-react";
-import { useAccount } from "@/contexts/account-context";
+import { useTeam } from "@/contexts/team-context";
 import { TIER_LIMITS, type SubscriptionTier } from "@/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -111,16 +111,16 @@ const comparisonRows: ComparisonRow[] = [
 
 const faqs = [
   {
+    q: "How does per-seat pricing work?",
+    a: "The team director pays for every active member. For example, a Pro team with 10 members costs $14.99 × 10 = $149.90/mo. When members join or leave, the subscription adjusts automatically with prorated charges.",
+  },
+  {
     q: "Can I change my plan at any time?",
-    a: "Yes! You can upgrade or downgrade your plan at any time. When upgrading, you'll be charged a prorated amount for the remainder of the billing cycle. Downgrades take effect at the end of the current period.",
+    a: "Yes! The team director can upgrade or downgrade at any time. Upgrades are prorated for the remainder of the billing cycle. Downgrades take effect at the end of the current period.",
   },
   {
-    q: "What happens when I run out of tokens?",
-    a: "When your monthly token allocation is exhausted, AI features will be limited until the next billing cycle. You can upgrade your plan or purchase additional credit packages to continue uninterrupted.",
-  },
-  {
-    q: "Do unused tokens roll over?",
-    a: "Monthly token allocations reset at the start of each billing cycle and do not roll over. Credit packages, however, never expire and remain available until used.",
+    q: "What happens when the team runs out of tokens?",
+    a: "Token limits are shared across the entire team. When the monthly allocation is exhausted, AI features are limited until the next billing cycle. Upgrade your plan for more tokens.",
   },
   {
     q: "How does Enterprise pricing work?",
@@ -181,8 +181,9 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 /* ------------------------------------------------------------------ */
 
 export function UpgradeContent() {
-  const { account, usage, isLoading } = useAccount();
-  const currentTier = account?.tier || "free";
+  const { currentTeam, isLoading, isDirector } = useTeam();
+  const currentTier = (currentTeam?.tier || "free") as SubscriptionTier;
+  const seatCount = currentTeam?.seatCount || 1;
 
   const tierOrder: SubscriptionTier[] = ["free", "pro", "max", "enterprise"];
 
@@ -220,17 +221,17 @@ export function UpgradeContent() {
                     <Badge variant="outline" className="capitalize">{currentTier}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {usage
-                      ? `${formatTokens(usage.tokensUsed)} / ${formatTokens(usage.tokenLimit)} tokens used`
-                      : "Loading usage..."}
+                    {currentTeam
+                      ? `${formatTokens(currentTeam.tokensUsed)} / ${formatTokens(currentTeam.tokenLimit)} tokens used · ${seatCount} seats`
+                      : "Loading..."}
                   </p>
                 </div>
               </div>
-              {usage && (
+              {currentTeam && currentTeam.tokenLimit > 0 && (
                 <div className="w-full sm:w-48">
-                  <Progress value={usage.percentUsed} className="h-2" />
+                  <Progress value={Math.min(100, (currentTeam.tokensUsed / currentTeam.tokenLimit) * 100)} className="h-2" />
                   <p className="text-xs text-muted-foreground mt-1 text-right">
-                    {usage.percentUsed.toFixed(0)}% used
+                    {Math.min(100, (currentTeam.tokensUsed / currentTeam.tokenLimit) * 100).toFixed(0)}% used
                   </p>
                 </div>
               )}
@@ -320,12 +321,16 @@ export function UpgradeContent() {
                       <ArrowRight className="ml-2 size-4" />
                     </a>
                   </Button>
-                ) : upgrade ? (
+                ) : upgrade && isDirector ? (
                   <Button className="w-full" asChild>
                     <Link href={`/dashboard/account/billing?upgrade=${plan.tier}`}>
                       Upgrade to {plan.name}
                       <ArrowRight className="ml-2 size-4" />
                     </Link>
+                  </Button>
+                ) : upgrade && !isDirector ? (
+                  <Button variant="outline" className="w-full" disabled>
+                    Ask Director to Upgrade
                   </Button>
                 ) : (
                   <Button variant="outline" className="w-full" disabled>

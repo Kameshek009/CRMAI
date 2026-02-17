@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { kickMemberSchema } from "@/lib/crm/team-validation";
+import { updateSubscriptionQuantity } from "@/lib/stripe/server";
 
 export async function POST(
   request: NextRequest,
@@ -57,6 +58,26 @@ export async function POST(
 
     if (dbError) {
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
+    }
+
+    // Update Stripe subscription quantity (per-seat billing)
+    const { data: team } = await supabase
+      .from("teams")
+      .select("stripe_subscription_id, tier, seat_count")
+      .eq("id", id)
+      .single();
+
+    if (team?.stripe_subscription_id && team.tier !== "free") {
+      const newSeatCount = Math.max(1, (team.seat_count || 1) - 1);
+      try {
+        await updateSubscriptionQuantity(team.stripe_subscription_id, newSeatCount);
+        await supabase
+          .from("teams")
+          .update({ seat_count: newSeatCount })
+          .eq("id", id);
+      } catch (err) {
+        console.error("[TeamKick] Failed to update Stripe quantity:", err);
+      }
     }
 
     return NextResponse.json({ success: true });

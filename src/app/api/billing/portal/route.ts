@@ -1,18 +1,20 @@
+/**
+ * POST /api/billing/portal
+ *
+ * Create a Stripe billing portal session.
+ * Only the team director can access the portal.
+ * Uses the team's stripe_customer_id.
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { createPortalSession } from "@/lib/stripe/server";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 
-/**
- * POST /api/billing/portal
- * Create a Stripe billing portal session.
- * Will create a Stripe customer if one doesn't exist.
- */
 export async function POST(_request: NextRequest) {
   try {
     const { userId } = await auth();
-
     if (!userId) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
@@ -20,7 +22,6 @@ export async function POST(_request: NextRequest) {
       );
     }
 
-    // Get user details from Clerk
     const user = await currentUser();
     if (!user) {
       return NextResponse.json(
@@ -29,8 +30,9 @@ export async function POST(_request: NextRequest) {
       );
     }
 
-    // Get account with Stripe customer ID
     const supabase = createSupabaseAdmin();
+
+    // Get account
     const { data: account, error: accountError } = await supabase
       .from("accounts")
       .select("id, stripe_customer_id")
@@ -44,7 +46,21 @@ export async function POST(_request: NextRequest) {
       );
     }
 
-    // Get primary email from Clerk
+    // Get the team owned by this account
+    const { data: team } = await supabase
+      .from("teams")
+      .select("id, stripe_customer_id, owner_account_id")
+      .eq("owner_account_id", account.id)
+      .is("deleted_at", null)
+      .single();
+
+    if (!team) {
+      return NextResponse.json(
+        { success: false, error: "Only the team director can access billing portal" },
+        { status: 403 }
+      );
+    }
+
     const primaryEmail = user.emailAddresses.find(
       (e) => e.id === user.primaryEmailAddressId
     )?.emailAddress;
@@ -56,16 +72,16 @@ export async function POST(_request: NextRequest) {
       );
     }
 
-    // Get or create permanent Stripe customer
+    // Get or create Stripe customer using team's customer ID
     const customerId = await getOrCreateStripeCustomer({
       accountId: account.id,
       clerkUserId: userId,
       email: primaryEmail,
       name: user.fullName || undefined,
-      existingStripeCustomerId: account.stripe_customer_id,
+      teamId: team.id,
+      existingStripeCustomerId: team.stripe_customer_id || account.stripe_customer_id,
     });
 
-    // Create portal session
     const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/account/billing`;
     const portalSession = await createPortalSession({
       customerId,
@@ -74,9 +90,7 @@ export async function POST(_request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: {
-        url: portalSession.url,
-      },
+      data: { url: portalSession.url },
     });
   } catch (error) {
     console.error("[BillingPortal]", error);

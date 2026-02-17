@@ -935,6 +935,7 @@ export type Database = {
           stripe_checkout_session_id: string | null
           stripe_invoice_id: string | null
           stripe_payment_intent_id: string | null
+          team_id: string | null
           tier_or_package: string | null
         }
         Insert: {
@@ -949,6 +950,7 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
+          team_id?: string | null
           tier_or_package?: string | null
         }
         Update: {
@@ -963,6 +965,7 @@ export type Database = {
           stripe_checkout_session_id?: string | null
           stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
+          team_id?: string | null
           tier_or_package?: string | null
         }
         Relationships: [
@@ -1244,6 +1247,7 @@ export type Database = {
       }
       teams: {
         Row: {
+          billing_cycle_start: string
           created_at: string
           deleted_at: string | null
           description: string | null
@@ -1252,11 +1256,20 @@ export type Database = {
           max_members: number
           name: string
           owner_account_id: string
+          seat_count: number
           settings: Json
           slug: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier: string
+          token_limit: number
+          tokens_used: number
           updated_at: string
+          week_start_date: string
+          weekly_tokens_used: number
         }
         Insert: {
+          billing_cycle_start?: string
           created_at?: string
           deleted_at?: string | null
           description?: string | null
@@ -1265,11 +1278,20 @@ export type Database = {
           max_members?: number
           name: string
           owner_account_id: string
+          seat_count?: number
           settings?: Json
           slug: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+          token_limit?: number
+          tokens_used?: number
           updated_at?: string
+          week_start_date?: string
+          weekly_tokens_used?: number
         }
         Update: {
+          billing_cycle_start?: string
           created_at?: string
           deleted_at?: string | null
           description?: string | null
@@ -1278,9 +1300,17 @@ export type Database = {
           max_members?: number
           name?: string
           owner_account_id?: string
+          seat_count?: number
           settings?: Json
           slug?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+          token_limit?: number
+          tokens_used?: number
           updated_at?: string
+          week_start_date?: string
+          weekly_tokens_used?: number
         }
         Relationships: [
           {

@@ -1,9 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { stripe, createCustomer } from "./server";
 
-/**
- * Supabase client for customer operations
- */
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -18,50 +15,40 @@ export interface CustomerInfo {
   clerkUserId: string;
   email: string;
   name?: string;
+  teamId?: string;
   existingStripeCustomerId?: string | null;
 }
 
 /**
- * Get or create a permanent Stripe customer for a user.
- *
- * This ensures ONE permanent customer per Clerk user:
- * 1. If stripe_customer_id exists in account, return it
- * 2. Otherwise, create new customer in Stripe with metadata
- * 3. Store stripe_customer_id in Supabase account
- * 4. Return the customer ID
- *
- * @param info - Customer information from Clerk/Supabase
- * @returns Stripe customer ID
+ * Get or create a Stripe customer for a team.
+ * Stores stripe_customer_id on both account and team.
  */
 export async function getOrCreateStripeCustomer(
   info: CustomerInfo
 ): Promise<string> {
-  const { accountId, clerkUserId, email, name, existingStripeCustomerId } = info;
+  const { accountId, clerkUserId, email, name, teamId, existingStripeCustomerId } = info;
 
-  // If customer already exists, return it
   if (existingStripeCustomerId) {
-    // Verify customer still exists in Stripe
     try {
       const customer = await stripe.customers.retrieve(existingStripeCustomerId);
       if (!customer.deleted) {
         return existingStripeCustomerId;
       }
     } catch {
-      // Customer was deleted or doesn't exist, create new one
       console.log(`Customer ${existingStripeCustomerId} not found, creating new one`);
     }
   }
 
-  // Create new Stripe customer
   const customer = await createCustomer({
     email,
     name,
     accountId,
     clerkUserId,
+    teamId,
   });
 
-  // Store customer ID in Supabase account
-  const { error } = await supabase
+  // Store on account
+  await supabase
     .from("accounts")
     .update({
       stripe_customer_id: customer.id,
@@ -69,9 +56,12 @@ export async function getOrCreateStripeCustomer(
     })
     .eq("id", accountId);
 
-  if (error) {
-    console.error("Failed to store Stripe customer ID in Supabase:", error);
-    // Don't throw - customer was created, we can retry storing the ID later
+  // Store on team
+  if (teamId) {
+    await supabase
+      .from("teams")
+      .update({ stripe_customer_id: customer.id })
+      .eq("id", teamId);
   }
 
   return customer.id;
@@ -99,6 +89,7 @@ export interface SubscriptionInfo {
   cancelAt: Date | null;
   priceId: string;
   productName: string | null;
+  quantity: number;
 }
 
 export interface InvoiceInfo {
@@ -121,20 +112,13 @@ export interface CustomerBillingInfo {
   paymentMethods: PaymentMethodInfo[];
   subscription: SubscriptionInfo | null;
   invoices: InvoiceInfo[];
-  balance: number; // Customer's credit balance (negative = credit)
+  balance: number;
 }
 
-/**
- * Get comprehensive billing information for a customer.
- *
- * @param customerId - Stripe customer ID
- * @returns Customer billing info including payment methods, subscription, and invoices
- */
 export async function getCustomerBillingInfo(
   customerId: string
 ): Promise<CustomerBillingInfo | null> {
   try {
-    // Fetch customer with expanded data
     const customer = await stripe.customers.retrieve(customerId, {
       expand: ["invoice_settings.default_payment_method"],
     });
@@ -143,7 +127,6 @@ export async function getCustomerBillingInfo(
       return null;
     }
 
-    // Get payment methods
     const paymentMethodsResponse = await stripe.paymentMethods.list({
       customer: customerId,
       type: "card",
@@ -165,7 +148,6 @@ export async function getCustomerBillingInfo(
       })
     );
 
-    // Get active subscription
     const subscriptionsResponse = await stripe.subscriptions.list({
       customer: customerId,
       status: "all",
@@ -175,8 +157,9 @@ export async function getCustomerBillingInfo(
     let subscription: SubscriptionInfo | null = null;
     const firstSubscription = subscriptionsResponse.data[0];
     if (firstSubscription) {
-      const sub = firstSubscription as any; // Use any to access raw Stripe properties
+      const sub = firstSubscription as any;
       const priceId = sub.items?.data?.[0]?.price?.id || "";
+      const quantity = sub.items?.data?.[0]?.quantity || 1;
 
       subscription = {
         id: sub.id,
@@ -186,11 +169,11 @@ export async function getCustomerBillingInfo(
         cancelAtPeriodEnd: sub.cancel_at_period_end || false,
         cancelAt: sub.cancel_at ? new Date(sub.cancel_at * 1000) : null,
         priceId,
-        productName: null, // Skip product name to avoid expansion depth issues
+        productName: null,
+        quantity,
       };
     }
 
-    // Get recent invoices
     const invoicesResponse = await stripe.invoices.list({
       customer: customerId,
       limit: 10,
@@ -224,9 +207,6 @@ export async function getCustomerBillingInfo(
   }
 }
 
-/**
- * Update Stripe customer email and name (sync from Clerk).
- */
 export async function syncCustomerFromClerk(
   customerId: string,
   email: string,

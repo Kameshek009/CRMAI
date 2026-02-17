@@ -1,172 +1,122 @@
 /**
- * Usage Checking Module
+ * Usage Checking Module — Team-level billing
  *
- * Implements daily caps and enterprise credit checking for the token system.
+ * All token limits are shared across the team.
+ * Director pays per seat; tokens are a team pool.
  *
  * Daily Cap System:
  * - Each tier has a daily token limit (resets every 24h)
- * - If user exceeds their daily limit, they're capped until next day
- * - Prevents burst usage and promotes steady consumption
+ * - If team exceeds their daily limit, all members are capped until next day
  *
- * Enterprise Credits:
- * - No monthly/daily caps
- * - Uses prepaid token credits that deplete
- * - Must buy more credits when depleted
- *
- * NOTE: Some interface field names (weeklyUsed, weeklyLimit, weeklyTokensUsed, etc.)
- * retain "weekly" naming for backward compatibility with the database schema and UI
- * components, even though the actual limit period is 24 hours (daily).
+ * NOTE: Field names retain "weekly" for DB/UI backward compatibility,
+ * but the actual limit period is 24 hours (daily).
  */
 
-import type { Account, UsageCheckResult, SubscriptionTier } from "@/types";
+import type { UsageCheckResult, UsageStats, SubscriptionTier } from "@/types";
 import { TIER_TOKEN_LIMITS, TIER_WEEKLY_LIMITS } from "@/lib/constants/tiers";
 
-/**
- * Check if a user is allowed to use tokens based on their tier and usage.
- *
- * For subscription tiers (free, pro, max):
- * - Checks daily cap (24h rolling window)
- * - Returns upgrade options if capped
- *
- * For enterprise tier:
- * - Checks credit balance
- * - Returns credit package options if depleted
- */
-export function checkUsageAllowed(
-  account: Account,
-  tokensNeeded: number
-): UsageCheckResult {
-  // Enterprise tier uses credits, not caps
-  if (account.tier === "enterprise") {
-    return checkEnterpriseCredits(account, tokensNeeded);
-  }
+// ============================================================================
+// Team billing data shape (from Supabase teams row)
+// ============================================================================
 
-  // Subscription tiers use daily caps
-  return checkDailyCap(account, tokensNeeded);
+export interface TeamBillingData {
+  tier: SubscriptionTier;
+  token_limit: number;
+  tokens_used: number;
+  weekly_tokens_used: number;
+  week_start_date: string;
+  billing_cycle_start: string;
+  seat_count: number;
 }
 
+// ============================================================================
+// Team Usage Check
+// ============================================================================
+
 /**
- * Check daily cap for subscription tiers.
- * Uses a 24h rolling window to limit token consumption.
+ * Check if a team is allowed to use tokens based on tier and usage.
  */
-function checkDailyCap(
-  account: Account,
+export function checkTeamUsageAllowed(
+  team: TeamBillingData,
   tokensNeeded: number
 ): UsageCheckResult {
-  const tierLimit = TIER_TOKEN_LIMITS[account.tier] || TIER_TOKEN_LIMITS.free;
-  const monthlyLimit = Math.max(account.tokenLimit, tierLimit);
-  // Daily limit from tier config (TIER_WEEKLY_LIMITS is named for legacy reasons but holds daily values)
-  const dailyLimit = TIER_WEEKLY_LIMITS[account.tier] || TIER_WEEKLY_LIMITS.free;
+  const tier = team.tier as SubscriptionTier;
 
-  // Check if day has rolled over (more than 24h since the day-start timestamp)
-  const dayStartDate = new Date(account.weekStartDate);
+  // Enterprise: unlimited
+  if (tier === "enterprise") {
+    return { allowed: true };
+  }
+
+  const tierLimit = TIER_TOKEN_LIMITS[tier] || TIER_TOKEN_LIMITS.free;
+  const monthlyLimit = Math.max(team.token_limit, tierLimit);
+  const dailyLimit = TIER_WEEKLY_LIMITS[tier] || TIER_WEEKLY_LIMITS.free;
+
+  // Check if 24h period has rolled over
+  const dayStartDate = new Date(team.week_start_date);
   const now = new Date();
   const hoursSinceDayStart =
     (now.getTime() - dayStartDate.getTime()) / (1000 * 60 * 60);
 
-  // If 24+ hours have passed, daily usage resets to 0
-  // account.weeklyTokensUsed stores the current day's usage (legacy field name)
-  const effectiveDailyUsed = hoursSinceDayStart >= 24 ? 0 : account.weeklyTokensUsed;
+  const effectiveDailyUsed = hoursSinceDayStart >= 24 ? 0 : team.weekly_tokens_used;
 
   // Check daily limit
   if (effectiveDailyUsed + tokensNeeded > dailyLimit) {
     return {
       allowed: false,
-      reason: "weekly_cap_exceeded", // Legacy reason name; actually means daily cap exceeded
-      weeklyUsed: effectiveDailyUsed, // Legacy field name; represents daily usage
-      weeklyLimit: dailyLimit, // Legacy field name; represents daily limit
-      monthlyUsed: account.tokensUsed,
+      reason: "weekly_cap_exceeded",
+      weeklyUsed: effectiveDailyUsed,
+      weeklyLimit: dailyLimit,
+      monthlyUsed: team.tokens_used,
       monthlyLimit,
-      upgradeOptions: getUpgradeOptions(account.tier),
+      upgradeOptions: getUpgradeOptions(tier),
     };
   }
 
-  // Also check monthly limit
-  if (account.tokensUsed + tokensNeeded > monthlyLimit) {
+  // Check monthly limit
+  if (team.tokens_used + tokensNeeded > monthlyLimit) {
     return {
       allowed: false,
       reason: "monthly_cap_exceeded",
       weeklyUsed: effectiveDailyUsed,
       weeklyLimit: dailyLimit,
-      monthlyUsed: account.tokensUsed,
+      monthlyUsed: team.tokens_used,
       monthlyLimit,
-      upgradeOptions: getUpgradeOptions(account.tier),
+      upgradeOptions: getUpgradeOptions(tier),
     };
   }
 
   return { allowed: true };
 }
 
-/**
- * Check credit balance for enterprise tier
- */
-function checkEnterpriseCredits(
-  account: Account,
-  tokensNeeded: number
-): UsageCheckResult {
-  const credits = account.tokenCredits || 0;
-
-  if (credits >= tokensNeeded) {
-    return { allowed: true };
-  }
-
-  return {
-    allowed: false,
-    reason: "insufficient_credits",
-    creditsRemaining: credits,
-    upgradeOptions: ["credits_100k", "credits_250k", "credits_600k", "credits_1500k"],
-  };
-}
+// ============================================================================
+// Team Usage Stats (for UI)
+// ============================================================================
 
 /**
- * Get upgrade options for a given tier
+ * Calculate usage statistics from team billing data.
  */
-function getUpgradeOptions(currentTier: SubscriptionTier): string[] {
-  const tierOrder = ["free", "pro", "max", "enterprise"];
-  const currentIndex = tierOrder.indexOf(currentTier);
+export function calculateTeamUsageStats(team: TeamBillingData): UsageStats {
+  const tier = team.tier as SubscriptionTier;
+  const isEnterprise = tier === "enterprise";
+  const tierLimit = TIER_TOKEN_LIMITS[tier] || 0;
+  const monthlyLimit = Math.max(team.token_limit, tierLimit);
+  const dailyLimit = TIER_WEEKLY_LIMITS[tier] || TIER_WEEKLY_LIMITS.free;
 
-  // Return higher tiers plus credit packages
-  const higherTiers = tierOrder.slice(currentIndex + 1).filter(t => t !== "enterprise");
-
-  // Always offer credit packages as an option
-  const creditOptions = ["credits_100k", "credits_250k", "credits_600k", "credits_1500k"];
-
-  return [...higherTiers, ...creditOptions];
-}
-
-/**
- * Calculate usage statistics from account data.
- *
- * Return field names use "weekly" prefix for backward compatibility with
- * UI components and the database schema, but the actual period is 24 hours.
- */
-export function calculateUsageStats(account: Account) {
-  const isEnterprise = account.tier === "enterprise";
-  const tierLimit = TIER_TOKEN_LIMITS[account.tier] || 0;
-  const monthlyLimit = Math.max(account.tokenLimit, tierLimit);
-  const dailyLimit = TIER_WEEKLY_LIMITS[account.tier] || TIER_WEEKLY_LIMITS.free;
-
-  // Calculate billing cycle end
-  const billingCycleStart = new Date(account.billingCycleStart);
+  const billingCycleStart = new Date(team.billing_cycle_start);
   const billingCycleEnd = new Date(billingCycleStart);
   billingCycleEnd.setMonth(billingCycleEnd.getMonth() + 1);
 
-  // Calculate days remaining in billing cycle
   const now = new Date();
   const msRemaining = billingCycleEnd.getTime() - now.getTime();
   const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
 
-  // Calculate hours into current 24h period
-  const dayStartDate = new Date(account.weekStartDate);
+  const dayStartDate = new Date(team.week_start_date);
   const hoursSinceDayStart =
     (now.getTime() - dayStartDate.getTime()) / (1000 * 60 * 60);
+  const effectiveDailyUsed = hoursSinceDayStart >= 24 ? 0 : team.weekly_tokens_used;
 
-  // If 24h+ passed, effective daily usage resets to 0
-  const effectiveDailyUsed = hoursSinceDayStart >= 24 ? 0 : account.weeklyTokensUsed;
-
-  // Calculate percentages
   const percentUsed = monthlyLimit > 0
-    ? Math.min(100, (account.tokensUsed / monthlyLimit) * 100)
+    ? Math.min(100, (team.tokens_used / monthlyLimit) * 100)
     : 0;
 
   const dailyPercentUsed = dailyLimit > 0
@@ -174,25 +124,32 @@ export function calculateUsageStats(account: Account) {
     : 0;
 
   return {
-    tokensUsed: account.tokensUsed,
+    tokensUsed: team.tokens_used,
     tokenLimit: monthlyLimit,
     percentUsed,
-    tokensRemaining: Math.max(0, monthlyLimit - account.tokensUsed),
-    weeklyTokensUsed: effectiveDailyUsed,   // Legacy name; actually daily usage
-    weeklyTokenLimit: dailyLimit,            // Legacy name; actually daily limit
-    weeklyPercentUsed: dailyPercentUsed,     // Legacy name; actually daily percentage
+    tokensRemaining: Math.max(0, monthlyLimit - team.tokens_used),
+    weeklyTokensUsed: effectiveDailyUsed,
+    weeklyTokenLimit: dailyLimit,
+    weeklyPercentUsed: dailyPercentUsed,
     daysRemaining,
-    daysIntoWeek: Math.min(Math.floor(hoursSinceDayStart), 24), // Hours into current 24h period
+    daysIntoWeek: Math.min(Math.floor(hoursSinceDayStart), 24),
     billingCycleStart,
     billingCycleEnd,
-    tokenCredits: account.tokenCredits || 0,
+    seatCount: team.seat_count,
     isEnterprise,
   };
 }
 
-/**
- * Format token count for display (e.g., "1.5M", "500K")
- */
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function getUpgradeOptions(currentTier: SubscriptionTier): string[] {
+  const tierOrder: SubscriptionTier[] = ["free", "pro", "max"];
+  const currentIndex = tierOrder.indexOf(currentTier);
+  return tierOrder.slice(currentIndex + 1);
+}
+
 export function formatTokenCount(count: number): string {
   if (count >= 1_000_000) {
     const millions = count / 1_000_000;
@@ -205,9 +162,6 @@ export function formatTokenCount(count: number): string {
   return count.toString();
 }
 
-/**
- * Get tier display name
- */
 export function getTierDisplayName(tier: SubscriptionTier): string {
   const names: Record<SubscriptionTier, string> = {
     free: "Free",
@@ -218,9 +172,6 @@ export function getTierDisplayName(tier: SubscriptionTier): string {
   return names[tier] || tier;
 }
 
-/**
- * Get tier badge color class
- */
 export function getTierBadgeColor(tier: SubscriptionTier): string {
   const colors: Record<SubscriptionTier, string> = {
     free: "bg-secondary text-foreground",

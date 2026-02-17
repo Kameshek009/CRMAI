@@ -17,6 +17,22 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Enforce 1 active team per account
+    const { data: existingTeam } = await supabase
+      .from("teams")
+      .select("id")
+      .eq("owner_account_id", accountId)
+      .is("deleted_at", null)
+      .single();
+
+    if (existingTeam) {
+      return NextResponse.json(
+        { success: false, error: "You can only own one team. Delete your current team first." },
+        { status: 409 }
+      );
+    }
+
     const { data: teamId, error: rpcError } = await supabase.rpc("create_team_with_defaults", {
       p_account_id: accountId,
       p_team_name: parsed.data.name,

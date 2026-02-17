@@ -3,8 +3,8 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { CRM_SYSTEM_PROMPT, CRM_TOOLS } from "@/lib/crm/ai-prompts";
 import { executeCrmToolCall } from "@/lib/crm/ai-executor";
-import { checkUsageAllowed } from "@/lib/usage/check";
-import { transformAccountRow } from "@/types";
+import { checkTeamUsageAllowed } from "@/lib/usage/check";
+import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 import Groq from "groq-sdk";
 
@@ -20,27 +20,36 @@ export async function POST(request: NextRequest) {
 
     const supabase = createSupabaseAdmin();
 
-    // Fetch account for quota check
-    const { data: accountRow, error: accountError } = await supabase
-      .from("accounts")
-      .select("*")
-      .eq("id", context.accountId)
+    // Fetch team for quota check
+    const { data: team, error: teamError } = await supabase
+      .from("teams")
+      .select("tier, token_limit, tokens_used, weekly_tokens_used, week_start_date, billing_cycle_start, seat_count")
+      .eq("id", context.teamId)
       .single();
 
-    if (accountError || !accountRow) {
+    if (teamError || !team) {
       return NextResponse.json(
-        { success: false, error: "Account not found" },
+        { success: false, error: "Team not found" },
         { status: 404 }
       );
     }
 
-    const account = transformAccountRow(accountRow);
+    // Check team usage limits
+    const usageCheck = checkTeamUsageAllowed(
+      {
+        tier: team.tier as SubscriptionTier,
+        token_limit: team.token_limit,
+        tokens_used: team.tokens_used,
+        weekly_tokens_used: team.weekly_tokens_used,
+        week_start_date: team.week_start_date,
+        billing_cycle_start: team.billing_cycle_start,
+        seat_count: team.seat_count,
+      },
+      500
+    );
 
-    // Check usage limits before calling AI
-    const usageCheck = checkUsageAllowed(account, 500); // estimate ~500 tokens
     if (!usageCheck.allowed) {
-      // Calculate when daily limit resets (24h from day start)
-      const dayStart = new Date(account.weekStartDate);
+      const dayStart = new Date(team.week_start_date);
       const resetsAt = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
       return NextResponse.json(
@@ -69,7 +78,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Message required" }, { status: 400 });
     }
 
-    // Build messages for Groq
     const messages = [
       { role: "system" as const, content: CRM_SYSTEM_PROMPT },
       ...history.slice(-10),
@@ -78,7 +86,6 @@ export async function POST(request: NextRequest) {
 
     let totalTokensUsed = 0;
 
-    // Call Groq with CRM tools
     const completion = await groq.chat.completions.create({
       messages,
       model: "llama-3.3-70b-versatile",
@@ -96,7 +103,6 @@ export async function POST(request: NextRequest) {
     let responseContent: string;
     let toolResults: { name: string; result: string; data?: unknown }[] = [];
 
-    // If there are tool calls, execute them
     if (toolCalls && toolCalls.length > 0) {
       for (const tc of toolCalls) {
         const args = JSON.parse(tc.function.arguments);
@@ -104,14 +110,12 @@ export async function POST(request: NextRequest) {
         toolResults.push({ name: tc.function.name, ...result });
       }
 
-      // Build tool call result messages for second Groq call
       const toolMessages = toolCalls.map((tc, i) => ({
         role: "tool" as const,
         tool_call_id: tc.id,
         content: toolResults[i].result,
       }));
 
-      // Get final response with tool results
       const finalCompletion = await groq.chat.completions.create({
         messages: [
           ...messages,
@@ -130,12 +134,11 @@ export async function POST(request: NextRequest) {
       responseContent = choice?.message?.content || "";
     }
 
-    // Deduct tokens from account
+    // Deduct tokens from TEAM (not account)
     if (totalTokensUsed > 0) {
-      const newTokensUsed = account.tokensUsed + totalTokensUsed;
+      const newTokensUsed = team.tokens_used + totalTokensUsed;
 
-      // Check if 24h has passed since daily period start — reset daily counter
-      const dayStart = new Date(account.weekStartDate);
+      const dayStart = new Date(team.week_start_date);
       const now = new Date();
       const hoursSinceDayStart =
         (now.getTime() - dayStart.getTime()) / (1000 * 60 * 60);
@@ -144,25 +147,22 @@ export async function POST(request: NextRequest) {
       let newDayStartDate: string;
 
       if (hoursSinceDayStart >= 24) {
-        // 24h passed — reset daily usage to just this request
         newDailyTokensUsed = totalTokensUsed;
         newDayStartDate = now.toISOString();
       } else {
-        // Same day — add to existing daily usage
-        newDailyTokensUsed = account.weeklyTokensUsed + totalTokensUsed;
-        newDayStartDate = new Date(account.weekStartDate).toISOString();
+        newDailyTokensUsed = team.weekly_tokens_used + totalTokensUsed;
+        newDayStartDate = team.week_start_date;
       }
 
-      // Update account
+      // Update team tokens
       await supabase
-        .from("accounts")
+        .from("teams")
         .update({
           tokens_used: newTokensUsed,
           weekly_tokens_used: newDailyTokensUsed,
           week_start_date: newDayStartDate,
-          updated_at: now.toISOString(),
         })
-        .eq("id", context.accountId);
+        .eq("id", context.teamId);
 
       // Record in usage_records
       await supabase.from("usage_records").insert({
@@ -170,6 +170,7 @@ export async function POST(request: NextRequest) {
         tokens_consumed: totalTokensUsed,
         action_type: "crm_ai_chat",
         metadata: {
+          team_id: context.teamId,
           model: "llama-3.3-70b-versatile",
           has_tool_calls: toolResults.length > 0,
           tool_count: toolResults.length,
@@ -184,8 +185,8 @@ export async function POST(request: NextRequest) {
         toolResults,
         usage: {
           tokensUsed: totalTokensUsed,
-          accountTokensUsed: account.tokensUsed + totalTokensUsed,
-          accountTokenLimit: account.tokenLimit,
+          teamTokensUsed: team.tokens_used + totalTokensUsed,
+          teamTokenLimit: team.token_limit,
         },
       },
     });
