@@ -13,16 +13,50 @@ export async function GET() {
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const nextWeek = new Date(now);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    // Run all 4 queries in parallel (they are independent)
+    const [overdueResult, staleResult, coldResult, closingResult] = await Promise.all([
+      supabase
+        .from("crm_tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("team_id", context.teamId)
+        .in("status", ["todo", "in_progress"])
+        .lt("due_date", now.toISOString()),
+      supabase
+        .from("deals")
+        .select("id, title, updated_at")
+        .eq("team_id", context.teamId)
+        .eq("status", "open")
+        .eq("is_deleted", false)
+        .lt("updated_at", thirtyDaysAgo.toISOString())
+        .limit(5),
+      supabase
+        .from("contacts")
+        .select("id", { count: "exact", head: true })
+        .eq("team_id", context.teamId)
+        .eq("status", "active")
+        .eq("is_deleted", false)
+        .lt("engagement_score", 20),
+      supabase
+        .from("deals")
+        .select("id, title, value, expected_close_date")
+        .eq("team_id", context.teamId)
+        .eq("status", "open")
+        .eq("is_deleted", false)
+        .lte("expected_close_date", nextWeek.toISOString().split("T")[0])
+        .gte("expected_close_date", now.toISOString().split("T")[0])
+        .gt("value", 0)
+        .limit(5),
+    ]);
+
     const insights: AIInsight[] = [];
 
-    // Check for overdue tasks
-    const { count: overdueTasks } = await supabase
-      .from("crm_tasks")
-      .select("id", { count: "exact", head: true })
-      .eq("team_id", context.teamId)
-      .in("status", ["todo", "in_progress"])
-      .lt("due_date", new Date().toISOString());
-
+    const overdueTasks = overdueResult.count;
     if (overdueTasks && overdueTasks > 0) {
       insights.push({
         id: "overdue-tasks",
@@ -33,19 +67,7 @@ export async function GET() {
       });
     }
 
-    // Check for deals without recent activity (stale deals)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const { data: staleDeals } = await supabase
-      .from("deals")
-      .select("id, title, updated_at")
-      .eq("team_id", context.teamId)
-      .eq("status", "open")
-      .eq("is_deleted", false)
-      .lt("updated_at", thirtyDaysAgo.toISOString())
-      .limit(5);
-
+    const staleDeals = staleResult.data;
     if (staleDeals && staleDeals.length > 0) {
       insights.push({
         id: "stale-deals",
@@ -56,15 +78,7 @@ export async function GET() {
       });
     }
 
-    // Check for contacts without recent engagement
-    const { count: coldContacts } = await supabase
-      .from("contacts")
-      .select("id", { count: "exact", head: true })
-      .eq("team_id", context.teamId)
-      .eq("status", "active")
-      .eq("is_deleted", false)
-      .lt("engagement_score", 20);
-
+    const coldContacts = coldResult.count;
     if (coldContacts && coldContacts > 5) {
       insights.push({
         id: "cold-contacts",
@@ -75,21 +89,7 @@ export async function GET() {
       });
     }
 
-    // Check for high-value deals close to closing
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-
-    const { data: closingDeals } = await supabase
-      .from("deals")
-      .select("id, title, value, expected_close_date")
-      .eq("team_id", context.teamId)
-      .eq("status", "open")
-      .eq("is_deleted", false)
-      .lte("expected_close_date", nextWeek.toISOString().split("T")[0])
-      .gte("expected_close_date", new Date().toISOString().split("T")[0])
-      .gt("value", 0)
-      .limit(5);
-
+    const closingDeals = closingResult.data;
     if (closingDeals && closingDeals.length > 0) {
       const totalValue = closingDeals.reduce((sum, d) => sum + Number(d.value), 0);
       insights.push({
@@ -101,7 +101,6 @@ export async function GET() {
       });
     }
 
-    // Add a motivational insight if pipeline is healthy
     if (insights.length === 0) {
       insights.push({
         id: "healthy-pipeline",

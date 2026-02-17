@@ -25,15 +25,21 @@ export async function GET() {
       .gte("actual_close_date", thirtyDaysAgo.toISOString().split("T")[0])
       .order("actual_close_date", { ascending: true });
 
+    // Build Map for O(1) lookup per day instead of O(n) filter
+    const revenueByDate = new Map<string, number>();
+    for (const deal of wonDeals || []) {
+      const date = deal.actual_close_date;
+      if (date) {
+        revenueByDate.set(date, (revenueByDate.get(date) || 0) + (Number(deal.value) || 0));
+      }
+    }
+
     const dailyData: { date: string; revenue: number }[] = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split("T")[0];
-      const dayRevenue = (wonDeals || [])
-        .filter((deal) => deal.actual_close_date === dateStr)
-        .reduce((sum, deal) => sum + (Number(deal.value) || 0), 0);
-      dailyData.push({ date: dateStr, revenue: dayRevenue });
+      dailyData.push({ date: dateStr, revenue: revenueByDate.get(dateStr) || 0 });
     }
 
     let cumulative = 0;

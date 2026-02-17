@@ -3,14 +3,22 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import type { TeamContext, TeamPermissions, TeamRoleRow } from "@/types/team";
 
+type TeamContextResult =
+  | { context: TeamContext; error: null }
+  | { context: null; error: NextResponse };
+
+// In-memory cache + request deduplication for getTeamContext.
+// When 6 API calls fire simultaneously, only the first one runs DB queries;
+// the other 5 await the same promise.
+const CACHE_TTL = 30_000;
+const contextCache = new Map<string, { result: TeamContextResult; ts: number }>();
+const inflight = new Map<string, Promise<TeamContextResult>>();
+
 /**
  * Get team context for the currently authenticated user.
- * Returns account, team, member info, role, and permissions.
+ * Uses in-memory cache (30s TTL) and request deduplication.
  */
-export async function getTeamContext(): Promise<
-  | { context: TeamContext; error: null }
-  | { context: null; error: NextResponse }
-> {
+export async function getTeamContext(): Promise<TeamContextResult> {
   const { userId } = await auth();
 
   if (!userId) {
@@ -23,9 +31,34 @@ export async function getTeamContext(): Promise<
     };
   }
 
+  // Return cached result if fresh
+  const cached = contextCache.get(userId);
+  if (cached && Date.now() - cached.ts < CACHE_TTL && cached.result.context) {
+    return { context: cached.result.context, error: null };
+  }
+
+  // Deduplicate: if another request is already fetching, wait for it
+  const pending = inflight.get(userId);
+  if (pending) return pending;
+
+  const promise = fetchTeamContext(userId);
+  inflight.set(userId, promise);
+
+  try {
+    const result = await promise;
+    if (result.context) {
+      contextCache.set(userId, { result, ts: Date.now() });
+    }
+    return result;
+  } finally {
+    inflight.delete(userId);
+  }
+}
+
+async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
   const supabase = createSupabaseAdmin();
 
-  // Get account with current_team_id
+  // Query 1: Get account (must run first — others depend on current_team_id)
   const { data: account, error: accountError } = await supabase
     .from("accounts")
     .select("id, current_team_id")
@@ -52,15 +85,24 @@ export async function getTeamContext(): Promise<
     };
   }
 
-  // Ensure team is not soft-deleted
-  const { data: team } = await supabase
-    .from("teams")
-    .select("id, deleted_at")
-    .eq("id", account.current_team_id)
-    .single();
+  // Queries 2 & 3 in parallel: team check + member/role fetch
+  const [teamResult, memberResult] = await Promise.all([
+    supabase
+      .from("teams")
+      .select("id, deleted_at")
+      .eq("id", account.current_team_id)
+      .single(),
+    supabase
+      .from("team_members")
+      .select("id, is_director, status, team_roles(*)")
+      .eq("team_id", account.current_team_id)
+      .eq("account_id", account.id)
+      .eq("status", "active")
+      .single(),
+  ]);
 
+  const team = teamResult.data;
   if (!team || team.deleted_at) {
-    // Clear stale current_team_id
     await supabase
       .from("accounts")
       .update({ current_team_id: null })
@@ -75,16 +117,8 @@ export async function getTeamContext(): Promise<
     };
   }
 
-  // Get team membership with role
-  const { data: member, error: memberError } = await supabase
-    .from("team_members")
-    .select("id, is_director, status, team_roles(*)")
-    .eq("team_id", account.current_team_id)
-    .eq("account_id", account.id)
-    .eq("status", "active")
-    .single();
-
-  if (memberError || !member) {
+  const member = memberResult.data;
+  if (memberResult.error || !member) {
     return {
       context: null,
       error: NextResponse.json(

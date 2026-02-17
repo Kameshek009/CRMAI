@@ -57,7 +57,7 @@ export async function GET() {
         .eq("team_id", context.teamId)
         .eq("status", "open")
         .eq("is_deleted", false)
-        .limit(5000),
+        .limit(1000),
       supabase
         .from("crm_tasks")
         .select("id", { count: "exact", head: true })
@@ -77,7 +77,7 @@ export async function GET() {
         .eq("team_id", context.teamId)
         .eq("status", "won")
         .gte("actual_close_date", monthStart.toISOString().split("T")[0])
-        .limit(5000),
+        .limit(1000),
     ]);
 
     const openDeals = openDealsResult.data;
