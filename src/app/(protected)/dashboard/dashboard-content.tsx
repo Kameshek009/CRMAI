@@ -1029,7 +1029,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         </div>
 
         {/* Plan info for free users */}
-        {!accountLoading && account?.tier === "free" && usage && usage.percentUsed >= 80 && (
+        {!accountLoading && (account?.tier === "free" || !account?.tier) && usage && usage.percentUsed >= 80 && (
           <div>
             <Card className="border-landing-accent/30 bg-gradient-to-r from-landing-accent/5 via-landing-accent/10 to-landing-accent/5">
               <CardContent className="p-4">

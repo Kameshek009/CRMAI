@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
+import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 
 /**
@@ -122,19 +124,54 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Enrich with team billing data
+    // Enrich with team billing data + auto-sync stale limits
     let enrichedAccount = account;
     if (account.current_team_id) {
-      const { data: team } = await createSupabaseAdmin()
+      const supabaseAdmin = createSupabaseAdmin();
+      const { data: team } = await supabaseAdmin
         .from("teams")
-        .select("tier, token_limit, tokens_used, weekly_tokens_used, week_start_date")
+        .select("id, tier, token_limit, tokens_used, weekly_tokens_used, week_start_date, seat_count")
         .eq("id", account.current_team_id)
         .single();
       if (team) {
+        const tier = team.tier as SubscriptionTier;
+        const expectedLimit = TIER_TOKEN_LIMITS[tier] ?? TIER_TOKEN_LIMITS.free;
+        let tokenLimit = team.token_limit;
+        let seatCount = team.seat_count;
+
+        // Auto-fix token_limit if it doesn't match the tier
+        const needsLimitSync = expectedLimit > 0 && team.token_limit !== expectedLimit;
+
+        // Auto-fix seat_count by counting active members
+        const { count: activeMembers } = await supabaseAdmin
+          .from("team_members")
+          .select("id", { count: "exact", head: true })
+          .eq("team_id", team.id)
+          .eq("status", "active");
+        const actualSeats = Math.max(activeMembers || 1, 1);
+        const needsSeatSync = actualSeats !== team.seat_count;
+
+        if (needsLimitSync || needsSeatSync) {
+          const updates: Record<string, unknown> = {};
+          if (needsLimitSync) {
+            updates.token_limit = expectedLimit;
+            tokenLimit = expectedLimit;
+          }
+          if (needsSeatSync) {
+            updates.seat_count = actualSeats;
+            seatCount = actualSeats;
+          }
+          await supabaseAdmin
+            .from("teams")
+            .update(updates)
+            .eq("id", team.id);
+          logger.info("Auth", `Auto-synced team ${team.id}: token_limit=${tokenLimit}, seat_count=${seatCount}`);
+        }
+
         enrichedAccount = {
           ...account,
           tier: team.tier,
-          token_limit: team.token_limit,
+          token_limit: tokenLimit,
           tokens_used: team.tokens_used,
           weekly_tokens_used: team.weekly_tokens_used,
           week_start_date: team.week_start_date,

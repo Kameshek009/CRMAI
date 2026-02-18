@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { useAccount } from "@/contexts/account-context";
+
 import { useTeam } from "@/contexts/team-context";
 import { Logo } from "@/components/ui/logo";
 import { NexusBrandSidebar } from "@/components/nexus-brand";
@@ -120,13 +120,14 @@ const TIER_COLORS: Record<string, string> = {
 function NavUser() {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { account } = useAccount();
+  const { currentTeam } = useTeam();
   const { isMobile } = useSidebar();
 
   if (!user) return null;
 
-  const tierName = account?.tier ? TIER_DISPLAY_NAMES[account.tier] || "Free" : "Free";
-  const tierColor = account?.tier ? TIER_COLORS[account.tier] || TIER_COLORS.free : TIER_COLORS.free;
+  const teamTier = currentTeam?.tier || "free";
+  const tierName = TIER_DISPLAY_NAMES[teamTier] || "Free";
+  const tierColor = TIER_COLORS[teamTier] || TIER_COLORS.free;
   const displayName = user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "User";
   const email = user.primaryEmailAddress?.emailAddress || "";
   const initials = displayName.slice(0, 2).toUpperCase();

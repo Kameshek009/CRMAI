@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
-import { useAccount } from "@/contexts/account-context";
+import { useTeam } from "@/contexts/team-context";
 import {
   LayoutGrid,
   Settings,
@@ -63,9 +63,9 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { account } = useAccount();
+  const { currentTeam } = useTeam();
 
-  const tierName = account?.tier ? TIER_DISPLAY_NAMES[account.tier] || "Free" : "Free";
+  const tierName = currentTeam?.tier ? TIER_DISPLAY_NAMES[currentTeam.tier] || "Free" : "Free";
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-60 flex flex-col bg-background border-r border-border z-50">
