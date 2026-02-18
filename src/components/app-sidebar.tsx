@@ -48,7 +48,6 @@ import {
   Shield,
   Link2,
   UserCog,
-  Target,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -72,7 +71,6 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Overview", href: "/dashboard", icon: LayoutGrid },
       { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare },
-      { label: "Plan", href: "/dashboard/plan", icon: Target },
     ],
   },
   {
