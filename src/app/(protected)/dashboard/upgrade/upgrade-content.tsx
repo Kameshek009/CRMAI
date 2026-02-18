@@ -357,7 +357,7 @@ export function UpgradeContent() {
                     <th className="text-center font-medium p-4">
                       <span className="flex items-center justify-center gap-1.5">
                         Pro
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Popular</Badge>
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0">Popular</Badge>
                       </span>
                     </th>
                     <th className="text-center font-medium p-4">Max</th>

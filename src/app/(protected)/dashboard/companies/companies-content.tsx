@@ -215,7 +215,7 @@ export function CompaniesContent() {
                     </div>
                     <div>
                       <p className="text-lg font-bold">{value}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{info.label}</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">{info.label}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -241,7 +241,7 @@ export function CompaniesContent() {
             <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
               <ListFilter className="size-4 mr-1" />
               Filters
-              {(industryFilter || sizeFilter) && <Badge className="ml-1.5 h-4 px-1 text-[9px]">!</Badge>}
+              {(industryFilter || sizeFilter) && <Badge className="ml-1.5 h-4 px-1 text-xs">!</Badge>}
             </Button>
             <select
               value={sortBy}

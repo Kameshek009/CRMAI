@@ -112,7 +112,7 @@ export function SessionsContent() {
                 <div key={session.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
                   <Badge
                     variant="outline"
-                    className={`text-[10px] shrink-0 ${statusColors[session.status] || ""}`}
+                    className={`text-xs shrink-0 ${statusColors[session.status] || ""}`}
                   >
                     {session.status}
                   </Badge>

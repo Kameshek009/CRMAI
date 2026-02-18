@@ -160,7 +160,7 @@ function MetricCard({
             <p className="text-xs text-muted-foreground">{subtitle}</p>
             {trend && (
               <div className={cn(
-                "flex items-center gap-0.5 text-[10px] font-medium",
+                "flex items-center gap-0.5 text-xs font-medium",
                 trend.direction === "up" ? "text-emerald-500" : "text-red-500"
               )}>
                 {trend.direction === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -443,7 +443,7 @@ export function AnalyticsContent() {
                   <Activity className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Activity Trend (30 Days)
-                <Badge variant="secondary" className="text-[10px] ml-auto">{data.totalActivities} total</Badge>
+                <Badge variant="secondary" className="text-xs ml-auto">{data.totalActivities} total</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -494,13 +494,13 @@ export function AnalyticsContent() {
                   <div className="text-xs text-emerald-600 font-medium mb-1">Won Deals</div>
                   <div className="text-xl font-bold text-emerald-600">{data.wonCount}</div>
                   <div className="text-xs text-emerald-600/70">${data.totalWonValue.toLocaleString()} total</div>
-                  <div className="text-[10px] text-emerald-600/60 mt-0.5">Avg: ${data.avgWonValue.toLocaleString()}</div>
+                  <div className="text-xs text-emerald-600/60 mt-0.5">Avg: ${data.avgWonValue.toLocaleString()}</div>
                 </div>
                 <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
                   <div className="text-xs text-red-500 font-medium mb-1">Lost Deals</div>
                   <div className="text-xl font-bold text-red-500">{data.lostCount}</div>
                   <div className="text-xs text-red-500/70">${data.totalLostValue.toLocaleString()} total</div>
-                  <div className="text-[10px] text-red-500/60 mt-0.5">Avg: ${data.avgLostValue.toLocaleString()}</div>
+                  <div className="text-xs text-red-500/60 mt-0.5">Avg: ${data.avgLostValue.toLocaleString()}</div>
                 </div>
               </div>
               {/* Win rate bar */}
@@ -519,7 +519,7 @@ export function AnalyticsContent() {
                     style={{ width: `${100 - data.winRate}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[10px] text-muted-foreground">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Won: {data.wonCount}</span>
                   <span>Lost: {data.lostCount}</span>
                 </div>
@@ -537,7 +537,7 @@ export function AnalyticsContent() {
                   <Users className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Contact Distribution
-                <Badge variant="secondary" className="text-[10px] ml-auto">{data.totalContacts} total</Badge>
+                <Badge variant="secondary" className="text-xs ml-auto">{data.totalContacts} total</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -589,37 +589,37 @@ export function AnalyticsContent() {
                   <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Task Breakdown
-                <Badge variant="secondary" className="text-[10px] ml-auto">{data.completedThisWeek} done this week</Badge>
+                <Badge variant="secondary" className="text-xs ml-auto">{data.completedThisWeek} done this week</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="grid grid-cols-2 gap-4">
                 {/* By Status */}
                 <div>
-                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">By Status</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">By Status</p>
                   <div className="space-y-2">
                     {taskStatusData.map((entry) => (
                       <div key={entry.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.fill }} />
-                          <span className="text-[11px]">{entry.name}</span>
+                          <span className="text-xs">{entry.name}</span>
                         </div>
-                        <span className="text-[11px] font-semibold">{entry.value}</span>
+                        <span className="text-xs font-semibold">{entry.value}</span>
                       </div>
                     ))}
                   </div>
                 </div>
                 {/* By Priority */}
                 <div>
-                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">By Priority</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">By Priority</p>
                   <div className="space-y-2">
                     {taskPriorityData.map((entry) => (
                       <div key={entry.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.fill }} />
-                          <span className="text-[11px]">{entry.name}</span>
+                          <span className="text-xs">{entry.name}</span>
                         </div>
-                        <span className="text-[11px] font-semibold">{entry.value}</span>
+                        <span className="text-xs font-semibold">{entry.value}</span>
                       </div>
                     ))}
                   </div>
@@ -676,7 +676,7 @@ export function AnalyticsContent() {
                   <Building2 className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
                 Company Health
-                <Badge variant="secondary" className="text-[10px] ml-auto">{data.totalCompanies} companies</Badge>
+                <Badge variant="secondary" className="text-xs ml-auto">{data.totalCompanies} companies</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -713,10 +713,10 @@ export function AnalyticsContent() {
                   {/* Industry breakdown */}
                   {(data.companiesByIndustry || []).length > 0 && (
                     <div>
-                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Top Industries</p>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Top Industries</p>
                       <div className="flex flex-wrap gap-1.5">
                         {(data.companiesByIndustry || []).slice(0, 6).map((ind) => (
-                          <Badge key={ind.industry} variant="secondary" className="text-[10px]">
+                          <Badge key={ind.industry} variant="secondary" className="text-xs">
                             {ind.industry}: {ind.count}
                           </Badge>
                         ))}
@@ -754,10 +754,10 @@ export function AnalyticsContent() {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium truncate">{deal.title}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <Badge variant="secondary" className="text-[9px]" style={{ color: deal.stageColor, borderColor: deal.stageColor + "30", backgroundColor: deal.stageColor + "10" }}>
+                          <Badge variant="secondary" className="text-xs" style={{ color: deal.stageColor, borderColor: deal.stageColor + "30", backgroundColor: deal.stageColor + "10" }}>
                             {deal.stage}
                           </Badge>
-                          <span className={cn("text-[10px] font-medium", deal.probability >= 70 ? "text-emerald-500" : deal.probability >= 40 ? "text-amber-500" : "text-red-400")}>
+                          <span className={cn("text-xs font-medium", deal.probability >= 70 ? "text-emerald-500" : deal.probability >= 40 ? "text-amber-500" : "text-red-400")}>
                             {deal.probability}% win
                           </span>
                         </div>
@@ -839,7 +839,7 @@ export function AnalyticsContent() {
                       <Icon className="w-4 h-4 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-xs font-medium">{insight.title}</p>
-                        <p className="text-[11px] opacity-70 mt-0.5">{insight.description}</p>
+                        <p className="text-xs opacity-70 mt-0.5">{insight.description}</p>
                       </div>
                     </div>
                   );

@@ -257,7 +257,7 @@ export function ContactsContent() {
                     </div>
                     <div>
                       <p className="text-lg font-bold">{statusStats[status] || 0}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{status}</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">{status}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -284,7 +284,7 @@ export function ContactsContent() {
               <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
                 <ListFilter className="size-4 mr-1" />
                 Sources
-                {sourceFilter && <Badge className="ml-1.5 h-4 px-1 text-[9px]">!</Badge>}
+                {sourceFilter && <Badge className="ml-1.5 h-4 px-1 text-xs">!</Badge>}
               </Button>
             )}
             <select

@@ -77,7 +77,7 @@ export default function TeamRolesPage() {
                 <Shield className="size-4" style={{ color: role.color }} />
                 <CardTitle className="text-sm font-semibold">{role.name}</CardTitle>
                 {role.is_system && (
-                  <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">System</span>
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">System</span>
                 )}
               </div>
               <RoleBadge name={`P${role.priority}`} color={role.color} />

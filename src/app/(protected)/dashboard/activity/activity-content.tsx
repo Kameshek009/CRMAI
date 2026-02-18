@@ -110,7 +110,7 @@ export function ActivityContent() {
                 <div key={log.id} className="flex items-start gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
                   <Badge
                     variant="secondary"
-                    className={`text-[10px] shrink-0 mt-0.5 ${eventTypeColors[log.event_type] || "bg-gray-500/10 text-gray-600"}`}
+                    className={`text-xs shrink-0 mt-0.5 ${eventTypeColors[log.event_type] || "bg-gray-500/10 text-gray-600"}`}
                   >
                     {formatEventType(log.event_type)}
                   </Badge>

@@ -364,7 +364,7 @@ export function TasksContent() {
               </div>
               <div>
                 <p className="text-lg font-bold">{stats.overdue}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Overdue</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Overdue</p>
               </div>
             </CardContent>
           </Card>
@@ -377,7 +377,7 @@ export function TasksContent() {
               </div>
               <div>
                 <p className="text-lg font-bold">{stats.dueToday}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Due Today</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Due Today</p>
               </div>
             </CardContent>
           </Card>
@@ -390,7 +390,7 @@ export function TasksContent() {
               </div>
               <div>
                 <p className="text-lg font-bold">{stats.inProgress}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">In Progress</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">In Progress</p>
               </div>
             </CardContent>
           </Card>
@@ -403,7 +403,7 @@ export function TasksContent() {
               </div>
               <div>
                 <p className="text-lg font-bold">{stats.total}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p>
               </div>
             </CardContent>
           </Card>
@@ -426,7 +426,7 @@ export function TasksContent() {
             <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
               <ListFilter className="size-4 mr-1" />
               Filters
-              {(priorityFilter || typeFilter) && <Badge className="ml-1.5 h-4 px-1 text-[9px]">!</Badge>}
+              {(priorityFilter || typeFilter) && <Badge className="ml-1.5 h-4 px-1 text-xs">!</Badge>}
             </Button>
             <select
               value={sortBy}

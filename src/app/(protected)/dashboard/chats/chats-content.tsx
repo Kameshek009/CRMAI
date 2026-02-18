@@ -418,7 +418,7 @@ export function ChatsContent() {
                           {isUnread(chat) && (
                             <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
                           )}
-                          <h3 className="font-medium text-foreground truncate text-sm sm:text-[15px]">
+                          <h3 className="font-medium text-foreground truncate text-sm sm:text-sm">
                             {chat.title || 'New Chat'}
                           </h3>
                           <span className="text-xs text-muted-foreground/50 bg-muted px-1.5 py-0.5 rounded shrink-0">
