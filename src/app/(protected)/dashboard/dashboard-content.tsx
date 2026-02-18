@@ -348,22 +348,24 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-8">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-80 rounded-lg" />
-          <Skeleton className="h-4 w-56 rounded-lg" />
+      <div className="p-8">
+        <div className="mx-auto max-w-5xl space-y-8">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-80 rounded-lg" />
+            <Skeleton className="h-4 w-56 rounded-lg" />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-[120px] rounded-xl" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-[220px] rounded-xl" />
+            ))}
+          </div>
+          <Skeleton className="h-[300px] rounded-xl" />
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-[120px] rounded-xl" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-[220px] rounded-xl" />
-          ))}
-        </div>
-        <Skeleton className="h-[300px] rounded-xl" />
       </div>
     );
   }
@@ -372,7 +374,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
     <div className="flex flex-col h-full">
       {/* Workspace header */}
       <div className="border-b border-border px-8 py-6">
-        <div className="flex items-center justify-between">
+        <div className="mx-auto max-w-5xl flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
               <GreetingIcon className="w-5 h-5 text-muted-foreground" />
@@ -418,7 +420,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       </div>
 
       {/* Overview content */}
-      <div className="flex-1 overflow-auto p-8 space-y-8">
+      <div className="flex-1 overflow-auto p-8">
+        <div className="mx-auto max-w-5xl space-y-8">
         {/* Stats row - animated cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <AnimatedStatCard
@@ -1055,6 +1058,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </Card>
           </div>
         )}
+        </div>
       </div>
 
       <UpgradeModal isOpen={isOpen} onClose={closeUpgradeModal} {...modalProps} />

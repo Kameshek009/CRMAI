@@ -282,24 +282,22 @@ export function ChatsContent() {
 
   if (accountLoading) {
     return (
-      <div className="space-y-8 p-8">
-        <Skeleton className="h-8 sm:h-10 w-32 sm:w-64" />
-        <div className="grid gap-2 sm:gap-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-16 sm:h-20 w-full rounded-xl" />
-          ))}
+      <div className="p-8">
+        <div className="mx-auto max-w-5xl space-y-8">
+          <Skeleton className="h-8 sm:h-10 w-32 sm:w-64" />
+          <div className="grid gap-2 sm:gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-16 sm:h-20 w-full rounded-xl" />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <motion.div
-      className="space-y-8 p-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="p-8">
+      <div className="mx-auto max-w-5xl space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center justify-between sm:block">
@@ -471,6 +469,7 @@ export function ChatsContent() {
           </AnimatePresence>
         </motion.div>
       )}
-    </motion.div>
+      </div>
+    </div>
   );
 }
