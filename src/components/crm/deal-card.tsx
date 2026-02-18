@@ -44,7 +44,7 @@ function DealCardInner({
   const probDot = prob >= 70 ? "bg-emerald-500" : prob >= 40 ? "bg-amber-500" : "bg-red-500";
 
   return (
-    <Card className={cn("p-3.5 transition-all group premium-card card-shine border bg-card", className)}>
+    <Card className={cn("p-4 transition-all group premium-card card-shine border bg-card", className)}>
       <div className="flex items-start gap-2 relative z-[1]">
         {dragHandle}
         <div className="flex-1 min-w-0">
@@ -54,12 +54,12 @@ function DealCardInner({
           >
             {deal.title}
           </Link>
-          <p className="text-base font-bold mt-0.5 tracking-tight">
+          <p className="text-base font-bold mt-1 tracking-tight">
             ${Number(deal.value).toLocaleString()}
           </p>
 
           {(contactName || deal.companies?.name) && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
               {deal.companies?.name && (
                 <span className="flex items-center gap-1 truncate max-w-[120px] hover:text-foreground transition-colors">
                   <Building2 className="size-3 shrink-0" />
@@ -75,10 +75,10 @@ function DealCardInner({
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-2.5">
+          <div className="flex items-center justify-between mt-2">
             <Badge
               variant="outline"
-              className={cn("text-[10px] px-1.5 py-0 badge-shimmer", probColor)}
+              className={cn("text-[10px] px-2 py-0 badge-shimmer", probColor)}
               aria-label={`Win probability: ${probLabel}, ${prob}%`}
             >
               <div className={cn("w-1.5 h-1.5 rounded-full mr-1", probDot)} />
@@ -116,7 +116,7 @@ export function DealCard({ deal }: { deal: DealForCard }) {
       {...attributes}
       {...listeners}
       aria-label={`Drag deal: ${deal.title}`}
-      className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0 hover:scale-110"
+      className="mt-1 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0 hover:scale-110"
     >
       <GripVertical className="size-4" />
     </button>

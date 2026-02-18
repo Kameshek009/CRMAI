@@ -284,7 +284,7 @@ export function ChatsContent() {
     return (
       <div className="space-y-8 p-8">
         <Skeleton className="h-8 sm:h-10 w-32 sm:w-64" />
-        <div className="grid gap-2 sm:gap-3">
+        <div className="grid gap-2 sm:gap-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-16 sm:h-20 w-full rounded-xl" />
           ))}
@@ -301,11 +301,11 @@ export function ChatsContent() {
       transition={{ duration: 0.3 }}
     >
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center justify-between sm:block">
           <div>
             <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Chats</h1>
-            <p className="text-sm text-muted-foreground mt-0.5 hidden sm:block">
+            <p className="text-sm text-muted-foreground mt-1 hidden sm:block">
               Synced conversations across all devices
             </p>
           </div>
@@ -313,7 +313,7 @@ export function ChatsContent() {
             <Plus className="h-5 w-5" />
           </Button>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-4">
           <AgentStatusBadge compact />
           <Button onClick={handleCreateChat} className="hidden sm:flex gap-2">
             <Plus className="h-4 w-4" />
@@ -335,7 +335,7 @@ export function ChatsContent() {
 
       {/* Chat List */}
       {isLoading ? (
-        <div className="grid gap-2 sm:gap-3">
+        <div className="grid gap-2 sm:gap-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-16 sm:h-20 w-full rounded-xl" />
           ))}
@@ -348,7 +348,7 @@ export function ChatsContent() {
         >
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-10 sm:py-16 px-4">
-              <div className="rounded-full bg-muted/50 p-3 sm:p-4 mb-3 sm:mb-4">
+              <div className="rounded-full bg-muted/50 p-4 mb-4">
                 <Search className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
               <CardTitle className="mb-2 text-base sm:text-lg">No results</CardTitle>
@@ -369,7 +369,7 @@ export function ChatsContent() {
         >
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-10 sm:py-16 px-4">
-              <div className="rounded-full bg-muted/50 p-3 sm:p-4 mb-3 sm:mb-4">
+              <div className="rounded-full bg-muted/50 p-4 mb-4">
                 <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
               <CardTitle className="mb-2 text-base sm:text-lg">No chats yet</CardTitle>
@@ -385,7 +385,7 @@ export function ChatsContent() {
         </motion.div>
       ) : (
         <motion.div
-          className="grid gap-2 sm:gap-3"
+          className="grid gap-2 sm:gap-4"
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -408,20 +408,20 @@ export function ChatsContent() {
                     router.push(`/dashboard/chats/${chat.id}`);
                   }}
                 >
-                  <CardContent className="flex items-center justify-between p-3 sm:p-4">
-                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                      <div className="rounded-xl bg-muted/50 p-2 sm:p-2.5 group-hover:bg-muted transition-colors shrink-0">
+                  <CardContent className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="rounded-xl bg-muted/50 p-2 group-hover:bg-muted transition-colors shrink-0">
                         {getModeIcon(chat.mode)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-0.5">
+                        <div className="flex items-center gap-2 sm:gap-4 mb-1">
                           {isUnread(chat) && (
                             <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
                           )}
                           <h3 className="font-medium text-foreground truncate text-sm sm:text-sm">
                             {chat.title || 'New Chat'}
                           </h3>
-                          <span className="text-xs text-muted-foreground/50 bg-muted px-1.5 py-0.5 rounded shrink-0">
+                          <span className="text-xs text-muted-foreground/50 bg-muted px-2 py-1 rounded shrink-0">
                             {chat.mode === 'chat' ? 'Chat' : chat.mode === 'agent' ? 'Agent' : 'Auto'}
                           </span>
                           <span className="text-xs text-muted-foreground/70 shrink-0">

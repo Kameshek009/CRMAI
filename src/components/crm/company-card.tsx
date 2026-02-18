@@ -54,11 +54,11 @@ export function CompanyCard({
   return (
     <div
       className={cn(
-        "premium-card card-shine flex flex-col gap-3 rounded-xl border p-4 bg-card",
+        "premium-card card-shine flex flex-col gap-4 rounded-xl border p-4 bg-card",
         selected && "ring-2 ring-primary/40 bg-primary/5 shadow-md"
       )}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {selectable && (
           <Checkbox
             checked={selected}
@@ -69,7 +69,7 @@ export function CompanyCard({
         )}
         <Link
           href={`/dashboard/companies/${id}`}
-          className="flex items-center gap-3 flex-1 min-w-0 relative z-[1]"
+          className="flex items-center gap-4 flex-1 min-w-0 relative z-[1]"
         >
           <Avatar className="size-11">
             <AvatarFallback className={cn("text-sm font-bold bg-gradient-to-br", gradient)}>
@@ -79,7 +79,7 @@ export function CompanyCard({
           <div className="flex-1 min-w-0">
             <p className="font-semibold truncate text-sm">{name}</p>
             {industry && (
-              <div className="flex items-center gap-1 mt-0.5">
+              <div className="flex items-center gap-1 mt-1">
                 <Factory className="size-3 text-muted-foreground" />
                 <p className="text-xs text-muted-foreground truncate">{industry}</p>
               </div>
@@ -89,9 +89,9 @@ export function CompanyCard({
         </Link>
       </div>
 
-      <div className="flex items-center gap-3 text-[11px] text-muted-foreground pl-1 relative z-[1]">
+      <div className="flex items-center gap-4 text-[11px] text-muted-foreground pl-1 relative z-[1]">
         {size && (
-          <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
+          <Badge variant="outline" className="text-[10px] py-0 px-2 font-normal">
             {size} emp.
           </Badge>
         )}

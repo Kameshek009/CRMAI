@@ -82,7 +82,7 @@ export function ActivityContent() {
         <Card>
           <CardContent className="p-6 space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-start gap-3">
+              <div key={i} className="flex items-start gap-4">
                 <Skeleton className="h-6 w-24 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -95,7 +95,7 @@ export function ActivityContent() {
       ) : logs.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Activity className="size-10 text-muted-foreground mx-auto mb-3" />
+            <Activity className="size-10 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm font-medium">No activity recorded yet</p>
             <p className="text-sm text-muted-foreground mt-1">
               Activity will appear here as you use the platform.
@@ -107,10 +107,10 @@ export function ActivityContent() {
           <CardContent className="p-0">
             <div className="divide-y">
               {logs.map((log) => (
-                <div key={log.id} className="flex items-start gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
+                <div key={log.id} className="flex items-start gap-4 px-4 py-4 hover:bg-muted/30 transition-colors">
                   <Badge
                     variant="secondary"
-                    className={`text-xs shrink-0 mt-0.5 ${eventTypeColors[log.event_type] || "bg-gray-500/10 text-gray-600"}`}
+                    className={`text-xs shrink-0 mt-1 ${eventTypeColors[log.event_type] || "bg-gray-500/10 text-gray-600"}`}
                   >
                     {formatEventType(log.event_type)}
                   </Badge>

@@ -83,7 +83,7 @@ export function SessionsContent() {
         <Card>
           <CardContent className="p-6 space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
+              <div key={i} className="flex items-center gap-4">
                 <Skeleton className="h-6 w-20 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-1/2" />
@@ -97,7 +97,7 @@ export function SessionsContent() {
       ) : sessions.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <MonitorSmartphone className="size-10 text-muted-foreground mx-auto mb-3" />
+            <MonitorSmartphone className="size-10 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm font-medium">No sessions recorded yet</p>
             <p className="text-sm text-muted-foreground mt-1">
               Sessions will appear here when you use the AI agent.
@@ -109,7 +109,7 @@ export function SessionsContent() {
           <CardContent className="p-0">
             <div className="divide-y">
               {sessions.map((session) => (
-                <div key={session.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
+                <div key={session.id} className="flex items-center gap-4 px-4 py-4 hover:bg-muted/30 transition-colors">
                   <Badge
                     variant="outline"
                     className={`text-xs shrink-0 ${statusColors[session.status] || ""}`}
@@ -120,7 +120,7 @@ export function SessionsContent() {
                     <p className="text-sm truncate">
                       {session.summary || "Untitled session"}
                     </p>
-                    <div className="flex items-center gap-3 mt-0.5">
+                    <div className="flex items-center gap-4 mt-1">
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="size-3" />
                         {formatDuration(session.started_at, session.ended_at)}

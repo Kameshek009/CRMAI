@@ -68,7 +68,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
       <div className="py-1 px-1">
         <Link
           href={String(metadata.link)}
-          className="flex items-center gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 transition-colors hover:bg-emerald-500/10"
+          className="flex items-center gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4 transition-colors hover:bg-emerald-500/10"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
             <CheckCircle className="h-4 w-4 text-emerald-600" />
@@ -93,12 +93,12 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
   return (
     <div
       className={cn(
-        'group py-5 px-1',
-        isHighlighted && 'bg-primary/5 -mx-2 px-3 rounded-lg',
+        'group py-6 px-1',
+        isHighlighted && 'bg-primary/5 -mx-2 px-4 rounded-lg',
       )}
     >
       {/* Role header */}
-      <div className="flex items-center gap-2.5 mb-2.5">
+      <div className="flex items-center gap-2 mb-2">
         {isUser ? (
           <>
             {userImageUrl ? (
@@ -137,13 +137,13 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
 
       {/* Message content */}
       <div className={cn(
-        'pl-8.5',
-        messageType === 'error' && !isUser && 'border-l-2 border-destructive/50 pl-4 ml-8.5',
-        messageType === 'result' && !isUser && 'border-l-2 border-success/50 pl-4 ml-8.5',
-        (messageType === 'plan' || messageType === 'action') && !isUser && 'border-l-2 border-warning/50 pl-4 ml-8.5',
+        'pl-8',
+        messageType === 'error' && !isUser && 'border-l-2 border-destructive/50 pl-4 ml-8',
+        messageType === 'result' && !isUser && 'border-l-2 border-success/50 pl-4 ml-8',
+        (messageType === 'plan' || messageType === 'action') && !isUser && 'border-l-2 border-warning/50 pl-4 ml-8',
       )}>
         {messageType !== 'text' && !isUser && (
-          <span className="text-xs font-medium uppercase text-muted-foreground mb-1.5 block tracking-wide">
+          <span className="text-xs font-medium uppercase text-muted-foreground mb-2 block tracking-wide">
             {messageType}
           </span>
         )}
@@ -154,7 +154,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
         )}
         {/* Attachments */}
         {attachments.length > 0 && (
-          <div className="mt-2.5 space-y-2">
+          <div className="mt-2 space-y-2">
             {attachments.map((att) => (
               att.mime_type?.startsWith('image/') ? (
                 <a key={att.id} href={att.url} target="_blank" rel="noreferrer" className="block">
@@ -171,7 +171,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
                   href={att.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-border hover:bg-muted/30 transition-all max-w-xs"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:border-border hover:bg-muted/30 transition-all max-w-xs"
                 >
                   <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                     <FileText className="h-4 w-4 text-muted-foreground" />
@@ -189,7 +189,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
       </div>
 
       {/* Footer: timestamp + tokens + delete */}
-      <div className="flex items-center gap-2.5 mt-2.5 pl-8.5">
+      <div className="flex items-center gap-2 mt-2 pl-8">
         <span className="text-xs text-muted-foreground/60">
           {formatTime(message.created_at || new Date().toISOString())}
         </span>
@@ -214,9 +214,9 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
 
 export function TypingIndicator() {
   return (
-    <div className="py-5 px-1">
+    <div className="py-6 px-1">
       {/* Role header */}
-      <div className="flex items-center gap-2.5 mb-2.5">
+      <div className="flex items-center gap-2 mb-2">
         <div className="h-6 w-6 rounded-full bg-chart-1/15 flex items-center justify-center">
           <Sparkles className="h-3.5 w-3.5 text-chart-1 animate-pulse" />
         </div>
@@ -224,7 +224,7 @@ export function TypingIndicator() {
       </div>
 
       {/* Shimmer + thinking text */}
-      <div className="pl-8.5 flex items-center gap-3">
+      <div className="pl-8 flex items-center gap-4">
         <div className="thinking-shimmer h-4 w-16 rounded-full" />
         <span className="text-sm text-muted-foreground/70 animate-pulse">Thinking...</span>
       </div>

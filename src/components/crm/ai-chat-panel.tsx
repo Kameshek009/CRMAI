@@ -127,7 +127,7 @@ export function AiChatPanel() {
   return (
     <Card className="fixed bottom-6 right-6 w-96 h-[500px] flex flex-col shadow-2xl z-50">
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-4 py-3">
+      <div className="flex items-center justify-between border-b px-4 py-4">
         <div className="flex items-center gap-2">
           <Bot className="size-5 text-primary" />
           <span className="font-medium text-sm">CRM Assistant</span>
@@ -138,20 +138,20 @@ export function AiChatPanel() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground py-8">
-            <Bot className="size-8 mx-auto mb-3 text-muted-foreground/50" />
+            <Bot className="size-8 mx-auto mb-4 text-muted-foreground/50" />
             <p className="font-medium">How can I help?</p>
             <p className="mt-1">Try: &quot;Add contact Ivan Petrov&quot;, &quot;Show overdue tasks&quot;, or &quot;Mark call task as done&quot;</p>
           </div>
         )}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {messages.map((msg, i) => (
             <div key={i}>
               <div
                 className={cn(
-                  "max-w-[85%] rounded-lg px-3 py-2 text-sm",
+                  "max-w-[85%] rounded-lg px-4 py-2 text-sm",
                   msg.role === "user"
                     ? "ml-auto bg-primary text-primary-foreground"
                     : msg.isError
@@ -160,7 +160,7 @@ export function AiChatPanel() {
                 )}
               >
                 {msg.role === "assistant" ? (
-                  <Markdown content={msg.content} className="text-sm [&_p]:my-0.5 [&_strong]:font-semibold" />
+                  <Markdown content={msg.content} className="text-sm [&_p]:my-1 [&_strong]:font-semibold" />
                 ) : (
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                 )}
@@ -168,12 +168,12 @@ export function AiChatPanel() {
 
               {/* Tool result badges */}
               {msg.toolResults && msg.toolResults.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1.5 max-w-[85%]">
+                <div className="flex flex-wrap gap-2 mt-2 max-w-[85%]">
                   {msg.toolResults.map((tr, j) => (
                     <span
                       key={j}
                       className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium",
                         tr.success
                           ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                           : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
@@ -206,7 +206,7 @@ export function AiChatPanel() {
             </div>
           ))}
           {isLoading && (
-            <div className="bg-muted max-w-[85%] rounded-lg px-3 py-2">
+            <div className="bg-muted max-w-[85%] rounded-lg px-4 py-2">
               <Loader2 className="size-4 animate-spin" />
             </div>
           )}
@@ -215,7 +215,7 @@ export function AiChatPanel() {
       </div>
 
       {/* Input */}
-      <div className="border-t p-3">
+      <div className="border-t p-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();

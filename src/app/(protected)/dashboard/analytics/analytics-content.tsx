@@ -149,7 +149,7 @@ function MetricCard({
     <div>
       <Card className="glass-card gradient-border-card stat-card-hover">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
             <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", gradient)}>
               <Icon className="w-4 h-4 text-landing-accent-foreground" />
@@ -160,7 +160,7 @@ function MetricCard({
             <p className="text-xs text-muted-foreground">{subtitle}</p>
             {trend && (
               <div className={cn(
-                "flex items-center gap-0.5 text-xs font-medium",
+                "flex items-center gap-1 text-xs font-medium",
                 trend.direction === "up" ? "text-emerald-500" : "text-red-500"
               )}>
                 {trend.direction === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -202,7 +202,7 @@ export function AnalyticsContent() {
     return (
       <PageContainer>
         <PageHeader title="Analytics" description="Comprehensive CRM performance insights" />
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-[110px] rounded-xl" />)}
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
@@ -218,7 +218,7 @@ export function AnalyticsContent() {
         <PageHeader title="Analytics" description="Comprehensive CRM performance insights" />
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <AlertCircle className="size-10 text-muted-foreground mb-3" />
+            <AlertCircle className="size-10 text-muted-foreground mb-4" />
             <p className="text-lg font-medium">Failed to load analytics</p>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </CardContent>
@@ -281,7 +281,7 @@ export function AnalyticsContent() {
       <PageHeader title="Analytics" description="Comprehensive CRM performance insights" />
 
       {/* Top metrics row - 8 cards */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Win Rate"
           value={`${data.winRate}%`}
@@ -404,7 +404,7 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               {funnelData.length === 0 ? (
                 <div className="text-center py-12">
-                  <Handshake className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <Handshake className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No pipeline stages configured</p>
                 </div>
               ) : (
@@ -490,17 +490,17 @@ export function AnalyticsContent() {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                   <div className="text-xs text-emerald-600 font-medium mb-1">Won Deals</div>
                   <div className="text-xl font-bold text-emerald-600">{data.wonCount}</div>
                   <div className="text-xs text-emerald-600/70">${data.totalWonValue.toLocaleString()} total</div>
-                  <div className="text-xs text-emerald-600/60 mt-0.5">Avg: ${data.avgWonValue.toLocaleString()}</div>
+                  <div className="text-xs text-emerald-600/60 mt-1">Avg: ${data.avgWonValue.toLocaleString()}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
                   <div className="text-xs text-red-500 font-medium mb-1">Lost Deals</div>
                   <div className="text-xl font-bold text-red-500">{data.lostCount}</div>
                   <div className="text-xs text-red-500/70">${data.totalLostValue.toLocaleString()} total</div>
-                  <div className="text-xs text-red-500/60 mt-0.5">Avg: ${data.avgLostValue.toLocaleString()}</div>
+                  <div className="text-xs text-red-500/60 mt-1">Avg: ${data.avgLostValue.toLocaleString()}</div>
                 </div>
               </div>
               {/* Win rate bar */}
@@ -543,7 +543,7 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               {contactStatusData.length === 0 ? (
                 <div className="text-center py-12">
-                  <Users className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <Users className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No contacts yet</p>
                 </div>
               ) : (
@@ -558,7 +558,7 @@ export function AnalyticsContent() {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="flex-1 space-y-3">
+                  <div className="flex-1 space-y-4">
                     {contactStatusData.map((entry) => (
                       <div key={entry.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -600,7 +600,7 @@ export function AnalyticsContent() {
                   <div className="space-y-2">
                     {taskStatusData.map((entry) => (
                       <div key={entry.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.fill }} />
                           <span className="text-xs">{entry.name}</span>
                         </div>
@@ -615,7 +615,7 @@ export function AnalyticsContent() {
                   <div className="space-y-2">
                     {taskPriorityData.map((entry) => (
                       <div key={entry.name} className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.fill }} />
                           <span className="text-xs">{entry.name}</span>
                         </div>
@@ -643,7 +643,7 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               {activityData.length === 0 ? (
                 <div className="text-center py-12">
-                  <Activity className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <Activity className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No recent activity</p>
                 </div>
               ) : (
@@ -682,7 +682,7 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               {healthData.length === 0 ? (
                 <div className="text-center py-12">
-                  <Building2 className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <Building2 className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No companies yet</p>
                 </div>
               ) : (
@@ -698,7 +698,7 @@ export function AnalyticsContent() {
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="flex-1 space-y-2.5">
+                    <div className="flex-1 space-y-2">
                       {healthData.map((entry) => (
                         <div key={entry.name} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -714,7 +714,7 @@ export function AnalyticsContent() {
                   {(data.companiesByIndustry || []).length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Top Industries</p>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {(data.companiesByIndustry || []).slice(0, 6).map((ind) => (
                           <Badge key={ind.industry} variant="secondary" className="text-xs">
                             {ind.industry}: {ind.count}
@@ -743,17 +743,17 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               {(data.topDeals || []).length === 0 ? (
                 <div className="text-center py-12">
-                  <Handshake className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <Handshake className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No open deals</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {(data.topDeals || []).map((deal, i) => (
-                    <div key={deal.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={deal.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">{i + 1}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium truncate">{deal.title}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className="text-xs" style={{ color: deal.stageColor, borderColor: deal.stageColor + "30", backgroundColor: deal.stageColor + "10" }}>
                             {deal.stage}
                           </Badge>
@@ -785,11 +785,11 @@ export function AnalyticsContent() {
             <CardContent className="pt-0">
               {(data.contactsBySource || []).length === 0 ? (
                 <div className="text-center py-12">
-                  <Users className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <Users className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No source data available</p>
                 </div>
               ) : (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {(data.contactsBySource || []).sort((a, b) => b.count - a.count).slice(0, 8).map((source, i) => {
                     const pct = data.totalContacts > 0 ? Math.round((source.count / data.totalContacts) * 100) : 0;
                     return (
@@ -821,7 +821,7 @@ export function AnalyticsContent() {
       {insights.length > 0 && (
         <div>
           <Card className="glass-card">
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-4">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Sparkles className="w-3 h-3 text-landing-accent-foreground" />
@@ -830,16 +830,16 @@ export function AnalyticsContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {insights.map((insight) => {
                   const Icon = insightIcons[insight.type] || Info;
                   const color = insightColors[insight.type] || insightColors.info;
                   return (
-                    <div key={insight.id} className={cn("flex items-start gap-2.5 p-3 rounded-xl border", color)}>
-                      <Icon className="w-4 h-4 mt-0.5 shrink-0" />
+                    <div key={insight.id} className={cn("flex items-start gap-2 p-4 rounded-xl border", color)}>
+                      <Icon className="w-4 h-4 mt-1 shrink-0" />
                       <div>
                         <p className="text-xs font-medium">{insight.title}</p>
-                        <p className="text-xs opacity-70 mt-0.5">{insight.description}</p>
+                        <p className="text-xs opacity-70 mt-1">{insight.description}</p>
                       </div>
                     </div>
                   );

@@ -211,7 +211,7 @@ export function UpgradeContent() {
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-center gap-3 flex-1">
+              <div className="flex items-center gap-4 flex-1">
                 <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
                   <Sparkles className="size-5 text-primary" />
                 </div>
@@ -276,9 +276,9 @@ export function UpgradeContent() {
                 <p className="text-sm text-muted-foreground">{plan.description}</p>
               </CardHeader>
 
-              <CardContent className="flex-1 space-y-5">
+              <CardContent className="flex-1 space-y-6">
                 {/* Price */}
-                <div className="flex items-baseline gap-1.5">
+                <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-bold">{formatPrice(plan.tier)}</span>
                   {plan.tier !== "enterprise" && (
                     <span className="text-muted-foreground text-sm">
@@ -288,9 +288,9 @@ export function UpgradeContent() {
                 </div>
 
                 {/* Token highlight */}
-                <div className="rounded-xl bg-secondary p-3.5">
+                <div className="rounded-xl bg-secondary p-4">
                   <p className="text-xs text-muted-foreground">Includes</p>
-                  <p className="text-base font-semibold mt-0.5">
+                  <p className="text-base font-semibold mt-1">
                     {plan.tier === "enterprise"
                       ? "Unlimited tokens"
                       : `${formatTokens(limits.monthlyTokenLimit)} tokens/mo`}
@@ -298,10 +298,10 @@ export function UpgradeContent() {
                 </div>
 
                 {/* Features */}
-                <ul className="space-y-2.5">
+                <ul className="space-y-2">
                   {limits.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
-                      <Check className="size-3.5 text-primary mt-0.5 shrink-0" />
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="size-3.5 text-primary mt-1 shrink-0" />
                       <span className="text-sm leading-snug">{feature}</span>
                     </li>
                   ))}
@@ -355,9 +355,9 @@ export function UpgradeContent() {
                     <th className="text-left font-medium p-4 w-[200px]">Feature</th>
                     <th className="text-center font-medium p-4">Free</th>
                     <th className="text-center font-medium p-4">
-                      <span className="flex items-center justify-center gap-1.5">
+                      <span className="flex items-center justify-center gap-2">
                         Pro
-                        <Badge variant="secondary" className="text-xs px-1.5 py-0">Popular</Badge>
+                        <Badge variant="secondary" className="text-xs px-2 py-0">Popular</Badge>
                       </span>
                     </th>
                     <th className="text-center font-medium p-4">Max</th>

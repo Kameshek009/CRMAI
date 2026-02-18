@@ -203,13 +203,13 @@ export function CompaniesContent() {
 
       {/* Health Overview */}
       {companies.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {(Object.entries(healthStats) as [keyof typeof healthLabels, number][]).map(([key, value], i) => {
             const info = healthLabels[key];
             return (
               <div key={key}>
                 <Card className="glass-card">
-                  <CardContent className="p-3 flex items-center gap-3">
+                  <CardContent className="p-4 flex items-center gap-4">
                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border", info.color)}>
                       <Heart className="w-4 h-4" />
                     </div>
@@ -226,27 +226,27 @@ export function CompaniesContent() {
       )}
 
       {/* Search and Filters */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search companies..."
-              className="pl-9"
+              className="pl-10"
             />
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
               <ListFilter className="size-4 mr-1" />
               Filters
-              {(industryFilter || sizeFilter) && <Badge className="ml-1.5 h-4 px-1 text-xs">!</Badge>}
+              {(industryFilter || sizeFilter) && <Badge className="ml-2 h-4 px-1 text-xs">!</Badge>}
             </Button>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+              className="flex h-9 rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
               aria-label="Sort companies by"
             >
               {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -255,11 +255,11 @@ export function CompaniesContent() {
         </div>
 
         {showFilters && (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             {industries.length > 0 && (
               <div className="flex gap-1 flex-wrap">
                 <span className="text-xs text-muted-foreground self-center mr-1">
-                  <Factory className="w-3 h-3 inline mr-0.5" />Industry:
+                  <Factory className="w-3 h-3 inline mr-1" />Industry:
                 </span>
                 <Badge
                   variant={industryFilter === "" ? "default" : "outline"}
@@ -282,7 +282,7 @@ export function CompaniesContent() {
             )}
             <div className="flex gap-1">
               <span className="text-xs text-muted-foreground self-center mr-1">
-                <Users className="w-3 h-3 inline mr-0.5" />Size:
+                <Users className="w-3 h-3 inline mr-1" />Size:
               </span>
               {sizeFilters.map((f) => (
                 <Badge

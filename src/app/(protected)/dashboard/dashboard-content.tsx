@@ -226,7 +226,7 @@ function AnimatedStatCard({
   return (
     <Link href={href}>
       <Card className="p-4 cursor-pointer hover:bg-muted/50 transition-colors group">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
           <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", iconGradient)}>
             <Icon className="w-4 h-4 text-muted-foreground" />
@@ -238,7 +238,7 @@ function AnimatedStatCard({
             : animatedValue.toLocaleString()
           }
         </div>
-        <div className="flex items-center justify-between mt-1.5">
+        <div className="flex items-center justify-between mt-2">
           <p className="text-xs text-muted-foreground">{subtitle}</p>
           {trend && (
             <div className={cn(
@@ -371,7 +371,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Workspace header */}
-      <div className="border-b border-border px-8 py-5">
+      <div className="border-b border-border px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
@@ -391,25 +391,25 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="group/btn hidden sm:inline-flex" asChild>
               <Link href="/dashboard/contacts">
-                <Users className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
+                <Users className="w-3.5 h-3.5 mr-2 transition-transform group-hover/btn:scale-110" />
                 Contacts
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="group/btn" asChild>
               <Link href="/dashboard/pipeline">
-                <Kanban className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
+                <Kanban className="w-3.5 h-3.5 mr-2 transition-transform group-hover/btn:scale-110" />
                 Pipeline
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="group/btn hidden sm:inline-flex" asChild>
               <Link href="/dashboard/analytics">
-                <BarChart3 className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:scale-110" />
+                <BarChart3 className="w-3.5 h-3.5 mr-2 transition-transform group-hover/btn:scale-110" />
                 Analytics
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="group/btn" asChild>
               <Link href="/dashboard/chats">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover/btn:rotate-12 group-hover/btn:scale-110" />
+                <Sparkles className="w-3.5 h-3.5 mr-2 transition-transform group-hover/btn:rotate-12 group-hover/btn:scale-110" />
                 AI Chat
               </Link>
             </Button>
@@ -530,9 +530,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           {/* Recent Activity */}
           <div>
             <Card className="h-full">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-4">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-2">
                     <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
                       <Clock className="w-3 h-3 text-muted-foreground" />
                     </div>
@@ -556,10 +556,10 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                       return (
                         <div
                           key={a.id}
-                          className="flex items-start gap-2 pb-3 relative"
+                          className="flex items-start gap-2 pb-4 relative"
                         >
                           <div className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 z-10 ring-2 ring-background",
+                            "w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 z-10 ring-2 ring-background",
                             colorClass
                           )}>
                             <Icon className="w-3 h-3" />
@@ -580,8 +580,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           {/* AI Insights */}
           <div>
             <Card className="h-full">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
                     <Sparkles className="w-3 h-3 text-muted-foreground" />
                   </div>
@@ -609,7 +609,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           key={insight.id}
                           className="flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                         >
-                          <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", color)}>
+                          <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-1", color)}>
                             <Icon className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -628,9 +628,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           {/* Upcoming Tasks */}
           <div>
             <Card className="h-full">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-4">
                 <CardTitle className="text-sm font-semibold flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-2">
                     <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
                       <CheckSquare className="w-3 h-3 text-muted-foreground" />
                     </div>
@@ -662,7 +662,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                           )}
                         >
                           <div className={cn(
-                            "w-5 h-5 rounded-full border-2 mt-0.5 shrink-0 flex items-center justify-center",
+                            "w-5 h-5 rounded-full border-2 mt-1 shrink-0 flex items-center justify-center",
                             PRIORITY_BG[task.priority] || "bg-blue-500/10 border-blue-500/20"
                           )}>
                             <div className={cn(
@@ -706,7 +706,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         {/* Deals table */}
         <div>
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
@@ -729,7 +729,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </CardHeader>
             <CardContent className="pt-0">
               {/* Table header - Desktop (6 columns) */}
-              <div className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-3 pb-2 border-b border-border">
+              <div className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-4 pb-2 border-b border-border">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stage</span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
@@ -738,7 +738,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
               </div>
               {/* Table header - Mobile (3 columns) */}
-              <div className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-3 pb-2 border-b border-border">
+              <div className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-4 pb-2 border-b border-border">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
@@ -748,9 +748,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 <div className="text-center py-8">
                   <Handshake className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
                   <p className="text-sm text-muted-foreground">No deals yet</p>
-                  <Button variant="outline" size="sm" className="mt-3" asChild>
+                  <Button variant="outline" size="sm" className="mt-4" asChild>
                     <Link href="/dashboard/pipeline">
-                      <Plus className="w-3.5 h-3.5 mr-1.5" />
+                      <Plus className="w-3.5 h-3.5 mr-2" />
                       Create Deal
                     </Link>
                   </Button>
@@ -767,7 +767,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         <div>
                           <Link
                             href={`/dashboard/deals/${deal.id}`}
-                            className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-3 py-2.5 deal-row-hover rounded-lg items-center"
+                            className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-4 py-2 deal-row-hover rounded-lg items-center"
                           >
                             <div className="flex items-center gap-2 min-w-0">
                               <div
@@ -826,7 +826,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         {/* Mobile view (3 columns) */}
                         <Link
                           href={`/dashboard/deals/${deal.id}`}
-                          className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-3 py-2.5 deal-row-hover rounded-lg items-center"
+                          className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-4 py-2 deal-row-hover rounded-lg items-center"
                         >
                           <div className="flex items-start gap-2 min-w-0">
                             <div
@@ -872,7 +872,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Revenue Trend Chart */}
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-4">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
                   <TrendingUp className="w-3 h-3 text-muted-foreground" />
@@ -883,7 +883,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardContent className="pt-0">
               {revenueTrend.length === 0 || revenueTrend.every((d) => d.revenue === 0) ? (
                 <div className="text-center py-8">
-                  <DollarSign className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <DollarSign className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No revenue data yet. Close deals to see trends.</p>
                 </div>
               ) : (
@@ -944,7 +944,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
           {/* Workload by Status */}
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-4">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
                   <Kanban className="w-3 h-3 text-muted-foreground" />
@@ -955,7 +955,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <CardContent className="pt-0">
               {taskStatusData.length === 0 ? (
                 <div className="text-center py-8">
-                  <CheckSquare className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                  <CheckSquare className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
                   <p className="text-sm text-muted-foreground">No tasks yet. Create tasks to see workload.</p>
                 </div>
               ) : (
@@ -991,7 +991,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="space-y-3 flex-1">
+                  <div className="space-y-4 flex-1">
                     {taskStatusData.map((entry) => (
                       <div
                         key={entry.name}
@@ -1047,7 +1047,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   <Button size="sm" className="bg-gradient-to-r from-landing-accent to-landing-accent text-muted-foreground border-0 hover:opacity-90" asChild>
                     <Link href="/dashboard/account/billing">
                       Upgrade
-                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                      <ArrowRight className="w-3.5 h-3.5 ml-2" />
                     </Link>
                   </Button>
                 </div>

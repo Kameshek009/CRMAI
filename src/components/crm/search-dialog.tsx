@@ -106,7 +106,7 @@ export function SearchDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-lg p-0 gap-0">
-        <div className="flex items-center gap-2 border-b px-3">
+        <div className="flex items-center gap-2 border-b px-4">
           <Search className="size-4 text-muted-foreground shrink-0" />
           <Input
             ref={inputRef}
@@ -126,7 +126,7 @@ export function SearchDialog() {
               const Icon = typeIcons[type] || User;
               return (
                 <div key={type}>
-                  <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase">
+                  <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                     {type}s
                   </div>
                   {items.map((item) => {
@@ -136,7 +136,7 @@ export function SearchDialog() {
                         key={item.id}
                         onClick={() => handleSelect(item)}
                         className={cn(
-                          "flex items-center gap-3 w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors",
+                          "flex items-center gap-4 w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors",
                           globalIndex === selectedIndex && "bg-muted"
                         )}
                       >
@@ -160,10 +160,10 @@ export function SearchDialog() {
           </div>
         )}
 
-        <div className="border-t px-3 py-2 text-xs text-muted-foreground flex items-center gap-4">
-          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">↑↓</kbd> Navigate</span>
-          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">↵</kbd> Open</span>
-          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">Esc</kbd> Close</span>
+        <div className="border-t px-4 py-2 text-xs text-muted-foreground flex items-center gap-4">
+          <span><kbd className="px-2 py-1 rounded bg-muted font-mono text-xs">↑↓</kbd> Navigate</span>
+          <span><kbd className="px-2 py-1 rounded bg-muted font-mono text-xs">↵</kbd> Open</span>
+          <span><kbd className="px-2 py-1 rounded bg-muted font-mono text-xs">Esc</kbd> Close</span>
         </div>
       </DialogContent>
     </Dialog>

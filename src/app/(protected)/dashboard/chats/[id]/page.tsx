@@ -385,17 +385,17 @@ export default function ChatDetailPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full">
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b">
+        <div className="px-4 sm:px-6 py-4 border-b">
           <Skeleton className="h-8 w-36 sm:w-48" />
         </div>
         <div className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 pt-8 space-y-8">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="space-y-2.5">
-              <div className="flex items-center gap-2.5">
+            <div key={i} className="space-y-2">
+              <div className="flex items-center gap-2">
                 <Skeleton className="h-6 w-6 rounded-full" />
                 <Skeleton className="h-4 w-20" />
               </div>
-              <div className="pl-8.5 space-y-1.5">
+              <div className="pl-8 space-y-2">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-3/4" />
               </div>
@@ -461,14 +461,14 @@ export default function ChatDetailPage() {
 
       {/* Vision Board Status */}
       {visionBoard && (
-        <div className="px-4 sm:px-6 py-2.5 border-b bg-muted/30">
+        <div className="px-4 sm:px-6 py-2 border-b bg-muted/30">
           <div className="flex items-center justify-between gap-2 max-w-3xl mx-auto">
             <div className="flex items-center gap-2 min-w-0">
               <Sparkles className="h-4 w-4 text-chart-3 shrink-0" />
               <span className="text-xs sm:text-sm font-medium truncate">{visionBoard.title}</span>
               <span
                 className={cn(
-                  'text-xs px-2 py-0.5 rounded-full shrink-0',
+                  'text-xs px-2 py-1 rounded-full shrink-0',
                   visionBoard.status === 'active' && 'bg-success/20 text-success',
                   visionBoard.status === 'completed' && 'bg-chart-1/20 text-chart-1',
                   visionBoard.status === 'failed' && 'bg-destructive/20 text-destructive',

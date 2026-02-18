@@ -88,13 +88,13 @@ export function ContactCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-semibold truncate text-sm">{name}</span>
-            <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 border badge-shimmer", config.color)}>
+            <Badge variant="outline" className={cn("text-[10px] px-2 py-0 border badge-shimmer", config.color)}>
               {status}
             </Badge>
           </div>
-          {title && <p className="text-xs text-muted-foreground truncate mt-0.5">{title}</p>}
+          {title && <p className="text-xs text-muted-foreground truncate mt-1">{title}</p>}
           <TooltipProvider delayDuration={300}>
-            <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-4 mt-2 text-[11px] text-muted-foreground">
               {companyName && (
                 <Tooltip>
                   <TooltipTrigger asChild>

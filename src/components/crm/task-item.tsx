@@ -51,7 +51,7 @@ export function TaskItem({
 
   return (
     <div className={cn(
-      "premium-card flex items-center gap-3 rounded-xl border p-3.5 bg-card group/task",
+      "premium-card flex items-center gap-4 rounded-xl border p-4 bg-card group/task",
       isDone && "opacity-50",
       isInProgress && "border-orange-200/60 bg-orange-50/30 dark:border-orange-800/30 dark:bg-orange-950/10",
       isOverdue && !isInProgress && "border-red-200/60 bg-red-50/30 dark:border-red-900/20 dark:bg-red-950/10",
@@ -79,8 +79,8 @@ export function TaskItem({
         <div className="flex items-center gap-2">
           <span className={cn("text-sm font-medium truncate", isDone && "line-through text-muted-foreground")}>{title}</span>
           {isInProgress && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-landing-accent/10 text-orange-600 border-orange-200 dark:border-orange-800/40 badge-shimmer">
-              <Clock className="size-2.5 mr-0.5" />
+            <Badge variant="outline" className="text-[10px] px-2 py-0 bg-landing-accent/10 text-orange-600 border-orange-200 dark:border-orange-800/40 badge-shimmer">
+              <Clock className="size-2.5 mr-1" />
               In Progress
             </Badge>
           )}
@@ -88,8 +88,8 @@ export function TaskItem({
             <Sparkles className="size-3 text-landing-accent shrink-0 animate-pulse-glow" />
           )}
         </div>
-        <div className="flex items-center gap-2 mt-1.5">
-          <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", config.badge)}>
+        <div className="flex items-center gap-2 mt-2">
+          <Badge variant="outline" className={cn("text-[10px] px-2 py-0", config.badge)}>
             {priority}
           </Badge>
           <span className="text-[11px] text-muted-foreground capitalize">{type.replace("_", " ")}</span>
@@ -100,12 +100,12 @@ export function TaskItem({
             )}>
               <Calendar className="size-3" />
               {new Date(dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-              {isOverdue && <span className="text-[9px] uppercase tracking-wide ml-0.5">overdue</span>}
+              {isOverdue && <span className="text-[9px] uppercase tracking-wide ml-1">overdue</span>}
             </span>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-0.5 shrink-0 sm:opacity-0 sm:group-hover/task:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:group-hover/task:opacity-100 transition-opacity">
         {onEdit && (
           <Button
             variant="ghost"

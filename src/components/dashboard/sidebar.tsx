@@ -70,7 +70,7 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 h-screen w-60 flex flex-col bg-background border-r border-border z-50">
       {/* Logo */}
-      <div className="h-14 flex items-center px-5">
+      <div className="h-14 flex items-center px-6">
         <Link href="/dashboard">
           <Logo size={22} />
         </Link>
@@ -78,7 +78,7 @@ export function Sidebar() {
 
       {/* User Info - At Top like Cursor */}
       {user && (
-        <div className="px-5 pb-5">
+        <div className="px-6 pb-6">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">
               {user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0]}
@@ -92,7 +92,7 @@ export function Sidebar() {
       )}
 
       {/* Navigation Groups */}
-      <nav className="flex-1 px-3 overflow-y-auto">
+      <nav className="flex-1 px-4 overflow-y-auto">
         {navGroups.map((group, groupIndex) => (
           <div key={groupIndex}>
             {/* Divider before each group (except first) */}
@@ -100,7 +100,7 @@ export function Sidebar() {
               <div className="h-px bg-border mx-2 my-2" />
             )}
 
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isExternal = item.external === true;
@@ -113,7 +113,7 @@ export function Sidebar() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      className="flex items-center gap-4 h-10 px-4 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                     >
                       <Icon className="w-4 h-4" strokeWidth={1.5} />
                       <span>{item.label}</span>
@@ -126,7 +126,7 @@ export function Sidebar() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 h-10 px-3 rounded-lg text-sm transition-colors",
+                      "flex items-center gap-4 h-10 px-4 rounded-lg text-sm transition-colors",
                       isActive
                         ? "bg-secondary text-foreground"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary"
@@ -143,11 +143,11 @@ export function Sidebar() {
       </nav>
 
       {/* Sign Out */}
-      <div className="px-3 py-4">
+      <div className="px-4 py-4">
         <div className="h-px bg-border mx-2 mb-2" />
         <button
           onClick={() => signOut({ redirectUrl: "/sign-in" })}
-          className="flex items-center gap-3 h-10 px-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors w-full"
+          className="flex items-center gap-4 h-10 px-4 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors w-full"
         >
           <LogOut className="w-4 h-4" strokeWidth={1.5} />
           <span>Sign out</span>

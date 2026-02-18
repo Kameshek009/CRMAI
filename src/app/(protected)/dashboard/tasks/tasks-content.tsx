@@ -91,7 +91,7 @@ const contextFields: Record<string, { name: string; label: string; inputType: st
   meeting: { name: "location", label: "Location", inputType: "text", icon: MapPin, placeholder: "Office, Zoom link, etc." },
 };
 
-const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 const PRIORITY_ORDER: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
 
@@ -355,10 +355,10 @@ export function TasksContent() {
       </PageHeader>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
           <Card className={cn("glass-card", stats.overdue > 0 && "border-red-500/30")}>
-            <CardContent className="p-3 flex items-center gap-3">
+            <CardContent className="p-4 flex items-center gap-4">
               <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", stats.overdue > 0 ? "bg-red-500/10" : "bg-muted")}>
                 <AlertTriangle className={cn("w-4 h-4", stats.overdue > 0 ? "text-red-500" : "text-muted-foreground")} />
               </div>
@@ -371,7 +371,7 @@ export function TasksContent() {
         </div>
         <div>
           <Card className="glass-card">
-            <CardContent className="p-3 flex items-center gap-3">
+            <CardContent className="p-4 flex items-center gap-4">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10">
                 <CalendarDays className="w-4 h-4 text-amber-500" />
               </div>
@@ -384,7 +384,7 @@ export function TasksContent() {
         </div>
         <div>
           <Card className="glass-card">
-            <CardContent className="p-3 flex items-center gap-3">
+            <CardContent className="p-4 flex items-center gap-4">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500/10">
                 <Clock className="w-4 h-4 text-blue-500" />
               </div>
@@ -397,7 +397,7 @@ export function TasksContent() {
         </div>
         <div>
           <Card className="glass-card">
-            <CardContent className="p-3 flex items-center gap-3">
+            <CardContent className="p-4 flex items-center gap-4">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/10">
                 <CheckSquare className="w-4 h-4 text-emerald-500" />
               </div>
@@ -411,27 +411,27 @@ export function TasksContent() {
       </div>
 
       {/* Search and Filters */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search tasks..."
-              className="pl-9"
+              className="pl-10"
             />
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
               <ListFilter className="size-4 mr-1" />
               Filters
-              {(priorityFilter || typeFilter) && <Badge className="ml-1.5 h-4 px-1 text-xs">!</Badge>}
+              {(priorityFilter || typeFilter) && <Badge className="ml-2 h-4 px-1 text-xs">!</Badge>}
             </Button>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+              className="flex h-9 rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
               aria-label="Sort tasks by"
             >
               {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -455,7 +455,7 @@ export function TasksContent() {
 
         {/* Advanced filters */}
         {showFilters && (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             <div className="flex gap-1">
               <span className="text-xs text-muted-foreground self-center mr-1">Priority:</span>
               {priorityFilters.map((f) => (
@@ -487,7 +487,7 @@ export function TasksContent() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
             <Skeleton key={i} className="h-16 w-full rounded-lg" />
           ))}
@@ -500,7 +500,7 @@ export function TasksContent() {
         />
       ) : (
         <div className="space-y-2">
-          <div className="flex items-center justify-between px-3 py-1">
+          <div className="flex items-center justify-between px-4 py-1">
             <div className="flex items-center gap-2">
               <Checkbox
                 checked={allSelected}
@@ -558,7 +558,7 @@ export function TasksContent() {
             <DialogTitle>{isEdit ? "Edit Task" : "New Task"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleFormSubmit} className="space-y-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Title</label>
               <Input
                 value={formValues.title || ""}
@@ -568,7 +568,7 @@ export function TasksContent() {
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Description</label>
               <Textarea
                 value={formValues.description || ""}
@@ -579,7 +579,7 @@ export function TasksContent() {
             </div>
 
             {isEdit && (
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="text-sm font-medium">Status</label>
                 <select
                   value={formValues.status || "todo"}
@@ -593,7 +593,7 @@ export function TasksContent() {
               </div>
             )}
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Type</label>
               <select
                 value={formValues.type || ""}
@@ -610,8 +610,8 @@ export function TasksContent() {
             </div>
 
             {ctxField && (
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium flex items-center gap-1.5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
                   <ctxField.icon className="size-3.5" />
                   {ctxField.label}
                 </label>
@@ -624,7 +624,7 @@ export function TasksContent() {
               </div>
             )}
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Priority</label>
               <select
                 value={formValues.priority || ""}
@@ -639,7 +639,7 @@ export function TasksContent() {
               </select>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Due Date</label>
               <Input
                 type="date"

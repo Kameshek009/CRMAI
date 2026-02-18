@@ -241,7 +241,7 @@ export function ContactsContent() {
 
       {/* Status Summary */}
       {contacts.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {(["lead", "active", "inactive", "churned"] as const).map((status, i) => {
             const Icon = statusIcons[status] || Users;
             const color = statusColors[status] || "text-muted-foreground bg-muted";
@@ -251,7 +251,7 @@ export function ContactsContent() {
                   className={cn("glass-card cursor-pointer transition-all", statusFilter === status && "ring-1 ring-primary")}
                   onClick={() => setStatusFilter(statusFilter === status ? "" : status)}
                 >
-                  <CardContent className="p-3 flex items-center gap-3">
+                  <CardContent className="p-4 flex items-center gap-4">
                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", color)}>
                       <Icon className="w-4 h-4" />
                     </div>
@@ -268,15 +268,15 @@ export function ContactsContent() {
       )}
 
       {/* Filters */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search contacts..."
-              className="pl-9"
+              className="pl-10"
             />
           </div>
           <div className="flex gap-2">
@@ -284,13 +284,13 @@ export function ContactsContent() {
               <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
                 <ListFilter className="size-4 mr-1" />
                 Sources
-                {sourceFilter && <Badge className="ml-1.5 h-4 px-1 text-xs">!</Badge>}
+                {sourceFilter && <Badge className="ml-2 h-4 px-1 text-xs">!</Badge>}
               </Button>
             )}
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+              className="flex h-9 rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
               aria-label="Sort contacts by"
             >
               {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -337,7 +337,7 @@ export function ContactsContent() {
 
       {/* Contact List */}
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
             <Skeleton key={i} className="h-20 w-full rounded-lg" />
           ))}
