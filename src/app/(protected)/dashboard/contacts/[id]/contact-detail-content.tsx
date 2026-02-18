@@ -126,7 +126,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
         <Skeleton className="h-6 w-32 mb-6 rounded-lg" />
         <div className="flex items-start gap-4 mb-8">
           <Skeleton className="size-20 rounded-2xl" />
-          <div className="space-y-3 flex-1">
+          <div className="space-y-4 flex-1">
             <Skeleton className="h-8 w-64 rounded-lg" />
             <Skeleton className="h-4 w-48 rounded-lg" />
             <Skeleton className="h-8 w-80 rounded-lg" />

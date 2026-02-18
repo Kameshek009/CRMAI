@@ -62,7 +62,7 @@ export function ActivityTimeline({ activities, emptyMessage = "No activity yet" 
         const colorClass = typeColors[activity.type] || "bg-gray-500/10 text-gray-600";
 
         return (
-          <div key={activity.id} className="flex gap-3 py-3">
+          <div key={activity.id} className="flex gap-4 py-4">
             <div className="flex flex-col items-center">
               <div className={cn("flex size-8 items-center justify-center rounded-full", colorClass)}>
                 <Icon className="size-4" />
@@ -74,7 +74,7 @@ export function ActivityTimeline({ activities, emptyMessage = "No activity yet" 
             <div className="flex-1 pb-2">
               <p className="text-sm font-medium">{activity.title}</p>
               {activity.description && (
-                <p className="text-sm text-muted-foreground mt-0.5">{activity.description}</p>
+                <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
               )}
               <p className="text-xs text-muted-foreground mt-1">
                 {formatRelativeTime(new Date(activity.created_at))}

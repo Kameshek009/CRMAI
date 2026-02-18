@@ -155,7 +155,7 @@ export default function TeamSettingsPage() {
                   step={5}
                 />
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <label className="flex items-center justify-between">
                   <span className="text-sm">Can create contacts</span>
                   <Switch

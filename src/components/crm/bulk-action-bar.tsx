@@ -36,7 +36,7 @@ export function BulkActionBar({ selectedCount, onDeselectAll, actions }: BulkAct
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
           role="toolbar"
           aria-label="Bulk actions"
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border bg-background px-4 py-2.5 shadow-lg"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-lg border bg-background px-4 py-2 shadow-lg"
         >
           <span className="text-sm font-medium whitespace-nowrap">
             {selectedCount} selected

@@ -87,7 +87,7 @@ export default function TeamConnectionsPage() {
             <CardTitle className="text-base">Your Connection Code</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="text-sm text-muted-foreground mb-4">
               Share this with another team&apos;s director to connect.
             </p>
             <InviteCodeDisplay code={currentTeam.inviteCode} teamId={currentTeam.id} />
@@ -129,7 +129,7 @@ export default function TeamConnectionsPage() {
 
           return (
             <Card key={conn.id}>
-              <CardContent className="flex items-center gap-4 py-3">
+              <CardContent className="flex items-center gap-4 py-4">
                 <Link2 className="size-5 text-muted-foreground" />
                 <div className="flex-1">
                   <span className="font-medium text-sm">{otherTeam.name}</span>

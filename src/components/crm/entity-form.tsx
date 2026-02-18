@@ -119,10 +119,10 @@ export function EntityForm({
             const fieldId = `entity-form-${field.name}`;
             const error = touched[field.name] ? errors[field.name] : undefined;
             return (
-              <div key={field.name} className="space-y-1.5">
+              <div key={field.name} className="space-y-2">
                 <label htmlFor={fieldId} className="text-sm font-medium">
                   {field.label}
-                  {field.required && <span className="text-destructive ml-0.5">*</span>}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
                 </label>
                 {field.type === "textarea" ? (
                   <Textarea
@@ -141,7 +141,7 @@ export function EntityForm({
                     onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
                     onBlur={() => handleBlur(field)}
                     className={cn(
-                      "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       error && "border-destructive focus-visible:ring-destructive"
                     )}
                   >

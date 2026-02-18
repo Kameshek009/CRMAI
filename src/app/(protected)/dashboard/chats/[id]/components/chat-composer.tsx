@@ -181,7 +181,7 @@ export function ChatComposer({
       <div className="max-w-3xl mx-auto">
         {/* Daily limit countdown */}
         {rateLimitResetsAt && countdown && (
-          <div className="flex items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-destructive/10 border border-destructive/30">
+          <div className="flex items-center justify-between gap-2 mb-4 p-4 rounded-xl bg-destructive/10 border border-destructive/30">
             <div className="flex items-center gap-2 min-w-0">
               <Clock className="h-4 w-4 text-destructive shrink-0" />
               <p className="text-xs sm:text-sm text-destructive">
@@ -198,7 +198,7 @@ export function ChatComposer({
         )}
         {/* Offline warning */}
         {!isAgentOnline && (
-          <div className="flex items-center gap-2 mb-3 p-3 rounded-xl bg-warning/10 border border-warning/30">
+          <div className="flex items-center gap-2 mb-4 p-4 rounded-xl bg-warning/10 border border-warning/30">
             <AlertCircle className="h-4 w-4 text-warning shrink-0" />
             <p className="text-xs sm:text-sm text-warning">
               Agent offline. Messages will be queued.
@@ -215,8 +215,8 @@ export function ChatComposer({
         )}>
           {/* Attachment preview */}
           {attachment && (
-            <div className="px-3 pt-3">
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 border border-border/50">
+            <div className="px-4 pt-4">
+              <div className="flex items-center gap-4 p-2 rounded-xl bg-muted/50 border border-border/50">
                 {attachment.isImage && attachment.previewUrl ? (
                   <img
                     src={attachment.previewUrl}
@@ -262,7 +262,7 @@ export function ChatComposer({
             }
             className={cn(
               'w-full min-h-[52px] max-h-40 resize-none border-none bg-transparent',
-              'px-4 pt-3.5 pb-12 text-sm',
+              'px-4 pt-4 pb-12 text-sm',
               'placeholder:text-muted-foreground/50',
               'focus:outline-none focus:ring-0',
             )}

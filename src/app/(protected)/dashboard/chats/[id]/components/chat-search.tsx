@@ -51,7 +51,7 @@ export function ChatSearch({
   if (!isOpen) return null;
 
   return (
-    <div className="flex items-center gap-2 px-3 sm:px-6 py-2 border-b bg-muted/30">
+    <div className="flex items-center gap-2 px-4 sm:px-6 py-2 border-b bg-muted/30">
       <Search className="h-4 w-4 text-muted-foreground shrink-0" />
       <Input
         ref={inputRef}
@@ -66,7 +66,7 @@ export function ChatSearch({
           {matchCount > 0 ? `${currentMatch + 1} / ${matchCount}` : 'No results'}
         </span>
       )}
-      <div className="flex items-center gap-0.5 shrink-0">
+      <div className="flex items-center gap-1 shrink-0">
         <Button
           variant="ghost"
           size="icon"

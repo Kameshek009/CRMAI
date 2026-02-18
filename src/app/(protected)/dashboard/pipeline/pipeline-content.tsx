@@ -259,7 +259,7 @@ export function PipelineContent() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full">
-        <div className="px-4 py-3 border-b">
+        <div className="px-4 py-4 border-b">
           <Skeleton className="h-8 w-48" />
         </div>
         <div className="flex gap-4 p-4 overflow-hidden flex-1">

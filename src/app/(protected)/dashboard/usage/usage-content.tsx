@@ -47,7 +47,7 @@ export function UsageContent() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-3">
+          <CardTitle className="flex items-center gap-4">
             <BarChart3 className="size-5" />
             Token Usage
           </CardTitle>
@@ -79,7 +79,7 @@ export function UsageContent() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Progress value={percentage} className="h-3" />
             {isLoading ? (
               <Skeleton className="h-5 w-48" />
@@ -178,7 +178,7 @@ export function UsageContent() {
                   : "Disconnected - click refresh to update"}
               </p>
             </div>
-            <Badge variant={isConnected ? "default" : "secondary"} className="h-8 px-3">
+            <Badge variant={isConnected ? "default" : "secondary"} className="h-8 px-4">
               <div className={`size-2.5 rounded-full mr-2 ${isConnected ? "bg-success" : "bg-muted-foreground"}`} />
               {isConnected ? "Live" : "Offline"}
             </Badge>

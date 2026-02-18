@@ -192,7 +192,7 @@ function BillingPageContent() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <CardTitle className="flex items-center gap-3">
+              <CardTitle className="flex items-center gap-4">
                 <CreditCard className="size-5" />
                 Current Plan
               </CardTitle>
@@ -202,7 +202,7 @@ function BillingPageContent() {
                   : "Team subscription (managed by director)"}
               </CardDescription>
             </div>
-            <Badge variant="outline" className="text-lg px-4 py-1.5 capitalize">
+            <Badge variant="outline" className="text-lg px-4 py-2 capitalize">
               {team.tier}
             </Badge>
           </div>
@@ -218,7 +218,7 @@ function BillingPageContent() {
               <p className="text-2xl font-bold">{formatTokens(usageStats.tokenLimit)}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <Users className="size-3.5" />
                 Seats
               </p>
@@ -240,7 +240,7 @@ function BillingPageContent() {
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{usageStats.percentUsed.toFixed(1)}% used</span>
               <span>{formatTokens(usageStats.tokensRemaining)} remaining</span>
@@ -254,7 +254,7 @@ function BillingPageContent() {
       {error && (
         <Card className="border-destructive">
           <CardContent className="p-6">
-            <div className="flex items-center gap-3 text-destructive">
+            <div className="flex items-center gap-4 text-destructive">
               <AlertCircle className="size-5" />
               <p>{error}</p>
             </div>

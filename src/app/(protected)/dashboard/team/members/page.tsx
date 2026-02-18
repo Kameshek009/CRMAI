@@ -108,7 +108,7 @@ export default function TeamMembersPage() {
   return (
     <PageContainer>
       <PageHeader title="Members" description={`${members.length} team members`}>
-        <Badge variant="outline" className="gap-1.5">
+        <Badge variant="outline" className="gap-2">
           <Users className="size-3" />
           {members.length} / {maxMembers > 1000 ? "∞" : maxMembers}
         </Badge>
@@ -116,7 +116,7 @@ export default function TeamMembersPage() {
 
       {/* Capacity indicator */}
       {maxMembers <= 1000 && (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Team capacity</span>
             <span className={isNearFull ? "text-amber-500 font-medium" : ""}>
@@ -130,7 +130,7 @@ export default function TeamMembersPage() {
       <div className="space-y-2">
         {members.map((member) => (
           <Card key={member.id}>
-            <CardContent className="flex items-center gap-4 py-3">
+            <CardContent className="flex items-center gap-4 py-4">
               <Avatar className="size-10">
                 <AvatarFallback>
                   {getMemberName(member).slice(0, 2).toUpperCase()}

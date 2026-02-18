@@ -237,7 +237,7 @@ export function AdminContent() {
   return (
     <PageContainer>
       <PageHeader title="Admin Panel" description="Manage users and plans">
-        <Badge variant="outline" className="gap-1.5">
+        <Badge variant="outline" className="gap-2">
           <Shield className="size-3" />
           Admin
         </Badge>
@@ -264,7 +264,7 @@ export function AdminContent() {
       <div className="grid gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Users className="size-5 text-muted-foreground" />
               <div>
                 <p className="text-2xl font-bold">{totalUsers}</p>
@@ -277,7 +277,7 @@ export function AdminContent() {
           (tier) => (
             <Card key={tier}>
               <CardContent className="p-6">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <Badge className={tierColors[tier]}>{tier}</Badge>
                   <p className="text-2xl font-bold">{tierCounts[tier] || 0}</p>
                 </div>
@@ -313,7 +313,7 @@ export function AdminContent() {
                     <TableRow key={user.id}>
                       {/* User info */}
                       <TableCell>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                           {user.imageUrl ? (
                             <img
                               src={user.imageUrl}
@@ -368,7 +368,7 @@ export function AdminContent() {
 
                       {/* Token limit */}
                       <TableCell>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <span className="text-sm">
                             {formatTokens(user.tokenLimit)}
                           </span>
@@ -386,7 +386,7 @@ export function AdminContent() {
 
                       {/* Credits */}
                       <TableCell>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <span className="text-sm">
                             {formatTokens(user.tokenCredits)}
                           </span>
@@ -418,9 +418,9 @@ export function AdminContent() {
                           disabled={isActioning}
                         >
                           {isActioning ? (
-                            <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                            <Loader2 className="mr-2 size-3.5 animate-spin" />
                           ) : (
-                            <RotateCcw className="mr-1.5 size-3.5" />
+                            <RotateCcw className="mr-2 size-3.5" />
                           )}
                           Reset
                         </Button>

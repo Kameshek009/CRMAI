@@ -114,7 +114,7 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
         </Avatar>
         <div>
           <h1 className="text-2xl font-bold">{String(company.name)}</h1>
-          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
             {company.industry && <span>{String(company.industry)}</span>}
             {company.size && <span>{String(company.size)} employees</span>}
           </div>
@@ -131,7 +131,7 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader><CardTitle className="text-sm">Company Info</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {company.website && (
               <div className="flex items-center gap-2 text-sm">
                 <Globe className="size-4 text-muted-foreground" />
@@ -170,7 +170,7 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
                     <Link
                       key={String(c.id)}
                       href={`/dashboard/contacts/${c.id}`}
-                      className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50"
+                      className="flex items-center gap-4 rounded-lg border p-4 hover:bg-muted/50"
                     >
                       <Avatar className="size-8">
                         <AvatarFallback className="text-xs">
@@ -198,7 +198,7 @@ export function CompanyDetailContent({ companyId }: CompanyDetailContentProps) {
                     <Link
                       key={String(deal.id)}
                       href={`/dashboard/deals/${deal.id}`}
-                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50"
+                      className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50"
                     >
                       <div>
                         <p className="text-sm font-medium">{String(deal.title)}</p>

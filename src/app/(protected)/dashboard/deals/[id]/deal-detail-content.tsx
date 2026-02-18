@@ -150,7 +150,7 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{String(deal.title)}</h1>
-        <div className="flex items-center gap-3 mt-2">
+        <div className="flex items-center gap-4 mt-2">
           <Badge>{String(deal.status)}</Badge>
           {stage && (
             <Badge variant="outline" style={{ borderColor: String(stage.color) }}>
@@ -163,7 +163,7 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
           </Button>
         </div>
         {stages.length > 0 && (
-          <div className="mt-3 max-w-xs">
+          <div className="mt-4 max-w-xs">
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Change Stage</label>
             <StageSelector
               stages={stages}
@@ -177,7 +177,7 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader><CardTitle className="text-sm">Deal Info</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
               <DollarSign className="size-4 text-muted-foreground" />
               <span className="text-lg font-bold">${Number(deal.value).toLocaleString()}</span>
@@ -217,7 +217,7 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
             <CardContent className="space-y-4">
               <NoteEditor onSubmit={handleAddNote} />
               {notes.map((note) => (
-                <div key={note.id} className="border-l-2 border-muted pl-3 py-1">
+                <div key={note.id} className="border-l-2 border-muted pl-4 py-1">
                   <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {new Date(note.created_at).toLocaleDateString()}
@@ -239,7 +239,7 @@ export function DealDetailContent({ dealId }: DealDetailContentProps) {
               <CardContent>
                 <div className="space-y-2">
                   {tasks.map((task) => (
-                    <div key={String(task.id)} className="flex items-center justify-between rounded-lg border p-3">
+                    <div key={String(task.id)} className="flex items-center justify-between rounded-lg border p-4">
                       <div>
                         <p className="text-sm font-medium">{String(task.title)}</p>
                         {task.due_date && (

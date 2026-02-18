@@ -50,7 +50,7 @@ export function TeamContent() {
     return (
       <PageContainer>
         <PageHeader title="Team" description={deletedTeams.length > 0 ? "Your team was deleted" : "No team selected"} />
-        <div className="space-y-3 max-w-lg">
+        <div className="space-y-4 max-w-lg">
           {/* Deleted teams — restore option */}
           {deletedTeams.map((dt) => {
             const deletedAt = new Date(dt.deletedAt).getTime();
@@ -71,7 +71,7 @@ export function TeamContent() {
                     onClick={() => handleRestore(dt.team.id)}
                     disabled={restoring === dt.team.id}
                   >
-                    <Undo2 className="size-3.5 mr-1.5" />
+                    <Undo2 className="size-3.5 mr-2" />
                     {restoring === dt.team.id ? "Restoring..." : "Restore"}
                   </Button>
                 </CardContent>
@@ -180,7 +180,7 @@ export function TeamContent() {
             <CardTitle className="text-base">Invite Code</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="text-sm text-muted-foreground mb-4">
               Share this code with people you want to invite to your team.
             </p>
             <InviteCodeDisplay

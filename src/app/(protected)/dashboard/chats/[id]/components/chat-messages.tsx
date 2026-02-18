@@ -154,10 +154,10 @@ export function ChatMessages({
     return (
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
         <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto">
-          <div className="rounded-full bg-chart-1/10 p-4 mb-5">
+          <div className="rounded-full bg-chart-1/10 p-4 mb-6">
             <Sparkles className="h-8 w-8 text-chart-1" />
           </div>
-          <h3 className="text-lg font-semibold mb-1.5">
+          <h3 className="text-lg font-semibold mb-2">
             {chat.mode === 'chat' ? 'CRM AI Assistant' : 'Start a conversation'}
           </h3>
           <p className="text-sm text-muted-foreground mb-8 text-center max-w-sm">
@@ -166,7 +166,7 @@ export function ChatMessages({
               : 'Describe a task for the agent to complete on your desktop.'}
           </p>
           {chat.mode === 'chat' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
               {QUICK_SUGGESTIONS.map((suggestion) => (
                 <button
                   key={suggestion.label}

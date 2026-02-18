@@ -123,7 +123,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
 
         {step === "paste" && (
           <>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 Paste CSV data with columns: first_name, last_name, email, phone, title, company
               </p>
@@ -144,7 +144,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
 
         {step === "preview" && (
           <>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 Found {parsed.length} contact{parsed.length !== 1 ? "s" : ""} to import:
               </p>
@@ -186,7 +186,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
 
         {step === "done" && importResult && (
           <>
-            <div className="text-center py-6 space-y-3">
+            <div className="text-center py-6 space-y-4">
               <CheckCircle2 className="size-12 text-emerald-500 mx-auto" />
               <p className="text-lg font-medium">Import Complete</p>
               <p className="text-sm text-muted-foreground">

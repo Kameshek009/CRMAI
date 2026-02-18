@@ -77,13 +77,13 @@ export default function TeamRolesPage() {
                 <Shield className="size-4" style={{ color: role.color }} />
                 <CardTitle className="text-sm font-semibold">{role.name}</CardTitle>
                 {role.is_system && (
-                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">System</span>
+                  <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">System</span>
                 )}
               </div>
               <RoleBadge name={`P${role.priority}`} color={role.color} />
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-muted-foreground mb-3">
+              <p className="text-xs text-muted-foreground mb-4">
                 {getPermissionSummary(role.permissions)}
               </p>
               {isDirector && (
