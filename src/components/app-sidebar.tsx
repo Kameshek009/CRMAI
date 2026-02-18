@@ -48,10 +48,11 @@ import {
   Shield,
   Link2,
   UserCog,
+  Target,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isAdmin } from "@/lib/constants/admin";
+
 
 interface NavItem {
   label: string;
@@ -71,6 +72,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Overview", href: "/dashboard", icon: LayoutGrid },
       { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare },
+      { label: "Plan", href: "/dashboard/plan", icon: Target },
     ],
   },
   {
@@ -205,7 +207,6 @@ function NavUser() {
 export function AppSidebar() {
   const pathname = usePathname();
   const { can } = useTeam();
-  const { account } = useAccount();
 
   return (
     <Sidebar collapsible="icon">
@@ -265,33 +266,6 @@ export function AppSidebar() {
             {groupIndex < navGroups.length - 1 && <SidebarSeparator className="my-2 opacity-30" />}
           </SidebarGroup>
         ))}
-        {/* Admin link — only visible to admin */}
-        {account && isAdmin(account.clerkUserId) && (
-          <>
-            <SidebarSeparator className="my-2 opacity-30" />
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                Admin
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === "/dashboard/admin"}
-                      tooltip="Admin Panel"
-                    >
-                      <Link href="/dashboard/admin">
-                        <Shield className={cn(pathname === "/dashboard/admin" && "text-[var(--accent-blue)]")} />
-                        <span className={cn(pathname === "/dashboard/admin" && "font-semibold")}>Admin Panel</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
       </SidebarContent>
 
       {/* User Footer */}
