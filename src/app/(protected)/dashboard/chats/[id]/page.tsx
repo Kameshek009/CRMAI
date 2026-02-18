@@ -274,6 +274,52 @@ export default function ChatDetailPage() {
             lastSSETimestamp.current = aiMsgResult.message.created_at;
           }
         }
+
+        // Send notification messages for created entities (tasks, contacts, deals)
+        if (aiJson.success && aiJson.data.toolResults?.length > 0) {
+          const entityResults = (aiJson.data.toolResults as { name: string; result: string; data?: { id: string; title?: string; first_name?: string } }[]).filter(
+            (r) => (r.name === 'create_task' || r.name === 'create_contact' || r.name === 'create_deal') && r.data?.id
+          );
+
+          const entityLinks: Record<string, string> = {
+            create_task: '/dashboard/tasks',
+            create_contact: '/dashboard/contacts',
+            create_deal: '/dashboard/pipeline',
+          };
+
+          const entityTypes: Record<string, string> = {
+            create_task: 'task',
+            create_contact: 'contact',
+            create_deal: 'deal',
+          };
+
+          for (const er of entityResults) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+
+            const entityTitle = er.data?.title || er.data?.first_name || er.result;
+            const notifRes = await fetch(`/api/chats/${chatId}/messages`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                role: 'assistant',
+                content: entityTitle,
+                message_type: 'notification',
+                metadata: {
+                  entity_type: entityTypes[er.name],
+                  entity_id: er.data!.id,
+                  link: entityLinks[er.name],
+                },
+              }),
+            });
+            const notifResult = await notifRes.json();
+            if (notifResult.success) {
+              setMessages((prev) => [...prev, notifResult.message]);
+              if (notifResult.message.created_at) {
+                lastSSETimestamp.current = notifResult.message.created_at;
+              }
+            }
+          }
+        }
       }
     } catch (err) {
       console.error('Error sending message:', err);

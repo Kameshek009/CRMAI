@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   Sparkles,
   User,
@@ -8,10 +9,10 @@ import {
   Trash2,
   FileText,
   Download,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Markdown } from '@/components/ui/markdown';
-import { motion } from 'framer-motion';
 import type { Message } from '@/lib/supabase/types';
 
 interface MessageBubbleProps {
@@ -52,16 +53,36 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
   const metadata = message.metadata as Record<string, unknown> | null;
   const attachments: AttachmentInfo[] = (metadata?.attachments as AttachmentInfo[]) || [];
 
+  // Notification card rendering
+  if (messageType === 'notification' && metadata?.link) {
+    return (
+      <div className="py-1 px-1">
+        <Link
+          href={String(metadata.link)}
+          className="flex items-center gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 transition-colors hover:bg-emerald-500/10"
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+            <CheckCircle className="h-4 w-4 text-emerald-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium truncate">{message.content}</p>
+            <p className="text-xs text-muted-foreground">
+              {metadata.entity_type === 'task' ? 'Task created' : 'Created'}
+            </p>
+          </div>
+          <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+        </Link>
+      </div>
+    );
+  }
+
   // Strip "[Attached file: ...]" from display for user messages
   const displayContent = isUser
     ? message.content.replace(/\n?\[Attached file: [^\]]+\]$/, '').trim()
     : message.content;
 
   return (
-    <motion.div
-      initial={isNew ? { opacity: 0, y: 8 } : false}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+    <div
       className={cn(
         'group py-5 px-1',
         isHighlighted && 'bg-primary/5 -mx-2 px-3 rounded-lg',
@@ -178,19 +199,13 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
           </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function TypingIndicator() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.3 }}
-      className="py-5 px-1"
-    >
+    <div className="py-5 px-1">
       {/* Role header */}
       <div className="flex items-center gap-2.5 mb-2.5">
         <div className="h-6 w-6 rounded-full bg-chart-1/15 flex items-center justify-center">
@@ -204,6 +219,6 @@ export function TypingIndicator() {
         <div className="thinking-shimmer h-4 w-16 rounded-full" />
         <span className="text-sm text-muted-foreground/70 animate-pulse">Thinking...</span>
       </div>
-    </motion.div>
+    </div>
   );
 }
