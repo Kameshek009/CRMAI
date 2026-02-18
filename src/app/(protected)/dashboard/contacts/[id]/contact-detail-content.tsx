@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -125,7 +124,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
     return (
       <PageContainer>
         <Skeleton className="h-6 w-32 mb-6 rounded-lg" />
-        <div className="flex items-start gap-5 mb-8">
+        <div className="flex items-start gap-4 mb-8">
           <Skeleton className="size-20 rounded-2xl" />
           <div className="space-y-3 flex-1">
             <Skeleton className="h-8 w-64 rounded-lg" />
@@ -170,27 +169,17 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
 
   return (
     <PageContainer>
-      <motion.div
-        initial={{ opacity: 0, x: -8 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mb-6"
-      >
+      <div className="mb-8">
         <Button variant="ghost" size="sm" className="hover:bg-muted/80 -ml-2" asChild>
           <Link href="/dashboard/contacts">
-            <ArrowLeft className="size-4 mr-1.5" />
+            <ArrowLeft className="size-4 mr-2" />
             Contacts
           </Link>
         </Button>
-      </motion.div>
+      </div>
 
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="flex items-start gap-5 mb-8"
-      >
+      <div className="flex items-start gap-8 mb-8">
         <div className="relative">
           <Avatar className="size-20 ring-4 ring-background shadow-lg">
             <AvatarFallback className={cn("text-2xl font-bold bg-gradient-to-br", gradient)}>
@@ -201,9 +190,9 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold tracking-tight">{name}</h1>
-          {contact.title && <p className="text-muted-foreground mt-0.5">{String(contact.title)}</p>}
-          <div className="flex items-center gap-3 mt-3 flex-wrap">
-            <Badge variant="outline" className={cn("text-xs border badge-shimmer", config.color)}>
+          {contact.title && <p className="text-muted-foreground mt-1">{String(contact.title)}</p>}
+          <div className="flex items-center gap-4 mt-4 flex-wrap">
+            <Badge variant="outline" className={cn("text-xs border", config.color)}>
               {status}
             </Badge>
             <ScoreBadge score={Number(contact.engagement_score)} size="md" />
@@ -214,58 +203,54 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               </Badge>
             )}
             <Button variant="outline" size="sm" onClick={() => setShowEdit(true)} className="ml-auto shadow-sm">
-              <Pencil className="size-3.5 mr-1.5" />
+              <Pencil className="size-3.5 mr-2" />
               Edit
             </Button>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-8 lg:grid-cols-3">
         {/* Info Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          <Card className="glass-card lg:col-span-1">
-            <CardHeader className="pb-3">
+        <div>
+          <Card className="lg:col-span-1">
+            <CardHeader className="pb-4">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                  <Mail className="w-3 h-3 text-landing-accent-foreground" />
+                <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                  <Mail className="w-3 h-3 text-muted-foreground" />
                 </div>
                 Contact Info
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2">
               {contact.email && (
-                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-landing-accent/10 flex items-center justify-center shrink-0">
-                    <Mail className="size-4 text-landing-accent" />
+                <div className="flex items-center gap-4 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Mail className="size-4 text-muted-foreground" />
                   </div>
                   <a href={`mailto:${contact.email}`} className="hover:underline text-foreground truncate">{String(contact.email)}</a>
                 </div>
               )}
               {contact.phone && (
-                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <Phone className="size-4 text-emerald-500" />
+                <div className="flex items-center gap-4 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Phone className="size-4 text-muted-foreground" />
                   </div>
                   <span>{String(contact.phone)}</span>
                 </div>
               )}
               {contact.title && (
-                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-landing-accent/10 flex items-center justify-center shrink-0">
-                    <Briefcase className="size-4 text-landing-accent" />
+                <div className="flex items-center gap-4 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Briefcase className="size-4 text-muted-foreground" />
                   </div>
                   <span>{String(contact.title)}</span>
                 </div>
               )}
               {contact.companies && (
-                <div className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <Building2 className="size-4 text-amber-500" />
+                <div className="flex items-center gap-4 text-sm p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Building2 className="size-4 text-muted-foreground" />
                   </div>
                   <Link
                     href={`/dashboard/companies/${contact.companies.id}`}
@@ -275,7 +260,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                   </Link>
                 </div>
               )}
-              <div className="flex items-center gap-3 text-sm p-2 rounded-lg text-muted-foreground">
+              <div className="flex items-center gap-4 text-sm p-2 rounded-lg text-muted-foreground">
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                   <Calendar className="size-4" />
                 </div>
@@ -283,60 +268,49 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Activity & Notes */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           {/* Notes */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-          >
-            <Card className="glass-card">
-              <CardHeader className="pb-3">
+          <div>
+            <Card>
+              <CardHeader className="pb-4">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                    <FileText className="w-3 h-3 text-landing-accent-foreground" />
+                  <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                    <FileText className="w-3 h-3 text-muted-foreground" />
                   </div>
                   Notes
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <NoteEditor onSubmit={handleAddNote} />
-                {notes.map((note, i) => (
-                  <motion.div
+                {notes.map((note) => (
+                  <div
                     key={note.id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.05 * i }}
-                    className="border-l-3 border-amber-500/30 pl-4 py-2 rounded-r-lg hover:bg-muted/30 transition-colors"
+                    className="border-l-2 border-muted-foreground/20 pl-4 py-2 rounded-r-lg hover:bg-muted/30 transition-colors"
                   >
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{note.content}</p>
-                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                    <p className="text-xs text-muted-foreground mt-2">
                       {new Date(note.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </p>
-                  </motion.div>
+                  </div>
                 ))}
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Related Deals */}
           {deals.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-            >
-              <Card className="glass-card">
-                <CardHeader className="pb-3">
+            <div>
+              <Card>
+                <CardHeader className="pb-4">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                      <Handshake className="w-3 h-3 text-landing-accent-foreground" />
+                    <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                      <Handshake className="w-3 h-3 text-muted-foreground" />
                     </div>
                     Deals
-                    <Badge variant="secondary" className="text-[10px] ml-1">{deals.length}</Badge>
+                    <Badge variant="secondary" className="text-xs ml-1">{deals.length}</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -345,11 +319,11 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                       <Link
                         key={String(deal.id)}
                         href={`/dashboard/deals/${deal.id}`}
-                        className="flex items-center justify-between rounded-xl border p-3.5 premium-card bg-card"
+                        className="flex items-center justify-between rounded-xl border p-4 bg-card"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-semibold truncate">{String(deal.title)}</p>
-                          <Badge variant="outline" className="text-[10px] mt-1 capitalize">{String(deal.status)}</Badge>
+                          <Badge variant="outline" className="text-xs mt-1 capitalize">{String(deal.status)}</Badge>
                         </div>
                         <span className="text-sm font-bold tabular-nums">${Number(deal.value).toLocaleString()}</span>
                       </Link>
@@ -357,24 +331,20 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           )}
 
           {/* Related Tasks */}
           {tasks.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.35 }}
-            >
-              <Card className="glass-card">
-                <CardHeader className="pb-3">
+            <div>
+              <Card>
+                <CardHeader className="pb-4">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
-                      <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
+                    <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                      <CheckSquare className="w-3 h-3 text-muted-foreground" />
                     </div>
                     Tasks
-                    <Badge variant="secondary" className="text-[10px] ml-1">{tasks.length}</Badge>
+                    <Badge variant="secondary" className="text-xs ml-1">{tasks.length}</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -385,14 +355,14 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                         <div
                           key={String(task.id)}
                           className={cn(
-                            "flex items-center justify-between rounded-xl border p-3.5 bg-card",
+                            "flex items-center justify-between rounded-xl border p-4 bg-card",
                             isOverdue && "border-red-200/60 bg-red-50/20 dark:border-red-900/20 dark:bg-red-950/10"
                           )}
                         >
                           <div className="min-w-0">
                             <p className="text-sm font-medium truncate">{String(task.title)}</p>
                             {task.due_date && (
-                              <p className={cn("text-[11px] mt-0.5", isOverdue ? "text-red-600 font-semibold" : "text-muted-foreground")}>
+                              <p className={cn("text-xs mt-1", isOverdue ? "text-red-600 font-semibold" : "text-muted-foreground")}>
                                 Due: {new Date(String(task.due_date)).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                 {isOverdue && " (overdue)"}
                               </p>
@@ -400,11 +370,11 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                           </div>
                           <div className="flex items-center gap-2">
                             {task.priority && (
-                              <Badge variant="outline" className={cn("text-[10px]", priorityConfig[task.priority] || "")}>
+                              <Badge variant="outline" className={cn("text-xs", priorityConfig[task.priority] || "")}>
                                 {task.priority}
                               </Badge>
                             )}
-                            <Badge variant={task.status === "done" ? "default" : "secondary"} className="text-[10px]">
+                            <Badge variant={task.status === "done" ? "default" : "secondary"} className="text-xs">
                               {String(task.status)}
                             </Badge>
                           </div>
@@ -414,20 +384,16 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           )}
 
           {/* Activity Timeline */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-          >
-            <Card className="glass-card">
-              <CardHeader className="pb-3">
+          <div>
+            <Card>
+              <CardHeader className="pb-4">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
-                    <Calendar className="w-3 h-3 text-landing-accent-foreground" />
+                  <div className="w-5 h-5 rounded-md bg-muted flex items-center justify-center">
+                    <Calendar className="w-3 h-3 text-muted-foreground" />
                   </div>
                   Activity
                 </CardTitle>
@@ -436,7 +402,7 @@ export function ContactDetailContent({ contactId }: ContactDetailContentProps) {
                 <ActivityTimeline activities={activities} />
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         </div>
       </div>
 
