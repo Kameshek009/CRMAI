@@ -277,37 +277,55 @@ export default function ChatDetailPage() {
 
         // Send notification messages for created entities (tasks, contacts, deals)
         if (aiJson.success && aiJson.data.toolResults?.length > 0) {
-          const entityResults = (aiJson.data.toolResults as { name: string; result: string; data?: { id: string; title?: string; first_name?: string } }[]).filter(
-            (r) => (r.name === 'create_task' || r.name === 'create_contact' || r.name === 'create_deal') && r.data?.id
-          );
+          const toolResults = aiJson.data.toolResults as { name: string; result: string; data?: { id: string; title?: string; first_name?: string } }[];
 
           const entityLinks: Record<string, string> = {
             create_task: '/dashboard/tasks',
             create_contact: '/dashboard/contacts',
             create_deal: '/dashboard/pipeline',
           };
-
           const entityTypes: Record<string, string> = {
             create_task: 'task',
             create_contact: 'contact',
             create_deal: 'deal',
           };
+          const entityLabels: Record<string, [string, string]> = {
+            task: ['task', 'tasks'],
+            contact: ['contact', 'contacts'],
+            deal: ['deal', 'deals'],
+          };
 
-          for (const er of entityResults) {
-            await new Promise((resolve) => setTimeout(resolve, 200));
+          // Group by entity type
+          const grouped = new Map<string, typeof toolResults>();
+          for (const r of toolResults) {
+            if ((r.name === 'create_task' || r.name === 'create_contact' || r.name === 'create_deal') && r.data?.id) {
+              const type = r.name;
+              if (!grouped.has(type)) grouped.set(type, []);
+              grouped.get(type)!.push(r);
+            }
+          }
 
-            const entityTitle = er.data?.title || er.data?.first_name || er.result;
+          for (const [toolName, results] of grouped) {
+            const eType = entityTypes[toolName];
+            const [singular, plural] = entityLabels[eType];
+
+            // Single → show title; multiple → show count
+            const content = results.length === 1
+              ? (results[0].data?.title || results[0].data?.first_name || results[0].result)
+              : `${results.length} ${plural} created`;
+
             const notifRes = await fetch(`/api/chats/${chatId}/messages`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 role: 'assistant',
-                content: entityTitle,
+                content,
                 message_type: 'notification',
                 metadata: {
-                  entity_type: entityTypes[er.name],
-                  entity_id: er.data!.id,
-                  link: entityLinks[er.name],
+                  entity_type: eType,
+                  count: results.length,
+                  entity_ids: results.map((r) => r.data!.id),
+                  link: entityLinks[toolName],
                 },
               }),
             });

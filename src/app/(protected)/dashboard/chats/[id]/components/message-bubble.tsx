@@ -55,6 +55,15 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
 
   // Notification card rendering
   if (messageType === 'notification' && metadata?.link) {
+    const count = Number(metadata.count) || 1;
+    const entityLabels: Record<string, [string, string]> = {
+      task: ['Task created', 'Open Tasks'],
+      contact: ['Contact created', 'Open Contacts'],
+      deal: ['Deal created', 'Open Deals'],
+    };
+    const eType = String(metadata.entity_type || 'task');
+    const [singleLabel, viewLabel] = entityLabels[eType] || ['Created', 'Open'];
+
     return (
       <div className="py-1 px-1">
         <Link
@@ -67,7 +76,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium truncate">{message.content}</p>
             <p className="text-xs text-muted-foreground">
-              {metadata.entity_type === 'task' ? 'Task created' : 'Created'}
+              {count === 1 ? singleLabel : viewLabel}
             </p>
           </div>
           <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
