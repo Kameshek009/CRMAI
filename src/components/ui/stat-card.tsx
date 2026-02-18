@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
@@ -25,14 +24,13 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card
+    <div
       className={cn(
-        "bg-card border border-border",
+        "bg-card border border-border rounded-lg",
         className
       )}
-      shadow="none"
     >
-      <CardBody className="p-6">
+      <div className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">{title}</p>
@@ -62,7 +60,7 @@ export function StatCard({
             </div>
           )}
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 }

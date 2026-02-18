@@ -1,8 +1,6 @@
 "use client";
 
-import { HeroUIProvider } from "@heroui/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import { ThemedClerkProvider } from "./clerk-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -12,8 +10,6 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  const router = useRouter();
-
   return (
     <NextThemesProvider
       attribute="class"
@@ -22,10 +18,8 @@ export function Providers({ children }: ProvidersProps) {
       disableTransitionOnChange
     >
       <ThemedClerkProvider>
-        <HeroUIProvider navigate={router.push}>
-          {children}
-          <Toaster richColors position="bottom-right" />
-        </HeroUIProvider>
+        {children}
+        <Toaster richColors position="bottom-right" />
       </ThemedClerkProvider>
     </NextThemesProvider>
   );

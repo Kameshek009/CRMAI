@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardBody, Progress } from "@heroui/react";
 import { Calendar, Clock, Coins, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTokenCount, getTierDisplayName } from "@/lib/usage/check";
@@ -28,14 +27,28 @@ interface UsageSummaryProps {
   className?: string;
 }
 
+function ProgressBar({ value, label }: { value: number; label: string }) {
+  return (
+    <div
+      className="w-full h-2 rounded-full bg-primary/20 overflow-hidden"
+      role="progressbar"
+      aria-label={label}
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
+      <div
+        className="h-full rounded-full bg-primary transition-all duration-300"
+        style={{ width: `${Math.min(100, value)}%` }}
+      />
+    </div>
+  );
+}
+
 /**
  * Comprehensive usage summary showing weekly and monthly stats
  */
 export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
-  const getProgressColor = (_percent?: number): "default" => {
-    return "default";
-  };
-
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
@@ -46,11 +59,8 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
   // Enterprise shows credits instead of limits
   if (stats.isEnterprise) {
     return (
-      <Card
-        className={cn("bg-card rounded-xl", className)}
-        shadow="none"
-      >
-        <CardBody className="p-6 space-y-6">
+      <div className={cn("bg-card border border-border rounded-xl", className)}>
+        <div className="p-6 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Coins className="w-5 h-5 text-foreground" />
@@ -75,17 +85,14 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
               Credits never expire. Purchase more when you need them.
             </p>
           </div>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card
-      className={cn("bg-card rounded-xl", className)}
-      shadow="none"
-    >
-      <CardBody className="p-6 space-y-6">
+    <div className={cn("bg-card border border-border rounded-xl", className)}>
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -112,12 +119,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
             </span>
           </div>
 
-          <Progress
-            value={stats.weeklyPercentUsed}
-            color={getProgressColor(stats.weeklyPercentUsed)}
-            className="h-2"
-            aria-label="Weekly usage"
-          />
+          <ProgressBar value={stats.weeklyPercentUsed} label="Weekly usage" />
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
@@ -146,12 +148,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
             </span>
           </div>
 
-          <Progress
-            value={stats.percentUsed}
-            color={getProgressColor()}
-            className="h-2"
-            aria-label="Monthly usage"
-          />
+          <ProgressBar value={stats.percentUsed} label="Monthly usage" />
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
@@ -183,8 +180,8 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
             </p>
           </div>
         )}
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 }
 

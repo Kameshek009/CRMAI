@@ -1,6 +1,5 @@
 "use client";
 
-import { Progress } from "@heroui/react";
 import { cn, formatNumber, formatCompact, calculatePercentage } from "@/lib/utils";
 
 interface UsageProgressProps {
@@ -22,10 +21,6 @@ export function UsageProgress({
 }: UsageProgressProps) {
   const percentage = calculatePercentage(used, limit);
 
-  const getColor = (): "default" => {
-    return "default";
-  };
-
   const sizeClasses = {
     sm: "h-1",
     md: "h-2",
@@ -42,12 +37,19 @@ export function UsageProgress({
           </span>
         )}
       </div>
-      <Progress
-        value={percentage}
-        color={getColor()}
-        className={sizeClasses[size]}
+      <div
+        className={cn("w-full rounded-full bg-primary/20 overflow-hidden", sizeClasses[size])}
+        role="progressbar"
         aria-label={`${label}: ${percentage}%`}
-      />
+        aria-valuenow={percentage}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className="h-full rounded-full bg-primary transition-all duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{percentage}% used</span>
         <span>{formatNumber(limit - used)} remaining</span>
