@@ -24,6 +24,7 @@ interface WorkspaceData {
   inviteCode: string;
   maxMembers: number;
   ownerAccountId: string;
+  parentTeamId: string | null;
   tier: string;
   tokenLimit: number;
   tokensUsed: number;
@@ -113,6 +114,7 @@ function transformWorkspace(raw: Record<string, unknown>): WorkspaceData {
     inviteCode: raw.invite_code as string,
     maxMembers: raw.max_members as number,
     ownerAccountId: raw.owner_account_id as string,
+    parentTeamId: (raw.parent_team_id as string) || null,
     tier: (raw.tier as string) || "free",
     tokenLimit: (raw.token_limit as number) || 0,
     tokensUsed: (raw.tokens_used as number) || 0,

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { TeamCreateWizard } from "@/components/team/team-create-wizard";
+import { TeamCreateDialog } from "@/components/team/team-create-dialog";
 import { useWorkspace } from "@/contexts/team-context";
 import { useTranslation } from "@/lib/i18n";
 import { ArrowRight, Loader2, Plus } from "lucide-react";
@@ -113,6 +113,7 @@ function JoinTeamForm({ onJoined }: { onJoined: () => void }) {
 export function WorkspaceSection() {
   const { t } = useTranslation();
   const { currentWorkspace, workspaces, refetch } = useWorkspace();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -141,7 +142,20 @@ export function WorkspaceSection() {
           <JoinTeamForm onJoined={refetch} />
         </TabsContent>
         <TabsContent value="create" className="mt-4">
-          <TeamCreateWizard />
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              {t("team.createDialog.createDescription")}
+            </p>
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="size-4 mr-2" />
+              {t("team.createDialog.createTeam")}
+            </Button>
+          </div>
+          <TeamCreateDialog
+            open={createDialogOpen}
+            onOpenChange={setCreateDialogOpen}
+            onCreated={refetch}
+          />
         </TabsContent>
       </Tabs>
     </div>

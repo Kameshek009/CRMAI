@@ -110,6 +110,26 @@
     "creating": "Creating...",
     "createTeam": "Create Team"
   },
+  "createDialog": {
+    "title": "Create Team",
+    "description": "Fill in the information for your new team",
+    "nameRequired": "Team name is required",
+    "created": "Team created!",
+    "failedCreate": "Failed to create team",
+    "teamName": "Team Name",
+    "namePlaceholder": "e.g. Sales Team",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "What does this team do?",
+    "parentTeam": "Parent Team",
+    "parentTeamPlaceholder": "Select parent team",
+    "noParent": "No parent team",
+    "members": "Members",
+    "searchUsers": "Search users by name or email...",
+    "unnamed": "Unnamed",
+    "creating": "Creating...",
+    "createTeam": "Create Team",
+    "createDescription": "Create a new team and add members"
+  },
   "kickDialog": {
     "title": "Remove team member",
     "description": "Are you sure you want to remove {name} from the team? They will lose access to all team data immediately.",

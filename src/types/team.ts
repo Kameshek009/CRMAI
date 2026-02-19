@@ -117,6 +117,7 @@ export interface Workspace {
   slug: string;
   description: string | null;
   ownerAccountId: string;
+  parentTeamId: string | null;
   inviteCode: string;
   maxMembers: number;
   settings: Record<string, unknown>;
@@ -133,6 +134,7 @@ export interface WorkspaceRow {
   slug: string;
   description: string | null;
   owner_account_id: string;
+  parent_team_id: string | null;
   invite_code: string;
   max_members: number;
   settings: Record<string, unknown>;
@@ -150,6 +152,7 @@ export function transformWorkspaceRow(row: WorkspaceRow): Workspace {
     slug: row.slug,
     description: row.description,
     ownerAccountId: row.owner_account_id,
+    parentTeamId: row.parent_team_id,
     inviteCode: row.invite_code,
     maxMembers: row.max_members,
     settings: row.settings || {},

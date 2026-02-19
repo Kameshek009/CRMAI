@@ -33,6 +33,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate parentTeamId if provided
+    if (parsed.data.parentTeamId) {
+      const { data: parentTeam } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("id", parsed.data.parentTeamId)
+        .is("deleted_at", null)
+        .single();
+
+      if (!parentTeam) {
+        return NextResponse.json(
+          { success: false, error: "Parent team not found" },
+          { status: 404 }
+        );
+      }
+    }
+
     const { data: teamId, error: rpcError } = await supabase.rpc("create_team_with_defaults", {
       p_account_id: accountId,
       p_team_name: parsed.data.name,
@@ -52,16 +69,54 @@ export async function POST(request: NextRequest) {
     const tier = (account?.tier || "free") as SubscriptionTier;
     const maxMembers = TIER_MAX_MEMBERS[tier] || TIER_MAX_MEMBERS.free;
 
-    // Update team with correct max_members and description
+    // Update team with correct max_members, description, and parent_team_id
     const updateData: Record<string, unknown> = { max_members: maxMembers };
     if (parsed.data.description) {
       updateData.description = parsed.data.description;
+    }
+    if (parsed.data.parentTeamId) {
+      updateData.parent_team_id = parsed.data.parentTeamId;
     }
 
     await supabase
       .from("teams")
       .update(updateData)
       .eq("id", teamId);
+
+    // Add members if provided
+    if (parsed.data.memberIds && parsed.data.memberIds.length > 0) {
+      // Get Member role for the new team
+      const { data: memberRole } = await supabase
+        .from("team_roles")
+        .select("id")
+        .eq("team_id", teamId)
+        .eq("name", "Member")
+        .single();
+
+      if (memberRole) {
+        // Respect max_members limit (-1 because owner is already added)
+        const membersToAdd = parsed.data.memberIds.slice(0, maxMembers - 1);
+
+        // Verify accounts exist
+        const { data: validAccounts } = await supabase
+          .from("accounts")
+          .select("id")
+          .in("id", membersToAdd);
+
+        if (validAccounts && validAccounts.length > 0) {
+          const memberInserts = validAccounts.map((acc) => ({
+            team_id: teamId,
+            account_id: acc.id,
+            role_id: memberRole.id,
+            is_director: false,
+            fixed_role: "member",
+            status: "active" as const,
+          }));
+
+          await supabase.from("team_members").insert(memberInserts);
+        }
+      }
+    }
 
     const { data: team } = await supabase
       .from("teams")
