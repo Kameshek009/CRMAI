@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/dialog";
 import { CheckSquare, Loader2, Phone, Mail, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/crm/handle-api-error";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -244,10 +246,11 @@ export function TasksContent() {
       const json = await res.json();
       if (json.success) {
         toast.success(isEdit ? "Task updated" : "Task created");
+        if (!isEdit) useFeatureLimitStore.getState().incrementUsage("tasks");
         fetchTasks();
         setFormMode({ type: "closed" });
       } else {
-        toast.error(json.error || "Failed");
+        handleApiError(json);
       }
     } finally {
       setIsSubmitting(false);
@@ -395,6 +398,7 @@ export function TasksContent() {
         entityName={`task${total !== 1 ? "s" : ""}`}
         onAdd={() => setFormMode({ type: "create" })}
         addLabel="New Task"
+        featureLimitKey="tasks"
       />
 
       {viewMode === "table" && (

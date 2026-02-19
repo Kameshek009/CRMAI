@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/crm/handle-api-error";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 
 interface AutomationBuilderProps {
   open: boolean;
@@ -122,10 +124,11 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
       const json = await res.json();
       if (json.success) {
         toast.success("Automation created");
+        useFeatureLimitStore.getState().incrementUsage("activeAutomations");
         reset();
         onCreated();
       } else {
-        toast.error(json.error || "Failed to create");
+        handleApiError(json);
       }
     } finally {
       setSaving(false);

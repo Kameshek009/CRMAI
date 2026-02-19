@@ -15,6 +15,8 @@ import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Zap } from "lucide-react";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/crm/handle-api-error";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -147,9 +149,10 @@ export function LeadsContent() {
     const json = await res.json();
     if (json.success) {
       toast.success("Lead created");
+      useFeatureLimitStore.getState().incrementUsage("leads");
       fetchLeads();
     } else {
-      toast.error(json.error || "Failed to create lead");
+      handleApiError(json);
       throw new Error(json.error);
     }
   };
@@ -303,6 +306,7 @@ export function LeadsContent() {
         entityName={`lead${total !== 1 ? "s" : ""}`}
         onAdd={() => setShowForm(true)}
         addLabel="New Lead"
+        featureLimitKey="leads"
       />
 
       {viewMode === "table" && (

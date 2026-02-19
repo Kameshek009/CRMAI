@@ -17,6 +17,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Upload, Users } from "lucide-react";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/crm/handle-api-error";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -143,9 +145,10 @@ export function ContactsContent() {
     const json = await res.json();
     if (json.success) {
       toast.success("Contact created");
+      useFeatureLimitStore.getState().incrementUsage("contacts");
       fetchContacts();
     } else {
-      toast.error(json.error || "Failed to create contact");
+      handleApiError(json);
       throw new Error(json.error);
     }
   };
@@ -320,6 +323,7 @@ export function ContactsContent() {
         entityName={`contact${total !== 1 ? "s" : ""}`}
         onAdd={() => setShowForm(true)}
         addLabel="New Contact"
+        featureLimitKey="contacts"
       />
 
       {/* Table View */}

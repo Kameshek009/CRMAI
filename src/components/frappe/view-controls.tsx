@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Search, SlidersHorizontal, ArrowUpDown, Download, Plus, X } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowUpDown, Download, Plus, X, Sparkles } from "lucide-react";
 import { useState, useCallback } from "react";
 import { ViewModeSwitcher } from "./view-mode-switcher";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import type { ViewMode } from "@/types/crm";
+import type { FeatureLimitKey } from "@/types";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 
 // ============================================================================
 // Types
@@ -75,6 +77,9 @@ interface ViewControlsProps {
   onAdd?: () => void;
   addLabel?: string;
 
+  // Feature limits
+  featureLimitKey?: FeatureLimitKey;
+
   // Count
   totalCount?: number;
   entityName?: string;
@@ -107,11 +112,18 @@ export function ViewControls({
   onExport,
   onAdd,
   addLabel = "Add New",
+  featureLimitKey,
   totalCount,
   entityName,
   className,
 }: ViewControlsProps) {
   const [searchFocused, setSearchFocused] = useState(false);
+
+  // Feature limit pre-check
+  const limitStore = useFeatureLimitStore();
+  const nearLimit = featureLimitKey ? limitStore.isNearLimit(featureLimitKey) : false;
+  const atLimit = featureLimitKey ? limitStore.isAtLimit(featureLimitKey) : false;
+  const usageInfo = featureLimitKey ? limitStore.getUsageInfo(featureLimitKey) : null;
 
   const handleSortClick = useCallback(
     (field: string) => {
@@ -269,12 +281,37 @@ export function ViewControls({
           </Button>
         )}
 
-        {/* Add */}
+        {/* Add / Upgrade */}
         {onAdd && (
-          <Button size="sm" className="h-8 gap-1.5" onClick={onAdd}>
-            <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
-            <span>{addLabel}</span>
-          </Button>
+          <>
+            {featureLimitKey && nearLimit && !atLimit && usageInfo && usageInfo.limit > 0 && (
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                {usageInfo.current}/{usageInfo.limit}
+              </span>
+            )}
+            {atLimit && usageInfo && usageInfo.limit > 0 ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-950"
+                onClick={() =>
+                  limitStore.showUpgradeModal(
+                    featureLimitKey!,
+                    usageInfo.current,
+                    usageInfo.limit
+                  )
+                }
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Upgrade to Add</span>
+              </Button>
+            ) : (
+              <Button size="sm" className="h-8 gap-1.5" onClick={onAdd}>
+                <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
+                <span>{addLabel}</span>
+              </Button>
+            )}
+          </>
         )}
       </div>
 

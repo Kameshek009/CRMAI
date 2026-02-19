@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, Loader2, Zap, Clock } from "lucide-react";
+import { Plus, Trash2, Loader2, Zap, Clock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import { cn } from "@/lib/utils";
 
 interface Automation {
@@ -52,6 +53,17 @@ export function AutomationsContent() {
   const [builderOpen, setBuilderOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const limitStore = useFeatureLimitStore();
+  const atAutomationLimit = limitStore.isAtLimit("activeAutomations");
+
+  const handleAddClick = () => {
+    if (atAutomationLimit) {
+      const info = limitStore.getUsageInfo("activeAutomations");
+      limitStore.showUpgradeModal("activeAutomations", info?.current ?? 0, info?.limit ?? 0);
+    } else {
+      setBuilderOpen(true);
+    }
+  };
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const fetchAutomations = useCallback(async () => {
@@ -130,9 +142,9 @@ export function AutomationsContent() {
         title="Automations"
         description="Automate repetitive tasks with simple rules"
       >
-        <Button onClick={() => setBuilderOpen(true)}>
-          <Plus className="size-4 mr-2" />
-          New Automation
+        <Button onClick={handleAddClick} variant={atAutomationLimit ? "outline" : "default"}>
+          {atAutomationLimit ? <Sparkles className="size-4 mr-2" /> : <Plus className="size-4 mr-2" />}
+          {atAutomationLimit ? "Upgrade to Add" : "New Automation"}
         </Button>
       </PageHeader>
 
@@ -144,7 +156,7 @@ export function AutomationsContent() {
             <p className="text-sm text-muted-foreground mb-4 max-w-sm">
               Create rules to automate tasks when records are created or updated.
             </p>
-            <Button onClick={() => setBuilderOpen(true)}>
+            <Button onClick={handleAddClick}>
               <Plus className="size-4 mr-2" />
               Create Your First Automation
             </Button>

@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, ArrowDown, Clock, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/crm/handle-api-error";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 
 interface Step {
   delay_days: number;
@@ -72,7 +74,7 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
       });
       const seqJson = await seqRes.json();
       if (!seqJson.success) {
-        toast.error(seqJson.error || "Failed to create sequence");
+        handleApiError(seqJson);
         return;
       }
 
@@ -94,6 +96,7 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
       }
 
       toast.success("Sequence created");
+      useFeatureLimitStore.getState().incrementUsage("emailSequences");
       setName("");
       setSteps([{ delay_days: 0, subject: "", body: "" }]);
       onCreated();

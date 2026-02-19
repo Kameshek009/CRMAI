@@ -9,8 +9,9 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/crm/empty-state";
 import { SequenceBuilder } from "@/components/crm/sequence-builder";
-import { Plus, Mail, Users, Trash2, Layers } from "lucide-react";
+import { Plus, Mail, Users, Trash2, Layers, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 
 interface Sequence {
   id: string;
@@ -27,6 +28,17 @@ export function SequencesContent() {
   const [sequences, setSequences] = useState<Sequence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showBuilder, setShowBuilder] = useState(false);
+  const limitStore = useFeatureLimitStore();
+  const atSequenceLimit = limitStore.isAtLimit("emailSequences");
+
+  const handleAddClick = () => {
+    if (atSequenceLimit) {
+      const info = limitStore.getUsageInfo("emailSequences");
+      limitStore.showUpgradeModal("emailSequences", info?.current ?? 0, info?.limit ?? 0);
+    } else {
+      setShowBuilder(true);
+    }
+  };
 
   const fetchSequences = useCallback(async () => {
     try {
@@ -94,9 +106,17 @@ export function SequencesContent() {
         title="Email Sequences"
         description="Automate email campaigns with timed follow-ups"
       >
-        <Button size="sm" onClick={() => setShowBuilder(true)}>
-          <Plus className="size-3.5 mr-1.5" />
-          New Sequence
+        <Button
+          size="sm"
+          onClick={handleAddClick}
+          variant={atSequenceLimit ? "outline" : "default"}
+        >
+          {atSequenceLimit ? (
+            <Sparkles className="size-3.5 mr-1.5" />
+          ) : (
+            <Plus className="size-3.5 mr-1.5" />
+          )}
+          {atSequenceLimit ? "Upgrade to Add" : "New Sequence"}
         </Button>
       </PageHeader>
 
@@ -106,7 +126,7 @@ export function SequencesContent() {
           title="No sequences yet"
           description="Create your first email sequence to automate follow-ups."
           actionLabel="Create Sequence"
-          onAction={() => setShowBuilder(true)}
+          onAction={handleAddClick}
         />
       ) : (
         <div className="space-y-3">

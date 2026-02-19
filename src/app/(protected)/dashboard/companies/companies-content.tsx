@@ -13,6 +13,8 @@ import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { Building2 } from "lucide-react";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/crm/handle-api-error";
+import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -131,9 +133,10 @@ export function CompaniesContent() {
     const json = await res.json();
     if (json.success) {
       toast.success("Organization created");
+      useFeatureLimitStore.getState().incrementUsage("companies");
       fetchCompanies();
     } else {
-      toast.error(json.error || "Failed to create organization");
+      handleApiError(json);
       throw new Error(json.error);
     }
   };
@@ -259,6 +262,7 @@ export function CompaniesContent() {
         entityName={`organization${total !== 1 ? "s" : ""}`}
         onAdd={() => setShowForm(true)}
         addLabel="New Organization"
+        featureLimitKey="companies"
       />
 
       {viewMode === "table" && (

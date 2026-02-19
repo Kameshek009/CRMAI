@@ -63,8 +63,11 @@ export async function checkFeatureLimit(
   const { count } = await query;
   const current = count ?? 0;
 
+  // Grace period: allow up to 110% of nominal limit before hard block
+  const graceLimit = Math.ceil(limit * 1.1);
+
   return {
-    allowed: current < limit,
+    allowed: current < graceLimit,
     current,
     limit,
   };
