@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, CheckSquare, BarChart2, LayoutGrid, Calendar, MessageCircle, Phone, Inbox, Film, FileText, Layout, BookOpen, ClipboardList, Clock, Zap, Timer, Grid3X3, Link2, Download, Play, BookMarked, HelpCircle, GraduationCap, Video, Menu, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggleSlider } from "./theme-toggle-slider";
@@ -338,8 +338,6 @@ export function PublicAuthHeader() {
             <Menu className="w-5 h-5" />
           </button>
         </div>
-        {/* Scroll progress bar */}
-        <ScrollProgress />
       </motion.header>
 
       <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
@@ -347,17 +345,3 @@ export function PublicAuthHeader() {
   );
 }
 
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-
-  return (
-    <motion.div
-      className="absolute bottom-0 left-0 right-0 h-[2px] origin-left"
-      style={{
-        scaleX,
-        background: "linear-gradient(90deg, var(--landing-accent), var(--landing-accent), var(--landing-accent), var(--landing-accent))",
-      }}
-    />
-  );
-}
