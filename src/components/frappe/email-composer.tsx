@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { FileText } from "lucide-react";
+
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  category: string | null;
+}
 
 interface EmailComposerProps {
   open: boolean;
@@ -22,6 +31,16 @@ interface EmailComposerProps {
   defaultTo?: string;
   defaultFrom?: string;
   onSent?: () => void;
+  /** Context variables for template interpolation */
+  templateContext?: Record<string, string>;
+}
+
+const selectClasses = "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
+function interpolateTemplate(text: string, ctx: Record<string, string>): string {
+  return text.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (match, key: string) => {
+    return ctx[key] || match;
+  });
 }
 
 export function EmailComposer({
@@ -32,12 +51,33 @@ export function EmailComposer({
   defaultTo,
   defaultFrom,
   onSent,
+  templateContext,
 }: EmailComposerProps) {
   const [to, setTo] = useState(defaultTo || "");
   const [from, setFrom] = useState(defaultFrom || "");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      fetch("/api/crm/email-templates")
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.success) setTemplates(json.data || []);
+        })
+        .catch(() => {});
+    }
+  }, [open]);
+
+  const applyTemplate = (tpl: EmailTemplate) => {
+    const ctx = templateContext || {};
+    setSubject(interpolateTemplate(tpl.subject, ctx));
+    setBody(interpolateTemplate(tpl.body, ctx));
+    setShowTemplates(false);
+  };
 
   const handleSend = async () => {
     if (!to.trim() || !from.trim()) {
@@ -87,6 +127,39 @@ export function EmailComposer({
           <DialogTitle className="text-base">Compose Email</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          {/* Template selector */}
+          {templates.length > 0 && (
+            <div>
+              {showTemplates ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Select a template</Label>
+                    <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setShowTemplates(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                  <div className="max-h-32 overflow-y-auto space-y-1 rounded-lg border p-2">
+                    {templates.map((tpl) => (
+                      <button
+                        key={tpl.id}
+                        onClick={() => applyTemplate(tpl)}
+                        className="w-full text-left text-sm px-2 py-1.5 rounded hover:bg-muted/50 transition-colors"
+                      >
+                        <span className="font-medium">{tpl.name}</span>
+                        {tpl.category && <span className="text-xs text-muted-foreground ml-2">({tpl.category})</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" onClick={() => setShowTemplates(true)}>
+                  <FileText className="size-3" />
+                  Use Template
+                </Button>
+              )}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label className="text-sm">From</Label>
             <Input value={from} onChange={(e) => setFrom(e.target.value)} placeholder="you@company.com" />

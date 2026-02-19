@@ -215,6 +215,26 @@ export async function GET() {
       }
     });
 
+    // --- Lead conversion funnel ---
+    const { data: leads } = await supabase
+      .from("leads")
+      .select("id, status, created_at")
+      .eq("team_id", context.teamId)
+      .eq("is_deleted", false);
+
+    const totalLeads = (leads || []).length;
+    const convertedLeads = (leads || []).filter((l) => l.status === "converted").length;
+    const totalContactsForFunnel = (contacts || []).length;
+    const totalDeals = deals.length;
+    const wonDealsCount = wonDeals.length;
+
+    const leadConversionFunnel = [
+      { stage: "Leads", count: totalLeads, color: "#f4a261" },
+      { stage: "Contacts", count: totalContactsForFunnel, color: "#e76f51" },
+      { stage: "Deals", count: totalDeals, color: "#2a9d8f" },
+      { stage: "Won", count: wonDealsCount, color: "#22c55e" },
+    ];
+
     // --- Pipeline velocity (value * win rate / avg cycle time) ---
     const pipelineValue = openDeals.reduce((sum, d) => sum + Number(d.value), 0);
     const salesVelocity = avgDaysToClose > 0
@@ -268,6 +288,9 @@ export async function GET() {
         tasksByType: Object.entries(tasksByType).map(([type, count]) => ({ type, count })),
         completedThisWeek,
         totalTasks: (allTasks || []).length,
+
+        // Lead funnel
+        leadConversionFunnel,
 
         // Companies
         healthBuckets,

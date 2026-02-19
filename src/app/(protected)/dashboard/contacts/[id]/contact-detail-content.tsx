@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Handshake, CheckSquare, Trash2 } from "lucide-react";
+import { Handshake, CheckSquare, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
@@ -75,6 +75,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
 
   useEffect(() => {
     const safeFetch = (url: string) =>
@@ -146,6 +147,31 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
     if (json.success) {
       setNotes([json.data, ...notes]);
       toast.success("Note added");
+    }
+  };
+
+  const handleEnrich = async () => {
+    setIsEnriching(true);
+    try {
+      const res = await fetch("/api/crm/ai/enrich", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contact_id: contactId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        const { enrichment, applied, contact: updatedContact } = json.data;
+        if (applied > 0) {
+          setContact(updatedContact);
+          toast.success(`Enriched ${applied} field${applied !== 1 ? "s" : ""}`);
+        } else {
+          toast.info(enrichment.notes || "No new data to apply");
+        }
+      } else {
+        toast.error(json.error || "Enrichment failed");
+      }
+    } finally {
+      setIsEnriching(false);
     }
   };
 
@@ -381,10 +407,16 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
         subtitle={contact.title}
         status={<StatusBadge status={contact.status || "lead"} />}
         actions={
-          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
-            <Trash2 className="size-3.5 mr-1.5" />
-            Delete
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleEnrich} disabled={isEnriching}>
+              {isEnriching ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Sparkles className="size-3.5 mr-1.5" />}
+              Enrich
+            </Button>
+            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="size-3.5 mr-1.5" />
+              Delete
+            </Button>
+          </div>
         }
         tabs={tabs}
         defaultTab="activity"

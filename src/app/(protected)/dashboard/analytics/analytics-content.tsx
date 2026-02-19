@@ -46,6 +46,7 @@ import {
   Building2,
   ArrowUpRight,
   ArrowDownRight,
+  Filter,
   type LucideIcon,
 } from "lucide-react";
 import type { AIInsight } from "@/types/crm";
@@ -84,6 +85,7 @@ interface AnalyticsData {
   healthBuckets: { excellent: number; good: number; fair: number; poor: number };
   companiesByIndustry: { industry: string; count: number }[];
   totalCompanies: number;
+  leadConversionFunnel: { stage: string; count: number; color: string }[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -816,6 +818,53 @@ export function AnalyticsContent() {
           </Card>
         </div>
       </div>
+
+      {/* Lead Conversion Funnel — full width */}
+      {(data.leadConversionFunnel || []).some((s) => s.count > 0) && (
+        <div>
+          <Card className="glass-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
+                  <Filter className="w-3 h-3 text-landing-accent-foreground" />
+                </div>
+                Lead Conversion Funnel
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                {(data.leadConversionFunnel || []).map((step, i) => {
+                  const maxCount = Math.max(...(data.leadConversionFunnel || []).map((s) => s.count), 1);
+                  const pct = Math.round((step.count / maxCount) * 100);
+                  const prevCount = i > 0 ? (data.leadConversionFunnel || [])[i - 1].count : 0;
+                  const convRate = i > 0 && prevCount > 0 ? Math.round((step.count / prevCount) * 100) : null;
+                  return (
+                    <div key={step.stage} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{step.stage}</span>
+                          <span className="text-muted-foreground">{step.count}</span>
+                        </div>
+                        {convRate !== null && (
+                          <span className="text-xs text-muted-foreground">{convRate}% from prev</span>
+                        )}
+                      </div>
+                      <div className="h-8 rounded-lg bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-lg transition-all duration-700 flex items-center px-3"
+                          style={{ width: `${Math.max(pct, 4)}%`, backgroundColor: step.color }}
+                        >
+                          {pct > 15 && <span className="text-xs font-semibold text-white">{step.count}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* AI Insights */}
       {insights.length > 0 && (
