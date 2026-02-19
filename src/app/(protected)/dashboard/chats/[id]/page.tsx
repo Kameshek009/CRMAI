@@ -206,6 +206,8 @@ export default function ChatDetailPage() {
 
     setMessages((prev) => [...prev, optimisticMessage]);
 
+    // Step 1: Save user message
+    let userMessageSaved = false;
     try {
       const response = await fetch(`/api/chats/${chatId}/messages`, {
         method: 'POST',
@@ -221,6 +223,8 @@ export default function ChatDetailPage() {
 
       if (!result.success) throw new Error(result.error || 'Failed to send message');
 
+      userMessageSaved = true;
+
       // Replace optimistic with real
       setMessages((prev) => prev.map((m) => (m.local_id === localId ? result.message : m)));
 
@@ -228,19 +232,34 @@ export default function ChatDetailPage() {
       if (result.message.created_at) {
         lastSSETimestamp.current = result.message.created_at;
       }
+    } catch (err) {
+      console.error('Error sending message:', err);
+      toast.error('Failed to send message');
+      setMessages((prev) => prev.filter((m) => m.local_id !== localId));
+      setIsSending(false);
+      return;
+    }
 
-      // For chat mode: call CRM AI
-      if (chat?.mode === 'chat') {
+    // Step 2: Call AI (only for chat mode, after user message is saved)
+    if (chat?.mode === 'chat') {
+      try {
         const recentMessages = messages
           .filter((m) => !m.id.startsWith('temp-'))
           .slice(-10)
           .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
+        // 30s timeout for AI call
+        const aiController = new AbortController();
+        const aiTimeout = setTimeout(() => aiController.abort(), 30000);
+
         const aiRes = await fetch('/api/crm/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: content, history: recentMessages }),
+          signal: aiController.signal,
         });
+        clearTimeout(aiTimeout);
+
         const aiJson = await aiRes.json();
 
         let aiContent: string;
@@ -258,9 +277,11 @@ export default function ChatDetailPage() {
           if (aiJson.resetsAt) setRateLimitResetsAt(aiJson.resetsAt);
           aiContent = 'Daily token limit reached. The limit will reset automatically — see the timer below.';
         } else {
-          aiContent = 'Sorry, something went wrong. Please try again.';
+          console.error('[Chat AI] Error response:', aiJson);
+          aiContent = aiJson.error || 'Sorry, something went wrong. Please try again.';
         }
 
+        // Save AI response
         const aiMsgRes = await fetch(`/api/chats/${chatId}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -273,6 +294,21 @@ export default function ChatDetailPage() {
           if (aiMsgResult.message.created_at) {
             lastSSETimestamp.current = aiMsgResult.message.created_at;
           }
+        } else {
+          // Save failed — show response locally anyway
+          const fallbackMsg: Message = {
+            id: `local-ai-${Date.now()}`,
+            chat_id: chatId,
+            role: 'assistant',
+            content: aiContent,
+            metadata: {} as Json,
+            message_type: 'text',
+            tokens_used: 0,
+            local_id: null,
+            device_origin: 'web',
+            created_at: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, fallbackMsg]);
         }
 
         // Send notification messages for created entities (tasks, contacts, deals)
@@ -307,10 +343,10 @@ export default function ChatDetailPage() {
 
           for (const [toolName, results] of grouped) {
             const eType = entityTypes[toolName];
-            const [singular, plural] = entityLabels[eType];
+            const [, plural] = entityLabels[eType];
 
             // Single → show title; multiple → show count
-            const content = results.length === 1
+            const notifContent = results.length === 1
               ? (results[0].data?.title || results[0].data?.first_name || results[0].result)
               : `${results.length} ${plural} created`;
 
@@ -319,7 +355,7 @@ export default function ChatDetailPage() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 role: 'assistant',
-                content,
+                content: notifContent,
                 message_type: 'notification',
                 metadata: {
                   entity_type: eType,
@@ -338,14 +374,30 @@ export default function ChatDetailPage() {
             }
           }
         }
+      } catch (err) {
+        console.error('[Chat AI] Error:', err);
+        const errorContent = err instanceof DOMException && err.name === 'AbortError'
+          ? 'AI request timed out. Please try again.'
+          : 'Sorry, something went wrong. Please try again.';
+
+        // Show error as AI message so user sees feedback
+        const errorMsg: Message = {
+          id: `error-${Date.now()}`,
+          chat_id: chatId,
+          role: 'assistant',
+          content: errorContent,
+          metadata: {} as Json,
+          message_type: 'error',
+          tokens_used: 0,
+          local_id: null,
+          device_origin: 'web',
+          created_at: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
       }
-    } catch (err) {
-      console.error('Error sending message:', err);
-      toast.error('Failed to send message');
-      setMessages((prev) => prev.filter((m) => m.local_id !== localId));
-    } finally {
-      setIsSending(false);
     }
+
+    setIsSending(false);
   }, [chatId, isSending, chat?.mode, messages]);
 
   // Delete message (optimistic)
