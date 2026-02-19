@@ -15,6 +15,7 @@ import { Trash2, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { EmailList } from "@/components/frappe/email-list";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -200,6 +201,11 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
           {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No notes yet</p>}
         </div>
       ),
+    },
+    {
+      value: "emails",
+      label: "Emails",
+      content: <EmailList entityType="lead" entityId={leadId} />,
     },
   ];
 

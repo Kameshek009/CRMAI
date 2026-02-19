@@ -16,6 +16,7 @@ import { Handshake, CheckSquare, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { EmailList } from "@/components/frappe/email-list";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -250,6 +251,11 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       ) : (
         <p className="text-sm text-muted-foreground py-8 text-center">No tasks linked</p>
       ),
+    },
+    {
+      value: "emails",
+      label: "Emails",
+      content: <EmailList entityType="contact" entityId={contactId} />,
     },
   ];
 
