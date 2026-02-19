@@ -1,5 +1,58 @@
 import type { FormField } from "@/components/crm/entity-form";
 
+// ============================================================================
+// Custom Field Definition (from field_definitions table)
+// ============================================================================
+
+export interface CustomFieldDefinition {
+  id: string;
+  team_id: string;
+  entity_type: string;
+  field_key: string;
+  label: string;
+  field_type: string;
+  options: { value: string; label: string; color?: string }[] | null;
+  is_required: boolean;
+  position: number;
+}
+
+const FIELD_TYPE_MAP: Record<string, FormField["type"]> = {
+  text: "text",
+  number: "number",
+  date: "date",
+  select: "select",
+  multi_select: "select",
+  url: "url",
+  email: "email",
+  phone: "tel",
+  boolean: "boolean",
+  currency: "number",
+  percent: "number",
+  textarea: "textarea",
+};
+
+export function customFieldToFormField(def: CustomFieldDefinition): FormField {
+  return {
+    name: `metadata.${def.field_key}`,
+    label: def.label,
+    type: FIELD_TYPE_MAP[def.field_type] || "text",
+    required: def.is_required,
+    options: def.options?.map((o) => ({ label: o.label, value: o.value })),
+    placeholder: def.field_type === "currency" ? "0.00" : def.field_type === "percent" ? "0-100" : undefined,
+  };
+}
+
+export function mergeFieldsWithCustom(
+  builtIn: FormField[],
+  customDefs: CustomFieldDefinition[]
+): FormField[] {
+  return [...builtIn, ...customDefs.map(customFieldToFormField)];
+}
+
+// ============================================================================
+// Built-in field definitions
+// ============================================================================
+
 export const contactFields: FormField[] = [
   { name: "first_name", label: "First Name", type: "text", required: true, placeholder: "John" },
   { name: "last_name", label: "Last Name", type: "text", placeholder: "Doe" },

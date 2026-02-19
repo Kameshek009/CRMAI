@@ -4,6 +4,8 @@ import { z } from "zod";
 // Contact schemas
 // ============================================================================
 
+const metadataField = z.record(z.string().max(100), z.unknown()).optional();
+
 export const createContactSchema = z.object({
   first_name: z.string().min(1, "First name is required").max(100),
   last_name: z.string().max(100).optional(),
@@ -14,6 +16,7 @@ export const createContactSchema = z.object({
   status: z.enum(["lead", "active", "inactive", "churned"]).optional(),
   source: z.string().max(100).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
+  metadata: metadataField,
 });
 
 export const updateContactSchema = z.object({
@@ -28,6 +31,7 @@ export const updateContactSchema = z.object({
   tags: z.array(z.string().max(50)).max(20).optional(),
   ai_sentiment: z.string().max(50).optional().nullable(),
   engagement_score: z.number().min(0).max(100).optional(),
+  metadata: metadataField,
 });
 
 // ============================================================================
@@ -45,6 +49,7 @@ export const createCompanySchema = z.object({
   website: z.string().max(2000).optional(),
   description: z.string().max(5000).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
+  metadata: metadataField,
 });
 
 export const updateCompanySchema = z.object({
@@ -59,6 +64,7 @@ export const updateCompanySchema = z.object({
   description: z.string().max(5000).optional().nullable(),
   tags: z.array(z.string().max(50)).max(20).optional(),
   ai_health_score: z.number().min(0).max(100).optional(),
+  metadata: metadataField,
 });
 
 // ============================================================================
@@ -75,6 +81,7 @@ export const createDealSchema = z.object({
   expected_close_date: z.string().max(30).optional().nullable(),
   description: z.string().max(5000).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
+  metadata: metadataField,
 });
 
 export const updateDealSchema = z.object({
@@ -90,6 +97,7 @@ export const updateDealSchema = z.object({
   actual_close_date: z.string().max(30).optional().nullable(),
   description: z.string().max(5000).optional().nullable(),
   tags: z.array(z.string().max(50)).max(20).optional(),
+  metadata: metadataField,
 });
 
 export const updateDealStageSchema = z.object({
@@ -225,6 +233,7 @@ export const createLeadSchema = z.object({
   lead_owner_account_id: z.string().uuid().optional().nullable(),
   notes: z.string().max(10000).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
+  metadata: metadataField,
 });
 
 export const updateLeadSchema = z.object({
@@ -241,6 +250,7 @@ export const updateLeadSchema = z.object({
   lead_owner_account_id: z.string().uuid().optional().nullable(),
   notes: z.string().max(10000).optional().nullable(),
   tags: z.array(z.string().max(50)).max(20).optional(),
+  metadata: metadataField,
 });
 
 export const convertLeadSchema = z.object({

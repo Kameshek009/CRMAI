@@ -11,13 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface FormField {
   name: string;
   label: string;
-  type: "text" | "email" | "tel" | "number" | "textarea" | "select" | "date";
+  type: "text" | "email" | "tel" | "number" | "textarea" | "select" | "date" | "url" | "boolean";
   placeholder?: string;
   required?: boolean;
   options?: { label: string; value: string }[];
@@ -101,7 +102,21 @@ export function EntityForm({
     if (!validateAll()) return;
     setIsSubmitting(true);
     try {
-      await onSubmit(values);
+      // Separate metadata.* fields into a nested metadata object
+      const payload: Record<string, string> = {};
+      const metadata: Record<string, string> = {};
+      for (const [key, val] of Object.entries(values)) {
+        if (key.startsWith("metadata.")) {
+          const metaKey = key.slice("metadata.".length);
+          if (val) metadata[metaKey] = val;
+        } else {
+          payload[key] = val;
+        }
+      }
+      if (Object.keys(metadata).length > 0) {
+        payload.metadata = JSON.stringify(metadata);
+      }
+      await onSubmit(payload);
       onOpenChange(false);
     } finally {
       setIsSubmitting(false);
@@ -124,7 +139,20 @@ export function EntityForm({
                   {field.label}
                   {field.required && <span className="text-destructive ml-1">*</span>}
                 </label>
-                {field.type === "textarea" ? (
+                {field.type === "boolean" ? (
+                  <div className="flex items-center gap-2 h-9">
+                    <Switch
+                      id={fieldId}
+                      checked={values[field.name] === "true"}
+                      onCheckedChange={(checked) =>
+                        setValues({ ...values, [field.name]: checked ? "true" : "false" })
+                      }
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {values[field.name] === "true" ? "Yes" : "No"}
+                    </span>
+                  </div>
+                ) : field.type === "textarea" ? (
                   <Textarea
                     id={fieldId}
                     value={values[field.name] || ""}
@@ -155,7 +183,7 @@ export function EntityForm({
                 ) : (
                   <Input
                     id={fieldId}
-                    type={field.type}
+                    type={field.type === "url" ? "url" : field.type}
                     value={values[field.name] || ""}
                     onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
                     onBlur={() => handleBlur(field)}

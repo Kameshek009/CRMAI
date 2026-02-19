@@ -30,7 +30,16 @@ interface DateFieldProps extends BaseFieldProps {
   type: "date";
 }
 
-type InlineEditFieldProps = TextFieldProps | SelectFieldProps | DateFieldProps;
+interface BooleanFieldProps extends BaseFieldProps {
+  type: "boolean";
+}
+
+interface TextareaFieldProps extends BaseFieldProps {
+  type: "textarea";
+  placeholder?: string;
+}
+
+type InlineEditFieldProps = TextFieldProps | SelectFieldProps | DateFieldProps | BooleanFieldProps | TextareaFieldProps;
 
 // ============================================================================
 // Component
@@ -86,6 +95,10 @@ export function InlineEditField(props: InlineEditFieldProps) {
   );
 
   const displayValue = (() => {
+    if (props.type === "boolean") {
+      const strVal = String(value ?? "");
+      return strVal === "true" ? "Yes" : strVal === "false" ? "No" : "—";
+    }
     if (value == null || value === "") return "—";
     if (props.type === "select") {
       const opt = props.options.find((o) => o.value === String(value));
@@ -94,12 +107,50 @@ export function InlineEditField(props: InlineEditFieldProps) {
     return String(value);
   })();
 
+  // Boolean field — simple toggle, no edit mode needed
+  if (props.type === "boolean") {
+    const isChecked = String(value ?? "") === "true";
+    return (
+      <div className={cn("group", className)}>
+        <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
+        <button
+          type="button"
+          onClick={async () => {
+            if (disabled) return;
+            const newVal = isChecked ? "false" : "true";
+            try {
+              setSaving(true);
+              await onSave(newVal);
+            } finally {
+              setSaving(false);
+            }
+          }}
+          disabled={disabled || saving}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-left transition-colors",
+            disabled ? "cursor-default" : "hover:bg-muted cursor-pointer"
+          )}
+        >
+          <div className={cn(
+            "h-4 w-4 rounded border-2 flex items-center justify-center transition-colors",
+            isChecked
+              ? "bg-primary border-primary text-primary-foreground"
+              : "border-muted-foreground/30"
+          )}>
+            {isChecked && <Check className="h-3 w-3" />}
+          </div>
+          <span className="text-foreground">{displayValue}</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("group", className)}>
       <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
 
       {editing ? (
-        <div className="flex items-center gap-1">
+        <div className="flex items-start gap-1">
           {props.type === "select" ? (
             <select
               ref={inputRef as React.RefObject<HTMLSelectElement | null>}
@@ -117,6 +168,19 @@ export function InlineEditField(props: InlineEditFieldProps) {
                 </option>
               ))}
             </select>
+          ) : props.type === "textarea" ? (
+            <textarea
+              ref={inputRef as unknown as React.RefObject<HTMLTextAreaElement | null>}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") cancelEdit();
+              }}
+              disabled={saving}
+              placeholder={props.placeholder}
+              rows={3}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm outline-none focus:border-foreground/30 focus:ring-1 focus:ring-foreground/10 resize-y"
+            />
           ) : (
             <input
               ref={inputRef as React.RefObject<HTMLInputElement | null>}
@@ -133,7 +197,7 @@ export function InlineEditField(props: InlineEditFieldProps) {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="rounded p-1 text-emerald-500 hover:bg-emerald-500/10"
+            className="rounded p-1 text-emerald-500 hover:bg-emerald-500/10 mt-1"
           >
             <Check className="h-3.5 w-3.5" />
           </button>
@@ -141,7 +205,7 @@ export function InlineEditField(props: InlineEditFieldProps) {
             type="button"
             onClick={cancelEdit}
             disabled={saving}
-            className="rounded p-1 text-muted-foreground hover:bg-muted"
+            className="rounded p-1 text-muted-foreground hover:bg-muted mt-1"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -158,7 +222,10 @@ export function InlineEditField(props: InlineEditFieldProps) {
               : "hover:bg-muted cursor-pointer"
           )}
         >
-          <span className={cn(value == null || value === "" ? "text-muted-foreground" : "text-foreground")}>
+          <span className={cn(
+            value == null || value === "" ? "text-muted-foreground" : "text-foreground",
+            props.type === "textarea" && "whitespace-pre-wrap line-clamp-3"
+          )}>
             {displayValue}
           </span>
           {!disabled && (

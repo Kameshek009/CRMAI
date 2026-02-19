@@ -16,6 +16,7 @@ import { Building2, Users, Handshake, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -35,6 +36,7 @@ interface Company {
   contact_count: number;
   deal_count: number;
   created_at: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 interface CompanyContact {
@@ -116,6 +118,23 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       toast.error("Failed to update");
     }
   }, [companyId]);
+
+  const handleUpdateMetadata = useCallback(async (key: string, value: string) => {
+    const currentMeta = company?.metadata || {};
+    const newMeta = { ...currentMeta, [key]: value || null };
+    const res = await fetch(`/api/crm/companies/${companyId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ metadata: newMeta }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setCompany(json.data);
+      toast.success("Updated");
+    } else {
+      toast.error("Failed to update");
+    }
+  }, [companyId, company?.metadata]);
 
   const handleAddNote = async (content: string) => {
     const res = await fetch("/api/crm/notes", {
@@ -326,6 +345,12 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
         value={company.email}
         type="email"
         onSave={(v) => updateField("email", v)}
+      />
+
+      <CustomFieldsPanel
+        entityType="company"
+        metadata={company.metadata}
+        onUpdateMetadata={handleUpdateMetadata}
       />
 
       <div className="pt-2 border-t border-border">

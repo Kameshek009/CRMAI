@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { FieldManager } from "@/components/crm/field-manager";
 import { toast } from "sonner";
 
 interface AiPerms {
@@ -184,6 +185,9 @@ export default function TeamSettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Custom Fields */}
+        <FieldManager />
 
         {/* Danger Zone */}
         <Card className="border-destructive/50">

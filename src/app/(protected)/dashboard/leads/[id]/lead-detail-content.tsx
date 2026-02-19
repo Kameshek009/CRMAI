@@ -15,6 +15,7 @@ import { Trash2, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import type { Activity } from "@/types/crm";
 
@@ -39,6 +40,7 @@ interface Lead {
   converted_contact_id: string | null;
   converted_deal_id: string | null;
   created_at: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 interface NoteData {
@@ -100,6 +102,23 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
       toast.error("Failed to update");
     }
   }, [leadId]);
+
+  const handleUpdateMetadata = useCallback(async (key: string, value: string) => {
+    const currentMeta = lead?.metadata || {};
+    const newMeta = { ...currentMeta, [key]: value || null };
+    const res = await fetch(`/api/crm/leads/${leadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ metadata: newMeta }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setLead(json.data);
+      toast.success("Updated");
+    } else {
+      toast.error("Failed to update");
+    }
+  }, [leadId, lead?.metadata]);
 
   const handleAddNote = async (content: string) => {
     const res = await fetch("/api/crm/notes", {
@@ -256,6 +275,12 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
           { value: "junk", label: "Junk" },
         ]}
         onSave={(v) => updateField("status", v)}
+      />
+
+      <CustomFieldsPanel
+        entityType="lead"
+        metadata={lead.metadata}
+        onUpdateMetadata={handleUpdateMetadata}
       />
 
       {isConverted && lead.converted_contact_id && (

@@ -15,6 +15,7 @@ import { Handshake, CheckSquare, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import type { Activity } from "@/types/crm";
 
@@ -42,6 +43,7 @@ interface Deal {
   ai_win_probability: number | null;
   stage_id: string;
   created_at: string | null;
+  metadata: Record<string, unknown> | null;
   deal_stages: DealStage | null;
   contacts: { id: string; first_name: string; last_name: string | null } | null;
   companies: { id: string; name: string } | null;
@@ -121,6 +123,23 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       toast.error("Failed to update");
     }
   }, [dealId]);
+
+  const handleUpdateMetadata = useCallback(async (key: string, value: string) => {
+    const currentMeta = deal?.metadata || {};
+    const newMeta = { ...currentMeta, [key]: value || null };
+    const res = await fetch(`/api/crm/deals/${dealId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ metadata: newMeta }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setDeal(json.data);
+      toast.success("Updated");
+    } else {
+      toast.error("Failed to update");
+    }
+  }, [dealId, deal?.metadata]);
 
   const handleStageChange = async (stageId: string) => {
     const res = await fetch(`/api/crm/deals/${dealId}`, {
@@ -347,6 +366,12 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
         value={deal.expected_close_date}
         type="date"
         onSave={(v) => updateField("expected_close_date", v)}
+      />
+
+      <CustomFieldsPanel
+        entityType="deal"
+        metadata={deal.metadata}
+        onUpdateMetadata={handleUpdateMetadata}
       />
 
       <div className="pt-2 border-t border-border">

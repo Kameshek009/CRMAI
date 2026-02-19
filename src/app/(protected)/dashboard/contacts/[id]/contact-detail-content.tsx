@@ -16,6 +16,7 @@ import { Handshake, CheckSquare, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import type { Activity } from "@/types/crm";
 
@@ -34,6 +35,7 @@ interface Contact {
   engagement_score: number | null;
   source: string | null;
   created_at: string | null;
+  metadata: Record<string, unknown> | null;
   companies: { id: string; name: string } | null;
 }
 
@@ -116,6 +118,23 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       toast.error("Failed to update");
     }
   }, [contactId]);
+
+  const handleUpdateMetadata = useCallback(async (key: string, value: string) => {
+    const currentMeta = contact?.metadata || {};
+    const newMeta = { ...currentMeta, [key]: value || null };
+    const res = await fetch(`/api/crm/contacts/${contactId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ metadata: newMeta }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setContact(json.data);
+      toast.success("Updated");
+    } else {
+      toast.error("Failed to update");
+    }
+  }, [contactId, contact?.metadata]);
 
   const handleAddNote = async (content: string) => {
     const res = await fetch("/api/crm/notes", {
@@ -324,6 +343,12 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
         <div className="text-xs text-muted-foreground mb-1">Engagement Score</div>
         <div className="text-sm font-semibold">{contact.engagement_score || 0}</div>
       </div>
+
+      <CustomFieldsPanel
+        entityType="contact"
+        metadata={contact.metadata}
+        onUpdateMetadata={handleUpdateMetadata}
+      />
 
       {contact.companies && (
         <div className="pt-2 border-t border-border">
