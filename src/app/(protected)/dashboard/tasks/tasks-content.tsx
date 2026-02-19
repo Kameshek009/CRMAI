@@ -23,6 +23,7 @@ import { CheckSquare, Loader2, Phone, Mail, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
+import { useTranslation } from "@/lib/i18n";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -48,68 +49,11 @@ type FormMode = { type: "closed" } | { type: "create" } | { type: "edit"; task: 
 // Constants
 // ============================================================================
 
-const FILTER_OPTIONS: FilterOption[] = [
-  {
-    field: "status", label: "Status", type: "select",
-    options: [
-      { value: "todo", label: "To Do" },
-      { value: "in_progress", label: "In Progress" },
-      { value: "done", label: "Done" },
-      { value: "cancelled", label: "Cancelled" },
-    ],
-  },
-  {
-    field: "priority", label: "Priority", type: "select",
-    options: [
-      { value: "urgent", label: "Urgent" },
-      { value: "high", label: "High" },
-      { value: "medium", label: "Medium" },
-      { value: "low", label: "Low" },
-    ],
-  },
-  {
-    field: "type", label: "Type", type: "select",
-    options: [
-      { value: "call", label: "Call" },
-      { value: "email", label: "Email" },
-      { value: "meeting", label: "Meeting" },
-      { value: "follow_up", label: "Follow Up" },
-      { value: "other", label: "Other" },
-    ],
-  },
-];
-
-const SORT_OPTIONS: SortOption[] = [
-  { field: "created_at", label: "Created" },
-  { field: "due_date", label: "Due Date" },
-  { field: "priority", label: "Priority" },
-  { field: "title", label: "Title" },
-];
-
-const GROUP_BY_OPTIONS: GroupByOption[] = [
-  { field: "status", label: "Status" },
-  { field: "priority", label: "Priority" },
-  { field: "type", label: "Type" },
-];
-
-const KANBAN_COLUMNS: KanbanColumn[] = [
-  { id: "todo", title: "To Do", color: "bg-gray-500" },
-  { id: "in_progress", title: "In Progress", color: "bg-blue-500" },
-  { id: "done", title: "Done", color: "bg-emerald-500" },
-  { id: "cancelled", title: "Cancelled", color: "bg-red-500" },
-];
-
 const PRIORITY_COLORS: Record<string, string> = {
   urgent: "text-red-600",
   high: "text-orange-600",
   medium: "text-amber-600",
   low: "text-blue-600",
-};
-
-const contextFields: Record<string, { name: string; label: string; inputType: string; icon: typeof Phone; placeholder: string }> = {
-  call: { name: "phone_number", label: "Phone Number", inputType: "tel", icon: Phone, placeholder: "+1 (555) 000-0000" },
-  email: { name: "email_address", label: "Email Address", inputType: "email", icon: Mail, placeholder: "email@example.com" },
-  meeting: { name: "location", label: "Location", inputType: "text", icon: MapPin, placeholder: "Office, Zoom link, etc." },
 };
 
 const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
@@ -121,6 +65,7 @@ const PAGE_SIZE = 50;
 // ============================================================================
 
 export function TasksContent() {
+  const { t } = useTranslation();
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -140,6 +85,63 @@ export function TasksContent() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
+
+  const filterOptions: FilterOption[] = useMemo(() => [
+    {
+      field: "status", label: t("crm.tasks.fields.status"), type: "select",
+      options: [
+        { value: "todo", label: t("crm.tasks.statuses.todo") },
+        { value: "in_progress", label: t("crm.tasks.statuses.inProgress") },
+        { value: "done", label: t("crm.tasks.statuses.done") },
+        { value: "cancelled", label: t("crm.tasks.statuses.cancelled") },
+      ],
+    },
+    {
+      field: "priority", label: t("crm.tasks.fields.priority"), type: "select",
+      options: [
+        { value: "urgent", label: t("crm.tasks.priorities.urgent") },
+        { value: "high", label: t("crm.tasks.priorities.high") },
+        { value: "medium", label: t("crm.tasks.priorities.medium") },
+        { value: "low", label: t("crm.tasks.priorities.low") },
+      ],
+    },
+    {
+      field: "type", label: t("crm.tasks.fields.type"), type: "select",
+      options: [
+        { value: "call", label: t("crm.tasks.types.call") },
+        { value: "email", label: t("crm.tasks.types.email") },
+        { value: "meeting", label: t("crm.tasks.types.meeting") },
+        { value: "follow_up", label: t("crm.tasks.types.followUp") },
+        { value: "other", label: t("crm.tasks.types.other") },
+      ],
+    },
+  ], [t]);
+
+  const sortOptions: SortOption[] = useMemo(() => [
+    { field: "created_at", label: t("crm.tasks.sort.created") },
+    { field: "due_date", label: t("crm.tasks.sort.dueDate") },
+    { field: "priority", label: t("crm.tasks.sort.priority") },
+    { field: "title", label: t("crm.tasks.sort.title") },
+  ], [t]);
+
+  const groupByOptions: GroupByOption[] = useMemo(() => [
+    { field: "status", label: t("crm.tasks.groupBy.status") },
+    { field: "priority", label: t("crm.tasks.groupBy.priority") },
+    { field: "type", label: t("crm.tasks.groupBy.type") },
+  ], [t]);
+
+  const kanbanColumns: KanbanColumn[] = useMemo(() => [
+    { id: "todo", title: t("crm.tasks.statuses.todo"), color: "bg-gray-500" },
+    { id: "in_progress", title: t("crm.tasks.statuses.inProgress"), color: "bg-blue-500" },
+    { id: "done", title: t("crm.tasks.statuses.done"), color: "bg-emerald-500" },
+    { id: "cancelled", title: t("crm.tasks.statuses.cancelled"), color: "bg-red-500" },
+  ], [t]);
+
+  const contextFields: Record<string, { name: string; label: string; inputType: string; icon: typeof Phone; placeholder: string }> = useMemo(() => ({
+    call: { name: "phone_number", label: t("crm.tasks.fields.phoneNumber"), inputType: "tel", icon: Phone, placeholder: t("crm.tasks.placeholders.phone") },
+    email: { name: "email_address", label: t("crm.tasks.fields.emailAddress"), inputType: "email", icon: Mail, placeholder: t("crm.tasks.placeholders.email") },
+    meeting: { name: "location", label: t("crm.tasks.fields.location"), inputType: "text", icon: MapPin, placeholder: t("crm.tasks.placeholders.location") },
+  }), [t]);
 
   const fetchTasks = useCallback(async () => {
     setIsLoading(true);
@@ -193,13 +195,13 @@ export function TasksContent() {
 
   // Handlers
   const handleFilterAdd = useCallback((field: string, value: string) => {
-    const option = FILTER_OPTIONS.find(f => f.field === field);
+    const option = filterOptions.find(f => f.field === field);
     const optLabel = option?.options?.find(o => o.value === value)?.label || value;
     setActiveFilters(prev => {
       const next = prev.filter(f => f.field !== field);
       return [...next, { field, value, label: optLabel }];
     });
-  }, []);
+  }, [filterOptions]);
 
   const handleFilterRemove = useCallback((field: string) => {
     setActiveFilters(prev => prev.filter(f => f.field !== field));
@@ -218,7 +220,7 @@ export function TasksContent() {
       body: JSON.stringify({ status: toColumn }),
     });
     if (!res.ok) {
-      toast.error("Failed to update status");
+      toast.error(t("crm.tasks.failedStatus"));
       fetchTasks();
     }
   };
@@ -245,7 +247,7 @@ export function TasksContent() {
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const json = await res.json();
       if (json.success) {
-        toast.success(isEdit ? "Task updated" : "Task created");
+        toast.success(isEdit ? t("crm.tasks.updated") : t("crm.tasks.created"));
         if (!isEdit) useFeatureLimitStore.getState().incrementUsage("tasks");
         fetchTasks();
         setFormMode({ type: "closed" });
@@ -268,11 +270,11 @@ export function TasksContent() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Deleted ${ids.length} task${ids.length !== 1 ? "s" : ""}`);
+        toast.success(t("crm.tasks.deleted", { count: ids.length }));
         setSelectedIds(new Set());
         fetchTasks();
       } else {
-        toast.error(json.error || "Failed");
+        toast.error(json.error || t("common.failed"));
       }
     } finally {
       setIsBulkLoading(false);
@@ -291,11 +293,11 @@ export function TasksContent() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Updated ${ids.length} task${ids.length !== 1 ? "s" : ""}`);
+        toast.success(t("crm.tasks.statusUpdated", { count: ids.length }));
         setSelectedIds(new Set());
         fetchTasks();
       } else {
-        toast.error(json.error || "Failed");
+        toast.error(json.error || t("common.failed"));
       }
     } finally {
       setIsBulkLoading(false);
@@ -308,7 +310,7 @@ export function TasksContent() {
     const now = new Date();
     const diff = d.getTime() - now.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const label = d.toLocaleDateString("ru-RU", { month: "short", day: "numeric" });
     if (days < 0) return <span className="text-red-600 font-medium">{label}</span>;
     if (days === 0) return <span className="text-amber-600 font-medium">{label}</span>;
     return label;
@@ -316,88 +318,100 @@ export function TasksContent() {
 
   const columns: Column<TaskData>[] = useMemo(() => [
     {
-      key: "title", label: "Title", sortable: true,
-      render: (t) => (
+      key: "title", label: t("crm.tasks.fields.title"), sortable: true,
+      render: (task) => (
         <div>
-          <span className="font-medium">{t.title}</span>
-          {t.is_ai_generated && <span className="ml-1 text-[10px] text-muted-foreground">AI</span>}
+          <span className="font-medium">{task.title}</span>
+          {task.is_ai_generated && <span className="ml-1 text-[10px] text-muted-foreground">AI</span>}
         </div>
       ),
     },
     {
-      key: "type", label: "Type",
-      render: (t) => <span className="text-xs capitalize">{t.type?.replace("_", " ") || "—"}</span>,
+      key: "type", label: t("crm.tasks.fields.type"),
+      render: (task) => {
+        const typeKey = task.type?.replace("_", "") as string;
+        const typeMap: Record<string, string> = { call: "call", email: "email", meeting: "meeting", follow_up: "followUp", followup: "followUp", other: "other" };
+        const key = typeMap[task.type] || task.type;
+        return <span className="text-xs">{t(`crm.tasks.types.${key}`) || task.type || "—"}</span>;
+      },
     },
     {
-      key: "priority", label: "Priority", sortable: true,
-      render: (t) => (
-        <span className={`text-xs font-medium capitalize ${PRIORITY_COLORS[t.priority] || ""}`}>
-          {t.priority || "—"}
-        </span>
-      ),
+      key: "priority", label: t("crm.tasks.fields.priority"), sortable: true,
+      render: (task) => {
+        const prioLabel = t(`crm.tasks.priorities.${task.priority}`);
+        return (
+          <span className={`text-xs font-medium ${PRIORITY_COLORS[task.priority] || ""}`}>
+            {prioLabel || task.priority || "—"}
+          </span>
+        );
+      },
     },
     {
-      key: "status", label: "Status", sortable: true,
-      render: (t) => <StatusBadge status={t.status} />,
+      key: "status", label: t("crm.tasks.fields.status"), sortable: true,
+      render: (task) => <StatusBadge status={task.status} />,
     },
     {
-      key: "due_date", label: "Due Date", sortable: true,
-      render: (t) => <span className="text-xs">{formatDueDate(t.due_date)}</span>,
+      key: "due_date", label: t("crm.tasks.fields.dueDate"), sortable: true,
+      render: (task) => <span className="text-xs">{formatDueDate(task.due_date)}</span>,
     },
-  ], []);
+  ], [t]);
 
   const groups: GroupByGroup<TaskData>[] = useMemo(() => {
     if (!groupBy) return [];
     const map = new Map<string, TaskData[]>();
-    for (const t of tasks) {
-      const key = String((t as unknown as Record<string, unknown>)[groupBy] ?? "—");
+    for (const task of tasks) {
+      const key = String((task as unknown as Record<string, unknown>)[groupBy] ?? "—");
       if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(t);
+      map.get(key)!.push(task);
     }
     return Array.from(map.entries()).map(([key, items]) => ({
       key, label: key.replace("_", " "), count: items.length, items,
     }));
   }, [tasks, groupBy]);
 
-  const kanbanColumns: KanbanColumn[] = useMemo(() =>
-    KANBAN_COLUMNS.map(col => ({
+  const kanbanCols: KanbanColumn[] = useMemo(() =>
+    kanbanColumns.map(col => ({
       ...col,
-      count: tasks.filter(t => t.status === col.id).length,
-    })), [tasks]);
+      count: tasks.filter(task => task.status === col.id).length,
+    })), [tasks, kanbanColumns]);
 
   const kanbanItems = useMemo(() =>
-    tasks.map(t => ({ ...t, columnId: t.status })), [tasks]);
+    tasks.map(task => ({ ...task, columnId: task.status })), [tasks]);
 
   const isEdit = formMode.type === "edit";
   const selectedType = formValues.type || "";
   const ctxField = contextFields[selectedType];
 
+  const taskCount = total !== 1
+    ? t("crm.tasks.count", { count: total })
+    : t("crm.tasks.countOne", { count: total });
+
   return (
     <PageContainer>
-      <PageHeader title="Tasks" description={`${total} task${total !== 1 ? "s" : ""}`} />
+      <PageHeader title={t("crm.tasks.title")} description={taskCount} />
 
       <ViewControls
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search tasks..."
+        searchPlaceholder={t("crm.tasks.searchPlaceholder")}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-        filterOptions={FILTER_OPTIONS}
+        filterOptions={filterOptions}
         activeFilters={activeFilters}
         onFilterAdd={handleFilterAdd}
         onFilterRemove={handleFilterRemove}
         onFiltersClear={() => setActiveFilters([])}
-        sortOptions={SORT_OPTIONS}
+        sortOptions={sortOptions}
         currentSort={sortBy}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
-        groupByOptions={GROUP_BY_OPTIONS}
+        groupByOptions={groupByOptions}
         currentGroupBy={groupBy}
         onGroupByChange={setGroupBy}
         totalCount={total}
-        entityName={`task${total !== 1 ? "s" : ""}`}
+        entityName={taskCount}
         onAdd={() => setFormMode({ type: "create" })}
-        addLabel="New Task"
+        addLabel={t("crm.tasks.new")}
         featureLimitKey="tasks"
       />
 
@@ -412,41 +426,41 @@ export function TasksContent() {
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onRowClick={(t) => {
-            const task = tasks.find(x => x.id === t.id);
-            if (task) setFormMode({ type: "edit", task });
+          onRowClick={(task) => {
+            const found = tasks.find(x => x.id === task.id);
+            if (found) setFormMode({ type: "edit", task: found });
           }}
           page={page}
           pageSize={PAGE_SIZE}
           totalCount={total}
           onPageChange={setPage}
-          emptyMessage={search || activeFilters.length ? "No matching tasks" : "No tasks yet"}
+          emptyMessage={search || activeFilters.length ? t("crm.tasks.noMatching") : t("crm.tasks.noYet")}
         />
       )}
 
       {viewMode === "kanban" && !isLoading && (
         <KanbanBoard
-          columns={kanbanColumns}
+          columns={kanbanCols}
           cards={kanbanItems}
           onCardMove={(id, _from, to) => handleKanbanMove(id, to)}
-          renderCard={(t) => (
+          renderCard={(task) => (
             <div
               className="cursor-pointer"
               onClick={() => {
-                const task = tasks.find(x => x.id === t.id);
-                if (task) setFormMode({ type: "edit", task });
+                const found = tasks.find(x => x.id === task.id);
+                if (found) setFormMode({ type: "edit", task: found });
               }}
             >
-              <span className="text-sm font-medium">{t.title}</span>
+              <span className="text-sm font-medium">{task.title}</span>
               <div className="flex items-center gap-2 mt-1">
-                {t.priority && (
-                  <span className={`text-[10px] font-medium capitalize ${PRIORITY_COLORS[t.priority] || ""}`}>
-                    {t.priority}
+                {task.priority && (
+                  <span className={`text-[10px] font-medium ${PRIORITY_COLORS[task.priority] || ""}`}>
+                    {t(`crm.tasks.priorities.${task.priority}`)}
                   </span>
                 )}
-                {t.due_date && (
+                {task.due_date && (
                   <span className="text-[10px] text-muted-foreground">
-                    {new Date(t.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {new Date(task.due_date).toLocaleDateString("ru-RU", { month: "short", day: "numeric" })}
                   </span>
                 )}
               </div>
@@ -458,27 +472,27 @@ export function TasksContent() {
       {viewMode === "group_by" && (
         <GroupByView
           groups={groups}
-          emptyMessage="No tasks to group"
-          renderItem={(t) => (
+          emptyMessage={t("crm.tasks.noGroup")}
+          renderItem={(task) => (
             <div
-              key={t.id}
+              key={task.id}
               className="flex items-center justify-between px-4 py-2 hover:bg-muted/30 cursor-pointer rounded-md transition-colors"
               onClick={() => {
-                const task = tasks.find(x => x.id === t.id);
-                if (task) setFormMode({ type: "edit", task });
+                const found = tasks.find(x => x.id === task.id);
+                if (found) setFormMode({ type: "edit", task: found });
               }}
             >
               <div className="flex items-center gap-3">
                 <CheckSquare className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-sm font-medium">{t.title}</span>
+                <span className="text-sm font-medium">{task.title}</span>
               </div>
               <div className="flex items-center gap-2">
-                {t.priority && (
-                  <span className={`text-xs font-medium capitalize ${PRIORITY_COLORS[t.priority] || ""}`}>
-                    {t.priority}
+                {task.priority && (
+                  <span className={`text-xs font-medium ${PRIORITY_COLORS[task.priority] || ""}`}>
+                    {t(`crm.tasks.priorities.${task.priority}`)}
                   </span>
                 )}
-                <StatusBadge status={t.status} />
+                <StatusBadge status={task.status} />
               </div>
             </div>
           )}
@@ -492,36 +506,36 @@ export function TasksContent() {
       >
         <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEdit ? "Edit Task" : "New Task"}</DialogTitle>
+            <DialogTitle>{isEdit ? t("crm.tasks.edit") : t("crm.tasks.new")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleFormSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Title</label>
-              <Input value={formValues.title || ""} onChange={(e) => set("title", e.target.value)} placeholder="Follow up with..." required />
+              <label className="text-sm font-medium">{t("crm.tasks.fields.title")}</label>
+              <Input value={formValues.title || ""} onChange={(e) => set("title", e.target.value)} placeholder={t("crm.tasks.placeholders.title")} required />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
-              <Textarea value={formValues.description || ""} onChange={(e) => set("description", e.target.value)} placeholder="Details..." rows={3} />
+              <label className="text-sm font-medium">{t("crm.tasks.fields.description")}</label>
+              <Textarea value={formValues.description || ""} onChange={(e) => set("description", e.target.value)} placeholder={t("crm.tasks.placeholders.description")} rows={3} />
             </div>
             {isEdit && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
+                <label className="text-sm font-medium">{t("crm.tasks.fields.status")}</label>
                 <select value={formValues.status || "todo"} onChange={(e) => set("status", e.target.value)} className={selectClass}>
-                  <option value="todo">To Do</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="done">Done</option>
+                  <option value="todo">{t("crm.tasks.statuses.todo")}</option>
+                  <option value="in_progress">{t("crm.tasks.statuses.inProgress")}</option>
+                  <option value="done">{t("crm.tasks.statuses.done")}</option>
                 </select>
               </div>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Type</label>
+              <label className="text-sm font-medium">{t("crm.tasks.fields.type")}</label>
               <select value={formValues.type || ""} onChange={(e) => set("type", e.target.value)} className={selectClass}>
-                <option value="">Select...</option>
-                <option value="call">Call</option>
-                <option value="email">Email</option>
-                <option value="meeting">Meeting</option>
-                <option value="follow_up">Follow Up</option>
-                <option value="other">Other</option>
+                <option value="">{t("crm.entityForm.select")}</option>
+                <option value="call">{t("crm.tasks.types.call")}</option>
+                <option value="email">{t("crm.tasks.types.email")}</option>
+                <option value="meeting">{t("crm.tasks.types.meeting")}</option>
+                <option value="follow_up">{t("crm.tasks.types.followUp")}</option>
+                <option value="other">{t("crm.tasks.types.other")}</option>
               </select>
             </div>
             {ctxField && (
@@ -534,24 +548,24 @@ export function TasksContent() {
               </div>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Priority</label>
+              <label className="text-sm font-medium">{t("crm.tasks.fields.priority")}</label>
               <select value={formValues.priority || ""} onChange={(e) => set("priority", e.target.value)} className={selectClass}>
-                <option value="">Select...</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
+                <option value="">{t("crm.entityForm.select")}</option>
+                <option value="low">{t("crm.tasks.priorities.low")}</option>
+                <option value="medium">{t("crm.tasks.priorities.medium")}</option>
+                <option value="high">{t("crm.tasks.priorities.high")}</option>
+                <option value="urgent">{t("crm.tasks.priorities.urgent")}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Due Date</label>
+              <label className="text-sm font-medium">{t("crm.tasks.fields.dueDate")}</label>
               <Input type="date" value={formValues.due_date || ""} onChange={(e) => set("due_date", e.target.value)} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setFormMode({ type: "closed" })}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setFormMode({ type: "closed" })}>{t("crm.entityForm.cancel")}</Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="size-4 mr-2 animate-spin" />}
-                {isEdit ? "Save" : "Create"}
+                {isEdit ? t("common.save") : t("crm.entityForm.create")}
               </Button>
             </DialogFooter>
           </form>
@@ -563,25 +577,25 @@ export function TasksContent() {
         onDeselectAll={() => setSelectedIds(new Set())}
         actions={[
           {
-            label: "Change Status",
+            label: t("crm.tasks.changeStatus"),
             dropdown: [
-              { label: "To Do", value: "todo" },
-              { label: "In Progress", value: "in_progress" },
-              { label: "Done", value: "done" },
-              { label: "Cancelled", value: "cancelled" },
+              { label: t("crm.tasks.statuses.todo"), value: "todo" },
+              { label: t("crm.tasks.statuses.inProgress"), value: "in_progress" },
+              { label: t("crm.tasks.statuses.done"), value: "done" },
+              { label: t("crm.tasks.statuses.cancelled"), value: "cancelled" },
             ],
             onDropdownSelect: handleBulkStatusChange,
           },
-          { label: "Delete", variant: "destructive", onClick: () => setConfirmDelete(true) },
+          { label: t("common.delete"), variant: "destructive", onClick: () => setConfirmDelete(true) },
         ]}
       />
 
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete tasks"
-        description={`Delete ${selectedIds.size} task${selectedIds.size !== 1 ? "s" : ""}?`}
-        confirmLabel="Delete"
+        title={t("crm.tasks.deleteTitle")}
+        description={t("crm.tasks.deleteConfirm", { count: selectedIds.size })}
+        confirmLabel={t("common.delete")}
         variant="destructive"
         isLoading={isBulkLoading}
         onConfirm={handleBulkDelete}

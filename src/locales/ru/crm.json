@@ -164,6 +164,73 @@
       "size": "Размер"
     }
   },
+  "tasks": {
+    "title": "Задачи",
+    "new": "Новая задача",
+    "edit": "Редактировать задачу",
+    "created": "Задача создана",
+    "updated": "Задача обновлена",
+    "searchPlaceholder": "Поиск задач...",
+    "noMatching": "Задачи не найдены",
+    "noYet": "Задач пока нет",
+    "noGroup": "Нет задач для группировки",
+    "deleteTitle": "Удалить задачи",
+    "deleteConfirm": "Удалить {count} задач(у)?",
+    "changeStatus": "Изменить статус",
+    "failedStatus": "Не удалось обновить статус",
+    "deleted": "Удалено {count} задач(а)",
+    "statusUpdated": "Обновлено {count} задач(а)",
+    "fields": {
+      "title": "Название",
+      "description": "Описание",
+      "type": "Тип",
+      "priority": "Приоритет",
+      "status": "Статус",
+      "dueDate": "Срок",
+      "phoneNumber": "Номер телефона",
+      "emailAddress": "Email адрес",
+      "location": "Место"
+    },
+    "placeholders": {
+      "title": "Перезвонить...",
+      "description": "Подробности...",
+      "phone": "+7 (999) 000-0000",
+      "email": "email@example.com",
+      "location": "Офис, Zoom, и т.д."
+    },
+    "statuses": {
+      "todo": "К выполнению",
+      "inProgress": "В работе",
+      "done": "Выполнена",
+      "cancelled": "Отменена"
+    },
+    "priorities": {
+      "urgent": "Срочный",
+      "high": "Высокий",
+      "medium": "Средний",
+      "low": "Низкий"
+    },
+    "types": {
+      "call": "Звонок",
+      "email": "Письмо",
+      "meeting": "Встреча",
+      "followUp": "Отслеживание",
+      "other": "Другое"
+    },
+    "sort": {
+      "created": "Дата создания",
+      "dueDate": "Срок",
+      "priority": "Приоритет",
+      "title": "Название"
+    },
+    "groupBy": {
+      "status": "Статус",
+      "priority": "Приоритет",
+      "type": "Тип"
+    },
+    "count": "{count} задач",
+    "countOne": "{count} задача"
+  },
   "callLogs": {
     "fields": {
       "direction": "Направление",

@@ -164,6 +164,73 @@
       "size": "Size"
     }
   },
+  "tasks": {
+    "title": "Tasks",
+    "new": "New Task",
+    "edit": "Edit Task",
+    "created": "Task created",
+    "updated": "Task updated",
+    "searchPlaceholder": "Search tasks...",
+    "noMatching": "No matching tasks",
+    "noYet": "No tasks yet",
+    "noGroup": "No tasks to group",
+    "deleteTitle": "Delete tasks",
+    "deleteConfirm": "Delete {count} task(s)?",
+    "changeStatus": "Change Status",
+    "failedStatus": "Failed to update status",
+    "deleted": "Deleted {count} task(s)",
+    "statusUpdated": "Updated {count} task(s)",
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "type": "Type",
+      "priority": "Priority",
+      "status": "Status",
+      "dueDate": "Due Date",
+      "phoneNumber": "Phone Number",
+      "emailAddress": "Email Address",
+      "location": "Location"
+    },
+    "placeholders": {
+      "title": "Follow up with...",
+      "description": "Details...",
+      "phone": "+1 (555) 000-0000",
+      "email": "email@example.com",
+      "location": "Office, Zoom link, etc."
+    },
+    "statuses": {
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "priorities": {
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "types": {
+      "call": "Call",
+      "email": "Email",
+      "meeting": "Meeting",
+      "followUp": "Follow Up",
+      "other": "Other"
+    },
+    "sort": {
+      "created": "Created",
+      "dueDate": "Due Date",
+      "priority": "Priority",
+      "title": "Title"
+    },
+    "groupBy": {
+      "status": "Status",
+      "priority": "Priority",
+      "type": "Type"
+    },
+    "count": "{count} tasks",
+    "countOne": "{count} task"
+  },
   "callLogs": {
     "fields": {
       "direction": "Direction",
