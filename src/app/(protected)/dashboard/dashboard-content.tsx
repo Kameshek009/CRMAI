@@ -2,22 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
 import {
   Sparkles,
   Users,
@@ -51,10 +40,14 @@ import { UpgradeModal, useUpgradeModal } from "@/components/billing";
 import { TeamCreateDialog } from "@/components/team/team-create-dialog";
 import { JoinTeamDialog } from "@/components/team/join-team-dialog";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
-import { ChartWidget } from "@/components/dashboard/widgets/chart-widget";
 import { ListWidget } from "@/components/dashboard/widgets/list-widget";
 import { TableWidget } from "@/components/dashboard/widgets/table-widget";
 import type { CrmStats, AIInsight } from "@/types/crm";
+
+const DashboardCharts = dynamic(
+  () => import("@/components/dashboard/widgets/dashboard-charts").then((m) => ({ default: m.DashboardCharts })),
+  { ssr: false, loading: () => <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"><Skeleton className="h-[280px] rounded-xl" /><Skeleton className="h-[280px] rounded-xl" /></div> }
+);
 
 // ============================================================================
 // Types
@@ -657,132 +650,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </div>
           </TableWidget>
 
-          {/* Row 5: Charts — Revenue Trend + Workload */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartWidget
-              title="Revenue Trend (30 Days)"
-              icon={TrendingUp}
-              isEmpty={revenueTrend.length === 0 || revenueTrend.every((d) => d.revenue === 0)}
-              emptyIcon={DollarSign}
-              emptyMessage="No revenue data yet. Close deals to see trends."
-            >
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={revenueTrend}>
-                    <defs>
-                      <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--landing-accent)" stopOpacity={0.3} />
-                        <stop offset="50%" stopColor="var(--landing-accent)" stopOpacity={0.1} />
-                        <stop offset="100%" stopColor="var(--landing-accent)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="revenueStroke" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="var(--landing-accent)" />
-                        <stop offset="100%" stopColor="var(--landing-accent)" />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
-                    <XAxis
-                      dataKey="date"
-                      tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                      interval="preserveStartEnd"
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                      tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "12px",
-                        fontSize: "12px",
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                      }}
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
-                      labelFormatter={(label) => new Date(String(label)).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="cumulative"
-                      stroke="url(#revenueStroke)"
-                      strokeWidth={2.5}
-                      fill="url(#revenueGradient)"
-                      activeDot={{ r: 5, fill: "var(--landing-accent)", strokeWidth: 2, stroke: "var(--card)" }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </ChartWidget>
-
-            <ChartWidget
-              title="Workload by Status"
-              icon={Kanban}
-              isEmpty={taskStatusData.length === 0}
-              emptyIcon={CheckSquare}
-              emptyMessage="No tasks yet. Create tasks to see workload."
-            >
-              <div className="flex items-center gap-6">
-                <div className="w-[170px] h-[170px] shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={taskStatusData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={48}
-                        outerRadius={75}
-                        paddingAngle={3}
-                        dataKey="value"
-                        stroke="none"
-                        animationBegin={600}
-                        animationDuration={800}
-                      >
-                        {taskStatusData.map((entry, i) => (
-                          <Cell key={i} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "var(--card)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "12px",
-                          fontSize: "12px",
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="space-y-4 flex-1">
-                  {taskStatusData.map((entry) => (
-                    <div key={entry.name} className="flex items-center justify-between group">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full transition-transform group-hover:scale-125"
-                          style={{ backgroundColor: entry.color, boxShadow: `0 0 8px ${entry.color}40` }}
-                        />
-                        <span className="text-xs text-foreground">{entry.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{ width: `${(entry.value / tasks.length) * 100}%`, backgroundColor: entry.color }}
-                          />
-                        </div>
-                        <span className="text-xs font-semibold text-foreground w-6 text-right">{entry.value}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </ChartWidget>
-          </div>
+          {/* Row 5: Charts — Revenue Trend + Workload (lazy loaded) */}
+          <DashboardCharts
+            revenueTrend={revenueTrend}
+            taskStatusData={taskStatusData}
+            totalTasks={tasks.length}
+          />
 
           {/* Upgrade banner for free users */}
           {!accountLoading && (account?.tier === "free" || !account?.tier) && usage && usage.percentUsed >= 80 && (

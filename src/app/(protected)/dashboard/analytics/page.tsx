@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { AnalyticsContent } from "./analytics-content";
+import { AnalyticsLoader } from "./analytics-loader";
 
 export const metadata: Metadata = { title: "Analytics" };
 
 export default function AnalyticsPage() {
-  return <AnalyticsContent />;
+  return <AnalyticsLoader />;
 }

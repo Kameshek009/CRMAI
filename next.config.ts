@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-icons",
       "date-fns",
       "sonner",
+      "recharts",
+      "framer-motion",
+      "@dnd-kit/core",
+      "@dnd-kit/sortable",
+      "@supabase/supabase-js",
     ],
   },
   images: {

@@ -297,6 +297,8 @@ export async function GET() {
         companiesByIndustry: Object.entries(companiesByIndustry).map(([industry, count]) => ({ industry, count })),
         totalCompanies: (companies || []).length,
       },
+    }, {
+      headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });
   } catch (error) {
     logger.error("CrmAnalytics", "GET error", error);

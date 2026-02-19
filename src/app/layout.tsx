@@ -33,6 +33,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head>
+        <link rel="dns-prefetch" href="https://img.clerk.com" />
+        <link rel="preconnect" href="https://img.clerk.com" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-screen bg-background text-foreground antialiased font-sans">
         <Providers>{children}</Providers>
       </body>

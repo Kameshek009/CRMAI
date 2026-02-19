@@ -48,7 +48,9 @@ export async function GET() {
       return { ...d, cumulative };
     });
 
-    return NextResponse.json({ success: true, data: cumulativeData });
+    return NextResponse.json({ success: true, data: cumulativeData }, {
+      headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
+    });
   } catch (error) {
     logger.error("CrmRevenueTrend", "GET error", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

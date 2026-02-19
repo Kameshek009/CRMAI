@@ -106,6 +106,8 @@ export async function GET() {
         wonDealsThisMonth,
         wonValueThisMonth,
       },
+    }, {
+      headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });
   } catch (error) {
     logger.error("Stats", "Failed to fetch stats", error);
