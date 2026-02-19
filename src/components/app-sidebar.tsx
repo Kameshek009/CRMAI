@@ -49,6 +49,7 @@ import {
   Handshake,
   FileText,
   Phone,
+  Mail,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -84,6 +85,7 @@ const toolsGroup: NavGroup = {
   items: [
     { label: "Pipeline", href: "/dashboard/pipeline", icon: Kanban, permission: "pipeline.read" },
     { label: "Automations", href: "/dashboard/automations", icon: Zap },
+    { label: "Sequences", href: "/dashboard/sequences", icon: Mail },
     { label: "Analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
     { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
   ],

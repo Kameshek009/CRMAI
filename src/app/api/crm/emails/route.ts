@@ -91,6 +91,23 @@ export async function POST(request: NextRequest) {
       });
     } catch (e) { logger.warn("Emails", "Failed to log activity", e); }
 
+    // Exit condition: inbound email exits active sequence enrollments
+    if (parsed.data.direction === "inbound") {
+      try {
+        const contactId = parsed.data.contact_id;
+        const leadId = parsed.data.lead_id;
+        if (contactId || leadId) {
+          let exitQuery = supabase
+            .from("email_sequence_enrollments")
+            .update({ status: "exited_reply", updated_at: new Date().toISOString() })
+            .eq("status", "active");
+          if (contactId) exitQuery = exitQuery.eq("contact_id", contactId);
+          else if (leadId) exitQuery = exitQuery.eq("lead_id", leadId);
+          await exitQuery;
+        }
+      } catch (e) { logger.warn("Emails", "Failed to exit sequence enrollments", e); }
+    }
+
     return NextResponse.json({ success: true, data });
   } catch (error) {
     logger.error("Emails", "POST error", error);
