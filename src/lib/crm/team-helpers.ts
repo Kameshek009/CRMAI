@@ -101,7 +101,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
       .single(),
     supabase
       .from("team_members")
-      .select("id, is_director, fixed_role, status, team_roles(*)")
+      .select("*, team_roles(*)")
       .eq("team_id", account.current_team_id)
       .eq("account_id", account.id)
       .eq("status", "active")
@@ -166,22 +166,27 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
           .limit(1);
 
         if (ownerRoles && ownerRoles.length > 0) {
-          await supabase.from("team_members").insert({
+          // Insert without fixed_role first (column may not exist if migration 022 wasn't applied)
+          const insertData: Record<string, unknown> = {
             team_id: account.current_team_id,
             account_id: account.id,
             role_id: ownerRoles[0].id,
             is_director: true,
-            fixed_role: "owner",
             status: "active",
-          });
-          logger.info("WorkspaceContext", `Self-repair: recreated owner membership for team ${account.current_team_id}`);
+          };
+          const { error: insertErr } = await supabase.from("team_members").insert(insertData);
+          if (insertErr) {
+            logger.error("WorkspaceContext", "Self-repair insert failed", insertErr);
+          } else {
+            logger.info("WorkspaceContext", `Self-repair: recreated owner membership for team ${account.current_team_id}`);
+          }
         }
       }
 
       // Retry after self-repair
       const { data: repairedMembers } = await supabase
         .from("team_members")
-        .select("id, is_director, fixed_role, status, team_roles(*)")
+        .select("*, team_roles(*)")
         .eq("team_id", account.current_team_id)
         .eq("account_id", account.id)
         .eq("status", "active")
