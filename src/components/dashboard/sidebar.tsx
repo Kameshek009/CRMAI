@@ -6,6 +6,7 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import { useWorkspace } from "@/contexts/team-context";
+import { useTranslation } from "@/lib/i18n";
 import {
   Settings,
   BarChart3,
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
   external?: boolean;
@@ -28,28 +29,26 @@ interface NavGroup {
   items: NavItem[];
 }
 
-// Navigation groups matching Cursor's structure
 const navGroups: NavGroup[] = [
   {
     items: [
-      { label: "Settings", href: "/dashboard/account", icon: Settings },
+      { labelKey: "crm.sidebar.settings", href: "/dashboard/account", icon: Settings },
     ],
   },
   {
     items: [
-      { label: "Usage", href: "/dashboard/usage", icon: BarChart3 },
-      { label: "Billing & Invoices", href: "/dashboard/account/billing", icon: CreditCard },
+      { labelKey: "crm.sidebar.usage", href: "/dashboard/usage", icon: BarChart3 },
+      { labelKey: "crm.sidebar.billing", href: "/dashboard/account/billing", icon: CreditCard },
     ],
   },
   {
     items: [
-      { label: "Docs", href: "https://docs.nexxuscrm.com", icon: FileText, external: true },
-      { label: "Contact Us", href: "mailto:support@nexxuscrm.com", icon: Mail, external: true },
+      { labelKey: "crm.sidebar.docs", href: "https://docs.nexxuscrm.com", icon: FileText, external: true },
+      { labelKey: "crm.sidebar.contactUs", href: "mailto:support@nexxuscrm.com", icon: Mail, external: true },
     ],
   },
 ];
 
-// Display names for tiers
 const TIER_DISPLAY_NAMES: Record<string, string> = {
   free: "Free",
   pro: "Pro",
@@ -62,6 +61,7 @@ export function Sidebar() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const { currentWorkspace: currentTeam } = useWorkspace();
+  const { t } = useTranslation();
 
   const tierName = currentTeam?.tier ? TIER_DISPLAY_NAMES[currentTeam.tier] || "Free" : "Free";
 
@@ -74,7 +74,7 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* User Info - At Top like Cursor */}
+      {/* User Info */}
       {user && (
         <div className="px-6 pb-6">
           <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export function Sidebar() {
             <ExternalLink className="w-3 h-3 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {tierName} Plan · {user.primaryEmailAddress?.emailAddress}
+            {tierName} {t("crm.sidebar.plan")} · {user.primaryEmailAddress?.emailAddress}
           </p>
         </div>
       )}
@@ -93,7 +93,6 @@ export function Sidebar() {
       <nav className="flex-1 px-4 overflow-y-auto">
         {navGroups.map((group, groupIndex) => (
           <div key={groupIndex}>
-            {/* Divider before each group (except first) */}
             {groupIndex > 0 && (
               <div className="h-px bg-border mx-2 my-2" />
             )}
@@ -103,6 +102,7 @@ export function Sidebar() {
                 const Icon = item.icon;
                 const isExternal = item.external === true;
                 const isActive = !isExternal && pathname === item.href;
+                const label = t(item.labelKey);
 
                 if (isExternal) {
                   return (
@@ -114,7 +114,7 @@ export function Sidebar() {
                       className="flex items-center gap-4 h-10 px-4 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                     >
                       <Icon className="w-4 h-4" strokeWidth={1.5} />
-                      <span>{item.label}</span>
+                      <span>{label}</span>
                     </a>
                   );
                 }
@@ -131,7 +131,7 @@ export function Sidebar() {
                     )}
                   >
                     <Icon className="w-4 h-4" strokeWidth={1.5} />
-                    <span>{item.label}</span>
+                    <span>{label}</span>
                   </Link>
                 );
               })}
@@ -148,7 +148,7 @@ export function Sidebar() {
           className="flex items-center gap-4 h-10 px-4 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors w-full"
         >
           <LogOut className="w-4 h-4" strokeWidth={1.5} />
-          <span>Sign out</span>
+          <span>{t("crm.sidebar.signOut")}</span>
         </button>
       </div>
     </aside>

@@ -18,6 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from "@/lib/i18n";
 import type { Chat } from '@/lib/supabase/types';
 
 interface ChatListItem extends Chat {
@@ -52,6 +53,7 @@ function isUnread(chat: ChatListItem): boolean {
 }
 
 export function ChatsContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { account, isLoading: accountLoading } = useAccount();
   const [chats, setChats] = useState<ChatListItem[]>([]);
@@ -93,14 +95,14 @@ export function ChatsContent() {
     } catch (err) {
       void err;
       if (!silent) {
-        toast.error('Failed to load chats');
+        toast.error(t("crm.chats.failedLoad"));
       }
     } finally {
       if (!silent) {
         setIsLoading(false);
       }
     }
-  }, [account?.id]);
+  }, [account?.id, t]);
 
   useEffect(() => {
     if (account?.id) {
@@ -185,11 +187,11 @@ export function ChatsContent() {
         throw new Error(result.error || 'Failed to create chat');
       }
 
-      toast.success('Chat created');
+      toast.success(t("crm.chats.created"));
       router.push(`/dashboard/chats/${result.chat.id}`);
     } catch (err) {
       void err;
-      toast.error('Failed to create chat');
+      toast.error(t("crm.chats.failedCreate"));
     }
   };
 
@@ -205,15 +207,15 @@ export function ChatsContent() {
       }
 
       setChats((prev) => prev.filter((c) => c.id !== chatId));
-      toast.success('Chat deleted');
+      toast.success(t("crm.chats.deleted"));
     } catch (err) {
       void err;
-      toast.error('Failed to delete chat');
+      toast.error(t("crm.chats.failedDelete"));
     }
   };
 
   const filteredChats = chats.filter((chat) => {
-    const title = chat.title || 'New Chat';
+    const title = chat.title || t("crm.chats.new");
     const preview = chat.last_message_preview || '';
     const query = searchQuery.toLowerCase();
     return title.toLowerCase().includes(query) || preview.toLowerCase().includes(query);
@@ -227,12 +229,12 @@ export function ChatsContent() {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return t("crm.chats.now");
+    if (diffMins < 60) return t("crm.activity.mAgo", { count: diffMins });
+    if (diffHours < 24) return t("crm.activity.hAgo", { count: diffHours });
+    if (diffDays < 7) return t("crm.activity.dAgo", { count: diffDays });
 
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   };
 
   const getModeIcon = (mode: Chat['mode']) => {
@@ -302,9 +304,9 @@ export function ChatsContent() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center justify-between sm:block">
           <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Chats</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">{t("crm.chats.title")}</h1>
             <p className="text-sm text-muted-foreground mt-1 hidden sm:block">
-              Synced conversations across all devices
+              {t("crm.chats.description")}
             </p>
           </div>
           <Button onClick={handleCreateChat} size="icon" className="sm:hidden h-10 w-10">
@@ -315,7 +317,7 @@ export function ChatsContent() {
           <AgentStatusBadge compact />
           <Button onClick={handleCreateChat} className="hidden sm:flex gap-2">
             <Plus className="h-4 w-4" />
-            New Chat
+            {t("crm.chats.new")}
           </Button>
         </div>
       </div>
@@ -324,7 +326,7 @@ export function ChatsContent() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         <Input
-          placeholder="Search chats..."
+          placeholder={t("crm.chats.searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10 bg-background/50 border-border/50 focus:border-border transition-colors"
@@ -349,12 +351,12 @@ export function ChatsContent() {
               <div className="rounded-full bg-muted/50 p-4 mb-4">
                 <Search className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
-              <CardTitle className="mb-2 text-base sm:text-lg">No results</CardTitle>
+              <CardTitle className="mb-2 text-base sm:text-lg">{t("crm.chats.noResults")}</CardTitle>
               <CardDescription className="text-center mb-4 sm:mb-6 max-w-sm text-sm">
-                No chats found for &quot;{searchQuery}&quot;
+                {t("crm.chats.noChatsFor", { query: searchQuery })}
               </CardDescription>
               <Button onClick={() => setSearchQuery('')} variant="ghost" className="gap-2 h-10">
-                Clear search
+                {t("crm.chats.clearSearch")}
               </Button>
             </CardContent>
           </Card>
@@ -370,13 +372,13 @@ export function ChatsContent() {
               <div className="rounded-full bg-muted/50 p-4 mb-4">
                 <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
-              <CardTitle className="mb-2 text-base sm:text-lg">No chats yet</CardTitle>
+              <CardTitle className="mb-2 text-base sm:text-lg">{t("crm.chats.noYet")}</CardTitle>
               <CardDescription className="text-center mb-4 sm:mb-6 max-w-sm text-sm">
-                Start a conversation from the desktop app or create a new chat here.
+                {t("crm.chats.noYetDesc")}
               </CardDescription>
               <Button onClick={handleCreateChat} variant="outline" className="gap-2 h-10">
                 <Plus className="h-4 w-4" />
-                New Chat
+                {t("crm.chats.new")}
               </Button>
             </CardContent>
           </Card>
@@ -417,22 +419,22 @@ export function ChatsContent() {
                             <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
                           )}
                           <h3 className="font-medium text-foreground truncate text-sm sm:text-sm">
-                            {chat.title || 'New Chat'}
+                            {chat.title || t("crm.chats.new")}
                           </h3>
                           <span className="text-xs text-muted-foreground/50 bg-muted px-2 py-1 rounded shrink-0">
-                            {chat.mode === 'chat' ? 'Chat' : chat.mode === 'agent' ? 'Agent' : 'Auto'}
+                            {chat.mode === 'chat' ? t("crm.chats.modeChat") : chat.mode === 'agent' ? t("crm.chats.modeAgent") : t("crm.chats.modeAuto")}
                           </span>
                           <span className="text-xs text-muted-foreground/70 shrink-0">
                             {formatTime(chat.updated_at || chat.created_at || new Date().toISOString())}
                           </span>
                         </div>
                         <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                          {chat.last_message_preview || 'No messages yet'}
+                          {chat.last_message_preview || t("crm.chats.noMessages")}
                         </p>
                       </div>
                       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                         <span className="text-xs text-muted-foreground/60 tabular-nums hidden sm:inline">
-                          {chat.message_count} msg{chat.message_count !== 1 ? 's' : ''}
+                          {t("crm.chats.msgs", { count: chat.message_count })}
                         </span>
                         <span className="text-xs text-muted-foreground/60 tabular-nums sm:hidden">
                           {chat.message_count}
@@ -456,7 +458,7 @@ export function ChatsContent() {
                               }}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
+                              {t("crm.chats.delete")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface Automation {
   id: string;
@@ -27,27 +28,8 @@ interface Automation {
   created_at: string;
 }
 
-const TRIGGER_LABELS: Record<string, string> = {
-  record_created: "Record Created",
-  record_updated: "Record Updated",
-  field_changed: "Field Changed",
-  deal_stage_changed: "Deal Stage Changed",
-};
-
-const ACTION_LABELS: Record<string, string> = {
-  create_task: "Create Task",
-  update_field: "Update Field",
-  assign_to: "Assign To",
-};
-
-const ENTITY_LABELS: Record<string, string> = {
-  contact: "Contact",
-  company: "Organization",
-  deal: "Deal",
-  lead: "Lead",
-};
-
 export function AutomationsContent() {
+  const { t } = useTranslation();
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [loading, setLoading] = useState(true);
   const [builderOpen, setBuilderOpen] = useState(false);
@@ -55,6 +37,25 @@ export function AutomationsContent() {
   const [isDeleting, setIsDeleting] = useState(false);
   const limitStore = useFeatureLimitStore();
   const atAutomationLimit = limitStore.isAtLimit("activeAutomations");
+
+  const triggerLabels: Record<string, string> = {
+    record_created: t("crm.automations.triggers.recordCreated"),
+    record_updated: t("crm.automations.triggers.recordUpdated"),
+    field_changed: t("crm.automations.triggers.fieldChanged"),
+    deal_stage_changed: t("crm.automations.triggers.dealStageChanged"),
+  };
+
+  const actionLabels: Record<string, string> = {
+    create_task: t("crm.automations.actionTypes.createTask"),
+    update_field: t("crm.automations.actionTypes.updateField"),
+    assign_to: t("crm.automations.actionTypes.assignTo"),
+  };
+
+  const entityLabels: Record<string, string> = {
+    contact: t("crm.automations.entities.contact"),
+    company: t("crm.automations.entities.company"),
+    deal: t("crm.automations.entities.deal"),
+  };
 
   const handleAddClick = () => {
     if (atAutomationLimit) {
@@ -93,7 +94,7 @@ export function AutomationsContent() {
         setAutomations((prev) =>
           prev.map((a) => (a.id === id ? { ...a, is_active: active } : a))
         );
-        toast.success(active ? "Automation enabled" : "Automation paused");
+        toast.success(active ? t("crm.automations.enabled") : t("crm.automations.paused"));
       }
     } finally {
       setTogglingId(null);
@@ -108,9 +109,9 @@ export function AutomationsContent() {
       const json = await res.json();
       if (json.success) {
         setAutomations((prev) => prev.filter((a) => a.id !== deleteId));
-        toast.success("Automation deleted");
+        toast.success(t("crm.automations.deletedMsg"));
       } else {
-        toast.error("Failed to delete");
+        toast.error(t("crm.automations.failedDelete"));
       }
     } finally {
       setIsDeleting(false);
@@ -126,7 +127,7 @@ export function AutomationsContent() {
   if (loading) {
     return (
       <PageContainer>
-        <PageHeader title="Automations" description="Loading..." />
+        <PageHeader title={t("crm.automations.title")} description={t("crm.automations.loading")} />
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-lg" />
@@ -139,12 +140,12 @@ export function AutomationsContent() {
   return (
     <PageContainer>
       <PageHeader
-        title="Automations"
-        description="Automate repetitive tasks with simple rules"
+        title={t("crm.automations.title")}
+        description={t("crm.automations.description")}
       >
         <Button onClick={handleAddClick} variant={atAutomationLimit ? "outline" : "default"}>
           {atAutomationLimit ? <Sparkles className="size-4 mr-2" /> : <Plus className="size-4 mr-2" />}
-          {atAutomationLimit ? "Upgrade to Add" : "New Automation"}
+          {atAutomationLimit ? t("crm.automations.upgradeToAdd") : t("crm.automations.new")}
         </Button>
       </PageHeader>
 
@@ -152,13 +153,13 @@ export function AutomationsContent() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <Zap className="size-10 text-muted-foreground/30 mb-4" />
-            <h3 className="text-sm font-semibold mb-1">No automations yet</h3>
+            <h3 className="text-sm font-semibold mb-1">{t("crm.automations.noYet")}</h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-              Create rules to automate tasks when records are created or updated.
+              {t("crm.automations.noYetDesc")}
             </p>
             <Button onClick={handleAddClick}>
               <Plus className="size-4 mr-2" />
-              Create Your First Automation
+              {t("crm.automations.createFirst")}
             </Button>
           </CardContent>
         </Card>
@@ -176,33 +177,33 @@ export function AutomationsContent() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-semibold">{auto.name}</span>
                     <Badge variant="outline" className="text-[10px]">
-                      {TRIGGER_LABELS[auto.trigger_type] || auto.trigger_type}
+                      {triggerLabels[auto.trigger_type] || auto.trigger_type}
                     </Badge>
                     {auto.trigger_config.entity_type && (
                       <Badge variant="outline" className="text-[10px]">
-                        {ENTITY_LABELS[auto.trigger_config.entity_type] || auto.trigger_config.entity_type}
+                        {entityLabels[auto.trigger_config.entity_type] || auto.trigger_config.entity_type}
                       </Badge>
                     )}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>
-                      {auto.actions.length} action{auto.actions.length !== 1 ? "s" : ""}:
-                      {" "}{auto.actions.map((a) => ACTION_LABELS[a.type] || a.type).join(", ")}
+                      {auto.actions.length === 1 ? t("crm.automations.action", { count: 1 }) : t("crm.automations.actions", { count: auto.actions.length })}:
+                      {" "}{auto.actions.map((a) => actionLabels[a.type] || a.type).join(", ")}
                     </span>
                     {auto.conditions.length > 0 && (
-                      <span>{auto.conditions.length} condition{auto.conditions.length !== 1 ? "s" : ""}</span>
+                      <span>{auto.conditions.length === 1 ? t("crm.automations.condition", { count: 1 }) : t("crm.automations.conditions", { count: auto.conditions.length })}</span>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
                   <div className="flex items-center gap-1">
                     <Zap className="size-3" />
-                    <span>{auto.run_count} runs</span>
+                    <span>{t("crm.automations.runs", { count: auto.run_count })}</span>
                   </div>
                   {auto.last_run_at && (
                     <div className="flex items-center gap-1">
                       <Clock className="size-3" />
-                      <span>{new Date(auto.last_run_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      <span>{new Date(auto.last_run_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
                     </div>
                   )}
                 </div>
@@ -229,9 +230,9 @@ export function AutomationsContent() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(v) => !v && setDeleteId(null)}
-        title="Delete automation"
-        description="Are you sure you want to delete this automation? This action cannot be undone."
-        confirmLabel="Delete"
+        title={t("crm.automations.deleteTitle")}
+        description={t("crm.automations.deleteConfirm")}
+        confirmLabel={t("crm.automations.deleteLabel")}
         variant="destructive"
         isLoading={isDeleting}
         onConfirm={handleDelete}

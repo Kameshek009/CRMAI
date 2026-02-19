@@ -8,8 +8,10 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, Wifi, TrendingUp, Calendar, Zap, BarChart3 } from "lucide-react";
 import { useAccount } from "@/contexts/account-context";
+import { useTranslation } from "@/lib/i18n";
 
 export function UsageContent() {
+  const { t } = useTranslation();
   const { account, usage, isLoading, error, refetch, isConnected } = useAccount();
 
   const used = usage?.tokensUsed ?? 0;
@@ -27,8 +29,8 @@ export function UsageContent() {
   return (
     <PageContainer>
       <PageHeader
-        title="Usage Analytics"
-        description="Monitor your token consumption and usage patterns"
+        title={t("crm.usage.title")}
+        description={t("crm.usage.description")}
       >
         <Button
           variant="outline"
@@ -41,7 +43,7 @@ export function UsageContent() {
           ) : (
             <RefreshCw className={`mr-2 size-4 ${isLoading ? "animate-spin" : ""}`} />
           )}
-          {isConnected ? "Live" : "Refresh"}
+          {isConnected ? t("crm.usage.live") : t("crm.usage.refresh")}
         </Button>
       </PageHeader>
 
@@ -49,16 +51,16 @@ export function UsageContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-4">
             <BarChart3 className="size-5" />
-            Token Usage
+            {t("crm.usage.tokenUsage")}
           </CardTitle>
           <CardDescription>
-            Your current billing period consumption
+            {t("crm.usage.billingPeriod")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="flex items-end justify-between">
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Tokens Used</p>
+              <p className="text-sm text-muted-foreground">{t("crm.usage.tokensUsed")}</p>
               {isLoading ? (
                 <Skeleton className="h-12 w-40" />
               ) : (
@@ -73,7 +75,7 @@ export function UsageContent() {
               ) : (
                 <>
                   <p className="text-2xl font-semibold">{limit.toLocaleString()}</p>
-                  <p className="text-sm text-muted-foreground">monthly limit</p>
+                  <p className="text-sm text-muted-foreground">{t("crm.usage.monthlyLimit")}</p>
                 </>
               )}
             </div>
@@ -85,8 +87,8 @@ export function UsageContent() {
               <Skeleton className="h-5 w-48" />
             ) : (
               <div className="flex justify-between text-sm text-muted-foreground">
-                <span>{percentage.toFixed(1)}% used</span>
-                <span>Resets in {daysRemaining} day{daysRemaining !== 1 ? "s" : ""}</span>
+                <span>{t("crm.usage.used", { percent: percentage.toFixed(1) })}</span>
+                <span>{daysRemaining === 1 ? t("crm.usage.resetsInOne", { days: daysRemaining }) : t("crm.usage.resetsIn", { days: daysRemaining })}</span>
               </div>
             )}
           </div>
@@ -96,7 +98,7 @@ export function UsageContent() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-medium">Remaining</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("crm.usage.remaining")}</CardTitle>
             <Zap className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -105,7 +107,7 @@ export function UsageContent() {
             ) : (
               <div className="space-y-2">
                 <div className="text-2xl font-bold">{formatTokens(remaining)}</div>
-                <p className="text-sm text-muted-foreground">tokens available</p>
+                <p className="text-sm text-muted-foreground">{t("crm.usage.tokensAvailable")}</p>
               </div>
             )}
           </CardContent>
@@ -113,7 +115,7 @@ export function UsageContent() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-medium">Current Plan</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("crm.usage.currentPlan")}</CardTitle>
             <TrendingUp className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -124,7 +126,7 @@ export function UsageContent() {
                 <div className="text-2xl font-bold uppercase">
                   {account?.tier || "FREE"}
                 </div>
-                <p className="text-sm text-muted-foreground">subscription tier</p>
+                <p className="text-sm text-muted-foreground">{t("crm.usage.subscriptionTier")}</p>
               </div>
             )}
           </CardContent>
@@ -132,7 +134,7 @@ export function UsageContent() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-medium">Days Left</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("crm.usage.daysLeft")}</CardTitle>
             <Calendar className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -141,7 +143,7 @@ export function UsageContent() {
             ) : (
               <div className="space-y-2">
                 <div className="text-2xl font-bold">{daysRemaining}</div>
-                <p className="text-sm text-muted-foreground">until cycle reset</p>
+                <p className="text-sm text-muted-foreground">{t("crm.usage.untilReset")}</p>
               </div>
             )}
           </CardContent>
@@ -149,7 +151,7 @@ export function UsageContent() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-medium">Daily Avg</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("crm.usage.dailyAvg")}</CardTitle>
             <BarChart3 className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -160,7 +162,7 @@ export function UsageContent() {
                 <div className="text-2xl font-bold">
                   {formatTokens(Math.round(used / Math.max(30 - daysRemaining, 1)))}
                 </div>
-                <p className="text-sm text-muted-foreground">tokens per day</p>
+                <p className="text-sm text-muted-foreground">{t("crm.usage.tokensPerDay")}</p>
               </div>
             )}
           </CardContent>
@@ -171,16 +173,16 @@ export function UsageContent() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="font-medium">Real-time Sync</p>
+              <p className="font-medium">{t("crm.usage.realtimeSync")}</p>
               <p className="text-muted-foreground">
                 {isConnected
-                  ? "Connected - updates appear automatically"
-                  : "Disconnected - click refresh to update"}
+                  ? t("crm.usage.connected")
+                  : t("crm.usage.disconnected")}
               </p>
             </div>
             <Badge variant={isConnected ? "default" : "secondary"} className="h-8 px-4">
               <div className={`size-2.5 rounded-full mr-2 ${isConnected ? "bg-success" : "bg-muted-foreground"}`} />
-              {isConnected ? "Live" : "Offline"}
+              {isConnected ? t("crm.usage.live") : t("crm.usage.offline")}
             </Badge>
           </div>
         </CardContent>
@@ -190,9 +192,9 @@ export function UsageContent() {
         <Card className="border-destructive">
           <CardContent className="p-6">
             <p className="text-destructive">
-              Failed to load usage data.{" "}
+              {t("crm.usage.failedLoad")}{" "}
               <button onClick={() => refetch()} className="underline">
-                Retry
+                {t("crm.usage.retry")}
               </button>
             </p>
           </CardContent>

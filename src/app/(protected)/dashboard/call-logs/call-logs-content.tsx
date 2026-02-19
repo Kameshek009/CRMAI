@@ -6,10 +6,10 @@ import { ViewControls, type FilterOption, type ActiveFilter, type SortOption } f
 import { DataTable, type Column } from "@/components/frappe/data-table";
 import { StatusBadge } from "@/components/frappe/status-badge";
 import { EntityForm } from "@/components/crm/entity-form";
-import { callLogFields } from "@/lib/crm/field-definitions";
-import { Badge } from "@/components/ui/badge";
+import { getCallLogFields } from "@/lib/crm/field-definitions";
 import { PhoneIncoming, PhoneOutgoing } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -28,38 +28,6 @@ interface CallLogData {
   contacts: { id: string; first_name: string; last_name: string | null } | null;
 }
 
-// ============================================================================
-// Constants
-// ============================================================================
-
-const FILTER_OPTIONS: FilterOption[] = [
-  {
-    field: "status", label: "Status", type: "select",
-    options: [
-      { value: "completed", label: "Completed" },
-      { value: "missed", label: "Missed" },
-      { value: "no_answer", label: "No Answer" },
-      { value: "busy", label: "Busy" },
-      { value: "voicemail", label: "Voicemail" },
-      { value: "cancelled", label: "Cancelled" },
-    ],
-  },
-  {
-    field: "direction", label: "Direction", type: "select",
-    options: [
-      { value: "inbound", label: "Inbound" },
-      { value: "outbound", label: "Outbound" },
-    ],
-  },
-];
-
-const SORT_OPTIONS: SortOption[] = [
-  { field: "created_at", label: "Created" },
-  { field: "duration_seconds", label: "Duration" },
-  { field: "status", label: "Status" },
-  { field: "direction", label: "Direction" },
-];
-
 const PAGE_SIZE = 50;
 
 function formatDuration(seconds: number | null): string {
@@ -74,6 +42,7 @@ function formatDuration(seconds: number | null): string {
 // ============================================================================
 
 export function CallLogsContent() {
+  const { t } = useTranslation();
   const [callLogs, setCallLogs] = useState<CallLogData[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,6 +55,34 @@ export function CallLogsContent() {
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
 
   const [showForm, setShowForm] = useState(false);
+
+  const filterOptions: FilterOption[] = useMemo(() => [
+    {
+      field: "status", label: t("crm.callLogs.fields.status"), type: "select",
+      options: [
+        { value: "completed", label: t("crm.callLogs.statuses.completed") },
+        { value: "missed", label: t("crm.callLogs.statuses.missed") },
+        { value: "no_answer", label: t("crm.callLogs.statuses.noAnswer") },
+        { value: "busy", label: t("crm.callLogs.statuses.busy") },
+        { value: "voicemail", label: t("crm.callLogs.statuses.voicemail") },
+        { value: "cancelled", label: t("crm.callLogs.statuses.cancelled") },
+      ],
+    },
+    {
+      field: "direction", label: t("crm.callLogs.fields.direction"), type: "select",
+      options: [
+        { value: "inbound", label: t("crm.callLogs.directions.inbound") },
+        { value: "outbound", label: t("crm.callLogs.directions.outbound") },
+      ],
+    },
+  ], [t]);
+
+  const sortOptions: SortOption[] = useMemo(() => [
+    { field: "created_at", label: t("crm.callLogs.sort.created") },
+    { field: "duration_seconds", label: t("crm.callLogs.sort.duration") },
+    { field: "status", label: t("crm.callLogs.sort.status") },
+    { field: "direction", label: t("crm.callLogs.sort.direction") },
+  ], [t]);
 
   const fetchCallLogs = useCallback(async () => {
     setIsLoading(true);
@@ -123,22 +120,22 @@ export function CallLogsContent() {
     });
     const json = await res.json();
     if (json.success) {
-      toast.success("Call log created");
+      toast.success(t("crm.callLogs.created"));
       fetchCallLogs();
     } else {
-      toast.error(json.error || "Failed to create call log");
+      toast.error(json.error || t("crm.callLogs.created"));
       throw new Error(json.error);
     }
   };
 
   const handleFilterAdd = useCallback((field: string, value: string) => {
-    const option = FILTER_OPTIONS.find(f => f.field === field);
+    const option = filterOptions.find(f => f.field === field);
     const optLabel = option?.options?.find(o => o.value === value)?.label || value;
     setActiveFilters(prev => {
       const next = prev.filter(f => f.field !== field);
       return [...next, { field, value, label: optLabel }];
     });
-  }, []);
+  }, [filterOptions]);
 
   const handleFilterRemove = useCallback((field: string) => {
     setActiveFilters(prev => prev.filter(f => f.field !== field));
@@ -151,69 +148,75 @@ export function CallLogsContent() {
 
   const columns: Column<CallLogData>[] = useMemo(() => [
     {
-      key: "direction", label: "Direction",
+      key: "direction", label: t("crm.callLogs.fields.direction"),
       render: (c) => (
         <div className="flex items-center gap-2">
           {c.direction === "inbound"
             ? <PhoneIncoming className="h-4 w-4 text-emerald-500" />
             : <PhoneOutgoing className="h-4 w-4 text-blue-500" />
           }
-          <span className="text-sm capitalize">{c.direction}</span>
+          <span className="text-sm">
+            {c.direction === "inbound" ? t("crm.callLogs.directions.inbound") : t("crm.callLogs.directions.outbound")}
+          </span>
         </div>
       ),
     },
     {
-      key: "contacts", label: "Contact",
+      key: "contacts", label: t("crm.callLogs.fields.contact"),
       render: (c) => {
         if (c.contacts) return `${c.contacts.first_name} ${c.contacts.last_name || ""}`.trim();
         return "—";
       },
     },
-    { key: "from_number", label: "From" },
-    { key: "to_number", label: "To" },
+    { key: "from_number", label: t("crm.callLogs.fields.from") },
+    { key: "to_number", label: t("crm.callLogs.fields.to") },
     {
-      key: "duration_seconds", label: "Duration", sortable: true, align: "center",
+      key: "duration_seconds", label: t("crm.callLogs.sort.duration"), sortable: true, align: "center",
       render: (c) => <span className="text-sm">{formatDuration(c.duration_seconds)}</span>,
     },
     {
-      key: "status", label: "Status", sortable: true,
+      key: "status", label: t("crm.callLogs.fields.status"), sortable: true,
       render: (c) => <StatusBadge status={c.status} />,
     },
     {
-      key: "summary", label: "Summary",
+      key: "summary", label: t("crm.callLogs.fields.summary"),
       render: (c) => c.summary ? (
         <span className="text-xs text-muted-foreground line-clamp-1">{c.summary}</span>
       ) : "—",
     },
     {
-      key: "created_at", label: "Date", sortable: true,
-      render: (c) => new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      key: "created_at", label: t("crm.callLogs.fields.date"), sortable: true,
+      render: (c) => new Date(c.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
     },
-  ], []);
+  ], [t]);
+
+  const description = total === 1
+    ? t("crm.callLogs.countOne", { count: total })
+    : t("crm.callLogs.count", { count: total });
 
   return (
     <PageContainer>
-      <PageHeader title="Call Logs" description={`${total} call log${total !== 1 ? "s" : ""}`} />
+      <PageHeader title={t("crm.callLogs.title")} description={description} />
 
       <ViewControls
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search call logs..."
+        searchPlaceholder={t("crm.callLogs.searchPlaceholder")}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-        filterOptions={FILTER_OPTIONS}
+        filterOptions={filterOptions}
         activeFilters={activeFilters}
         onFilterAdd={handleFilterAdd}
         onFilterRemove={handleFilterRemove}
         onFiltersClear={() => setActiveFilters([])}
-        sortOptions={SORT_OPTIONS}
+        sortOptions={sortOptions}
         currentSort={sortBy}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
         totalCount={total}
-        entityName={`call log${total !== 1 ? "s" : ""}`}
+        entityName={t("crm.callLogs.title").toLowerCase()}
         onAdd={() => setShowForm(true)}
-        addLabel="New Call Log"
+        addLabel={t("crm.callLogs.new")}
       />
 
       <DataTable
@@ -227,14 +230,14 @@ export function CallLogsContent() {
         pageSize={PAGE_SIZE}
         totalCount={total}
         onPageChange={setPage}
-        emptyMessage={search || activeFilters.length > 0 ? "No matching call logs" : "No call logs yet"}
+        emptyMessage={search || activeFilters.length > 0 ? t("crm.callLogs.noMatching") : t("crm.callLogs.noYet")}
       />
 
       <EntityForm
         open={showForm}
         onOpenChange={setShowForm}
-        title="New Call Log"
-        fields={callLogFields}
+        title={t("crm.callLogs.new")}
+        fields={getCallLogFields(t)}
         onSubmit={handleCreate}
       />
     </PageContainer>

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Clock } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface ActivityLogEntry {
   id: string;
@@ -38,22 +39,23 @@ function formatEventType(type: string) {
   return type.replace(/_/g, " ");
 }
 
-function timeAgo(dateStr: string) {
-  const now = Date.now();
-  const diff = now - new Date(dateStr).getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
-}
-
 export function ActivityContent() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const timeAgo = useCallback((dateStr: string) => {
+    const now = Date.now();
+    const diff = now - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return t("crm.activity.justNow");
+    if (minutes < 60) return t("crm.activity.mAgo", { count: minutes });
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return t("crm.activity.hAgo", { count: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 30) return t("crm.activity.dAgo", { count: days });
+    return new Date(dateStr).toLocaleDateString();
+  }, [t]);
 
   const fetchLogs = useCallback(async () => {
     setIsLoading(true);
@@ -76,7 +78,7 @@ export function ActivityContent() {
 
   return (
     <PageContainer>
-      <PageHeader title="Activity Log" description="Your account activity and events" />
+      <PageHeader title={t("crm.activity.title")} description={t("crm.activity.description")} />
 
       {isLoading ? (
         <Card>
@@ -96,9 +98,9 @@ export function ActivityContent() {
         <Card>
           <CardContent className="py-12 text-center">
             <Activity className="size-10 text-muted-foreground mx-auto mb-4" />
-            <p className="text-sm font-medium">No activity recorded yet</p>
+            <p className="text-sm font-medium">{t("crm.activity.noYet")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Activity will appear here as you use the platform.
+              {t("crm.activity.noYetDesc")}
             </p>
           </CardContent>
         </Card>

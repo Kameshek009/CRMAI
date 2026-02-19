@@ -12,6 +12,7 @@ import { SequenceBuilder } from "@/components/crm/sequence-builder";
 import { Plus, Mail, Users, Trash2, Layers, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
+import { useTranslation } from "@/lib/i18n";
 
 interface Sequence {
   id: string;
@@ -25,6 +26,7 @@ interface Sequence {
 }
 
 export function SequencesContent() {
+  const { t } = useTranslation();
   const [sequences, setSequences] = useState<Sequence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showBuilder, setShowBuilder] = useState(false);
@@ -65,9 +67,9 @@ export function SequencesContent() {
       setSequences((prev) =>
         prev.map((s) => (s.id === id ? { ...s, is_active: isActive } : s))
       );
-      toast.success(isActive ? "Sequence activated" : "Sequence paused");
+      toast.success(isActive ? t("crm.sequences.activated") : t("crm.sequences.pausedMsg"));
     } else {
-      toast.error(json.error || "Failed to update");
+      toast.error(json.error || t("crm.sequences.failedUpdate"));
     }
   };
 
@@ -76,9 +78,9 @@ export function SequencesContent() {
     const json = await res.json();
     if (json.success) {
       setSequences((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Sequence deleted");
+      toast.success(t("crm.sequences.deletedMsg"));
     } else {
-      toast.error(json.error || "Failed to delete");
+      toast.error(json.error || t("crm.sequences.failedDelete"));
     }
   };
 
@@ -90,7 +92,7 @@ export function SequencesContent() {
   if (isLoading) {
     return (
       <PageContainer>
-        <PageHeader title="Email Sequences" />
+        <PageHeader title={t("crm.sequences.title")} />
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-24 w-full rounded-lg" />
@@ -103,8 +105,8 @@ export function SequencesContent() {
   return (
     <PageContainer>
       <PageHeader
-        title="Email Sequences"
-        description="Automate email campaigns with timed follow-ups"
+        title={t("crm.sequences.title")}
+        description={t("crm.sequences.description")}
       >
         <Button
           size="sm"
@@ -116,16 +118,16 @@ export function SequencesContent() {
           ) : (
             <Plus className="size-3.5 mr-1.5" />
           )}
-          {atSequenceLimit ? "Upgrade to Add" : "New Sequence"}
+          {atSequenceLimit ? t("crm.sequences.upgradeToAdd") : t("crm.sequences.new")}
         </Button>
       </PageHeader>
 
       {sequences.length === 0 ? (
         <EmptyState
           icon={Mail}
-          title="No sequences yet"
-          description="Create your first email sequence to automate follow-ups."
-          actionLabel="Create Sequence"
+          title={t("crm.sequences.noYet")}
+          description={t("crm.sequences.noYetDesc")}
+          actionLabel={t("crm.sequences.create")}
           onAction={handleAddClick}
         />
       ) : (
@@ -142,17 +144,17 @@ export function SequencesContent() {
                       <div className="flex items-center gap-2">
                         <h3 className="text-sm font-semibold truncate">{seq.name}</h3>
                         <Badge variant={seq.is_active ? "default" : "secondary"} className="text-[10px] shrink-0">
-                          {seq.is_active ? "Active" : "Paused"}
+                          {seq.is_active ? t("crm.sequences.active") : t("crm.sequences.pausedLabel")}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Layers className="size-3" />
-                          {seq.step_count} steps
+                          {t("crm.sequences.steps", { count: seq.step_count })}
                         </span>
                         <span className="flex items-center gap-1">
                           <Users className="size-3" />
-                          {seq.active_enrollments} active / {seq.total_enrollments} total
+                          {t("crm.sequences.activeOf", { active: seq.active_enrollments, total: seq.total_enrollments })}
                         </span>
                         <span className="capitalize">{seq.trigger_type.replace("_", " ")}</span>
                       </div>

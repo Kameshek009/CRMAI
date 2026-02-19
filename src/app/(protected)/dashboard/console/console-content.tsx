@@ -2,8 +2,10 @@
 
 import { PageContainer, Card } from "@/components/dashboard/page-container";
 import { Terminal } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function ConsoleContent() {
+  const { t } = useTranslation();
   return (
     <PageContainer>
       <Card>
@@ -12,13 +14,13 @@ export function ConsoleContent() {
             <Terminal className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
           </div>
           <div>
-            <p className="text-sm font-medium">Console</p>
+            <p className="text-sm font-medium">{t("crm.console.title")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Connect your desktop agent to use the console
+              {t("crm.console.description")}
             </p>
           </div>
           <span className="inline-block text-xs font-medium px-2 py-1 rounded bg-warning/10 text-warning">
-            Beta
+            {t("crm.console.beta")}
           </span>
         </div>
       </Card>

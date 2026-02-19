@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MonitorSmartphone, Clock, Zap } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface Session {
   id: string;
@@ -39,22 +40,23 @@ function formatTokens(count: number) {
   return count.toString();
 }
 
-function timeAgo(dateStr: string) {
-  const now = Date.now();
-  const diff = now - new Date(dateStr).getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
-}
-
 export function SessionsContent() {
+  const { t } = useTranslation();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const timeAgo = useCallback((dateStr: string) => {
+    const now = Date.now();
+    const diff = now - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return t("crm.activity.justNow");
+    if (minutes < 60) return t("crm.activity.mAgo", { count: minutes });
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return t("crm.activity.hAgo", { count: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 30) return t("crm.activity.dAgo", { count: days });
+    return new Date(dateStr).toLocaleDateString();
+  }, [t]);
 
   const fetchSessions = useCallback(async () => {
     setIsLoading(true);
@@ -77,7 +79,7 @@ export function SessionsContent() {
 
   return (
     <PageContainer>
-      <PageHeader title="Sessions" description="Your AI agent session history" />
+      <PageHeader title={t("crm.sessions.title")} description={t("crm.sessions.description")} />
 
       {isLoading ? (
         <Card>
@@ -98,9 +100,9 @@ export function SessionsContent() {
         <Card>
           <CardContent className="py-12 text-center">
             <MonitorSmartphone className="size-10 text-muted-foreground mx-auto mb-4" />
-            <p className="text-sm font-medium">No sessions recorded yet</p>
+            <p className="text-sm font-medium">{t("crm.sessions.noYet")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Sessions will appear here when you use the AI agent.
+              {t("crm.sessions.noYetDesc")}
             </p>
           </CardContent>
         </Card>
@@ -118,7 +120,7 @@ export function SessionsContent() {
                   </Badge>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate">
-                      {session.summary || "Untitled session"}
+                      {session.summary || t("crm.sessions.untitled")}
                     </p>
                     <div className="flex items-center gap-4 mt-1">
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -127,7 +129,7 @@ export function SessionsContent() {
                       </span>
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Zap className="size-3" />
-                        {formatTokens(session.tokens_used)} tokens
+                        {formatTokens(session.tokens_used)} {t("crm.sessions.tokens")}
                       </span>
                     </div>
                   </div>
