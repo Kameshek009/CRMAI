@@ -26,7 +26,6 @@ interface CallLogData {
   summary: string | null;
   created_at: string;
   contacts: { id: string; first_name: string; last_name: string | null } | null;
-  leads: { id: string; first_name: string; last_name: string | null } | null;
 }
 
 // ============================================================================
@@ -164,10 +163,9 @@ export function CallLogsContent() {
       ),
     },
     {
-      key: "contacts", label: "Contact / Lead",
+      key: "contacts", label: "Contact",
       render: (c) => {
         if (c.contacts) return `${c.contacts.first_name} ${c.contacts.last_name || ""}`.trim();
-        if (c.leads) return `${c.leads.first_name} ${c.leads.last_name || ""}`.trim();
         return "—";
       },
     },

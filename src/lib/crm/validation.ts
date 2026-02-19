@@ -221,7 +221,6 @@ export const bulkCompaniesSchema = z.discriminatedUnion("action", [
 
 export const createCallLogSchema = z.object({
   contact_id: z.string().uuid().optional().nullable(),
-  lead_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   direction: z.enum(["inbound", "outbound"]).optional(),
   status: z.enum(["completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
@@ -234,7 +233,6 @@ export const createCallLogSchema = z.object({
 
 export const updateCallLogSchema = z.object({
   contact_id: z.string().uuid().optional().nullable(),
-  lead_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   direction: z.enum(["inbound", "outbound"]).optional(),
   status: z.enum(["completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
@@ -283,7 +281,6 @@ export const updateSavedViewSchema = z.object({
 
 export const createEmailSchema = z.object({
   contact_id: z.string().uuid().optional().nullable(),
-  lead_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   subject: z.string().max(500).optional(),
   body_html: z.string().max(100000).optional(),

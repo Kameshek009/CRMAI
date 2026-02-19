@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
     const { limit, offset } = parsePagination(searchParams);
     const contactId = searchParams.get("contact_id");
     const dealId = searchParams.get("deal_id");
-    const leadId = searchParams.get("lead_id");
 
     const supabase = createSupabaseAdmin();
 
@@ -31,7 +30,6 @@ export async function GET(request: NextRequest) {
 
     if (contactId) query = query.eq("contact_id", contactId);
     if (dealId) query = query.eq("deal_id", dealId);
-    if (leadId) query = query.eq("lead_id", leadId);
 
     const { data, error: dbError, count } = await query;
 
@@ -83,7 +81,6 @@ export async function POST(request: NextRequest) {
         account_id: context.accountId,
         team_id: context.teamId,
         contact_id: parsed.data.contact_id || null,
-        lead_id: parsed.data.lead_id || null,
         deal_id: parsed.data.deal_id || null,
         type: "email",
         title: `Email: ${parsed.data.subject || "(no subject)"}`,
@@ -95,15 +92,12 @@ export async function POST(request: NextRequest) {
     if (parsed.data.direction === "inbound") {
       try {
         const contactId = parsed.data.contact_id;
-        const leadId = parsed.data.lead_id;
-        if (contactId || leadId) {
-          let exitQuery = supabase
+        if (contactId) {
+          await supabase
             .from("email_sequence_enrollments")
             .update({ status: "exited_reply", updated_at: new Date().toISOString() })
-            .eq("status", "active");
-          if (contactId) exitQuery = exitQuery.eq("contact_id", contactId);
-          else if (leadId) exitQuery = exitQuery.eq("lead_id", leadId);
-          await exitQuery;
+            .eq("status", "active")
+            .eq("contact_id", contactId);
         }
       } catch (e) { logger.warn("Emails", "Failed to exit sequence enrollments", e); }
     }
