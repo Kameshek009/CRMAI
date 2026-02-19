@@ -48,6 +48,8 @@ import { cn } from "@/lib/utils";
 import { useAccount } from "@/contexts/account-context";
 import { useWorkspace } from "@/contexts/team-context";
 import { UpgradeModal, useUpgradeModal } from "@/components/billing";
+import { TeamCreateDialog } from "@/components/team/team-create-dialog";
+import { JoinTeamDialog } from "@/components/team/join-team-dialog";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
 import { ChartWidget } from "@/components/dashboard/widgets/chart-widget";
 import { ListWidget } from "@/components/dashboard/widgets/list-widget";
@@ -191,8 +193,11 @@ function getGreeting(): { text: string; icon: LucideIcon } {
 
 export function DashboardContent({ userName }: DashboardContentProps) {
   const { account, usage, isLoading: accountLoading } = useAccount();
-  const { currentWorkspace, isLoading: workspaceLoading, can } = useWorkspace();
+  const { currentWorkspace, isLoading: workspaceLoading, can, refetch } = useWorkspace();
   const { isOpen, modalProps, closeUpgradeModal } = useUpgradeModal();
+
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
 
   const [crmStats, setCrmStats] = useState<CrmStats | null>(null);
   const [insights, setInsights] = useState<AIInsight[]>([]);
@@ -276,20 +281,27 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </p>
           </div>
           <div className="flex items-center justify-center gap-3">
-            <Button asChild>
-              <Link href="/dashboard/account">
-                <Plus className="w-4 h-4 mr-2" />
-                Создать команду
-              </Link>
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Создать команду
             </Button>
-            <Button variant="outline" asChild>
-              <Link href="/dashboard/account">
-                <Users className="w-4 h-4 mr-2" />
-                Присоединиться
-              </Link>
+            <Button variant="outline" onClick={() => setJoinDialogOpen(true)}>
+              <Users className="w-4 h-4 mr-2" />
+              Присоединиться
             </Button>
           </div>
         </div>
+
+        <TeamCreateDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onCreated={() => refetch()}
+        />
+        <JoinTeamDialog
+          open={joinDialogOpen}
+          onOpenChange={setJoinDialogOpen}
+          onJoined={() => refetch()}
+        />
       </div>
     );
   }
