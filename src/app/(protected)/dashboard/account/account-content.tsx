@@ -2,13 +2,16 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { User, Palette, Globe, CreditCard, Users, AlertTriangle } from "lucide-react";
+import { User, Palette, Globe, CreditCard, Users, Shield, Link2, AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
 import { LanguageSection } from "./sections/language-section";
 import { BillingSection } from "./sections/billing-section";
-import { WorkspaceSection } from "./sections/workspace-section";
+import { TeamSection } from "./sections/team-section";
+import { MembersSection } from "./sections/members-section";
+import { RolesSection } from "./sections/roles-section";
+import { ConnectionsSection } from "./sections/connections-section";
 import { DangerSection } from "./sections/danger-section";
 
 interface AccountContentProps {
@@ -17,12 +20,21 @@ interface AccountContentProps {
   imageUrl: string;
 }
 
-const NAV_ITEMS = [
+const PERSONAL_NAV = [
   { id: "profile", icon: User },
   { id: "appearance", icon: Palette },
   { id: "language", icon: Globe },
+] as const;
+
+const TEAM_NAV = [
+  { id: "team", icon: Users },
+  { id: "members", icon: Users },
+  { id: "roles", icon: Shield },
+  { id: "connections", icon: Link2 },
+] as const;
+
+const BILLING_NAV = [
   { id: "billing", icon: CreditCard },
-  { id: "workspace", icon: Users },
 ] as const;
 
 export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
@@ -44,7 +56,8 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             variant="line"
             className="mb-6 flex overflow-x-auto md:mb-0 md:w-52 md:shrink-0 md:flex-col md:overflow-x-visible md:bg-transparent"
           >
-            {NAV_ITEMS.map(({ id, icon: Icon }) => (
+            {/* Personal */}
+            {PERSONAL_NAV.map(({ id, icon: Icon }) => (
               <TabsTrigger
                 key={id}
                 value={id}
@@ -54,7 +67,38 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
                 {t(`settings.nav.${id}`)}
               </TabsTrigger>
             ))}
+
             <Separator className="my-2 hidden md:block" />
+
+            {/* Team */}
+            {TEAM_NAV.map(({ id, icon: Icon }) => (
+              <TabsTrigger
+                key={id}
+                value={id}
+                className="justify-start gap-2 px-3 py-2 text-sm"
+              >
+                <Icon className="size-4" />
+                {t(`settings.nav.${id}`)}
+              </TabsTrigger>
+            ))}
+
+            <Separator className="my-2 hidden md:block" />
+
+            {/* Billing */}
+            {BILLING_NAV.map(({ id, icon: Icon }) => (
+              <TabsTrigger
+                key={id}
+                value={id}
+                className="justify-start gap-2 px-3 py-2 text-sm"
+              >
+                <Icon className="size-4" />
+                {t(`settings.nav.${id}`)}
+              </TabsTrigger>
+            ))}
+
+            <Separator className="my-2 hidden md:block" />
+
+            {/* Danger */}
             <TabsTrigger
               value="danger"
               className="justify-start gap-2 px-3 py-2 text-sm text-destructive data-[state=active]:text-destructive"
@@ -75,11 +119,20 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             <TabsContent value="language">
               <LanguageSection />
             </TabsContent>
+            <TabsContent value="team">
+              <TeamSection />
+            </TabsContent>
+            <TabsContent value="members">
+              <MembersSection />
+            </TabsContent>
+            <TabsContent value="roles">
+              <RolesSection />
+            </TabsContent>
+            <TabsContent value="connections">
+              <ConnectionsSection />
+            </TabsContent>
             <TabsContent value="billing">
               <BillingSection />
-            </TabsContent>
-            <TabsContent value="workspace">
-              <WorkspaceSection />
             </TabsContent>
             <TabsContent value="danger">
               <DangerSection />

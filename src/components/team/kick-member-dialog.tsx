@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from "@/lib/i18n";
 
 interface KickMemberDialogProps {
   open: boolean;
@@ -26,24 +27,25 @@ export function KickMemberDialog({
   onConfirm,
   isLoading,
 }: KickMemberDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Remove team member</AlertDialogTitle>
+          <AlertDialogTitle>{t("team.kickDialog.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove <strong>{memberName}</strong> from the team?
-            They will lose access to all team data immediately.
+            {t("team.kickDialog.description", { name: memberName })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isLoading ? "Removing..." : "Remove"}
+            {isLoading ? t("team.kickDialog.removing") : t("team.kickDialog.remove")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

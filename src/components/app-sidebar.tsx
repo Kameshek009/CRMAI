@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 
 import { useWorkspace } from "@/contexts/team-context";
+import { useTranslation } from "@/lib/i18n";
 import { Logo } from "@/components/ui/logo";
 import { NexusBrandSidebar } from "@/components/nexus-brand";
 import { TeamSwitcher } from "@/components/team/team-switcher";
@@ -56,72 +57,56 @@ import { cn } from "@/lib/utils";
 
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
   permission?: string;
 }
 
 interface NavGroup {
-  label?: string;
+  labelKey?: string;
   items: NavItem[];
 }
 
 const crmGroup: NavGroup = {
-  label: "CRM",
+  labelKey: "nav.groups.crm",
   items: [
-    { label: "Leads", href: "/dashboard/leads", icon: Zap, permission: "leads.read" },
-    { label: "Contacts", href: "/dashboard/contacts", icon: Users, permission: "contacts.read" },
-    { label: "Deals", href: "/dashboard/deals", icon: Handshake, permission: "deals.read" },
-    { label: "Organizations", href: "/dashboard/companies", icon: Building2, permission: "companies.read" },
-    { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare, permission: "tasks.read" },
-    { label: "Notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
-    { label: "Call Logs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
+    { labelKey: "nav.items.leads", href: "/dashboard/leads", icon: Zap, permission: "leads.read" },
+    { labelKey: "nav.items.contacts", href: "/dashboard/contacts", icon: Users, permission: "contacts.read" },
+    { labelKey: "nav.items.deals", href: "/dashboard/deals", icon: Handshake, permission: "deals.read" },
+    { labelKey: "nav.items.organizations", href: "/dashboard/companies", icon: Building2, permission: "companies.read" },
+    { labelKey: "nav.items.tasks", href: "/dashboard/tasks", icon: CheckSquare, permission: "tasks.read" },
+    { labelKey: "nav.items.notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
+    { labelKey: "nav.items.callLogs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
   ],
 };
 
 const toolsGroup: NavGroup = {
-  label: "Tools",
+  labelKey: "nav.groups.tools",
   items: [
-    { label: "Pipeline", href: "/dashboard/pipeline", icon: Kanban, permission: "pipeline.read" },
-    { label: "Automations", href: "/dashboard/automations", icon: Zap },
-    { label: "Sequences", href: "/dashboard/sequences", icon: Mail },
-    { label: "Analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
-    { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
-  ],
-};
-
-const workspaceGroup: NavGroup = {
-  label: "Workspace",
-  items: [
-    { label: "Workspace", href: "/dashboard/team", icon: Users },
-    { label: "Settings", href: "/dashboard/team/settings", icon: Settings, permission: "team_settings.manage" },
+    { labelKey: "nav.items.pipeline", href: "/dashboard/pipeline", icon: Kanban, permission: "pipeline.read" },
+    { labelKey: "nav.items.automations", href: "/dashboard/automations", icon: Zap },
+    { labelKey: "nav.items.sequences", href: "/dashboard/sequences", icon: Mail },
+    { labelKey: "nav.items.analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
+    { labelKey: "nav.items.aiChat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
   ],
 };
 
 const accountGroup: NavGroup = {
   items: [
-    { label: "Account", href: "/dashboard/account", icon: Settings },
-    { label: "Usage", href: "/dashboard/usage", icon: BarChart3 },
-    { label: "Upgrade", href: "/dashboard/upgrade", icon: Sparkles },
-    { label: "Billing", href: "/dashboard/account/billing", icon: CreditCard },
+    { labelKey: "nav.items.settings", href: "/dashboard/account", icon: Settings },
+    { labelKey: "nav.items.usage", href: "/dashboard/usage", icon: BarChart3 },
+    { labelKey: "nav.items.upgrade", href: "/dashboard/upgrade", icon: Sparkles },
+    { labelKey: "nav.items.billing", href: "/dashboard/account/billing", icon: CreditCard },
   ],
 };
 
 const navGroups: NavGroup[] = [
-  { items: [{ label: "Overview", href: "/dashboard", icon: LayoutGrid }] },
+  { items: [{ labelKey: "nav.overview", href: "/dashboard", icon: LayoutGrid }] },
   crmGroup,
   toolsGroup,
-  workspaceGroup,
   accountGroup,
 ];
-
-const TIER_DISPLAY_NAMES: Record<string, string> = {
-  free: "Free",
-  pro: "Pro",
-  max: "Max",
-  enterprise: "Enterprise",
-};
 
 const TIER_COLORS: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
@@ -135,11 +120,12 @@ function NavUser() {
   const { signOut } = useClerk();
   const { currentWorkspace } = useWorkspace();
   const { isMobile } = useSidebar();
+  const { t } = useTranslation();
 
   if (!user) return null;
 
   const wsTier = currentWorkspace?.tier || "free";
-  const tierName = TIER_DISPLAY_NAMES[wsTier] || "Free";
+  const tierName = t(`nav.tier.${wsTier}`);
   const tierColor = TIER_COLORS[wsTier] || TIER_COLORS.free;
   const displayName = user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "User";
   const email = user.primaryEmailAddress?.emailAddress || "";
@@ -192,13 +178,13 @@ function NavUser() {
             <DropdownMenuItem asChild>
               <Link href="/dashboard/account" className="flex items-center gap-2">
                 <Settings className="size-4" />
-                Settings
+                {t("nav.user.settings")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/dashboard/account/billing" className="flex items-center gap-2">
                 <CreditCard className="size-4" />
-                Billing
+                {t("nav.user.billing")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -207,7 +193,7 @@ function NavUser() {
               className="text-red-600 focus:text-red-600 focus:bg-red-500/10"
             >
               <LogOut className="size-4" />
-              Sign out
+              {t("nav.user.signOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -219,6 +205,7 @@ function NavUser() {
 export function AppSidebar() {
   const pathname = usePathname();
   const { can } = useWorkspace();
+  const { t } = useTranslation();
 
   return (
     <Sidebar collapsible="icon">
@@ -233,7 +220,7 @@ export function AppSidebar() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <NexusBrandSidebar />
-                  <span className="truncate text-xs text-muted-foreground">Dashboard</span>
+                  <span className="truncate text-xs text-muted-foreground">{t("nav.dashboard")}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -248,9 +235,9 @@ export function AppSidebar() {
       <SidebarContent>
         {navGroups.map((group, groupIndex) => (
           <SidebarGroup key={groupIndex}>
-            {group.label && (
+            {group.labelKey && (
               <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                {group.label}
+                {t(group.labelKey)}
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
@@ -259,15 +246,16 @@ export function AppSidebar() {
                   .filter((item) => !item.permission || can(item.permission))
                   .map((item) => {
                     const Icon = item.icon;
+                    const label = t(item.labelKey);
                     const isActive = pathname === item.href ||
                       (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
                     return (
                       <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                        <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
                           <Link href={item.href}>
                             <Icon className={cn(isActive && "text-[var(--accent-blue)]")} />
-                            <span className={cn(isActive && "font-semibold")}>{item.label}</span>
+                            <span className={cn(isActive && "font-semibold")}>{label}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

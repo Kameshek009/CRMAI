@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useAgentStatus } from '@/hooks/use-agent-status';
+import { useTranslation } from '@/lib/i18n';
 import type { Chat, Message, VisionBoard, Json } from '@/lib/supabase/types';
 
 import { ChatHeader } from './components/chat-header';
@@ -30,7 +30,7 @@ export default function ChatDetailPage() {
   const chatId = params.id as string;
   const { account } = useAccount();
   const { user } = useUser();
-  const { isOnline: isAgentOnline } = useAgentStatus();
+  const { t } = useTranslation();
 
   const [chat, setChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -92,7 +92,7 @@ export default function ChatDetailPage() {
       }
     } catch (err) {
       console.error('Error fetching chat:', err);
-      toast.error('Failed to load chat');
+      toast.error(t('chat.failedToLoad'));
     } finally {
       setIsLoading(false);
     }
@@ -180,7 +180,7 @@ export default function ChatDetailPage() {
     // Build content with attachment note for AI
     let messageContent = content;
     if (attachment) {
-      const fileNote = `[Attached file: ${attachment.filename}]`;
+      const fileNote = `[${t('chat.attachedFile')} ${attachment.filename}]`;
       messageContent = content ? `${content}\n${fileNote}` : fileNote;
     }
 
@@ -234,7 +234,7 @@ export default function ChatDetailPage() {
       }
     } catch (err) {
       console.error('Error sending message:', err);
-      toast.error('Failed to send message');
+      toast.error(t('chat.failedToSend'));
       setMessages((prev) => prev.filter((m) => m.local_id !== localId));
       setIsSending(false);
       return;
@@ -275,10 +275,10 @@ export default function ChatDetailPage() {
           setRateLimitResetsAt(null);
         } else if (aiJson.reason === 'weekly_cap_exceeded' || aiJson.reason === 'monthly_cap_exceeded') {
           if (aiJson.resetsAt) setRateLimitResetsAt(aiJson.resetsAt);
-          aiContent = 'Daily token limit reached. The limit will reset automatically — see the timer below.';
+          aiContent = t('chat.dailyLimitMessage');
         } else {
           console.error('[Chat AI] Error response:', aiJson);
-          aiContent = aiJson.error || 'Sorry, something went wrong. Please try again.';
+          aiContent = aiJson.error || t('chat.aiError');
         }
 
         // Save AI response
@@ -377,8 +377,8 @@ export default function ChatDetailPage() {
       } catch (err) {
         console.error('[Chat AI] Error:', err);
         const errorContent = err instanceof DOMException && err.name === 'AbortError'
-          ? 'AI request timed out. Please try again.'
-          : 'Sorry, something went wrong. Please try again.';
+          ? t('chat.aiTimeout')
+          : t('chat.aiError');
 
         // Show error as AI message so user sees feedback
         const errorMsg: Message = {
@@ -416,7 +416,7 @@ export default function ChatDetailPage() {
           (a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime()
         ));
       }
-      toast.error('Failed to delete message');
+      toast.error(t('common.error'));
     }
   }, [chatId, messages]);
 
@@ -426,11 +426,11 @@ export default function ChatDetailPage() {
       const response = await fetch(`/api/chats/${chatId}`, { method: 'DELETE' });
       const result = await response.json();
       if (!result.success) throw new Error(result.error || 'Failed to delete chat');
-      toast.success('Chat deleted');
+      toast.success(t('common.delete'));
       router.push('/dashboard/chats');
     } catch (err) {
       console.error('Error deleting chat:', err);
-      toast.error('Failed to delete chat');
+      toast.error(t('common.error'));
     }
   }, [chatId, router]);
 
@@ -467,12 +467,12 @@ export default function ChatDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 sm:p-6">
         <AlertCircle className="h-10 w-10 text-muted-foreground mb-4" />
-        <h2 className="text-lg sm:text-xl font-semibold mb-2">Chat not found</h2>
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">{t('chat.notFound')}</h2>
         <p className="text-sm sm:text-base text-muted-foreground mb-4 text-center px-4">
-          This chat may have been deleted or you don&apos;t have access.
+          {t('chat.notFoundDescription')}
         </p>
         <Button onClick={() => router.push('/dashboard/chats')} className="h-10">
-          Back to Chats
+          {t('chat.backToChats')}
         </Button>
       </div>
     );
@@ -558,7 +558,6 @@ export default function ChatDetailPage() {
         chat={chat}
         chatId={chatId}
         isSending={isSending}
-        isAgentOnline={isAgentOnline}
         rateLimitResetsAt={rateLimitResetsAt}
         onSend={handleSend}
       />

@@ -1,0 +1,22 @@
+{
+  "fileTooLarge": "File too large. Maximum 10MB",
+  "failedUpload": "Failed to upload file",
+  "dailyLimitReached": "Daily limit reached. Resets in",
+  "upgrade": "Upgrade",
+  "placeholder": {
+    "withAttachment": "Add a message (optional)...",
+    "chat": "Message AI assistant...",
+    "agent": "Describe a task for the agent...",
+    "default": "Send a message..."
+  },
+  "disclaimer": "AI can make mistakes. Verify important information.",
+  "notFound": "Chat not found",
+  "notFoundDescription": "This chat may have been deleted or you don't have access.",
+  "backToChats": "Back to Chats",
+  "failedToLoad": "Failed to load chat",
+  "failedToSend": "Failed to send message",
+  "attachedFile": "Attached file:",
+  "dailyLimitMessage": "Daily token limit reached. The limit will reset automatically — see the timer below.",
+  "aiError": "Sorry, something went wrong. Please try again.",
+  "aiTimeout": "AI request timed out. Please try again."
+}

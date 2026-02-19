@@ -1,0 +1,96 @@
+{
+  "overview": "Обзор",
+  "dashboard": "Панель",
+  "groups": {
+    "crm": "CRM",
+    "tools": "Инструменты",
+    "workspace": "Команда"
+  },
+  "items": {
+    "leads": "Лиды",
+    "contacts": "Контакты",
+    "deals": "Сделки",
+    "organizations": "Организации",
+    "tasks": "Задачи",
+    "notes": "Заметки",
+    "callLogs": "Звонки",
+    "pipeline": "Воронка",
+    "automations": "Автоматизации",
+    "sequences": "Рассылки",
+    "analytics": "Аналитика",
+    "aiChat": "ИИ Чат",
+    "workspace": "Команда",
+    "settings": "Настройки",
+    "account": "Аккаунт",
+    "usage": "Использование",
+    "upgrade": "Улучшить",
+    "billing": "Оплата",
+    "members": "Участники",
+    "roles": "Роли",
+    "connections": "Подключения",
+    "activity": "Активность",
+    "sessions": "Сессии",
+    "console": "Консоль"
+  },
+  "breadcrumb": {
+    "home": "Главная",
+    "detail": "Детали"
+  },
+  "user": {
+    "settings": "Настройки",
+    "billing": "Оплата",
+    "signOut": "Выйти"
+  },
+  "tier": {
+    "free": "Free",
+    "pro": "Pro",
+    "max": "Max",
+    "enterprise": "Enterprise"
+  },
+  "search": {
+    "placeholder": "Введите команду или поиск...",
+    "buttonLabel": "Поиск...",
+    "noResults": "Нет результатов для",
+    "groups": {
+      "results": "Результаты поиска",
+      "actions": "Действия",
+      "goTo": "Перейти"
+    },
+    "commands": {
+      "createContact": "Создать контакт",
+      "createDeal": "Создать сделку",
+      "createLead": "Создать лид",
+      "createTask": "Создать задачу"
+    },
+    "pages": {
+      "overview": "Обзор",
+      "overviewSub": "Главная панель",
+      "contacts": "Контакты",
+      "contactsSub": "Все контакты",
+      "deals": "Сделки",
+      "dealsSub": "Все сделки",
+      "leads": "Лиды",
+      "leadsSub": "Все лиды",
+      "organizations": "Организации",
+      "organizationsSub": "Все организации",
+      "pipeline": "Воронка",
+      "pipelineSub": "Канбан вид",
+      "tasks": "Задачи",
+      "tasksSub": "Все задачи",
+      "notes": "Заметки",
+      "notesSub": "Все заметки",
+      "callLogs": "Звонки",
+      "analytics": "Аналитика",
+      "analyticsSub": "Отчёты и аналитика",
+      "aiChat": "ИИ Чат",
+      "aiChatSub": "Чат с ИИ",
+      "settings": "Настройки",
+      "settingsSub": "Настройки аккаунта"
+    },
+    "hints": {
+      "navigate": "Навигация",
+      "open": "Открыть",
+      "close": "Закрыть"
+    }
+  }
+}

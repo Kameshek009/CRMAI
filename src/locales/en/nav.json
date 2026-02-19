@@ -1,0 +1,96 @@
+{
+  "overview": "Overview",
+  "dashboard": "Dashboard",
+  "groups": {
+    "crm": "CRM",
+    "tools": "Tools",
+    "workspace": "Workspace"
+  },
+  "items": {
+    "leads": "Leads",
+    "contacts": "Contacts",
+    "deals": "Deals",
+    "organizations": "Organizations",
+    "tasks": "Tasks",
+    "notes": "Notes",
+    "callLogs": "Call Logs",
+    "pipeline": "Pipeline",
+    "automations": "Automations",
+    "sequences": "Sequences",
+    "analytics": "Analytics",
+    "aiChat": "AI Chat",
+    "workspace": "Workspace",
+    "settings": "Settings",
+    "account": "Account",
+    "usage": "Usage",
+    "upgrade": "Upgrade",
+    "billing": "Billing",
+    "members": "Members",
+    "roles": "Roles",
+    "connections": "Connections",
+    "activity": "Activity",
+    "sessions": "Sessions",
+    "console": "Console"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "detail": "Detail"
+  },
+  "user": {
+    "settings": "Settings",
+    "billing": "Billing",
+    "signOut": "Sign out"
+  },
+  "tier": {
+    "free": "Free",
+    "pro": "Pro",
+    "max": "Max",
+    "enterprise": "Enterprise"
+  },
+  "search": {
+    "placeholder": "Type a command or search...",
+    "buttonLabel": "Search...",
+    "noResults": "No results for",
+    "groups": {
+      "results": "Search Results",
+      "actions": "Actions",
+      "goTo": "Go to"
+    },
+    "commands": {
+      "createContact": "Create Contact",
+      "createDeal": "Create Deal",
+      "createLead": "Create Lead",
+      "createTask": "Create Task"
+    },
+    "pages": {
+      "overview": "Overview",
+      "overviewSub": "Dashboard home",
+      "contacts": "Contacts",
+      "contactsSub": "All contacts",
+      "deals": "Deals",
+      "dealsSub": "All deals",
+      "leads": "Leads",
+      "leadsSub": "All leads",
+      "organizations": "Organizations",
+      "organizationsSub": "All organizations",
+      "pipeline": "Pipeline",
+      "pipelineSub": "Kanban view",
+      "tasks": "Tasks",
+      "tasksSub": "All tasks",
+      "notes": "Notes",
+      "notesSub": "All notes",
+      "callLogs": "Call Logs",
+      "analytics": "Analytics",
+      "analyticsSub": "Reports & insights",
+      "aiChat": "AI Chat",
+      "aiChatSub": "Chat with AI",
+      "settings": "Settings",
+      "settingsSub": "Account settings"
+    },
+    "hints": {
+      "navigate": "Navigate",
+      "open": "Open",
+      "close": "Close"
+    }
+  }
+}

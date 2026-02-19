@@ -5,33 +5,34 @@ import Link from "next/link";
 import { ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/stores/search-store";
+import { useTranslation } from "@/lib/i18n";
 
-const segmentLabels: Record<string, string> = {
-  dashboard: "Home",
-  contacts: "Contacts",
-  companies: "Organizations",
-  pipeline: "Pipeline",
-  tasks: "Tasks",
-  chats: "AI Chat",
-  analytics: "Analytics",
-  team: "Team",
-  account: "Account",
-  usage: "Usage",
-  upgrade: "Upgrade",
-  activity: "Activity",
-  sessions: "Sessions",
-  console: "Console",
-  billing: "Billing",
-  members: "Members",
-  roles: "Roles",
-  settings: "Settings",
-  connections: "Connections",
-  deals: "Deals",
-  leads: "Leads",
-  "call-logs": "Call Logs",
-  notes: "Notes",
-  automations: "Automations",
-  sequences: "Sequences",
+const segmentKeys: Record<string, string> = {
+  dashboard: "nav.breadcrumb.home",
+  contacts: "nav.items.contacts",
+  companies: "nav.items.organizations",
+  pipeline: "nav.items.pipeline",
+  tasks: "nav.items.tasks",
+  chats: "nav.items.aiChat",
+  analytics: "nav.items.analytics",
+  team: "nav.groups.workspace",
+  account: "nav.items.account",
+  usage: "nav.items.usage",
+  upgrade: "nav.items.upgrade",
+  activity: "nav.items.activity",
+  sessions: "nav.items.sessions",
+  console: "nav.items.console",
+  billing: "nav.items.billing",
+  members: "nav.items.members",
+  roles: "nav.items.roles",
+  settings: "nav.items.settings",
+  connections: "nav.items.connections",
+  deals: "nav.items.deals",
+  leads: "nav.items.leads",
+  "call-logs": "nav.items.callLogs",
+  notes: "nav.items.notes",
+  automations: "nav.items.automations",
+  sequences: "nav.items.sequences",
 };
 
 function isUUID(s: string) {
@@ -41,6 +42,7 @@ function isUUID(s: string) {
 export function DashboardHeader() {
   const pathname = usePathname();
   const setOpen = useSearchStore((s) => s.setOpen);
+  const { t } = useTranslation();
 
   const segments = pathname.split("/").filter(Boolean);
   // Build breadcrumb items
@@ -48,7 +50,8 @@ export function DashboardHeader() {
   let path = "";
   for (const seg of segments) {
     path += `/${seg}`;
-    const label = isUUID(seg) ? "Detail" : segmentLabels[seg] || seg;
+    const key = segmentKeys[seg];
+    const label = isUUID(seg) ? t("nav.breadcrumb.detail") : key ? t(key) : seg;
     crumbs.push({ label, href: path });
   }
 
@@ -81,7 +84,7 @@ export function DashboardHeader() {
         onClick={() => setOpen(true)}
       >
         <Search className="size-3.5" />
-        <span className="hidden sm:inline">Search...</span>
+        <span className="hidden sm:inline">{t("nav.search.buttonLabel")}</span>
         <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-2 font-mono text-xs font-medium">
           <span className="text-xs">⌘</span>K
         </kbd>

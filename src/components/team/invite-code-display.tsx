@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 interface InviteCodeDisplayProps {
   code: string;
@@ -13,13 +14,14 @@ interface InviteCodeDisplayProps {
 }
 
 export function InviteCodeDisplay({ code, teamId, canRegenerate = false, onRegenerate }: InviteCodeDisplayProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
     setCopied(true);
-    toast.success("Invite code copied");
+    toast.success(t("team.overview.inviteCodeCopied"));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -29,13 +31,13 @@ export function InviteCodeDisplay({ code, teamId, canRegenerate = false, onRegen
       const res = await fetch(`/api/teams/${teamId}/invite-code/regenerate`, { method: "POST" });
       const json = await res.json();
       if (json.success) {
-        toast.success("Invite code regenerated");
+        toast.success(t("team.overview.inviteCodeRegenerated"));
         onRegenerate?.(json.data.invite_code);
       } else {
-        toast.error(json.error || "Failed to regenerate");
+        toast.error(json.error || t("team.overview.failedRegenerate"));
       }
     } catch {
-      toast.error("Failed to regenerate");
+      toast.error(t("team.overview.failedRegenerate"));
     } finally {
       setRegenerating(false);
     }

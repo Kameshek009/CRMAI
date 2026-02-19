@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchStore } from "@/stores/search-store";
+import { useTranslation } from "@/lib/i18n";
 import type { LucideIcon } from "lucide-react";
 
 // ============================================================================
@@ -66,14 +67,6 @@ const typeRoutes: Record<string, string> = {
   task: "/dashboard/tasks",
 };
 
-const typeLabels: Record<string, string> = {
-  contact: "Contacts",
-  company: "Organizations",
-  deal: "Deals",
-  lead: "Leads",
-  task: "Tasks",
-};
-
 // ============================================================================
 // Component
 // ============================================================================
@@ -90,7 +83,7 @@ export function SearchDialog() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const pathname = usePathname();
+  const { t } = useTranslation();
 
   // Keyboard shortcut
   useEffect(() => {
@@ -144,26 +137,26 @@ export function SearchDialog() {
 
   // Build command items
   const staticActions: CommandItem[] = useMemo(() => [
-    { id: "create-contact", label: "Create Contact", icon: Plus, section: "actions", action: () => navigate("/dashboard/contacts?create=1") },
-    { id: "create-deal", label: "Create Deal", icon: Plus, section: "actions", action: () => navigate("/dashboard/deals?create=1") },
-    { id: "create-lead", label: "Create Lead", icon: Plus, section: "actions", action: () => navigate("/dashboard/leads?create=1") },
-    { id: "create-task", label: "Create Task", icon: Plus, section: "actions", action: () => navigate("/dashboard/tasks?create=1") },
-  ], [navigate]);
+    { id: "create-contact", label: t("nav.search.commands.createContact"), icon: Plus, section: "actions", action: () => navigate("/dashboard/contacts?create=1") },
+    { id: "create-deal", label: t("nav.search.commands.createDeal"), icon: Plus, section: "actions", action: () => navigate("/dashboard/deals?create=1") },
+    { id: "create-lead", label: t("nav.search.commands.createLead"), icon: Plus, section: "actions", action: () => navigate("/dashboard/leads?create=1") },
+    { id: "create-task", label: t("nav.search.commands.createTask"), icon: Plus, section: "actions", action: () => navigate("/dashboard/tasks?create=1") },
+  ], [navigate, t]);
 
   const navItems: CommandItem[] = useMemo(() => [
-    { id: "nav-overview", label: "Overview", sublabel: "Dashboard home", icon: LayoutGrid, section: "navigation", action: () => navigate("/dashboard") },
-    { id: "nav-contacts", label: "Contacts", sublabel: "All contacts", icon: User, section: "navigation", action: () => navigate("/dashboard/contacts") },
-    { id: "nav-deals", label: "Deals", sublabel: "All deals", icon: Handshake, section: "navigation", action: () => navigate("/dashboard/deals") },
-    { id: "nav-leads", label: "Leads", sublabel: "All leads", icon: Zap, section: "navigation", action: () => navigate("/dashboard/leads") },
-    { id: "nav-companies", label: "Organizations", sublabel: "All organizations", icon: Building2, section: "navigation", action: () => navigate("/dashboard/companies") },
-    { id: "nav-pipeline", label: "Pipeline", sublabel: "Kanban view", icon: Kanban, section: "navigation", action: () => navigate("/dashboard/pipeline") },
-    { id: "nav-tasks", label: "Tasks", sublabel: "All tasks", icon: CheckSquare, section: "navigation", action: () => navigate("/dashboard/tasks") },
-    { id: "nav-notes", label: "Notes", sublabel: "All notes", icon: FileText, section: "navigation", action: () => navigate("/dashboard/notes") },
-    { id: "nav-call-logs", label: "Call Logs", icon: Phone, section: "navigation", action: () => navigate("/dashboard/call-logs") },
-    { id: "nav-analytics", label: "Analytics", sublabel: "Reports & insights", icon: TrendingUp, section: "navigation", action: () => navigate("/dashboard/analytics") },
-    { id: "nav-chat", label: "AI Chat", sublabel: "Chat with AI", icon: MessageSquare, section: "navigation", action: () => navigate("/dashboard/chats") },
-    { id: "nav-settings", label: "Settings", sublabel: "Workspace settings", icon: Settings, section: "navigation", action: () => navigate("/dashboard/team/settings") },
-  ], [navigate]);
+    { id: "nav-overview", label: t("nav.search.pages.overview"), sublabel: t("nav.search.pages.overviewSub"), icon: LayoutGrid, section: "navigation", action: () => navigate("/dashboard") },
+    { id: "nav-contacts", label: t("nav.search.pages.contacts"), sublabel: t("nav.search.pages.contactsSub"), icon: User, section: "navigation", action: () => navigate("/dashboard/contacts") },
+    { id: "nav-deals", label: t("nav.search.pages.deals"), sublabel: t("nav.search.pages.dealsSub"), icon: Handshake, section: "navigation", action: () => navigate("/dashboard/deals") },
+    { id: "nav-leads", label: t("nav.search.pages.leads"), sublabel: t("nav.search.pages.leadsSub"), icon: Zap, section: "navigation", action: () => navigate("/dashboard/leads") },
+    { id: "nav-companies", label: t("nav.search.pages.organizations"), sublabel: t("nav.search.pages.organizationsSub"), icon: Building2, section: "navigation", action: () => navigate("/dashboard/companies") },
+    { id: "nav-pipeline", label: t("nav.search.pages.pipeline"), sublabel: t("nav.search.pages.pipelineSub"), icon: Kanban, section: "navigation", action: () => navigate("/dashboard/pipeline") },
+    { id: "nav-tasks", label: t("nav.search.pages.tasks"), sublabel: t("nav.search.pages.tasksSub"), icon: CheckSquare, section: "navigation", action: () => navigate("/dashboard/tasks") },
+    { id: "nav-notes", label: t("nav.search.pages.notes"), sublabel: t("nav.search.pages.notesSub"), icon: FileText, section: "navigation", action: () => navigate("/dashboard/notes") },
+    { id: "nav-call-logs", label: t("nav.search.pages.callLogs"), icon: Phone, section: "navigation", action: () => navigate("/dashboard/call-logs") },
+    { id: "nav-analytics", label: t("nav.search.pages.analytics"), sublabel: t("nav.search.pages.analyticsSub"), icon: TrendingUp, section: "navigation", action: () => navigate("/dashboard/analytics") },
+    { id: "nav-chat", label: t("nav.search.pages.aiChat"), sublabel: t("nav.search.pages.aiChatSub"), icon: MessageSquare, section: "navigation", action: () => navigate("/dashboard/chats") },
+    { id: "nav-settings", label: t("nav.search.pages.settings"), sublabel: t("nav.search.pages.settingsSub"), icon: Settings, section: "navigation", action: () => navigate("/dashboard/account") },
+  ], [navigate, t]);
 
   // Filter static items by query (fuzzy)
   const filteredStatic = useMemo(() => {
@@ -194,7 +187,6 @@ export function SearchDialog() {
   // All items in display order
   const allItems = useMemo(() => {
     if (!query) return filteredStatic;
-    // When query exists: show search results first, then filtered static items
     return [...searchItems, ...filteredStatic];
   }, [query, searchItems, filteredStatic]);
 
@@ -227,13 +219,12 @@ export function SearchDialog() {
   // Group items by section
   const sections = useMemo(() => {
     const groups: { label: string; items: { item: CommandItem; globalIndex: number }[] }[] = [];
-    let idx = 0;
 
     const sectionOrder = ["search", "actions", "navigation"] as const;
     const sectionLabels = {
-      search: "Search Results",
-      actions: "Actions",
-      navigation: "Go to",
+      search: t("nav.search.groups.results"),
+      actions: t("nav.search.groups.actions"),
+      navigation: t("nav.search.groups.goTo"),
     };
 
     for (const section of sectionOrder) {
@@ -246,7 +237,7 @@ export function SearchDialog() {
     }
 
     return groups;
-  }, [allItems]);
+  }, [allItems, t]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -258,7 +249,7 @@ export function SearchDialog() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a command or search..."
+            placeholder={t("nav.search.placeholder")}
             className="border-0 shadow-none focus-visible:ring-0 h-12"
             autoFocus
           />
@@ -303,15 +294,15 @@ export function SearchDialog() {
 
           {query && !isLoading && allItems.length === 0 && (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              No results for &quot;{query}&quot;
+              {t("nav.search.noResults")} &quot;{query}&quot;
             </div>
           )}
         </div>
 
         <div className="border-t px-4 py-2 text-xs text-muted-foreground flex items-center gap-4">
-          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">↑↓</kbd> Navigate</span>
-          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">↵</kbd> Open</span>
-          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> Close</span>
+          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">↑↓</kbd> {t("nav.search.hints.navigate")}</span>
+          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">↵</kbd> {t("nav.search.hints.open")}</span>
+          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> {t("nav.search.hints.close")}</span>
         </div>
       </DialogContent>
     </Dialog>

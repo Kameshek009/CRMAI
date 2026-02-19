@@ -9,5 +9,14 @@
   "join": "Join",
   "add": "Add",
   "create": "Create",
-  "error": "Something went wrong"
+  "error": "Something went wrong",
+  "failed": "Failed",
+  "edit": "Edit",
+  "remove": "Remove",
+  "confirm": "Confirm",
+  "close": "Close",
+  "back": "Back",
+  "next": "Next",
+  "search": "Search",
+  "noResults": "No results"
 }

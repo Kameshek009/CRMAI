@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowUp, Loader2, Clock, AlertCircle, Paperclip, X, FileText, Image as ImageIcon } from 'lucide-react';
+import { ArrowUp, Loader2, Clock, Paperclip, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 import type { Chat } from '@/lib/supabase/types';
 
 interface AttachmentPreview {
@@ -25,7 +26,6 @@ interface ChatComposerProps {
   chat: Chat;
   chatId: string;
   isSending: boolean;
-  isAgentOnline: boolean;
   rateLimitResetsAt: string | null;
   onSend: (content: string, attachment?: AttachmentData) => void;
 }
@@ -36,10 +36,10 @@ export function ChatComposer({
   chat,
   chatId,
   isSending,
-  isAgentOnline,
   rateLimitResetsAt,
   onSend,
 }: ChatComposerProps) {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [countdown, setCountdown] = useState('');
   const [attachment, setAttachment] = useState<AttachmentPreview | null>(null);
@@ -87,7 +87,7 @@ export function ChatComposer({
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('File too large. Maximum 10MB');
+      toast.error(t('chat.fileTooLarge'));
       return;
     }
 
@@ -126,14 +126,14 @@ export function ChatComposer({
         const result = await res.json();
 
         if (!result.success) {
-          toast.error(result.error || 'Failed to upload file');
+          toast.error(result.error || t('chat.failedUpload'));
           setIsUploading(false);
           return;
         }
 
         uploadedAttachment = result.attachment;
       } catch {
-        toast.error('Failed to upload file');
+        toast.error(t('chat.failedUpload'));
         setIsUploading(false);
         return;
       }
@@ -185,24 +185,15 @@ export function ChatComposer({
             <div className="flex items-center gap-2 min-w-0">
               <Clock className="h-4 w-4 text-destructive shrink-0" />
               <p className="text-xs sm:text-sm text-destructive">
-                Daily limit reached. Resets in <span className="font-mono font-semibold">{countdown}</span>
+                {t('chat.dailyLimitReached')} <span className="font-mono font-semibold">{countdown}</span>
               </p>
             </div>
             <a
               href="/dashboard/upgrade"
               className="text-xs font-medium text-destructive hover:underline shrink-0"
             >
-              Upgrade
+              {t('chat.upgrade')}
             </a>
-          </div>
-        )}
-        {/* Offline warning */}
-        {!isAgentOnline && (
-          <div className="flex items-center gap-2 mb-4 p-4 rounded-xl bg-warning/10 border border-warning/30">
-            <AlertCircle className="h-4 w-4 text-warning shrink-0" />
-            <p className="text-xs sm:text-sm text-warning">
-              Agent offline. Messages will be queued.
-            </p>
           </div>
         )}
 
@@ -251,14 +242,12 @@ export function ChatComposer({
             onKeyDown={handleKeyDown}
             placeholder={
               attachment
-                ? 'Add a message (optional)...'
+                ? t('chat.placeholder.withAttachment')
                 : chat.mode === 'chat'
-                ? 'Message AI assistant...'
-                : !isAgentOnline
-                ? 'Agent offline — message will be queued...'
+                ? t('chat.placeholder.chat')
                 : chat.mode === 'agent'
-                ? 'Describe a task for the agent...'
-                : 'Send a message...'
+                ? t('chat.placeholder.agent')
+                : t('chat.placeholder.default')
             }
             className={cn(
               'w-full min-h-[52px] max-h-40 resize-none border-none bg-transparent',
@@ -323,7 +312,7 @@ export function ChatComposer({
         </div>
 
         <p className="text-center text-xs text-muted-foreground/40 mt-2">
-          AI can make mistakes. Verify important information.
+          {t('chat.disclaimer')}
         </p>
       </div>
     </div>

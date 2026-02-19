@@ -1,0 +1,131 @@
+{
+  "overview": {
+    "title": "Workspace",
+    "deleted": "Your workspace was deleted",
+    "noWorkspace": "No workspace selected",
+    "deletedRestore": "Deleted — restore available for {hours}h",
+    "restore": "Restore",
+    "restoring": "Restoring...",
+    "restored": "Workspace restored!",
+    "switchPrompt": "Or switch to an active workspace:",
+    "switch": "Switch",
+    "workspaceOverview": "Workspace overview",
+    "members": "Members",
+    "slots": "{count} / {max} slots",
+    "unlimited": "Unlimited",
+    "yourRole": "Your Role",
+    "owner": "Owner",
+    "priority": "Priority {value}",
+    "workspaces": "Workspaces",
+    "joinedWorkspaces": "Joined workspaces",
+    "joined": "Joined",
+    "memberSince": "Member since",
+    "inviteCode": "Invite Code",
+    "inviteCodeDescription": "Share this code with people you want to invite to your workspace.",
+    "inviteCodeCopied": "Invite code copied",
+    "inviteCodeRegenerated": "Invite code regenerated",
+    "failedRegenerate": "Failed to regenerate"
+  },
+  "settings": {
+    "title": "Workspace Settings",
+    "description": "Manage your workspace configuration",
+    "onlyOwners": "Only workspace owners can manage settings.",
+    "info": {
+      "title": "Workspace Information",
+      "name": "Workspace Name",
+      "description": "Description",
+      "updated": "Workspace updated"
+    },
+    "ai": {
+      "title": "AI Permissions",
+      "description": "Control what the AI agent can do in your workspace",
+      "permissionLevel": "Permission Level: {value}%",
+      "canCreateContacts": "Can create contacts",
+      "canCreateDeals": "Can create deals",
+      "canCreateTasks": "Can create tasks",
+      "saveAi": "Save AI Permissions",
+      "aiUpdated": "AI permissions updated"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "deleteWorkspace": "Delete Workspace",
+      "deleteWorkspaceDescription": "Delete this workspace. You can restore it within 24 hours.",
+      "deleting": "Deleting...",
+      "confirmDelete": "Are you sure? You can restore the workspace within 24 hours.",
+      "deleted": "Workspace deleted. You can restore it within 24 hours."
+    }
+  },
+  "members": {
+    "title": "Members",
+    "description": "{count} workspace members",
+    "capacity": "Workspace capacity",
+    "removed": "Removed {name}",
+    "failedRemove": "Failed to remove member",
+    "roleUpdated": "Role updated",
+    "failedUpdate": "Failed to update"
+  },
+  "roles": {
+    "title": "Roles",
+    "fixedDescription": "Fixed roles for your plan. Upgrade to Max for custom roles.",
+    "fixed": "Fixed",
+    "builtIn": "Built-in role",
+    "customDescription": "Manage workspace roles and permissions",
+    "createRole": "Create Role",
+    "system": "System",
+    "edit": "Edit",
+    "deleted": "Role deleted",
+    "failedDelete": "Failed to delete",
+    "permissions": {
+      "createContacts": "Create contacts",
+      "createDeals": "Create deals",
+      "managePipeline": "Manage pipeline",
+      "manageWorkspace": "Manage workspace",
+      "readOnly": "Read only"
+    }
+  },
+  "connections": {
+    "title": "Connections",
+    "description": "Connect with other workspaces",
+    "yourCode": "Your Connection Code",
+    "yourCodeDescription": "Share this with another workspace's director to connect.",
+    "connectTo": "Connect to Another Workspace",
+    "enterCode": "Enter workspace's connection code",
+    "connecting": "Connecting...",
+    "connect": "Connect",
+    "requestSent": "Connection request sent",
+    "noConnections": "No connections yet",
+    "incoming": "Incoming",
+    "outgoing": "Outgoing",
+    "accepted": "Connection accepted",
+    "rejected": "Connection rejected"
+  },
+  "createWizard": {
+    "nameRequired": "Team name is required",
+    "created": "Team created!",
+    "failedCreate": "Failed to create team",
+    "teamName": "Team Name",
+    "namePlaceholder": "e.g. Sales Team",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "What does this team do?",
+    "creating": "Creating...",
+    "createTeam": "Create Team"
+  },
+  "kickDialog": {
+    "title": "Remove team member",
+    "description": "Are you sure you want to remove {name} from the team? They will lose access to all team data immediately.",
+    "removing": "Removing...",
+    "remove": "Remove"
+  },
+  "visibilityGroups": {
+    "title": "Visibility Groups",
+    "description": "Control which records team members can see. Assign records to groups when creating them.",
+    "newGroupPlaceholder": "New group name...",
+    "noGroups": "No visibility groups yet. Create one to start restricting record access.",
+    "members": "{count} members",
+    "default": "Default",
+    "created": "Group created",
+    "deleted": "Group deleted",
+    "failedCreate": "Failed to create group",
+    "failedDelete": "Failed to delete"
+  }
+}

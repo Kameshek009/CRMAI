@@ -9,6 +9,10 @@
     "language": "Language",
     "billing": "Subscription & Billing",
     "workspace": "Workspace",
+    "team": "Team",
+    "members": "Members",
+    "roles": "Roles",
+    "connections": "Connections",
     "danger": "Danger Zone"
   },
   "profile": {
@@ -55,8 +59,13 @@
   },
   "danger": {
     "title": "Danger Zone",
-    "description": "Irreversible actions for your account",
+    "description": "Irreversible actions for your account and workspace",
     "deleteAccount": "Delete Account",
-    "deleteDescription": "Permanently delete your account and all data"
+    "deleteAccountDescription": "Permanently delete your account and all data",
+    "deleteWorkspace": "Delete Workspace",
+    "deleteWorkspaceDescription": "Delete this workspace. You can restore it within 24 hours.",
+    "confirmDeleteWorkspace": "Are you sure? You can restore the workspace within 24 hours.",
+    "workspaceDeleted": "Workspace deleted. You can restore it within 24 hours.",
+    "deleting": "Deleting..."
   }
 }
