@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAccount } from "@/contexts/account-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { UpgradeModal, useUpgradeModal } from "@/components/billing";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
 import { ChartWidget } from "@/components/dashboard/widgets/chart-widget";
@@ -190,6 +191,7 @@ function getGreeting(): { text: string; icon: LucideIcon } {
 
 export function DashboardContent({ userName }: DashboardContentProps) {
   const { account, usage, isLoading: accountLoading } = useAccount();
+  const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
   const { isOpen, modalProps, closeUpgradeModal } = useUpgradeModal();
 
   const [crmStats, setCrmStats] = useState<CrmStats | null>(null);
@@ -201,6 +203,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   const [revenueTrend, setRevenueTrend] = useState<{ date: string; revenue: number; cumulative: number }[]>([]);
 
   useEffect(() => {
+    // Don't fetch CRM data if no workspace selected
+    if (!currentWorkspace) {
+      setIsLoading(false);
+      return;
+    }
+
     const safeFetch = (url: string) =>
       fetch(url).then((r) => (r.ok ? r.json() : { success: false })).catch(() => ({ success: false }));
 
@@ -219,7 +227,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       if (activitiesRes.success) setActivities(activitiesRes.data);
       if (revenueTrendRes.success) setRevenueTrend(revenueTrendRes.data);
     }).finally(() => setIsLoading(false));
-  }, []);
+  }, [currentWorkspace]);
 
   const taskStatusData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -251,6 +259,39 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
   const greeting = getGreeting();
   const GreetingIcon = greeting.icon;
+
+  // No active workspace — show empty state
+  if (!workspaceLoading && !currentWorkspace) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        <div className="mx-auto max-w-md text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
+            <Users className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Нет активной команды</h2>
+            <p className="text-sm text-muted-foreground">
+              Создайте новую команду или присоединитесь к существующей, чтобы начать работу с CRM.
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-3">
+            <Button asChild>
+              <Link href="/dashboard/account">
+                <Plus className="w-4 h-4 mr-2" />
+                Создать команду
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/account">
+                <Users className="w-4 h-4 mr-2" />
+                Присоединиться
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
