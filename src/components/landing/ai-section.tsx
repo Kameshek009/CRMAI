@@ -179,8 +179,8 @@ function NeuralNetworkBg() {
 const capabilities = [
   {
     icon: Target,
-    title: "AI Lead Scoring",
-    description: "Automatically rank leads based on behavior, engagement, and fit. Focus on deals that matter most.",
+    title: "AI Contact Scoring",
+    description: "Automatically rank contacts based on behavior, engagement, and fit. Focus on deals that matter most.",
     gradient: "from-landing-accent to-landing-accent",
     stat: "94%",
     statLabel: "Accuracy",

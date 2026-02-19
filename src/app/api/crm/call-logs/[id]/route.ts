@@ -24,7 +24,7 @@ export async function GET(
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("call_logs")
-      .select("*, contacts(id, first_name, last_name), leads(id, first_name, last_name)")
+      .select("*, contacts(id, first_name, last_name)")
       .eq("id", id)
       .eq("team_id", context.teamId)
       .eq("is_deleted", false)
@@ -69,7 +69,7 @@ export async function PATCH(
       .update(parsed.data)
       .eq("id", id)
       .eq("team_id", context.teamId)
-      .select("*, contacts(id, first_name, last_name), leads(id, first_name, last_name)")
+      .select("*, contacts(id, first_name, last_name)")
       .single();
 
     if (dbError || !data) {

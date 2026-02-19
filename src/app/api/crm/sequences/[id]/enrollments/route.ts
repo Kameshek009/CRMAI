@@ -21,7 +21,7 @@ export async function GET(
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_sequence_enrollments")
-      .select("*, contacts(id, first_name, last_name, email), leads(id, first_name, last_name, email)")
+      .select("*, contacts(id, first_name, last_name, email)")
       .eq("sequence_id", id)
       .order("created_at", { ascending: false });
 

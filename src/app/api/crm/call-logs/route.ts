@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from("call_logs")
-      .select("*, contacts(id, first_name, last_name), leads(id, first_name, last_name)", { count: "exact" })
+      .select("*, contacts(id, first_name, last_name)", { count: "exact" })
       .eq("team_id", context.teamId)
       .eq("is_deleted", false);
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         caller_account_id: context.accountId,
         ...parsed.data,
       })
-      .select("*, contacts(id, first_name, last_name), leads(id, first_name, last_name)")
+      .select("*, contacts(id, first_name, last_name)")
       .single();
 
     if (dbError) {
@@ -77,7 +77,6 @@ export async function POST(request: NextRequest) {
         account_id: context.accountId,
         team_id: context.teamId,
         contact_id: parsed.data.contact_id || null,
-        lead_id: parsed.data.lead_id || null,
         deal_id: parsed.data.deal_id || null,
         type: "call",
         title: `${parsed.data.direction === "inbound" ? "Inbound" : "Outbound"} call${parsed.data.status ? ` — ${parsed.data.status}` : ""}`,

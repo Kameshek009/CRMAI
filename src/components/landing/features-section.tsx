@@ -26,7 +26,7 @@ const features: BentoFeature[] = [
     icon: Brain,
     title: "AI-Powered CRM",
     description:
-      "Let artificial intelligence score leads, predict outcomes, and draft follow-ups. Your AI co-pilot works 24/7 so you never miss an opportunity.",
+      "Let artificial intelligence score contacts, predict outcomes, and draft follow-ups. Your AI co-pilot works 24/7 so you never miss an opportunity.",
     gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
     iconGradient: "from-landing-accent to-landing-accent",
     size: "lg",
@@ -62,7 +62,7 @@ const features: BentoFeature[] = [
     icon: Zap,
     title: "Smart Automation",
     description:
-      "Create triggers and workflows that eliminate repetitive tasks. Auto-assign leads, send follow-ups, update stages — hands free.",
+      "Create triggers and workflows that eliminate repetitive tasks. Auto-assign contacts, send follow-ups, update stages — hands free.",
     gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
     iconGradient: "from-landing-accent to-landing-accent",
     size: "md",

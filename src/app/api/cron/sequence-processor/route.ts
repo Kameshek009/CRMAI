@@ -76,13 +76,6 @@ export async function GET(request: NextRequest) {
             .eq("id", enrollment.contact_id)
             .single();
           toEmail = contact?.email || null;
-        } else if (enrollment.lead_id) {
-          const { data: lead } = await supabase
-            .from("leads")
-            .select("email")
-            .eq("id", enrollment.lead_id)
-            .single();
-          toEmail = lead?.email || null;
         }
 
         if (!toEmail) {
@@ -99,7 +92,6 @@ export async function GET(request: NextRequest) {
           team_id: teamId,
           account_id: enrollment.enrolled_by,
           contact_id: enrollment.contact_id || null,
-          lead_id: enrollment.lead_id || null,
           from_email: "sequence@nexxuscrm.com",
           to_emails: [toEmail],
           subject: currentStep.subject,

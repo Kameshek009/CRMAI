@@ -6,7 +6,6 @@ import { logger } from "@/lib/logger";
 
 const enrollSchema = z.object({
   contact_ids: z.array(z.string().uuid()).optional(),
-  lead_ids: z.array(z.string().uuid()).optional(),
 });
 
 export async function POST(
@@ -48,7 +47,6 @@ export async function POST(
     const enrollments: {
       sequence_id: string;
       contact_id?: string;
-      lead_id?: string;
       enrolled_by: string;
       current_step: number;
       next_send_at: string;
@@ -64,18 +62,8 @@ export async function POST(
       });
     }
 
-    for (const leadId of parsed.data.lead_ids || []) {
-      enrollments.push({
-        sequence_id: sequenceId,
-        lead_id: leadId,
-        enrolled_by: context.accountId,
-        current_step: 0,
-        next_send_at: nextSendAt.toISOString(),
-      });
-    }
-
     if (enrollments.length === 0) {
-      return NextResponse.json({ success: false, error: "No contacts or leads specified" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "No contacts specified" }, { status: 400 });
     }
 
     const { data, error: dbError } = await supabase
