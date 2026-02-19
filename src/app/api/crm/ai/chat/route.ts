@@ -10,6 +10,51 @@ import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// ─── Fair token billing ─────────────────────────────────────
+// Instead of charging raw Groq tokens (which include huge system prompt
+// + tool definitions overhead), we charge virtual tokens based on actions.
+
+const CHAT_BASE_COST = 150; // simple conversation message
+const CHAT_LONG_REPLY_COST = 300; // longer AI reply (>200 chars)
+
+const TOOL_COSTS: Record<string, { base: number; perField: number }> = {
+  create_lead:         { base: 200, perField: 80 },
+  create_contact:      { base: 200, perField: 80 },
+  create_deal:         { base: 300, perField: 100 },
+  create_task:         { base: 200, perField: 60 },
+  update_contact:      { base: 200, perField: 60 },
+  update_deal:         { base: 200, perField: 60 },
+  update_task:         { base: 150, perField: 50 },
+  complete_task:       { base: 100, perField: 0 },
+  delete_record:       { base: 100, perField: 0 },
+  search_crm:          { base: 150, perField: 0 },
+  get_pipeline_summary:{ base: 200, perField: 0 },
+  get_contact_details: { base: 150, perField: 0 },
+  get_deal_details:    { base: 150, perField: 0 },
+  list_upcoming_tasks: { base: 150, perField: 0 },
+  get_activity_feed:   { base: 150, perField: 0 },
+};
+
+function calculateBillableTokens(
+  toolCalls: { name: string; args?: Record<string, unknown> }[],
+  responseLength: number
+): number {
+  if (toolCalls.length === 0) {
+    // Simple conversation — charge based on response length
+    return responseLength > 200 ? CHAT_LONG_REPLY_COST : CHAT_BASE_COST;
+  }
+
+  let total = 0;
+  for (const tc of toolCalls) {
+    const cost = TOOL_COSTS[tc.name] || { base: 200, perField: 0 };
+    const fieldCount = tc.args ? Object.keys(tc.args).length : 0;
+    total += cost.base + cost.perField * fieldCount;
+  }
+  return total;
+}
+
+// ─────────────────────────────────────────────────────────────
+
 export async function POST(request: NextRequest) {
   try {
     const { context, error } = await getTeamContext();
@@ -45,7 +90,7 @@ export async function POST(request: NextRequest) {
         billing_cycle_start: team.billing_cycle_start,
         seat_count: team.seat_count,
       },
-      500
+      100 // lower minimum check — our billing is now cheaper
     );
 
     if (!usageCheck.allowed) {
@@ -89,7 +134,7 @@ export async function POST(request: NextRequest) {
       { role: "user" as const, content: message },
     ];
 
-    let totalTokensUsed = 0;
+    let realTokensUsed = 0;
 
     const completion = await groq.chat.completions.create({
       messages,
@@ -100,13 +145,14 @@ export async function POST(request: NextRequest) {
       stream: false,
     });
 
-    totalTokensUsed += completion.usage?.total_tokens || 0;
+    realTokensUsed += completion.usage?.total_tokens || 0;
 
     const choice = completion.choices[0];
     const toolCalls = choice?.message?.tool_calls;
 
     let responseContent: string;
     let toolResults: { name: string; result: string; data?: unknown }[] = [];
+    const executedTools: { name: string; args?: Record<string, unknown> }[] = [];
 
     if (toolCalls && toolCalls.length > 0) {
       for (const tc of toolCalls) {
@@ -118,6 +164,7 @@ export async function POST(request: NextRequest) {
           toolResults.push({ name: tc.function.name, result: "Error: invalid tool call format" });
           continue;
         }
+        executedTools.push({ name: tc.function.name, args });
         const result = await executeCrmToolCall(context.accountId, context.teamId, tc.function.name, args);
         toolResults.push({ name: tc.function.name, ...result });
       }
@@ -140,25 +187,28 @@ export async function POST(request: NextRequest) {
         stream: false,
       });
 
-      totalTokensUsed += finalCompletion.usage?.total_tokens || 0;
+      realTokensUsed += finalCompletion.usage?.total_tokens || 0;
       responseContent = finalCompletion.choices[0]?.message?.content || "";
     } else {
       responseContent = choice?.message?.content || "";
     }
 
+    // Calculate fair billable tokens based on actions performed
+    const billableTokens = calculateBillableTokens(executedTools, responseContent.length);
+
     // Deduct tokens from TEAM atomically (prevents race conditions)
     let finalTokensUsed = team.tokens_used;
     let finalTokenLimit = team.token_limit;
 
-    if (totalTokensUsed > 0) {
+    if (billableTokens > 0) {
       const dayStart = new Date(team.week_start_date);
       const now = new Date();
       const hoursSinceDayStart =
         (now.getTime() - dayStart.getTime()) / (1000 * 60 * 60);
 
       const newDailyTokensUsed = hoursSinceDayStart >= 24
-        ? totalTokensUsed
-        : team.weekly_tokens_used + totalTokensUsed;
+        ? billableTokens
+        : team.weekly_tokens_used + billableTokens;
       const newDayStartDate = hoursSinceDayStart >= 24
         ? now.toISOString()
         : team.week_start_date;
@@ -166,7 +216,7 @@ export async function POST(request: NextRequest) {
       // Atomic increment via RPC
       const { data: rpcResult } = await supabase.rpc("increment_team_tokens", {
         p_team_id: context.teamId,
-        p_tokens: totalTokensUsed,
+        p_tokens: billableTokens,
         p_daily_tokens: newDailyTokensUsed,
         p_new_day_start: newDayStartDate,
       });
@@ -176,16 +226,19 @@ export async function POST(request: NextRequest) {
         finalTokenLimit = rpcResult[0].token_limit;
       }
 
-      // Record in usage_records
+      // Record in usage_records (track both real and billable)
       await supabase.from("usage_records").insert({
         account_id: context.accountId,
-        tokens_consumed: totalTokensUsed,
+        tokens_consumed: billableTokens,
         action_type: "crm_ai_chat",
         metadata: {
           team_id: context.teamId,
           model: "llama-3.3-70b-versatile",
+          real_tokens: realTokensUsed,
+          billable_tokens: billableTokens,
           has_tool_calls: toolResults.length > 0,
           tool_count: toolResults.length,
+          tools_used: executedTools.map((t) => t.name),
         },
       });
     }
@@ -196,7 +249,7 @@ export async function POST(request: NextRequest) {
         response: responseContent,
         toolResults,
         usage: {
-          tokensUsed: totalTokensUsed,
+          tokensUsed: billableTokens,
           teamTokensUsed: finalTokensUsed,
           teamTokenLimit: finalTokenLimit,
         },
