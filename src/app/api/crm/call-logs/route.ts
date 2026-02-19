@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     if (dbError) {
       logger.error("CallLogs", "Failed to create call log", dbError);
-      return NextResponse.json({ success: false, error: "Failed to create call log" }, { status: 500 });
+      return NextResponse.json({ success: false, error: "Failed to create call log", details: dbError.message }, { status: 500 });
     }
 
     // Log activity
