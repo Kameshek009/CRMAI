@@ -64,7 +64,7 @@ export async function POST(
     // Update Stripe subscription quantity (per-seat billing)
     const { data: team } = await supabase
       .from("teams")
-      .select("stripe_subscription_id, tier, seat_count")
+      .select("*")
       .eq("id", id)
       .single();
 

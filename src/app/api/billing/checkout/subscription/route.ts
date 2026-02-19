@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     // Get the team owned by this account
     const { data: team, error: teamError } = await supabase
       .from("teams")
-      .select("id, tier, stripe_subscription_id, stripe_customer_id, owner_account_id, seat_count")
+      .select("*")
       .eq("owner_account_id", account.id)
       .is("deleted_at", null)
       .single();

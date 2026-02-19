@@ -104,12 +104,12 @@ export async function POST(request: NextRequest) {
           .in("id", membersToAdd);
 
         if (validAccounts && validAccounts.length > 0) {
+          // Don't include fixed_role — column may not exist if migration 022 not applied
           const memberInserts = validAccounts.map((acc) => ({
             team_id: teamId,
             account_id: acc.id,
             role_id: memberRole.id,
             is_director: false,
-            fixed_role: "member",
             status: "active" as const,
           }));
 

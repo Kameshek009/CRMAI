@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Find team by invite code
     const { data: team } = await supabase
       .from("teams")
-      .select("id, name, max_members, tier, stripe_subscription_id, seat_count")
+      .select("*")
       .eq("invite_code", parsed.data.invite_code)
       .is("deleted_at", null)
       .single();
@@ -84,17 +84,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Team role not found" }, { status: 500 });
     }
 
-    // Add as member
+    // Add as member (don't include fixed_role — column may not exist if migration 022 not applied)
+    const insertData: Record<string, unknown> = {
+      team_id: team.id,
+      account_id: accountId,
+      role_id: memberRole.id,
+      is_director: false,
+      status: "active",
+    };
     const { error: joinError } = await supabase
       .from("team_members")
-      .insert({
-        team_id: team.id,
-        account_id: accountId,
-        role_id: memberRole.id,
-        is_director: false,
-        fixed_role: "member",
-        status: "active",
-      });
+      .insert(insertData);
 
     if (joinError) {
       return NextResponse.json({ success: false, error: joinError.message }, { status: 500 });

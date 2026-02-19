@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       const supabaseAdmin = createSupabaseAdmin();
       const { data: team } = await supabaseAdmin
         .from("teams")
-        .select("id, tier, token_limit, tokens_used, weekly_tokens_used, week_start_date, seat_count")
+        .select("*")
         .eq("id", account.current_team_id)
         .single();
       if (team) {

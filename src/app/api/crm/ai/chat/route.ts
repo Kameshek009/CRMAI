@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Fetch team for quota check
     const { data: team, error: teamError } = await supabase
       .from("teams")
-      .select("tier, token_limit, tokens_used, weekly_tokens_used, week_start_date, billing_cycle_start, seat_count")
+      .select("*")
       .eq("id", context.teamId)
       .single();
 

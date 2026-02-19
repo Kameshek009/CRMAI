@@ -96,7 +96,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
   const [workspaceResult, membersResult] = await Promise.all([
     supabase
       .from("teams")
-      .select("id, deleted_at, tier, owner_account_id")
+      .select("*")
       .eq("id", account.current_team_id)
       .single(),
     supabase
