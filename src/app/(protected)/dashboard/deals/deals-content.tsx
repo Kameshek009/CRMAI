@@ -8,6 +8,7 @@ import { DataTable, type Column } from "@/components/frappe/data-table";
 import { KanbanBoard, type KanbanColumn } from "@/components/frappe/kanban-board";
 import { GroupByView, type GroupByGroup } from "@/components/frappe/group-by-view";
 import { StatusBadge } from "@/components/frappe/status-badge";
+import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { Handshake } from "lucide-react";
 import { toast } from "sonner";
 import type { ViewMode } from "@/types/crm";
@@ -68,6 +69,13 @@ const GROUP_BY_OPTIONS: GroupByOption[] = [
 
 const PAGE_SIZE = 50;
 
+const dealFormFields: FormField[] = [
+  { name: "title", label: "Название сделки", type: "text", required: true, placeholder: "Новая сделка" },
+  { name: "value", label: "Сумма ($)", type: "number", placeholder: "10000" },
+  { name: "expected_close_date", label: "Ожидаемое закрытие", type: "date" },
+  { name: "description", label: "Описание", type: "textarea" },
+];
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -79,6 +87,7 @@ export function DealsContent() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [stages, setStages] = useState<DealStage[]>([]);
+  const [showForm, setShowForm] = useState(false);
 
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [search, setSearch] = useState("");
@@ -123,13 +132,14 @@ export function DealsContent() {
   useEffect(() => { fetchDeals(); }, [fetchDeals]);
   useEffect(() => { setPage(1); }, [search, activeFilters, sortBy, sortOrder]);
 
-  // Also fetch stages separately on mount for kanban
+  // Also fetch stages separately on mount for kanban + create form
   useEffect(() => {
     fetch("/api/crm/pipeline")
       .then(r => r.json())
       .then(json => {
-        if (json.success && json.data) {
-          setStages(json.data.sort((a: DealStage, b: DealStage) => a.position - b.position));
+        if (json.success && json.data?.columns) {
+          const parsed = json.data.columns.map((c: { stage: DealStage }) => c.stage);
+          setStages(parsed.sort((a: DealStage, b: DealStage) => a.position - b.position));
         }
       })
       .catch(() => {});
@@ -163,6 +173,36 @@ export function DealsContent() {
     if (!res.ok) {
       toast.error("Failed to update deal stage");
       fetchDeals();
+    }
+  };
+
+  const handleCreateDeal = async (values: Record<string, string>) => {
+    // Use the first stage (Lead) by default
+    const defaultStage = stages.length > 0
+      ? stages.reduce((a, b) => a.position < b.position ? a : b)
+      : null;
+
+    if (!defaultStage) {
+      toast.error("Нет стадий пайплайна. Сначала откройте пайплайн.");
+      throw new Error("No pipeline stages");
+    }
+
+    const res = await fetch("/api/crm/deals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...Object.fromEntries(Object.entries(values).filter(([, v]) => v !== "")),
+        stage_id: defaultStage.id,
+        value: Number(values.value) || 0,
+      }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      toast.success("Сделка создана");
+      fetchDeals();
+    } else {
+      toast.error(json.error || "Ошибка создания");
+      throw new Error(json.error);
     }
   };
 
@@ -277,6 +317,9 @@ export function DealsContent() {
         onGroupByChange={setGroupBy}
         totalCount={total}
         entityName={`deal${total !== 1 ? "s" : ""}`}
+        onAdd={() => setShowForm(true)}
+        addLabel="Новая сделка"
+        featureLimitKey="deals"
       />
 
       {viewMode === "table" && (
@@ -344,6 +387,13 @@ export function DealsContent() {
           )}
         />
       )}
+      <EntityForm
+        open={showForm}
+        onOpenChange={setShowForm}
+        title="Новая сделка"
+        fields={dealFormFields}
+        onSubmit={handleCreateDeal}
+      />
     </PageContainer>
   );
 }
