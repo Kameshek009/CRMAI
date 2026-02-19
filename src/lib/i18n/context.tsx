@@ -18,16 +18,18 @@ import enNav from "@/locales/en/nav.json";
 import enChat from "@/locales/en/chat.json";
 import enTeam from "@/locales/en/team.json";
 import enFields from "@/locales/en/fields.json";
+import enCrm from "@/locales/en/crm.json";
 import ruCommon from "@/locales/ru/common.json";
 import ruSettings from "@/locales/ru/settings.json";
 import ruNav from "@/locales/ru/nav.json";
 import ruChat from "@/locales/ru/chat.json";
 import ruTeam from "@/locales/ru/team.json";
 import ruFields from "@/locales/ru/fields.json";
+import ruCrm from "@/locales/ru/crm.json";
 
 const translations: Record<Locale, Record<string, unknown>> = {
-  en: { common: enCommon, settings: enSettings, nav: enNav, chat: enChat, team: enTeam, fields: enFields },
-  ru: { common: ruCommon, settings: ruSettings, nav: ruNav, chat: ruChat, team: ruTeam, fields: ruFields },
+  en: { common: enCommon, settings: enSettings, nav: enNav, chat: enChat, team: enTeam, fields: enFields, crm: enCrm },
+  ru: { common: ruCommon, settings: ruSettings, nav: ruNav, chat: ruChat, team: ruTeam, fields: ruFields, crm: ruCrm },
 };
 
 const STORAGE_KEY = "nexxus-language";

@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export interface FormField {
   name: string;
@@ -36,16 +37,16 @@ interface EntityFormProps {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateField(field: FormField, value: string): string | null {
+function validateField(field: FormField, value: string, t: (key: string, params?: Record<string, string | number>) => string): string | null {
   const trimmed = value.trim();
   if (field.required && !trimmed) {
-    return `${field.label} is required`;
+    return t("crm.entityForm.required", { field: field.label });
   }
   if (field.type === "email" && trimmed && !EMAIL_REGEX.test(trimmed)) {
-    return "Invalid email address";
+    return t("crm.entityForm.invalidEmail");
   }
   if (field.type === "tel" && trimmed && trimmed.length > 20) {
-    return "Phone number is too long";
+    return t("crm.entityForm.phoneTooLong");
   }
   return null;
 }
@@ -57,8 +58,9 @@ export function EntityForm({
   fields,
   initialValues = {},
   onSubmit,
-  submitLabel = "Create",
+  submitLabel,
 }: EntityFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<Record<string, string>>(initialValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -78,7 +80,7 @@ export function EntityForm({
   const validateAll = (): boolean => {
     const newErrors: Record<string, string> = {};
     fields.forEach((field) => {
-      const error = validateField(field, values[field.name] || "");
+      const error = validateField(field, values[field.name] || "", t);
       if (error) newErrors[field.name] = error;
     });
     setErrors(newErrors);
@@ -88,7 +90,7 @@ export function EntityForm({
 
   const handleBlur = (field: FormField) => {
     setTouched((prev) => ({ ...prev, [field.name]: true }));
-    const error = validateField(field, values[field.name] || "");
+    const error = validateField(field, values[field.name] || "", t);
     setErrors((prev) => {
       if (error) return { ...prev, [field.name]: error };
       const next = { ...prev };
@@ -149,7 +151,7 @@ export function EntityForm({
                       }
                     />
                     <span className="text-sm text-muted-foreground">
-                      {values[field.name] === "true" ? "Yes" : "No"}
+                      {values[field.name] === "true" ? t("crm.entityForm.yes") : t("crm.entityForm.no")}
                     </span>
                   </div>
                 ) : field.type === "textarea" ? (
@@ -173,7 +175,7 @@ export function EntityForm({
                       error && "border-destructive focus-visible:ring-destructive"
                     )}
                   >
-                    <option value="">Select...</option>
+                    <option value="">{t("crm.entityForm.select")}</option>
                     {field.options?.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -203,11 +205,11 @@ export function EntityForm({
           })}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("crm.entityForm.cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="size-4 mr-2 animate-spin" />}
-              {submitLabel}
+              {submitLabel || t("crm.entityForm.create")}
             </Button>
           </DialogFooter>
         </form>

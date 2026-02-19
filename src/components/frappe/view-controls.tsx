@@ -16,6 +16,7 @@ import {
 import type { ViewMode } from "@/types/crm";
 import type { FeatureLimitKey } from "@/types";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
+import { useTranslation } from "@/lib/i18n";
 
 // ============================================================================
 // Types
@@ -117,6 +118,7 @@ export function ViewControls({
   entityName,
   className,
 }: ViewControlsProps) {
+  const { t } = useTranslation();
   const [searchFocused, setSearchFocused] = useState(false);
 
   // Feature limit pre-check
@@ -175,7 +177,7 @@ export function ViewControls({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 gap-1.5">
                 <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.5} />
-                <span>Filter</span>
+                <span>{t("crm.viewControls.filter")}</span>
                 {activeFilters.length > 0 && (
                   <span className="ml-1 rounded-full bg-foreground text-background px-1.5 py-0.5 text-[10px] font-semibold leading-none">
                     {activeFilters.length}
@@ -184,7 +186,7 @@ export function ViewControls({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("crm.viewControls.filterBy")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {filterOptions.map((filter) => {
                 if (filter.type === "select" && filter.options) {
@@ -210,11 +212,11 @@ export function ViewControls({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 gap-1.5">
                 <ArrowUpDown className="h-3.5 w-3.5" strokeWidth={1.5} />
-                <span>Sort</span>
+                <span>{t("crm.viewControls.sort")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("crm.viewControls.sortBy")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {sortOptions.map((opt) => (
                 <DropdownMenuItem
@@ -226,7 +228,7 @@ export function ViewControls({
                   </span>
                   {currentSort === opt.field && (
                     <span className="ml-auto text-xs text-muted-foreground">
-                      {sortOrder === "asc" ? "A-Z" : "Z-A"}
+                      {sortOrder === "asc" ? t("crm.viewControls.asc") : t("crm.viewControls.desc")}
                     </span>
                   )}
                 </DropdownMenuItem>
@@ -240,11 +242,11 @@ export function ViewControls({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 gap-1.5">
-                <span>Group by: {currentGroupBy ? groupByOptions.find(o => o.field === currentGroupBy)?.label || currentGroupBy : "None"}</span>
+                <span>{t("crm.viewControls.groupBy")}: {currentGroupBy ? groupByOptions.find(o => o.field === currentGroupBy)?.label || currentGroupBy : t("crm.viewControls.none")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuLabel>Group by</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("crm.viewControls.groupBy")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {groupByOptions.map((opt) => (
                 <DropdownMenuItem
@@ -277,7 +279,7 @@ export function ViewControls({
         {onExport && (
           <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={onExport}>
             <Download className="h-3.5 w-3.5" strokeWidth={1.5} />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden sm:inline">{t("crm.viewControls.export")}</span>
           </Button>
         )}
 
@@ -303,7 +305,7 @@ export function ViewControls({
                 }
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>Upgrade to Add</span>
+                <span>{t("crm.viewControls.upgradeToAdd")}</span>
               </Button>
             ) : (
               <Button size="sm" className="h-8 gap-1.5" onClick={onAdd}>
@@ -340,7 +342,7 @@ export function ViewControls({
               onClick={onFiltersClear}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              Clear all
+              {t("crm.viewControls.clearAll")}
             </button>
           )}
         </div>

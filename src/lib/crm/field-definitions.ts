@@ -50,112 +50,140 @@ export function mergeFieldsWithCustom(
 }
 
 // ============================================================================
-// Built-in field definitions
+// Translation helper type
 // ============================================================================
 
-export const contactFields: FormField[] = [
-  { name: "first_name", label: "First Name", type: "text", required: true, placeholder: "John" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Doe" },
-  { name: "email", label: "Email", type: "email", placeholder: "john@example.com" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "+1 (555) 123-4567" },
-  { name: "title", label: "Job Title", type: "text", placeholder: "Sales Manager" },
-  {
-    name: "status", label: "Status", type: "select",
-    options: [
-      { label: "Lead", value: "lead" },
-      { label: "Active", value: "active" },
-      { label: "Inactive", value: "inactive" },
-    ],
-  },
-];
+type T = (key: string, params?: Record<string, string | number>) => string;
 
-export const companyFields: FormField[] = [
-  { name: "name", label: "Company Name", type: "text", required: true, placeholder: "Acme Inc" },
-  { name: "domain", label: "Domain", type: "text", placeholder: "acme.com" },
-  { name: "industry", label: "Industry", type: "text", placeholder: "Technology" },
-  {
-    name: "size", label: "Company Size", type: "select",
-    options: [
-      { label: "1-10", value: "1-10" },
-      { label: "11-50", value: "11-50" },
-      { label: "51-200", value: "51-200" },
-      { label: "201-500", value: "201-500" },
-      { label: "500+", value: "500+" },
-    ],
-  },
-  { name: "website", label: "Website", type: "text", placeholder: "https://acme.com" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "+1 (555) 123-4567" },
-];
+// ============================================================================
+// Built-in field definitions (localized)
+// ============================================================================
 
-export const dealFields: FormField[] = [
-  { name: "title", label: "Deal Title", type: "text", required: true, placeholder: "Enterprise Contract" },
-  { name: "value", label: "Value ($)", type: "number", placeholder: "10000" },
-  { name: "expected_close_date", label: "Expected Close Date", type: "date" },
-  { name: "description", label: "Description", type: "textarea", placeholder: "Deal details..." },
-  {
-    name: "status", label: "Status", type: "select",
-    options: [
-      { label: "Open", value: "open" },
-      { label: "Won", value: "won" },
-      { label: "Lost", value: "lost" },
-    ],
-  },
-];
+export function getContactFields(t: T): FormField[] {
+  return [
+    { name: "first_name", label: t("crm.contacts.fields.firstName"), type: "text", required: true, placeholder: "John" },
+    { name: "last_name", label: t("crm.contacts.fields.lastName"), type: "text", placeholder: "Doe" },
+    { name: "email", label: t("crm.contacts.fields.email"), type: "email", placeholder: "john@example.com" },
+    { name: "phone", label: t("crm.contacts.fields.phone"), type: "tel", placeholder: "+1 (555) 123-4567" },
+    { name: "title", label: t("crm.contacts.fields.jobTitle"), type: "text" },
+    {
+      name: "status", label: t("crm.contacts.fields.status"), type: "select",
+      options: [
+        { label: t("crm.contacts.statuses.lead"), value: "lead" },
+        { label: t("crm.contacts.statuses.active"), value: "active" },
+        { label: t("crm.contacts.statuses.inactive"), value: "inactive" },
+      ],
+    },
+  ];
+}
 
-export const leadFields: FormField[] = [
-  { name: "first_name", label: "First Name", type: "text", required: true, placeholder: "John" },
-  { name: "last_name", label: "Last Name", type: "text", placeholder: "Doe" },
-  { name: "email", label: "Email", type: "email", placeholder: "john@example.com" },
-  { name: "phone", label: "Phone", type: "tel", placeholder: "+1 (555) 123-4567" },
-  { name: "mobile", label: "Mobile", type: "tel", placeholder: "+1 (555) 987-6543" },
-  { name: "organization", label: "Organization", type: "text", placeholder: "Acme Inc" },
-  { name: "website", label: "Website", type: "text", placeholder: "https://acme.com" },
-  { name: "job_title", label: "Job Title", type: "text", placeholder: "Sales Manager" },
-  {
-    name: "source", label: "Source", type: "select",
-    options: [
-      { label: "Website", value: "website" },
-      { label: "Referral", value: "referral" },
-      { label: "Campaign", value: "campaign" },
-      { label: "Cold Call", value: "cold_call" },
-      { label: "Social Media", value: "social_media" },
-      { label: "Event", value: "event" },
-      { label: "Other", value: "other" },
-    ],
-  },
-  {
-    name: "status", label: "Status", type: "select",
-    options: [
-      { label: "New", value: "new" },
-      { label: "Contacted", value: "contacted" },
-      { label: "Qualified", value: "qualified" },
-      { label: "Unqualified", value: "unqualified" },
-      { label: "Junk", value: "junk" },
-    ],
-  },
-];
+export function getCompanyFields(t: T): FormField[] {
+  return [
+    { name: "name", label: t("crm.companies.fields.companyName"), type: "text", required: true, placeholder: "Acme Inc" },
+    { name: "domain", label: t("crm.companies.fields.domain"), type: "text", placeholder: "acme.com" },
+    { name: "industry", label: t("crm.companies.fields.industry"), type: "text" },
+    {
+      name: "size", label: t("crm.companies.fields.size"), type: "select",
+      options: [
+        { label: "1-10", value: "1-10" },
+        { label: "11-50", value: "11-50" },
+        { label: "51-200", value: "51-200" },
+        { label: "201-500", value: "201-500" },
+        { label: "500+", value: "500+" },
+      ],
+    },
+    { name: "website", label: t("crm.companies.fields.website"), type: "text", placeholder: "https://acme.com" },
+    { name: "phone", label: t("crm.companies.fields.phone"), type: "tel", placeholder: "+1 (555) 123-4567" },
+  ];
+}
 
-export const callLogFields: FormField[] = [
-  {
-    name: "direction", label: "Direction", type: "select",
-    options: [
-      { label: "Outbound", value: "outbound" },
-      { label: "Inbound", value: "inbound" },
-    ],
-  },
-  {
-    name: "status", label: "Status", type: "select",
-    options: [
-      { label: "Completed", value: "completed" },
-      { label: "Missed", value: "missed" },
-      { label: "No Answer", value: "no_answer" },
-      { label: "Busy", value: "busy" },
-      { label: "Voicemail", value: "voicemail" },
-      { label: "Cancelled", value: "cancelled" },
-    ],
-  },
-  { name: "from_number", label: "From", type: "tel", placeholder: "+1 (555) 123-4567" },
-  { name: "to_number", label: "To", type: "tel", placeholder: "+1 (555) 987-6543" },
-  { name: "duration_seconds", label: "Duration (seconds)", type: "number", placeholder: "120" },
-  { name: "summary", label: "Summary", type: "textarea", placeholder: "Call notes..." },
-];
+export function getDealFields(t: T): FormField[] {
+  return [
+    { name: "title", label: t("crm.deals.fields.dealTitle"), type: "text", required: true },
+    { name: "value", label: t("crm.deals.fields.value"), type: "number", placeholder: "10000" },
+    { name: "expected_close_date", label: t("crm.deals.fields.expectedClose"), type: "date" },
+    { name: "description", label: t("crm.deals.fields.description"), type: "textarea" },
+    {
+      name: "status", label: t("crm.deals.fields.status"), type: "select",
+      options: [
+        { label: t("crm.deals.statuses.open"), value: "open" },
+        { label: t("crm.deals.statuses.won"), value: "won" },
+        { label: t("crm.deals.statuses.lost"), value: "lost" },
+      ],
+    },
+  ];
+}
+
+export function getLeadFields(t: T): FormField[] {
+  return [
+    { name: "first_name", label: t("crm.leads.fields.firstName"), type: "text", required: true, placeholder: "John" },
+    { name: "last_name", label: t("crm.leads.fields.lastName"), type: "text", placeholder: "Doe" },
+    { name: "email", label: t("crm.leads.fields.email"), type: "email", placeholder: "john@example.com" },
+    { name: "phone", label: t("crm.leads.fields.phone"), type: "tel", placeholder: "+1 (555) 123-4567" },
+    { name: "mobile", label: t("crm.leads.fields.mobile"), type: "tel" },
+    { name: "organization", label: t("crm.leads.fields.organization"), type: "text", placeholder: "Acme Inc" },
+    { name: "website", label: t("crm.leads.fields.website"), type: "text", placeholder: "https://acme.com" },
+    { name: "job_title", label: t("crm.leads.fields.jobTitle"), type: "text" },
+    {
+      name: "source", label: t("crm.leads.fields.source"), type: "select",
+      options: [
+        { label: t("crm.leads.sources.website"), value: "website" },
+        { label: t("crm.leads.sources.referral"), value: "referral" },
+        { label: t("crm.leads.sources.campaign"), value: "campaign" },
+        { label: t("crm.leads.sources.coldCall"), value: "cold_call" },
+        { label: t("crm.leads.sources.socialMedia"), value: "social_media" },
+        { label: t("crm.leads.sources.event"), value: "event" },
+        { label: t("crm.leads.sources.other"), value: "other" },
+      ],
+    },
+    {
+      name: "status", label: t("crm.leads.fields.status"), type: "select",
+      options: [
+        { label: t("crm.leads.statuses.new"), value: "new" },
+        { label: t("crm.leads.statuses.contacted"), value: "contacted" },
+        { label: t("crm.leads.statuses.qualified"), value: "qualified" },
+        { label: t("crm.leads.statuses.unqualified"), value: "unqualified" },
+        { label: t("crm.leads.statuses.junk"), value: "junk" },
+      ],
+    },
+  ];
+}
+
+export function getCallLogFields(t: T): FormField[] {
+  return [
+    {
+      name: "direction", label: t("crm.callLogs.fields.direction"), type: "select",
+      options: [
+        { label: t("crm.callLogs.directions.outbound"), value: "outbound" },
+        { label: t("crm.callLogs.directions.inbound"), value: "inbound" },
+      ],
+    },
+    {
+      name: "status", label: t("crm.callLogs.fields.status"), type: "select",
+      options: [
+        { label: t("crm.callLogs.statuses.completed"), value: "completed" },
+        { label: t("crm.callLogs.statuses.missed"), value: "missed" },
+        { label: t("crm.callLogs.statuses.noAnswer"), value: "no_answer" },
+        { label: t("crm.callLogs.statuses.busy"), value: "busy" },
+        { label: t("crm.callLogs.statuses.voicemail"), value: "voicemail" },
+        { label: t("crm.callLogs.statuses.cancelled"), value: "cancelled" },
+      ],
+    },
+    { name: "from_number", label: t("crm.callLogs.fields.from"), type: "tel", placeholder: "+1 (555) 123-4567" },
+    { name: "to_number", label: t("crm.callLogs.fields.to"), type: "tel", placeholder: "+1 (555) 987-6543" },
+    { name: "duration_seconds", label: t("crm.callLogs.fields.duration"), type: "number", placeholder: "120" },
+    { name: "summary", label: t("crm.callLogs.fields.summary"), type: "textarea" },
+  ];
+}
+
+// ============================================================================
+// Backward-compatible static exports (English defaults)
+// ============================================================================
+
+const id = (key: string) => key.split(".").pop() || key;
+
+export const contactFields = getContactFields(id);
+export const companyFields = getCompanyFields(id);
+export const dealFields = getDealFields(id);
+export const leadFields = getLeadFields(id);
+export const callLogFields = getCallLogFields(id);

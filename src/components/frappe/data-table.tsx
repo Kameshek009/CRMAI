@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCallback, useMemo } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 // ============================================================================
 // Types
@@ -61,9 +62,11 @@ export function DataTable<T extends { id: string }>({
   totalCount,
   onPageChange,
   loading = false,
-  emptyMessage = "No data found",
+  emptyMessage,
   className,
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
+  const resolvedEmptyMessage = emptyMessage || t("crm.dataTable.noData");
   const allSelected = useMemo(
     () => data.length > 0 && data.every((item) => selectedIds.has(item.id)),
     [data, selectedIds]
@@ -174,7 +177,7 @@ export function DataTable<T extends { id: string }>({
                   colSpan={columns.length + (selectable ? 1 : 0)}
                   className="px-3 py-16 text-center text-sm text-muted-foreground"
                 >
-                  {emptyMessage}
+                  {resolvedEmptyMessage}
                 </td>
               </tr>
             ) : (
@@ -223,7 +226,7 @@ export function DataTable<T extends { id: string }>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-border px-4 py-2">
           <span className="text-xs text-muted-foreground">
-            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
+            {t("crm.dataTable.showing", { start: (page - 1) * pageSize + 1, end: Math.min(page * pageSize, total), total })}
           </span>
           <div className="flex items-center gap-1">
             <button
@@ -232,7 +235,7 @@ export function DataTable<T extends { id: string }>({
               onClick={() => onPageChange?.(page - 1)}
               className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
-              Previous
+              {t("crm.dataTable.previous")}
             </button>
             <span className="px-2 text-xs font-medium">
               {page} / {totalPages}
@@ -243,7 +246,7 @@ export function DataTable<T extends { id: string }>({
               onClick={() => onPageChange?.(page + 1)}
               className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
-              Next
+              {t("crm.dataTable.next")}
             </button>
           </div>
         </div>
