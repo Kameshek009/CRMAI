@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useTranslation } from "@/lib/i18n";
 import {
   DndContext,
   DragOverlay,
@@ -49,16 +50,17 @@ interface PipelineColumn {
 const COLUMN_WIDTH = 288;
 const COLUMN_GAP = 16;
 
-const dealFields: FormField[] = [
-  { name: "title", label: "Deal Title", type: "text", required: true, placeholder: "New deal" },
-  { name: "value", label: "Value ($)", type: "number", placeholder: "10000" },
-  { name: "expected_close_date", label: "Expected Close", type: "date" },
-  { name: "description", label: "Description", type: "textarea" },
-];
-
 // ── Pipeline Page ───────────────────────────────────────────────────────
 
 export function PipelineContent() {
+  const { t } = useTranslation();
+
+  const dealFields: FormField[] = useMemo(() => [
+    { name: "title", label: t("crm.pipeline.dealTitle"), type: "text" as const, required: true, placeholder: t("crm.pipeline.newDealPlaceholder") },
+    { name: "value", label: t("crm.pipeline.value"), type: "number" as const, placeholder: "10000" },
+    { name: "expected_close_date", label: t("crm.pipeline.expectedClose"), type: "date" as const },
+    { name: "description", label: t("crm.pipeline.description"), type: "textarea" as const },
+  ], [t]);
   const [columns, setColumns] = useState<PipelineColumn[]>([]);
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [totalValue, setTotalValue] = useState(0);
@@ -215,10 +217,10 @@ export function PipelineContent() {
     });
 
     if (!res.ok) {
-      toast.error("Failed to move deal");
+      toast.error(t("crm.pipeline.failedMove"));
       fetchPipeline();
     } else {
-      toast.success(`Moved to ${targetStage?.name}`);
+      toast.success(t("crm.pipeline.movedTo", { stage: targetStage?.name || "" }));
     }
   };
 
@@ -234,10 +236,10 @@ export function PipelineContent() {
     });
     const json = await res.json();
     if (json.success) {
-      toast.success("Deal created");
+      toast.success(t("crm.pipeline.dealCreated"));
       fetchPipeline();
     } else {
-      toast.error(json.error || "Failed");
+      toast.error(json.error || t("crm.pipeline.failed"));
       throw new Error(json.error);
     }
   };
@@ -280,8 +282,8 @@ export function PipelineContent() {
       <div className="flex items-center justify-center h-full">
         <EmptyState
           icon={Kanban}
-          title="Pipeline not set up"
-          description="Your deal stages are being configured."
+          title={t("crm.pipeline.notSetUp")}
+          description={t("crm.pipeline.beingConfigured")}
         />
       </div>
     );
@@ -355,7 +357,7 @@ export function PipelineContent() {
       <EntityForm
         open={showForm}
         onOpenChange={setShowForm}
-        title="New Deal"
+        title={t("crm.pipeline.title")}
         fields={dealFields}
         onSubmit={handleCreateDeal}
       />

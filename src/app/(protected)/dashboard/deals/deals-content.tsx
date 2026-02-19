@@ -12,6 +12,7 @@ import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { Handshake } from "lucide-react";
 import { toast } from "sonner";
 import type { ViewMode } from "@/types/crm";
+import { useTranslation } from "@/lib/i18n";
 
 // ============================================================================
 // Types
@@ -44,43 +45,14 @@ interface DealData {
 // Constants
 // ============================================================================
 
-const FILTER_OPTIONS: FilterOption[] = [
-  {
-    field: "status", label: "Status", type: "select",
-    options: [
-      { value: "open", label: "Open" },
-      { value: "won", label: "Won" },
-      { value: "lost", label: "Lost" },
-    ],
-  },
-];
-
-const SORT_OPTIONS: SortOption[] = [
-  { field: "created_at", label: "Created" },
-  { field: "title", label: "Title" },
-  { field: "value", label: "Value" },
-  { field: "expected_close_date", label: "Expected Close" },
-  { field: "ai_win_probability", label: "Win %" },
-];
-
-const GROUP_BY_OPTIONS: GroupByOption[] = [
-  { field: "status", label: "Status" },
-];
-
 const PAGE_SIZE = 50;
-
-const dealFormFields: FormField[] = [
-  { name: "title", label: "Название сделки", type: "text", required: true, placeholder: "Новая сделка" },
-  { name: "value", label: "Сумма ($)", type: "number", placeholder: "10000" },
-  { name: "expected_close_date", label: "Ожидаемое закрытие", type: "date" },
-  { name: "description", label: "Описание", type: "textarea" },
-];
 
 // ============================================================================
 // Component
 // ============================================================================
 
 export function DealsContent() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [deals, setDeals] = useState<DealData[]>([]);
@@ -96,6 +68,36 @@ export function DealsContent() {
   const [page, setPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [groupBy, setGroupBy] = useState<string | null>("status");
+
+  const FILTER_OPTIONS: FilterOption[] = useMemo(() => [
+    {
+      field: "status", label: t("crm.deals.fields.status"), type: "select" as const,
+      options: [
+        { value: "open", label: t("crm.deals.statuses.open") },
+        { value: "won", label: t("crm.deals.statuses.won") },
+        { value: "lost", label: t("crm.deals.statuses.lost") },
+      ],
+    },
+  ], [t]);
+
+  const SORT_OPTIONS: SortOption[] = useMemo(() => [
+    { field: "created_at", label: t("crm.deals.sort.created") },
+    { field: "title", label: t("crm.deals.sort.title") },
+    { field: "value", label: t("crm.deals.sort.value") },
+    { field: "expected_close_date", label: t("crm.deals.sort.expectedClose") },
+    { field: "ai_win_probability", label: t("crm.deals.sort.winPercent") },
+  ], [t]);
+
+  const GROUP_BY_OPTIONS: GroupByOption[] = useMemo(() => [
+    { field: "status", label: t("crm.deals.groupBy.status") },
+  ], [t]);
+
+  const dealFormFields: FormField[] = useMemo(() => [
+    { name: "title", label: t("crm.deals.fields.dealTitle"), type: "text" as const, required: true, placeholder: t("crm.deals.new") },
+    { name: "value", label: t("crm.deals.fields.value"), type: "number" as const, placeholder: "10000" },
+    { name: "expected_close_date", label: t("crm.deals.fields.expectedClose"), type: "date" as const },
+    { name: "description", label: t("crm.deals.fields.description"), type: "textarea" as const },
+  ], [t]);
 
   const fetchDeals = useCallback(async () => {
     setIsLoading(true);
@@ -152,7 +154,7 @@ export function DealsContent() {
       const next = prev.filter(f => f.field !== field);
       return [...next, { field, value, label: optLabel }];
     });
-  }, []);
+  }, [FILTER_OPTIONS]);
 
   const handleFilterRemove = useCallback((field: string) => {
     setActiveFilters(prev => prev.filter(f => f.field !== field));
@@ -183,7 +185,7 @@ export function DealsContent() {
       : null;
 
     if (!defaultStage) {
-      toast.error("Нет стадий пайплайна. Сначала откройте пайплайн.");
+      toast.error(t("crm.deals.noStages"));
       throw new Error("No pipeline stages");
     }
 
@@ -198,10 +200,10 @@ export function DealsContent() {
     });
     const json = await res.json();
     if (json.success) {
-      toast.success("Сделка создана");
+      toast.success(t("crm.deals.created"));
       fetchDeals();
     } else {
-      toast.error(json.error || "Ошибка создания");
+      toast.error(json.error || t("common.failed"));
       throw new Error(json.error);
     }
   };
@@ -213,7 +215,7 @@ export function DealsContent() {
 
   const columns: Column<DealData>[] = useMemo(() => [
     {
-      key: "title", label: "Title", sortable: true,
+      key: "title", label: t("crm.deals.fields.title"), sortable: true,
       render: (d) => (
         <div className="flex items-center gap-2">
           <Handshake className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -222,7 +224,7 @@ export function DealsContent() {
       ),
     },
     {
-      key: "deal_stages", label: "Stage",
+      key: "deal_stages", label: t("crm.deals.fields.stage"),
       render: (d) => d.deal_stages ? (
         <span
           className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-md"
@@ -234,34 +236,34 @@ export function DealsContent() {
       ) : "—",
     },
     {
-      key: "value", label: "Value", sortable: true, align: "right",
+      key: "value", label: t("crm.deals.fields.value"), sortable: true, align: "right",
       render: (d) => <span className="font-medium">{formatCurrency(d.value)}</span>,
     },
     {
-      key: "contacts", label: "Contact",
+      key: "contacts", label: t("crm.deals.fields.contact"),
       render: (d) => d.contacts ? `${d.contacts.first_name} ${d.contacts.last_name || ""}`.trim() : "—",
     },
     {
-      key: "companies", label: "Organization",
+      key: "companies", label: t("crm.deals.fields.organization"),
       render: (d) => d.companies?.name || "—",
     },
     {
-      key: "ai_win_probability", label: "Win %", sortable: true, align: "center",
+      key: "ai_win_probability", label: t("crm.deals.fields.winPercent"), sortable: true, align: "center",
       render: (d) => d.ai_win_probability != null ? (
         <span className="text-xs font-medium">{d.ai_win_probability}%</span>
       ) : "—",
     },
     {
-      key: "status", label: "Status", sortable: true,
+      key: "status", label: t("crm.deals.fields.status"), sortable: true,
       render: (d) => <StatusBadge status={d.status} />,
     },
     {
-      key: "expected_close_date", label: "Expected Close", sortable: true,
+      key: "expected_close_date", label: t("crm.deals.fields.expectedClose"), sortable: true,
       render: (d) => d.expected_close_date
         ? new Date(d.expected_close_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
         : "—",
     },
-  ], []);
+  ], [t]);
 
   const groups: GroupByGroup<DealData>[] = useMemo(() => {
     if (!groupBy) return [];
@@ -295,12 +297,12 @@ export function DealsContent() {
 
   return (
     <PageContainer>
-      <PageHeader title="Deals" description={`${total} deal${total !== 1 ? "s" : ""}`} />
+      <PageHeader title={t("crm.deals.title")} description={`${total}`} />
 
       <ViewControls
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search deals..."
+        searchPlaceholder={t("crm.deals.searchPlaceholder")}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         filterOptions={FILTER_OPTIONS}
@@ -316,9 +318,8 @@ export function DealsContent() {
         currentGroupBy={groupBy}
         onGroupByChange={setGroupBy}
         totalCount={total}
-        entityName={`deal${total !== 1 ? "s" : ""}`}
         onAdd={() => setShowForm(true)}
-        addLabel="Новая сделка"
+        addLabel={t("crm.deals.new")}
         featureLimitKey="deals"
       />
 
@@ -335,7 +336,7 @@ export function DealsContent() {
           pageSize={PAGE_SIZE}
           totalCount={total}
           onPageChange={setPage}
-          emptyMessage={search || activeFilters.length ? "No matching deals" : "No deals yet"}
+          emptyMessage={search || activeFilters.length ? t("crm.deals.noMatching") : t("crm.deals.noYet")}
         />
       )}
 
@@ -365,7 +366,7 @@ export function DealsContent() {
       {viewMode === "group_by" && (
         <GroupByView
           groups={groups}
-          emptyMessage="No deals to group"
+          emptyMessage={t("crm.deals.noGroup")}
           renderItem={(d) => (
             <div
               key={d.id}
@@ -390,7 +391,7 @@ export function DealsContent() {
       <EntityForm
         open={showForm}
         onOpenChange={setShowForm}
-        title="Новая сделка"
+        title={t("crm.deals.new")}
         fields={dealFormFields}
         onSubmit={handleCreateDeal}
       />
