@@ -27,7 +27,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       "50K AI tokens/month (team pool)",
       "Up to 100 contacts",
       "Up to 5 companies",
-      "Up to 50 deals & leads",
+      "Up to 50 deals",
       "Up to 50 tasks",
       "Basic pipeline (3 stages)",
       "3 email templates",
@@ -47,12 +47,12 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       "500K AI tokens/month (team pool)",
       "Up to 5,000 contacts",
       "Up to 500 companies",
-      "Up to 2,500 deals & leads",
+      "Up to 2,500 deals",
       "Unlimited tasks & pipeline stages",
       "10 active automations",
       "25 email templates · 5 sequences",
       "30 custom fields · 3 visibility groups",
-      "AI deal insights & lead scoring",
+      "AI deal insights",
       "Import / Export (CSV)",
       "Priority support",
       "Unlimited team members",
@@ -69,7 +69,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       "1.5M AI tokens/month (team pool)",
       "Up to 25,000 contacts",
       "Up to 5,000 companies",
-      "Up to 15,000 deals & leads",
+      "Up to 15,000 deals",
       "50 active automations",
       "100 email templates · 25 sequences",
       "100 custom fields · 10 visibility groups",
@@ -89,7 +89,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     features: [
       "Unlimited AI tokens (team pool)",
       "Unlimited contacts & companies",
-      "Unlimited deals & leads",
+      "Unlimited deals",
       "200 active automations",
       "Unlimited email templates & sequences",
       "500 custom fields",
@@ -109,7 +109,6 @@ export type FeatureLimitKey =
   | "contacts"
   | "companies"
   | "deals"
-  | "leads"
   | "tasks"
   | "customFields"
   | "activeAutomations"
@@ -126,7 +125,6 @@ export const TIER_FEATURE_LIMITS: Record<SubscriptionTier, TierFeatureLimits> = 
     contacts: 100,
     companies: 5,
     deals: 50,
-    leads: 50,
     tasks: 50,
     customFields: 5,
     activeAutomations: 0,
@@ -140,7 +138,6 @@ export const TIER_FEATURE_LIMITS: Record<SubscriptionTier, TierFeatureLimits> = 
     contacts: 5_000,
     companies: 500,
     deals: 2_500,
-    leads: 2_500,
     tasks: 0,
     customFields: 30,
     activeAutomations: 10,
@@ -154,7 +151,6 @@ export const TIER_FEATURE_LIMITS: Record<SubscriptionTier, TierFeatureLimits> = 
     contacts: 25_000,
     companies: 5_000,
     deals: 15_000,
-    leads: 15_000,
     tasks: 0,
     customFields: 100,
     activeAutomations: 50,
@@ -168,7 +164,6 @@ export const TIER_FEATURE_LIMITS: Record<SubscriptionTier, TierFeatureLimits> = 
     contacts: 0,
     companies: 0,
     deals: 0,
-    leads: 0,
     tasks: 0,
     customFields: 500,
     activeAutomations: 200,

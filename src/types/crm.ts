@@ -10,16 +10,14 @@ export type TaskType = "call" | "email" | "meeting" | "follow_up" | "other";
 export type CrmActivityType =
   | "note" | "call" | "email" | "meeting"
   | "deal_created" | "deal_stage_changed" | "deal_won" | "deal_lost"
-  | "contact_created" | "task_completed" | "import"
-  | "lead_created" | "lead_converted" | "lead_status_changed";
+  | "contact_created" | "task_completed" | "import";
 
 // New types for Frappe CRM redesign
-export type LeadStatus = "new" | "contacted" | "qualified" | "unqualified" | "junk";
 export type CallLogStatus = "completed" | "missed" | "no_answer" | "busy" | "voicemail" | "cancelled";
 export type CallDirection = "inbound" | "outbound";
 export type EmailStatus = "draft" | "sent" | "received" | "failed";
 export type ViewMode = "table" | "kanban" | "group_by";
-export type EntityType = "contacts" | "leads" | "deals" | "organizations" | "tasks" | "call_logs" | "notes";
+export type EntityType = "contacts" | "deals" | "organizations" | "tasks" | "call_logs" | "notes";
 
 // ============================================================================
 // Company
@@ -291,7 +289,6 @@ export interface CrmTask {
   contactId: string | null;
   dealId: string | null;
   companyId: string | null;
-  leadId: string | null;
   title: string;
   description: string | null;
   type: TaskType;
@@ -314,7 +311,6 @@ export interface CrmTaskRow {
   contact_id: string | null;
   deal_id: string | null;
   company_id: string | null;
-  lead_id: string | null;
   title: string;
   description: string | null;
   type: TaskType;
@@ -335,7 +331,6 @@ export function transformCrmTaskRow(row: CrmTaskRow): CrmTask {
     contactId: row.contact_id,
     dealId: row.deal_id,
     companyId: row.company_id,
-    leadId: row.lead_id,
     title: row.title,
     description: row.description,
     type: row.type,
@@ -360,7 +355,6 @@ export interface Activity {
   contactId: string | null;
   dealId: string | null;
   companyId: string | null;
-  leadId: string | null;
   type: CrmActivityType;
   title: string;
   description: string | null;
@@ -374,7 +368,6 @@ export interface ActivityRow {
   contact_id: string | null;
   deal_id: string | null;
   company_id: string | null;
-  lead_id: string | null;
   type: CrmActivityType;
   title: string;
   description: string | null;
@@ -389,7 +382,6 @@ export function transformActivityRow(row: ActivityRow): Activity {
     contactId: row.contact_id,
     dealId: row.deal_id,
     companyId: row.company_id,
-    leadId: row.lead_id,
     type: row.type,
     title: row.title,
     description: row.description,
@@ -408,7 +400,6 @@ export interface Note {
   contactId: string | null;
   dealId: string | null;
   companyId: string | null;
-  leadId: string | null;
   content: string;
   isPinned: boolean;
   metadata: Record<string, unknown>;
@@ -422,7 +413,6 @@ export interface NoteRow {
   contact_id: string | null;
   deal_id: string | null;
   company_id: string | null;
-  lead_id: string | null;
   content: string;
   is_pinned: boolean;
   metadata: Record<string, unknown>;
@@ -437,7 +427,6 @@ export function transformNoteRow(row: NoteRow): Note {
     contactId: row.contact_id,
     dealId: row.deal_id,
     companyId: row.company_id,
-    leadId: row.lead_id,
     content: row.content,
     isPinned: row.is_pinned,
     metadata: row.metadata || {},
@@ -493,95 +482,11 @@ export interface CrmStats {
 // ============================================================================
 
 export interface SearchResult {
-  type: "contact" | "company" | "deal" | "lead";
+  type: "contact" | "company" | "deal";
   id: string;
   title: string;
   subtitle: string;
   score?: number;
-}
-
-// ============================================================================
-// Lead
-// ============================================================================
-
-export interface Lead {
-  id: string;
-  teamId: string;
-  accountId: string;
-  firstName: string;
-  lastName: string | null;
-  email: string | null;
-  phone: string | null;
-  mobile: string | null;
-  organization: string | null;
-  website: string | null;
-  jobTitle: string | null;
-  source: string | null;
-  status: LeadStatus;
-  leadOwnerAccountId: string | null;
-  convertedDealId: string | null;
-  convertedContactId: string | null;
-  convertedAt: string | null;
-  notes: string | null;
-  tags: string[];
-  metadata: Record<string, unknown>;
-  isDeleted: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface LeadRow {
-  id: string;
-  team_id: string;
-  account_id: string;
-  first_name: string;
-  last_name: string | null;
-  email: string | null;
-  phone: string | null;
-  mobile: string | null;
-  organization: string | null;
-  website: string | null;
-  job_title: string | null;
-  source: string | null;
-  status: LeadStatus;
-  lead_owner_account_id: string | null;
-  converted_deal_id: string | null;
-  converted_contact_id: string | null;
-  converted_at: string | null;
-  notes: string | null;
-  tags: string[];
-  metadata: Record<string, unknown>;
-  is_deleted: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export function transformLeadRow(row: LeadRow): Lead {
-  return {
-    id: row.id,
-    teamId: row.team_id,
-    accountId: row.account_id,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    email: row.email,
-    phone: row.phone,
-    mobile: row.mobile,
-    organization: row.organization,
-    website: row.website,
-    jobTitle: row.job_title,
-    source: row.source,
-    status: row.status,
-    leadOwnerAccountId: row.lead_owner_account_id,
-    convertedDealId: row.converted_deal_id,
-    convertedContactId: row.converted_contact_id,
-    convertedAt: row.converted_at,
-    notes: row.notes,
-    tags: row.tags || [],
-    metadata: row.metadata || {},
-    isDeleted: row.is_deleted,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
 }
 
 // ============================================================================
@@ -593,7 +498,6 @@ export interface CallLog {
   teamId: string;
   accountId: string;
   contactId: string | null;
-  leadId: string | null;
   dealId: string | null;
   callerAccountId: string | null;
   direction: CallDirection;
@@ -609,7 +513,6 @@ export interface CallLog {
   updatedAt: string;
   // Joined
   contact?: Contact | null;
-  lead?: Lead | null;
 }
 
 export interface CallLogRow {
@@ -617,7 +520,6 @@ export interface CallLogRow {
   team_id: string;
   account_id: string;
   contact_id: string | null;
-  lead_id: string | null;
   deal_id: string | null;
   caller_account_id: string | null;
   direction: CallDirection;
@@ -639,7 +541,6 @@ export function transformCallLogRow(row: CallLogRow): CallLog {
     teamId: row.team_id,
     accountId: row.account_id,
     contactId: row.contact_id,
-    leadId: row.lead_id,
     dealId: row.deal_id,
     callerAccountId: row.caller_account_id,
     direction: row.direction,
@@ -731,7 +632,6 @@ export interface EmailCommunication {
   teamId: string;
   accountId: string;
   contactId: string | null;
-  leadId: string | null;
   dealId: string | null;
   subject: string | null;
   bodyHtml: string | null;
@@ -756,7 +656,6 @@ export interface EmailCommunicationRow {
   team_id: string;
   account_id: string;
   contact_id: string | null;
-  lead_id: string | null;
   deal_id: string | null;
   subject: string | null;
   body_html: string | null;
@@ -782,7 +681,6 @@ export function transformEmailCommunicationRow(row: EmailCommunicationRow): Emai
     teamId: row.team_id,
     accountId: row.account_id,
     contactId: row.contact_id,
-    leadId: row.lead_id,
     dealId: row.deal_id,
     subject: row.subject,
     bodyHtml: row.body_html,
