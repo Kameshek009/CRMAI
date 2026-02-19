@@ -28,7 +28,6 @@ interface CompanyData {
   industry: string | null;
   size: string | null;
   domain: string | null;
-  ai_health_score: number;
   created_at: string;
 }
 
@@ -67,7 +66,6 @@ export function CompaniesContent() {
     { field: "created_at", label: t("crm.companies.sort.created") },
     { field: "name", label: t("crm.companies.sort.name") },
     { field: "industry", label: t("crm.companies.sort.industry") },
-    { field: "ai_health_score", label: t("crm.companies.sort.healthScore") },
   ], [t]);
 
   const GROUP_BY_OPTIONS: GroupByOption[] = useMemo(() => [
@@ -185,13 +183,6 @@ export function CompaniesContent() {
     }
   };
 
-  const healthScoreColor = (score: number) => {
-    if (score >= 80) return "text-emerald-600";
-    if (score >= 60) return "text-blue-600";
-    if (score >= 40) return "text-amber-600";
-    return "text-red-600";
-  };
-
   const columns: Column<CompanyData>[] = useMemo(() => [
     {
       key: "name", label: t("crm.companies.fields.name"), sortable: true,
@@ -207,14 +198,6 @@ export function CompaniesContent() {
     { key: "domain", label: t("crm.companies.fields.domain") },
     { key: "industry", label: t("crm.companies.fields.industry"), sortable: true },
     { key: "size", label: t("crm.companies.groupBy.size") },
-    {
-      key: "ai_health_score", label: t("crm.companies.fields.health"), sortable: true, align: "center",
-      render: (c) => (
-        <span className={`text-xs font-semibold ${healthScoreColor(c.ai_health_score)}`}>
-          {c.ai_health_score || 0}
-        </span>
-      ),
-    },
   ], [t]);
 
   const groups: GroupByGroup<CompanyData>[] = useMemo(() => {
@@ -298,9 +281,6 @@ export function CompaniesContent() {
             >
               <span className="text-sm font-medium">{c.name}</span>
               {c.industry && <p className="text-xs text-muted-foreground">{c.industry}</p>}
-              <p className={`text-xs font-semibold mt-1 ${healthScoreColor(c.ai_health_score)}`}>
-                Health: {c.ai_health_score || 0}
-              </p>
             </div>
           )}
         />
@@ -325,7 +305,7 @@ export function CompaniesContent() {
                   {c.domain && <p className="text-xs text-muted-foreground">{c.domain}</p>}
                 </div>
               </div>
-              <span className={`text-xs font-semibold ${healthScoreColor(c.ai_health_score)}`}>{c.ai_health_score || 0}</span>
+              <span className="text-xs text-muted-foreground">{c.size || "—"}</span>
             </div>
           )}
         />
