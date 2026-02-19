@@ -5,6 +5,7 @@ import { parseListParams, applyListQuery, applyVisibilityFilter } from "@/lib/cr
 import { createContactSchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
 import { runAutomations } from "@/lib/crm/automation-engine";
+import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -55,6 +56,9 @@ export async function POST(request: NextRequest) {
 
     const permError = requirePermission(context.permissions, "contacts", "create", context.isOwner);
     if (permError) return permError;
+
+    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "contacts");
+    if (limitError) return limitError;
 
     const body = await request.json();
     const parsed = createContactSchema.safeParse(body);

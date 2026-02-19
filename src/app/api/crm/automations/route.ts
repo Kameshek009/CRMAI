@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { z } from "zod";
+import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
 const createAutomationSchema = z.object({
@@ -55,6 +56,9 @@ export async function POST(request: NextRequest) {
 
     const permError = requirePermission(context.permissions, "team_settings", "manage", context.isOwner);
     if (permError) return permError;
+
+    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "activeAutomations");
+    if (limitError) return limitError;
 
     const body = await request.json();
     const parsed = createAutomationSchema.safeParse(body);

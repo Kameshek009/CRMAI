@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createTaskSchema } from "@/lib/crm/validation";
+import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -47,6 +48,9 @@ export async function POST(request: NextRequest) {
 
     const permError = requirePermission(context.permissions, "tasks", "create", context.isDirector);
     if (permError) return permError;
+
+    const limitError = await requireFeatureLimit(context.teamId, context.tier, "tasks");
+    if (limitError) return limitError;
 
     const body = await request.json();
     const parsed = createTaskSchema.safeParse(body);

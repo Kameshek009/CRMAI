@@ -25,13 +25,15 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     maxMembers: 3,
     features: [
       "50K AI tokens/month (team pool)",
-      "Up to 50 contacts",
-      "1 company",
-      "Basic pipeline (2 stages)",
-      "Up to 20 tasks",
+      "Up to 100 contacts",
+      "Up to 5 companies",
+      "Up to 50 deals & leads",
+      "Up to 50 tasks",
+      "Basic pipeline (3 stages)",
+      "3 email templates",
+      "5 custom fields",
       "Up to 3 team members",
       "Community support",
-      "3-day activity history",
     ],
   },
   pro: {
@@ -43,15 +45,16 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     maxMembers: 5000,
     features: [
       "500K AI tokens/month (team pool)",
-      "Up to 200 contacts",
-      "Up to 5 companies",
-      "Unlimited pipeline stages",
+      "Up to 5,000 contacts",
+      "Up to 500 companies",
+      "Up to 2,500 deals & leads",
+      "Unlimited tasks & pipeline stages",
+      "10 active automations",
+      "25 email templates · 5 sequences",
+      "30 custom fields · 3 visibility groups",
       "AI deal insights & lead scoring",
       "Import / Export (CSV)",
       "Priority support",
-      "30-day activity history",
-      "Usage analytics",
-      "API access",
       "Unlimited team members",
     ],
   },
@@ -64,14 +67,14 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     maxMembers: 5000,
     features: [
       "1.5M AI tokens/month (team pool)",
-      "Up to 500 contacts",
-      "Up to 10 companies",
-      "Advanced AI automation",
-      "Custom fields",
+      "Up to 25,000 contacts",
+      "Up to 5,000 companies",
+      "Up to 15,000 deals & leads",
+      "50 active automations",
+      "100 email templates · 25 sequences",
+      "100 custom fields · 10 visibility groups",
       "Advanced analytics & reports",
       "Dedicated support",
-      "Unlimited activity history",
-      "Custom integrations",
       "SLA guarantee",
       "Unlimited team members",
     ],
@@ -85,15 +88,95 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     maxMembers: 5000,
     features: [
       "Unlimited AI tokens (team pool)",
-      "25+ companies",
-      "Unlimited contacts",
-      "White labeling",
-      "SSO (SAML / OAuth)",
-      "Audit logs",
-      "Dedicated infrastructure",
+      "Unlimited contacts & companies",
+      "Unlimited deals & leads",
+      "200 active automations",
+      "Unlimited email templates & sequences",
+      "500 custom fields",
+      "White labeling · SSO (SAML / OAuth)",
+      "Audit logs · Dedicated infrastructure",
       "24/7 priority support",
       "Custom SLA & onboarding",
     ],
+  },
+};
+
+// ============================================================================
+// Feature Limits per Tier (0 = unlimited)
+// ============================================================================
+
+export type FeatureLimitKey =
+  | "contacts"
+  | "companies"
+  | "deals"
+  | "leads"
+  | "tasks"
+  | "customFields"
+  | "activeAutomations"
+  | "pipelineStages"
+  | "emailTemplates"
+  | "emailSequences"
+  | "visibilityGroups"
+  | "teamMembers";
+
+export type TierFeatureLimits = Record<FeatureLimitKey, number>;
+
+export const TIER_FEATURE_LIMITS: Record<SubscriptionTier, TierFeatureLimits> = {
+  free: {
+    contacts: 100,
+    companies: 5,
+    deals: 50,
+    leads: 50,
+    tasks: 50,
+    customFields: 5,
+    activeAutomations: 0,
+    pipelineStages: 3,
+    emailTemplates: 3,
+    emailSequences: 0,
+    visibilityGroups: 0,
+    teamMembers: 3,
+  },
+  pro: {
+    contacts: 5_000,
+    companies: 500,
+    deals: 2_500,
+    leads: 2_500,
+    tasks: 0,
+    customFields: 30,
+    activeAutomations: 10,
+    pipelineStages: 0,
+    emailTemplates: 25,
+    emailSequences: 5,
+    visibilityGroups: 3,
+    teamMembers: 0,
+  },
+  max: {
+    contacts: 25_000,
+    companies: 5_000,
+    deals: 15_000,
+    leads: 15_000,
+    tasks: 0,
+    customFields: 100,
+    activeAutomations: 50,
+    pipelineStages: 0,
+    emailTemplates: 100,
+    emailSequences: 25,
+    visibilityGroups: 10,
+    teamMembers: 0,
+  },
+  enterprise: {
+    contacts: 0,
+    companies: 0,
+    deals: 0,
+    leads: 0,
+    tasks: 0,
+    customFields: 500,
+    activeAutomations: 200,
+    pipelineStages: 0,
+    emailTemplates: 0,
+    emailSequences: 0,
+    visibilityGroups: 0,
+    teamMembers: 0,
   },
 };
 

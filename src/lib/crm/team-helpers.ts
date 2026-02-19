@@ -147,6 +147,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
       workspaceId: account.current_team_id,
       teamId: account.current_team_id, // backward compat
       memberId: member.id,
+      tier: tier as import("@/types").SubscriptionTier,
       fixedRole,
       role: {
         id: role.id,

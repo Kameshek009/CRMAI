@@ -321,6 +321,7 @@ export interface WorkspaceContext {
   /** @deprecated Use workspaceId */
   teamId: string;
   memberId: string;
+  tier: import("@/types").SubscriptionTier;
   fixedRole: FixedRole;
   role: WorkspaceRole;
   permissions: WorkspacePermissions;

@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { ensureDealStages } from "@/lib/crm/helpers";
 import { createPipelineStageSchema, reorderStagesSchema } from "@/lib/crm/validation";
+import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
 export async function GET() {
@@ -75,6 +76,9 @@ export async function POST(request: NextRequest) {
 
     const permError = requirePermission(context.permissions, "pipeline", "manage", context.isDirector);
     if (permError) return permError;
+
+    const limitError = await requireFeatureLimit(context.teamId, context.tier, "pipelineStages");
+    if (limitError) return limitError;
 
     const body = await request.json();
     const parsed = createPipelineStageSchema.safeParse(body);

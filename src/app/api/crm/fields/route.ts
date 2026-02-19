@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { z } from "zod";
+import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
 const VALID_ENTITY_TYPES = ["contact", "company", "deal", "lead"];
@@ -66,6 +67,9 @@ export async function POST(request: NextRequest) {
     // Only admins/owners can create custom fields
     const permError = requirePermission(context.permissions, "team_settings", "manage", context.isOwner);
     if (permError) return permError;
+
+    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "customFields");
+    if (limitError) return limitError;
 
     const body = await request.json();
     const parsed = createFieldSchema.safeParse(body);

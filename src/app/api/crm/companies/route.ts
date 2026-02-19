@@ -4,6 +4,7 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parseListParams, applyListQuery, applyVisibilityFilter } from "@/lib/crm/query-builder";
 import { createCompanySchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
+import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -54,6 +55,9 @@ export async function POST(request: NextRequest) {
 
     const permError = requirePermission(context.permissions, "companies", "create", context.isOwner);
     if (permError) return permError;
+
+    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "companies");
+    if (limitError) return limitError;
 
     const body = await request.json();
     const parsed = createCompanySchema.safeParse(body);
