@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
+import { parseListParams, applyListQuery, applyVisibilityFilter } from "@/lib/crm/query-builder";
 import { createLeadSchema } from "@/lib/crm/validation";
+import { logAudit } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "leads", "read", context.isDirector);
+    const permError = requirePermission(context.permissions, "leads", "read", context.isOwner);
     if (permError) return permError;
 
     const url = new URL(request.url);
@@ -21,8 +22,14 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("leads")
       .select("*", { count: "exact" })
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .eq("is_deleted", false);
+
+    query = applyVisibilityFilter(query, "leads", {
+      accountId: context.accountId,
+      isOwner: context.isOwner,
+      fixedRole: context.fixedRole,
+    });
 
     query = applyListQuery(query, "leads", params, ["first_name", "last_name", "email", "organization"]);
 
@@ -45,7 +52,7 @@ export async function POST(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "leads", "create", context.isDirector);
+    const permError = requirePermission(context.permissions, "leads", "create", context.isOwner);
     if (permError) return permError;
 
     const body = await request.json();
@@ -57,7 +64,7 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("leads")
-      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
+      .insert({ account_id: context.accountId, team_id: context.workspaceId, ...parsed.data })
       .select()
       .single();
 
@@ -69,12 +76,20 @@ export async function POST(request: NextRequest) {
     try {
       await supabase.from("crm_activities").insert({
         account_id: context.accountId,
-        team_id: context.teamId,
+        team_id: context.workspaceId,
         lead_id: data.id,
         type: "lead_created",
         title: `Lead created: ${data.first_name} ${data.last_name || ""}`.trim(),
       });
     } catch (e) { logger.warn("Leads", "Failed to log activity", e); }
+
+    logAudit({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      entityType: "lead",
+      entityId: data.id,
+      action: "create",
+    });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

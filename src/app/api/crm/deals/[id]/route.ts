@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateDealSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
+import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -13,7 +14,7 @@ export async function GET(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "deals", "read", context.isDirector);
+    const permError = requirePermission(context.permissions, "deals", "read", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -26,7 +27,7 @@ export async function GET(
       .from("deals")
       .select("*, deal_stages(id, name, color, position, is_won, is_lost), contacts(id, first_name, last_name, email), companies(id, name)")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -49,7 +50,7 @@ export async function PATCH(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "deals", "update", context.isDirector);
+    const permError = requirePermission(context.permissions, "deals", "update", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -63,11 +64,20 @@ export async function PATCH(
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Fetch old record for audit diff
+    const { data: oldRecord } = await supabase
+      .from("deals")
+      .select("*")
+      .eq("id", id)
+      .eq("team_id", context.workspaceId)
+      .single();
+
     const { data, error: dbError } = await supabase
       .from("deals")
       .update(parsed.data)
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .select("*, deal_stages(id, name, color), contacts(id, first_name, last_name), companies(id, name)")
       .single();
 
@@ -78,7 +88,7 @@ export async function PATCH(
     try {
       await supabase.from("crm_activities").insert({
         account_id: context.accountId,
-        team_id: context.teamId,
+        team_id: context.workspaceId,
         deal_id: id,
         contact_id: data.contact_id,
         company_id: data.company_id,
@@ -86,6 +96,15 @@ export async function PATCH(
         title: `Deal updated: ${data.title}`,
       });
     } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
+
+    logAudit({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      entityType: "deal",
+      entityId: id,
+      action: "update",
+      changes: oldRecord ? computeChanges(oldRecord, parsed.data) : undefined,
+    });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -102,7 +121,7 @@ export async function DELETE(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "deals", "delete", context.isDirector);
+    const permError = requirePermission(context.permissions, "deals", "delete", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -115,14 +134,14 @@ export async function DELETE(
       .from("deals")
       .select("title, contact_id, company_id")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .single();
 
     const { error: dbError } = await supabase
       .from("deals")
       .update({ is_deleted: true })
       .eq("id", id)
-      .eq("team_id", context.teamId);
+      .eq("team_id", context.workspaceId);
 
     if (dbError) {
       logger.error("Deals", "DB error", dbError);
@@ -132,7 +151,7 @@ export async function DELETE(
     try {
       await supabase.from("crm_activities").insert({
         account_id: context.accountId,
-        team_id: context.teamId,
+        team_id: context.workspaceId,
         deal_id: id,
         contact_id: existing?.contact_id,
         company_id: existing?.company_id,
@@ -140,6 +159,14 @@ export async function DELETE(
         title: `Deal deleted: ${existing?.title || "Unknown"}`,
       });
     } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
+
+    logAudit({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      entityType: "deal",
+      entityId: id,
+      action: "delete",
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

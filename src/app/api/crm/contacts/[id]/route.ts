@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateContactSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
+import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -13,7 +14,7 @@ export async function GET(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "contacts", "read", context.isDirector);
+    const permError = requirePermission(context.permissions, "contacts", "read", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -26,7 +27,7 @@ export async function GET(
       .from("contacts")
       .select("*, companies(id, name, industry, domain)")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -49,7 +50,7 @@ export async function PATCH(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "contacts", "update", context.isDirector);
+    const permError = requirePermission(context.permissions, "contacts", "update", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -63,11 +64,20 @@ export async function PATCH(
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Fetch old record for audit diff
+    const { data: oldRecord } = await supabase
+      .from("contacts")
+      .select("*")
+      .eq("id", id)
+      .eq("team_id", context.workspaceId)
+      .single();
+
     const { data, error: dbError } = await supabase
       .from("contacts")
       .update(parsed.data)
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .select("*, companies(id, name)")
       .single();
 
@@ -78,12 +88,22 @@ export async function PATCH(
     try {
       await supabase.from("crm_activities").insert({
         account_id: context.accountId,
-        team_id: context.teamId,
+        team_id: context.workspaceId,
         contact_id: id,
         type: "contact_updated",
         title: `Contact updated: ${data.first_name} ${data.last_name || ""}`.trim(),
       });
     } catch (e) { logger.warn("Contacts", "Failed to log activity", e); }
+
+    // Audit log with changes
+    logAudit({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      entityType: "contact",
+      entityId: id,
+      action: "update",
+      changes: oldRecord ? computeChanges(oldRecord, parsed.data) : undefined,
+    });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -100,7 +120,7 @@ export async function DELETE(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "contacts", "delete", context.isDirector);
+    const permError = requirePermission(context.permissions, "contacts", "delete", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -113,14 +133,14 @@ export async function DELETE(
       .from("contacts")
       .select("first_name, last_name")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .single();
 
     const { error: dbError } = await supabase
       .from("contacts")
       .update({ is_deleted: true })
       .eq("id", id)
-      .eq("team_id", context.teamId);
+      .eq("team_id", context.workspaceId);
 
     if (dbError) {
       logger.error("Contacts", "Failed to delete contact", dbError);
@@ -130,12 +150,21 @@ export async function DELETE(
     try {
       await supabase.from("crm_activities").insert({
         account_id: context.accountId,
-        team_id: context.teamId,
+        team_id: context.workspaceId,
         contact_id: id,
         type: "contact_deleted",
         title: `Contact deleted: ${existing?.first_name || ""} ${existing?.last_name || ""}`.trim(),
       });
     } catch (e) { logger.warn("Contacts", "Failed to log activity", e); }
+
+    // Audit log
+    logAudit({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      entityType: "contact",
+      entityId: id,
+      action: "delete",
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

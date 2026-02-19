@@ -13,6 +13,12 @@ export interface ListQueryParams {
   filters?: Record<string, string | string[]>;
 }
 
+export interface VisibilityContext {
+  accountId: string;
+  isOwner: boolean;
+  fixedRole: string;
+}
+
 // Allowed sort fields per entity to prevent injection
 const ALLOWED_SORT_FIELDS: Record<string, string[]> = {
   contacts: ["created_at", "first_name", "last_name", "email", "status", "engagement_score"],
@@ -116,5 +122,42 @@ export function applyListQuery(
   query = query.range(offset, offset + limit - 1);
 
   return query;
+}
+/**
+ * Apply visibility filter to a query.
+ * - Owner/Admin: see everything in the workspace
+ * - Member: see 'workspace' records + own records + assigned records
+ * - Viewer: see only 'workspace' records
+ *
+ * Entity must have: visibility, account_id columns.
+ * Optional: assigned_to column.
+ */
+export function applyVisibilityFilter(
+  query: any,
+  entityType: string,
+  ctx: VisibilityContext
+): any {
+  // Owners and admins see everything
+  if (ctx.isOwner || ctx.fixedRole === "owner" || ctx.fixedRole === "admin") {
+    return query;
+  }
+
+  // Viewers: only workspace-visible records
+  if (ctx.fixedRole === "viewer") {
+    return query.eq("visibility", "workspace");
+  }
+
+  // Members: workspace records + own + assigned
+  const hasAssignedTo = ["contacts", "deals", "leads"].includes(entityType);
+
+  if (hasAssignedTo) {
+    return query.or(
+      `visibility.eq.workspace,account_id.eq.${ctx.accountId},assigned_to.eq.${ctx.accountId}`
+    );
+  }
+
+  return query.or(
+    `visibility.eq.workspace,account_id.eq.${ctx.accountId}`
+  );
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

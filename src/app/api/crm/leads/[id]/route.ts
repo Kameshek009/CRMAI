@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateLeadSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
+import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -13,7 +14,7 @@ export async function GET(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "leads", "read", context.isDirector);
+    const permError = requirePermission(context.permissions, "leads", "read", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -26,7 +27,7 @@ export async function GET(
       .from("leads")
       .select("*")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -49,7 +50,7 @@ export async function PATCH(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "leads", "update", context.isDirector);
+    const permError = requirePermission(context.permissions, "leads", "update", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -64,17 +65,35 @@ export async function PATCH(
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Fetch old record for audit diff
+    const { data: oldRecord } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("id", id)
+      .eq("team_id", context.workspaceId)
+      .single();
+
     const { data, error: dbError } = await supabase
       .from("leads")
       .update(parsed.data)
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", context.workspaceId)
       .select()
       .single();
 
     if (dbError || !data) {
       return NextResponse.json({ success: false, error: "Lead not found" }, { status: 404 });
     }
+
+    logAudit({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      entityType: "lead",
+      entityId: id,
+      action: "update",
+      changes: oldRecord ? computeChanges(oldRecord, parsed.data) : undefined,
+    });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -91,7 +110,7 @@ export async function DELETE(
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "leads", "delete", context.isDirector);
+    const permError = requirePermission(context.permissions, "leads", "delete", context.isOwner);
     if (permError) return permError;
 
     const { id } = await params;
@@ -104,12 +123,20 @@ export async function DELETE(
       .from("leads")
       .update({ is_deleted: true })
       .eq("id", id)
-      .eq("team_id", context.teamId);
+      .eq("team_id", context.workspaceId);
 
     if (dbError) {
       logger.error("Leads", "Failed to delete lead", dbError);
       return NextResponse.json({ success: false, error: "Failed to delete lead" }, { status: 500 });
     }
+
+    logAudit({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      entityType: "lead",
+      entityId: id,
+      action: "delete",
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
