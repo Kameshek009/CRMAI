@@ -141,6 +141,9 @@ export async function POST(request: NextRequest) {
 
       totalTokensUsed += finalCompletion.usage?.total_tokens || 0;
       responseContent = finalCompletion.choices[0]?.message?.content || "";
+      logger.info("CrmAI", `Tool calls: ${toolCalls.length}, results: ${toolResults.length}`, {
+        tools: toolResults.map(r => ({ name: r.name, hasData: !!r.data, dataKeys: r.data ? Object.keys(r.data as Record<string, unknown>) : [] })),
+      });
     } else {
       responseContent = choice?.message?.content || "";
     }

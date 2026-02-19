@@ -312,9 +312,15 @@ export default function ChatDetailPage() {
         }
 
         // Send notification messages for created entities (tasks, contacts, deals)
-        if (aiJson.success && aiJson.data.toolResults) {
-          const toolResults = aiJson.data.toolResults as { name: string; success?: boolean; result: string; data?: Record<string, unknown> }[];
-          console.log('[Chat] toolResults:', JSON.stringify(toolResults.map(r => ({ name: r.name, success: r.success, hasData: !!r.data, dataId: r.data?.id }))));
+        const rawToolResults = aiJson.success ? aiJson.data.toolResults : null;
+        // DEBUG: show toast with tool results info
+        if (aiJson.success) {
+          const trLen = rawToolResults?.length ?? 0;
+          const trNames = (rawToolResults || []).map((r: { name: string }) => r.name).join(', ');
+          toast.info(`[debug] toolResults: ${trLen} items. Names: ${trNames || 'none'}`);
+        }
+        if (rawToolResults && Array.isArray(rawToolResults) && rawToolResults.length > 0) {
+          const toolResults = rawToolResults as { name: string; success?: boolean; result: string; data?: Record<string, unknown> }[];
 
           const entityLinks: Record<string, string> = {
             create_task: '/dashboard/tasks',
@@ -340,8 +346,6 @@ export default function ChatDetailPage() {
               grouped.get(r.name)!.push(r);
             }
           }
-
-          console.log('[Chat] notification groups:', [...grouped.entries()].map(([k, v]) => `${k}: ${v.length}`));
 
           for (const [toolName, results] of grouped) {
             const eType = entityTypes[toolName];
