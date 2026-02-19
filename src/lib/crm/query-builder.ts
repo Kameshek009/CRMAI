@@ -1,0 +1,120 @@
+import { sanitizeLike } from "./helpers";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface ListQueryParams {
+  search?: string;
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+  filters?: Record<string, string | string[]>;
+}
+
+// Allowed sort fields per entity to prevent injection
+const ALLOWED_SORT_FIELDS: Record<string, string[]> = {
+  contacts: ["created_at", "first_name", "last_name", "email", "status", "engagement_score"],
+  companies: ["created_at", "name", "industry", "size", "ai_health_score"],
+  deals: ["created_at", "title", "value", "status", "expected_close_date", "ai_win_probability"],
+  tasks: ["created_at", "title", "due_date", "priority", "status", "type"],
+  leads: ["created_at", "first_name", "last_name", "email", "status", "source", "organization"],
+  call_logs: ["created_at", "direction", "status", "duration_seconds"],
+  notes: ["created_at", "updated_at", "is_pinned"],
+};
+
+// Allowed filter fields per entity
+const ALLOWED_FILTER_FIELDS: Record<string, string[]> = {
+  contacts: ["status", "source", "company_id"],
+  companies: ["industry", "size"],
+  deals: ["status", "stage_id"],
+  tasks: ["status", "priority", "type"],
+  leads: ["status", "source"],
+  call_logs: ["status", "direction"],
+  notes: ["is_pinned"],
+};
+
+// ============================================================================
+// Query Parser
+// ============================================================================
+
+export function parseListParams(url: URL): ListQueryParams {
+  const params: ListQueryParams = {};
+
+  const search = url.searchParams.get("search") || url.searchParams.get("q");
+  if (search) params.search = search;
+
+  const sortBy = url.searchParams.get("sort_by");
+  if (sortBy) params.sort_by = sortBy;
+
+  const sortOrder = url.searchParams.get("sort_order");
+  if (sortOrder === "asc" || sortOrder === "desc") params.sort_order = sortOrder;
+
+  const page = url.searchParams.get("page");
+  if (page) params.page = Math.max(1, parseInt(page, 10) || 1);
+
+  const limit = url.searchParams.get("limit");
+  if (limit) params.limit = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
+
+  // Parse filter_* params
+  const filters: Record<string, string> = {};
+  url.searchParams.forEach((value, key) => {
+    if (key.startsWith("filter_")) {
+      const field = key.slice(7); // remove "filter_"
+      filters[field] = value;
+    }
+  });
+  if (Object.keys(filters).length > 0) params.filters = filters;
+
+  return params;
+}
+
+// ============================================================================
+// Query Builder
+// ============================================================================
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function applyListQuery(
+  query: any,
+  entityType: string,
+  params: ListQueryParams,
+  searchFields?: string[]
+): any {
+  const allowedSorts = ALLOWED_SORT_FIELDS[entityType] || [];
+  const allowedFilters = ALLOWED_FILTER_FIELDS[entityType] || [];
+
+  // Apply filters
+  if (params.filters) {
+    for (const [field, value] of Object.entries(params.filters)) {
+      if (allowedFilters.includes(field) && value) {
+        query = query.eq(field, value);
+      }
+    }
+  }
+
+  // Apply search across fields
+  if (params.search && searchFields && searchFields.length > 0) {
+    const sanitized = sanitizeLike(params.search);
+    const orConditions = searchFields
+      .map((field) => `${field}.ilike.%${sanitized}%`)
+      .join(",");
+    query = query.or(orConditions);
+  }
+
+  // Apply sort
+  const sortBy = params.sort_by && allowedSorts.includes(params.sort_by)
+    ? params.sort_by
+    : "created_at";
+  const sortOrder = params.sort_order || "desc";
+  query = query.order(sortBy, { ascending: sortOrder === "asc" });
+
+  // Apply pagination
+  const page = params.page || 1;
+  const limit = params.limit || 50;
+  const offset = (page - 1) * limit;
+  query = query.range(offset, offset + limit - 1);
+
+  return query;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */

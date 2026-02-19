@@ -206,3 +206,133 @@ export const bulkTasksSchema = z.discriminatedUnion("action", [
 export const bulkCompaniesSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("delete"), ids: bulkIds }),
 ]);
+
+// ============================================================================
+// Lead schemas
+// ============================================================================
+
+export const createLeadSchema = z.object({
+  first_name: z.string().min(1, "First name is required").max(100),
+  last_name: z.string().max(100).optional(),
+  email: z.string().email().max(254).optional().or(z.literal("")),
+  phone: z.string().max(30).optional(),
+  mobile: z.string().max(30).optional(),
+  organization: z.string().max(200).optional(),
+  website: z.string().max(2000).optional(),
+  job_title: z.string().max(200).optional(),
+  source: z.string().max(100).optional(),
+  status: z.enum(["new", "contacted", "qualified", "unqualified", "junk"]).optional(),
+  lead_owner_account_id: z.string().uuid().optional().nullable(),
+  notes: z.string().max(10000).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+});
+
+export const updateLeadSchema = z.object({
+  first_name: z.string().min(1).max(100).optional(),
+  last_name: z.string().max(100).optional().nullable(),
+  email: z.string().email().max(254).optional().nullable().or(z.literal("")),
+  phone: z.string().max(30).optional().nullable(),
+  mobile: z.string().max(30).optional().nullable(),
+  organization: z.string().max(200).optional().nullable(),
+  website: z.string().max(2000).optional().nullable(),
+  job_title: z.string().max(200).optional().nullable(),
+  source: z.string().max(100).optional().nullable(),
+  status: z.enum(["new", "contacted", "qualified", "unqualified", "junk"]).optional(),
+  lead_owner_account_id: z.string().uuid().optional().nullable(),
+  notes: z.string().max(10000).optional().nullable(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+});
+
+export const convertLeadSchema = z.object({
+  create_contact: z.boolean().default(true),
+  create_deal: z.boolean().default(true),
+  deal_title: z.string().max(200).optional(),
+  deal_value: z.number().min(0).optional(),
+  deal_stage_id: z.string().uuid().optional(),
+});
+
+export const bulkLeadsSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("delete"), ids: bulkIds }),
+  z.object({ action: z.literal("update_status"), ids: bulkIds, status: z.enum(["new", "contacted", "qualified", "unqualified", "junk"]) }),
+]);
+
+// ============================================================================
+// Call Log schemas
+// ============================================================================
+
+export const createCallLogSchema = z.object({
+  contact_id: z.string().uuid().optional().nullable(),
+  lead_id: z.string().uuid().optional().nullable(),
+  deal_id: z.string().uuid().optional().nullable(),
+  direction: z.enum(["inbound", "outbound"]).optional(),
+  status: z.enum(["completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
+  duration_seconds: z.number().min(0).optional(),
+  from_number: z.string().max(30).optional(),
+  to_number: z.string().max(30).optional(),
+  summary: z.string().max(5000).optional(),
+  recording_url: z.string().max(2000).optional(),
+});
+
+export const updateCallLogSchema = z.object({
+  contact_id: z.string().uuid().optional().nullable(),
+  lead_id: z.string().uuid().optional().nullable(),
+  deal_id: z.string().uuid().optional().nullable(),
+  direction: z.enum(["inbound", "outbound"]).optional(),
+  status: z.enum(["completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
+  duration_seconds: z.number().min(0).optional(),
+  from_number: z.string().max(30).optional().nullable(),
+  to_number: z.string().max(30).optional().nullable(),
+  summary: z.string().max(5000).optional().nullable(),
+  recording_url: z.string().max(2000).optional().nullable(),
+});
+
+// ============================================================================
+// Saved View schemas
+// ============================================================================
+
+export const createSavedViewSchema = z.object({
+  entity_type: z.enum(["contacts", "leads", "deals", "organizations", "tasks", "call_logs", "notes"]),
+  label: z.string().min(1, "View name is required").max(100),
+  icon: z.string().max(50).optional(),
+  filters: z.record(z.string(), z.unknown()).optional(),
+  sort_by: z.string().max(100).optional(),
+  sort_order: z.enum(["asc", "desc"]).optional(),
+  group_by: z.string().max(100).optional().nullable(),
+  columns: z.array(z.string().max(100)).max(20).optional(),
+  view_mode: z.enum(["table", "kanban", "group_by"]).optional(),
+  is_pinned: z.boolean().optional(),
+  is_public: z.boolean().optional(),
+});
+
+export const updateSavedViewSchema = z.object({
+  label: z.string().min(1).max(100).optional(),
+  icon: z.string().max(50).optional().nullable(),
+  filters: z.record(z.string(), z.unknown()).optional(),
+  sort_by: z.string().max(100).optional().nullable(),
+  sort_order: z.enum(["asc", "desc"]).optional(),
+  group_by: z.string().max(100).optional().nullable(),
+  columns: z.array(z.string().max(100)).max(20).optional(),
+  view_mode: z.enum(["table", "kanban", "group_by"]).optional(),
+  is_pinned: z.boolean().optional(),
+  is_public: z.boolean().optional(),
+  position: z.number().min(0).optional(),
+});
+
+// ============================================================================
+// Email Communication schemas
+// ============================================================================
+
+export const createEmailSchema = z.object({
+  contact_id: z.string().uuid().optional().nullable(),
+  lead_id: z.string().uuid().optional().nullable(),
+  deal_id: z.string().uuid().optional().nullable(),
+  subject: z.string().max(500).optional(),
+  body_html: z.string().max(100000).optional(),
+  body_text: z.string().max(50000).optional(),
+  from_email: z.string().email().max(254),
+  to_emails: z.array(z.string().email().max(254)).min(1),
+  cc_emails: z.array(z.string().email().max(254)).optional(),
+  bcc_emails: z.array(z.string().email().max(254)).optional(),
+  direction: z.enum(["inbound", "outbound"]).optional(),
+  status: z.enum(["draft", "sent", "received", "failed"]).optional(),
+});
