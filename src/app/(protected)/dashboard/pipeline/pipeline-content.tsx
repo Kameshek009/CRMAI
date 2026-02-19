@@ -34,6 +34,7 @@ interface PipelineStage {
   position: number;
   is_won: boolean;
   is_lost: boolean;
+  rotting_days?: number | null;
 }
 
 interface PipelineColumn {

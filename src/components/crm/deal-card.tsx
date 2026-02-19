@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Building2, User, GripVertical, Calendar, TrendingUp } from "lucide-react";
+import { Building2, User, GripVertical, Calendar, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 export interface DealForCard {
@@ -14,6 +14,7 @@ export interface DealForCard {
   value: number;
   ai_win_probability: number;
   expected_close_date: string | null;
+  is_rotting?: boolean;
   contacts: { id: string; first_name: string; last_name: string | null } | null;
   companies: { id: string; name: string } | null;
 }
@@ -44,7 +45,11 @@ function DealCardInner({
   const probDot = prob >= 70 ? "bg-emerald-500" : prob >= 40 ? "bg-amber-500" : "bg-red-500";
 
   return (
-    <Card className={cn("p-4 transition-all group premium-card card-shine border bg-card", className)}>
+    <Card className={cn(
+      "p-4 transition-all group premium-card card-shine border bg-card",
+      deal.is_rotting && "border-l-[3px] border-l-red-500",
+      className
+    )}>
       <div className="flex items-start gap-2 relative z-[1]">
         {dragHandle}
         <div className="flex-1 min-w-0">
@@ -76,14 +81,22 @@ function DealCardInner({
           )}
 
           <div className="flex items-center justify-between mt-2">
-            <Badge
-              variant="outline"
-              className={cn("text-[10px] px-2 py-0 badge-shimmer", probColor)}
-              aria-label={`Win probability: ${probLabel}, ${prob}%`}
-            >
-              <div className={cn("w-1.5 h-1.5 rounded-full mr-1", probDot)} />
-              {probLabel} {prob}%
-            </Badge>
+            <div className="flex items-center gap-1.5">
+              <Badge
+                variant="outline"
+                className={cn("text-[10px] px-2 py-0 badge-shimmer", probColor)}
+                aria-label={`Win probability: ${probLabel}, ${prob}%`}
+              >
+                <div className={cn("w-1.5 h-1.5 rounded-full mr-1", probDot)} />
+                {probLabel} {prob}%
+              </Badge>
+              {deal.is_rotting && (
+                <Badge variant="outline" className="text-[10px] px-2 py-0 text-red-600 border-red-200 dark:border-red-800/40 bg-red-500/10">
+                  <AlertTriangle className="size-2.5 mr-1" />
+                  Rotting
+                </Badge>
+              )}
+            </div>
             {deal.expected_close_date && (
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Calendar className="size-2.5" />

@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { DealCard, type DealForCard } from "@/components/crm/deal-card";
 import { Button } from "@/components/ui/button";
-import { Plus, Kanban } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Kanban, Settings2, Timer, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface StageColumnProps {
   stage: {
@@ -14,6 +17,7 @@ interface StageColumnProps {
     position: number;
     is_won: boolean;
     is_lost: boolean;
+    rotting_days?: number | null;
   };
   deals: DealForCard[];
   totalValue: number;
@@ -33,6 +37,36 @@ export function StageColumn({
   compact = false,
 }: StageColumnProps) {
   const { setNodeRef } = useDroppable({ id: stage.id });
+  const [showSettings, setShowSettings] = useState(false);
+  const [rottingDays, setRottingDays] = useState(stage.rotting_days?.toString() || "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const rottingCount = deals.filter((d) => d.is_rotting).length;
+
+  const handleSaveRotting = async () => {
+    setIsSaving(true);
+    try {
+      const value = rottingDays.trim() === "" ? null : parseInt(rottingDays, 10);
+      if (value !== null && (isNaN(value) || value < 0)) {
+        toast.error("Invalid number of days");
+        return;
+      }
+      const res = await fetch(`/api/crm/pipeline/stages/${stage.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rotting_days: value }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(value ? `Rotting: ${value} days` : "Rotting disabled");
+        setShowSettings(false);
+      } else {
+        toast.error(json.error || "Failed to save");
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className={cn("shrink-0 flex flex-col", compact ? "w-56" : "w-72")}>
@@ -56,21 +90,76 @@ export function StageColumn({
             >
               {count}
             </span>
+            {rottingCount > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold tabular-nums bg-red-500/15 text-red-600">
+                {rottingCount} rotting
+              </span>
+            )}
           </div>
-          <p className={cn("text-muted-foreground mt-0.5 font-medium", compact ? "text-[10px]" : "text-xs")}>
-            ${totalValue.toLocaleString()}
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className={cn("text-muted-foreground font-medium", compact ? "text-[10px]" : "text-xs")}>
+              ${totalValue.toLocaleString()}
+            </p>
+            {stage.rotting_days && !compact && (
+              <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60">
+                <Timer className="size-2.5" />
+                {stage.rotting_days}d
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-0.5 relative z-[1]">
+          {!stage.is_won && !stage.is_lost && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 hover:bg-muted/80"
+              onClick={() => setShowSettings(!showSettings)}
+              aria-label={`Settings for ${stage.name}`}
+            >
+              <Settings2 className="size-3.5" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 hover:bg-muted/80"
+            onClick={onAddDeal}
+            aria-label={`Add deal to ${stage.name}`}
+          >
+            <Plus className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Rotting settings popover */}
+      {showSettings && (
+        <div className="border border-t-0 bg-card p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium">Deal rotting (days)</span>
+            <Button variant="ghost" size="icon" className="size-5" onClick={() => setShowSettings(false)}>
+              <X className="size-3" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min={0}
+              max={365}
+              value={rottingDays}
+              onChange={(e) => setRottingDays(e.target.value)}
+              placeholder="e.g. 14"
+              className="h-7 text-xs"
+            />
+            <Button size="icon" className="size-7 shrink-0" onClick={handleSaveRotting} disabled={isSaving}>
+              <Check className="size-3.5" />
+            </Button>
+          </div>
+          <p className="text-[10px] text-muted-foreground">
+            Deals without activity for this many days will be marked as rotting. Leave empty to disable.
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7 relative z-[1] hover:bg-muted/80"
-          onClick={onAddDeal}
-          aria-label={`Add deal to ${stage.name}`}
-        >
-          <Plus className="size-4" />
-        </Button>
-      </div>
+      )}
 
       {/* Drop zone */}
       <div

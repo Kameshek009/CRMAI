@@ -37,9 +37,20 @@ export async function GET() {
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
 
-    // Build pipeline columns
+    // Build pipeline columns (with deal rotting detection)
+    const now = Date.now();
     const columns = stages!.map((stage) => {
-      const stageDeals = (deals || []).filter((d) => d.stage_id === stage.id);
+      const rottingDays = stage.rotting_days as number | null;
+      const stageDeals = (deals || [])
+        .filter((d) => d.stage_id === stage.id)
+        .map((d) => {
+          let is_rotting = false;
+          if (rottingDays && rottingDays > 0 && d.status === "open" && d.updated_at) {
+            const updatedAt = new Date(d.updated_at).getTime();
+            is_rotting = (now - updatedAt) > rottingDays * 86_400_000;
+          }
+          return { ...d, is_rotting };
+        });
       return {
         stage,
         deals: stageDeals,
