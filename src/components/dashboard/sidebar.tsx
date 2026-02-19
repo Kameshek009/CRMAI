@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import { useWorkspace } from "@/contexts/team-context";
 import {
-  LayoutGrid,
   Settings,
   BarChart3,
   CreditCard,
@@ -33,7 +32,6 @@ interface NavGroup {
 const navGroups: NavGroup[] = [
   {
     items: [
-      { label: "Overview", href: "/dashboard", icon: LayoutGrid },
       { label: "Settings", href: "/dashboard/account", icon: Settings },
     ],
   },
