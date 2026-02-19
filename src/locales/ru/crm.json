@@ -229,7 +229,13 @@
       "type": "Тип"
     },
     "count": "{count} задач",
-    "countOne": "{count} задача"
+    "countOne": "{count} задача",
+    "photos": "Фото",
+    "addPhoto": "Добавить фото",
+    "photoUploaded": "Фото загружено",
+    "photoDeleted": "Фото удалено",
+    "maxPhotos": "Максимум {max} фото",
+    "uploadFailed": "Не удалось загрузить"
   },
   "callLogs": {
     "fields": {

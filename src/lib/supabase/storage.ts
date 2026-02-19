@@ -90,3 +90,63 @@ export async function deleteChatFile(storagePath: string) {
   const supabase = createSupabaseAdmin();
   await supabase.storage.from(BUCKET_NAME).remove([storagePath]);
 }
+
+// ─── Task attachments ───────────────────────────────────────
+
+const TASK_BUCKET = "task-attachments";
+const TASK_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const TASK_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+export function validateTaskImage(file: File): string | null {
+  if (file.size > TASK_MAX_SIZE) return `File too large. Maximum size is 5MB`;
+  if (!TASK_ALLOWED_TYPES.includes(file.type)) return "Only images allowed (JPEG, PNG, GIF, WebP)";
+  return null;
+}
+
+async function ensureTaskBucket() {
+  const supabase = createSupabaseAdmin();
+  const { data: buckets } = await supabase.storage.listBuckets();
+  if (!buckets?.some((b) => b.name === TASK_BUCKET)) {
+    await supabase.storage.createBucket(TASK_BUCKET, {
+      public: true,
+      fileSizeLimit: TASK_MAX_SIZE,
+      allowedMimeTypes: TASK_ALLOWED_TYPES,
+    });
+  }
+}
+
+export async function uploadTaskImage(
+  fileBuffer: Buffer,
+  filename: string,
+  mimeType: string,
+  teamId: string,
+  taskId: string
+): Promise<Attachment> {
+  const supabase = createSupabaseAdmin();
+  await ensureTaskBucket();
+
+  const fileId = crypto.randomUUID();
+  const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storagePath = `${teamId}/${taskId}/${fileId}_${safeName}`;
+
+  const { error } = await supabase.storage
+    .from(TASK_BUCKET)
+    .upload(storagePath, fileBuffer, { contentType: mimeType, upsert: false });
+
+  if (error) throw new Error(`Upload failed: ${error.message}`);
+
+  const { data: urlData } = supabase.storage.from(TASK_BUCKET).getPublicUrl(storagePath);
+
+  return {
+    id: fileId,
+    url: urlData.publicUrl,
+    filename,
+    mime_type: mimeType,
+    size: fileBuffer.byteLength,
+  };
+}
+
+export async function deleteTaskImage(storagePath: string) {
+  const supabase = createSupabaseAdmin();
+  await supabase.storage.from(TASK_BUCKET).remove([storagePath]);
+}

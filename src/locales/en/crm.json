@@ -229,7 +229,13 @@
       "type": "Type"
     },
     "count": "{count} tasks",
-    "countOne": "{count} task"
+    "countOne": "{count} task",
+    "photos": "Photos",
+    "addPhoto": "Add Photo",
+    "photoUploaded": "Photo uploaded",
+    "photoDeleted": "Photo deleted",
+    "maxPhotos": "Maximum {max} photos",
+    "uploadFailed": "Upload failed"
   },
   "callLogs": {
     "fields": {

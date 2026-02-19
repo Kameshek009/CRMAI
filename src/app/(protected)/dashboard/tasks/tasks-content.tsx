@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { CheckSquare, Loader2, Phone, Mail, MapPin } from "lucide-react";
+import { CheckSquare, Loader2, Phone, Mail, MapPin, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
@@ -41,6 +41,14 @@ interface TaskData {
   is_ai_generated: boolean;
   metadata: Record<string, unknown> | null;
   created_at: string;
+}
+
+interface TaskAttachment {
+  id: string;
+  url: string;
+  filename: string;
+  mime_type: string;
+  size: number;
 }
 
 type FormMode = { type: "closed" } | { type: "create" } | { type: "edit"; task: TaskData };
@@ -81,6 +89,9 @@ export function TasksContent() {
   const [formMode, setFormMode] = useState<FormMode>({ type: "closed" });
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [attachments, setAttachments] = useState<TaskAttachment[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -173,7 +184,8 @@ export function TasksContent() {
   // Form init
   useEffect(() => {
     if (formMode.type === "edit") {
-      const meta = (formMode.task.metadata || {}) as Record<string, string>;
+      const meta = (formMode.task.metadata || {}) as Record<string, unknown>;
+      const metaStr = meta as Record<string, string>;
       setFormValues({
         title: formMode.task.title,
         description: formMode.task.description || "",
@@ -181,17 +193,63 @@ export function TasksContent() {
         priority: formMode.task.priority || "",
         status: formMode.task.status || "todo",
         due_date: formMode.task.due_date ? formMode.task.due_date.split("T")[0] : "",
-        phone_number: meta.phone_number || "",
-        email_address: meta.email_address || "",
-        location: meta.location || "",
+        phone_number: metaStr.phone_number || "",
+        email_address: metaStr.email_address || "",
+        location: metaStr.location || "",
       });
+      setAttachments((meta.attachments as TaskAttachment[]) || []);
     } else if (formMode.type === "create") {
       setFormValues({});
+      setAttachments([]);
     }
   }, [formMode]);
 
   const set = (name: string, value: string) =>
     setFormValues((prev) => ({ ...prev, [name]: value }));
+
+  // Photo handlers
+  const handlePhotoUpload = async (file: File) => {
+    if (formMode.type !== "edit") return;
+    if (attachments.length >= 5) {
+      toast.error(t("crm.tasks.maxPhotos", { max: 5 }));
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch(`/api/crm/tasks/${formMode.task.id}/upload`, { method: "POST", body: fd });
+      const json = await res.json();
+      if (json.success) {
+        setAttachments(json.attachments);
+        toast.success(t("crm.tasks.photoUploaded"));
+      } else {
+        toast.error(json.error || t("crm.tasks.uploadFailed"));
+      }
+    } catch {
+      toast.error(t("crm.tasks.uploadFailed"));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handlePhotoDelete = async (attachmentId: string) => {
+    if (formMode.type !== "edit") return;
+    try {
+      const res = await fetch(`/api/crm/tasks/${formMode.task.id}/upload`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attachmentId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setAttachments(json.attachments);
+        toast.success(t("crm.tasks.photoDeleted"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    }
+  };
 
   // Handlers
   const handleFilterAdd = useCallback((field: string, value: string) => {
@@ -561,6 +619,48 @@ export function TasksContent() {
               <label className="text-sm font-medium">{t("crm.tasks.fields.dueDate")}</label>
               <Input type="date" value={formValues.due_date || ""} onChange={(e) => set("due_date", e.target.value)} />
             </div>
+            {isEdit && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t("crm.tasks.photos")}</label>
+                <div className="flex flex-wrap gap-2">
+                  {attachments.map((att) => (
+                    <div key={att.id} className="relative group size-20 rounded-md overflow-hidden border">
+                      <img src={att.url} alt={att.filename} className="size-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handlePhotoDelete(att.id)}
+                        className="absolute top-0.5 right-0.5 size-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="size-3 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                  {attachments.length < 5 && (
+                    <label className="size-20 rounded-md border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                      {isUploading ? (
+                        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                      ) : (
+                        <ImagePlus className="size-5 text-muted-foreground" />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        className="hidden"
+                        disabled={isUploading}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handlePhotoUpload(file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+                {attachments.length > 0 && (
+                  <p className="text-xs text-muted-foreground">{attachments.length} / 5</p>
+                )}
+              </div>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setFormMode({ type: "closed" })}>{t("crm.entityForm.cancel")}</Button>
               <Button type="submit" disabled={isSubmitting}>
