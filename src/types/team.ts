@@ -325,6 +325,7 @@ export interface WorkspaceContext {
   fixedRole: FixedRole;
   role: WorkspaceRole;
   permissions: WorkspacePermissions;
+  visibilityGroupIds: string[];
   isOwner: boolean;
   /** @deprecated Use isOwner */
   isDirector: boolean;

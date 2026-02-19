@@ -141,6 +141,19 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
     ? FIXED_ROLE_PERMISSIONS[fixedRole]
     : role.permissions;
 
+  // Load visibility group IDs for this user (fire-and-forget safe)
+  let visibilityGroupIds: string[] = [];
+  try {
+    const { data: vgMembers } = await supabase
+      .from("visibility_group_members")
+      .select("group_id, visibility_groups!inner(team_id)")
+      .eq("account_id", account.id)
+      .eq("visibility_groups.team_id", account.current_team_id);
+    visibilityGroupIds = (vgMembers || []).map((m: { group_id: string }) => m.group_id);
+  } catch {
+    // Table may not exist yet — gracefully degrade
+  }
+
   return {
     context: {
       accountId: account.id,
@@ -162,6 +175,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
         updatedAt: role.updated_at,
       },
       permissions,
+      visibilityGroupIds,
       isOwner: member.is_director,
       isDirector: member.is_director, // backward compat
     },

@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       accountId: context.accountId,
       isOwner: context.isOwner,
       fixedRole: context.fixedRole,
+      visibilityGroupIds: context.visibilityGroupIds,
     });
 
     query = applyListQuery(query, "leads", params, ["first_name", "last_name", "email", "organization"]);

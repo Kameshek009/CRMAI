@@ -17,6 +17,7 @@ export interface VisibilityContext {
   accountId: string;
   isOwner: boolean;
   fixedRole: string;
+  visibilityGroupIds?: string[];
 }
 
 // Allowed sort fields per entity to prevent injection
@@ -147,17 +148,26 @@ export function applyVisibilityFilter(
     return query.eq("visibility", "workspace");
   }
 
-  // Members: workspace records + own + assigned
+  // Members: workspace records + own + assigned + group records
   const hasAssignedTo = ["contacts", "deals", "leads"].includes(entityType);
+  const hasVisGroup = ["contacts", "companies", "deals", "leads"].includes(entityType);
+
+  const conditions = [
+    `visibility.eq.workspace`,
+    `account_id.eq.${ctx.accountId}`,
+  ];
 
   if (hasAssignedTo) {
-    return query.or(
-      `visibility.eq.workspace,account_id.eq.${ctx.accountId},assigned_to.eq.${ctx.accountId}`
+    conditions.push(`assigned_to.eq.${ctx.accountId}`);
+  }
+
+  // Include records assigned to any of user's visibility groups
+  if (hasVisGroup && ctx.visibilityGroupIds && ctx.visibilityGroupIds.length > 0) {
+    conditions.push(
+      `visibility_group_id.in.(${ctx.visibilityGroupIds.join(",")})`
     );
   }
 
-  return query.or(
-    `visibility.eq.workspace,account_id.eq.${ctx.accountId}`
-  );
+  return query.or(conditions.join(","));
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

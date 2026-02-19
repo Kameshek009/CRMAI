@@ -12,7 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { FieldManager } from "@/components/crm/field-manager";
+import { Eye, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 interface AiPerms {
@@ -189,6 +191,9 @@ export default function TeamSettingsPage() {
         {/* Custom Fields */}
         <FieldManager />
 
+        {/* Visibility Groups */}
+        <VisibilityGroupsSection />
+
         {/* Danger Zone */}
         <Card className="border-destructive/50">
           <CardHeader>
@@ -209,5 +214,131 @@ export default function TeamSettingsPage() {
         </Card>
       </div>
     </PageContainer>
+  );
+}
+
+// ── Visibility Groups Section ───────────────────────────────────────
+
+interface VGroup {
+  id: string;
+  name: string;
+  is_default: boolean;
+  visibility_group_members: { id: string; account_id: string }[];
+}
+
+function VisibilityGroupsSection() {
+  const [groups, setGroups] = useState<VGroup[]>([]);
+  const [newName, setNewName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+
+  const fetchGroups = useCallback(async () => {
+    const res = await fetch("/api/crm/visibility-groups");
+    const json = await res.json();
+    if (json.success) setGroups(json.data || []);
+  }, []);
+
+  useEffect(() => { fetchGroups(); }, [fetchGroups]);
+
+  const handleCreate = async () => {
+    if (!newName.trim()) return;
+    setIsCreating(true);
+    try {
+      const res = await fetch("/api/crm/visibility-groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName.trim() }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Group created");
+        setNewName("");
+        fetchGroups();
+      } else {
+        toast.error(json.error || "Failed to create group");
+      }
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const res = await fetch(`/api/crm/visibility-groups/${id}`, { method: "DELETE" });
+    const json = await res.json();
+    if (json.success) {
+      toast.success("Group deleted");
+      fetchGroups();
+    } else {
+      toast.error(json.error || "Failed to delete");
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Eye className="size-4" />
+          Visibility Groups
+        </CardTitle>
+        <CardDescription>
+          Control which records team members can see. Assign records to groups when creating them.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Create new group */}
+        <div className="flex items-center gap-2">
+          <Input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="New group name..."
+            className="flex-1"
+            maxLength={100}
+            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+          />
+          <Button size="sm" onClick={handleCreate} disabled={isCreating || !newName.trim()}>
+            <Plus className="size-3.5 mr-1.5" />
+            Add
+          </Button>
+        </div>
+
+        {/* Groups list */}
+        {groups.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            No visibility groups yet. Create one to start restricting record access.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                className="flex items-center justify-between rounded-lg border p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-md bg-secondary">
+                    <Users className="size-3.5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{group.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {group.visibility_group_members?.length || 0} members
+                    </p>
+                  </div>
+                  {group.is_default && (
+                    <Badge variant="secondary" className="text-[10px]">Default</Badge>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 text-muted-foreground hover:text-destructive"
+                  onClick={() => handleDelete(group.id)}
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
