@@ -5,7 +5,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import {
   FileText, Phone, Mail, Users, Handshake,
   CheckCircle2, ArrowRightLeft, Trophy, XCircle,
-  Upload, Zap, RefreshCw, MessageSquare,
+  Upload, MessageSquare,
 } from "lucide-react";
 import type { Activity, CrmActivityType } from "@/types/crm";
 
@@ -25,9 +25,6 @@ const ACTIVITY_CONFIG: Record<CrmActivityType, { icon: typeof FileText; color: s
   contact_created: { icon: Users, color: "text-blue-500 bg-blue-500/10" },
   task_completed: { icon: CheckCircle2, color: "text-emerald-500 bg-emerald-500/10" },
   import: { icon: Upload, color: "text-gray-500 bg-gray-500/10" },
-  lead_created: { icon: Zap, color: "text-orange-500 bg-orange-500/10" },
-  lead_converted: { icon: RefreshCw, color: "text-emerald-500 bg-emerald-500/10" },
-  lead_status_changed: { icon: ArrowRightLeft, color: "text-amber-500 bg-amber-500/10" },
 };
 
 const DEFAULT_CONFIG = { icon: MessageSquare, color: "text-gray-500 bg-gray-500/10" };

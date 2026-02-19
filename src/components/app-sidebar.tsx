@@ -71,7 +71,6 @@ interface NavGroup {
 const crmGroup: NavGroup = {
   labelKey: "nav.groups.crm",
   items: [
-    { labelKey: "nav.items.leads", href: "/dashboard/leads", icon: Zap, permission: "leads.read" },
     { labelKey: "nav.items.contacts", href: "/dashboard/contacts", icon: Users, permission: "contacts.read" },
     { labelKey: "nav.items.deals", href: "/dashboard/deals", icon: Handshake, permission: "deals.read" },
     { labelKey: "nav.items.organizations", href: "/dashboard/companies", icon: Building2, permission: "companies.read" },

@@ -1,18 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { ContactStatus, DealStatus, LeadStatus, CrmTaskStatus, CallLogStatus } from "@/types/crm";
+import type { ContactStatus, DealStatus, CrmTaskStatus, CallLogStatus } from "@/types/crm";
 
-type StatusType = ContactStatus | DealStatus | LeadStatus | CrmTaskStatus | CallLogStatus | string;
+type StatusType = ContactStatus | DealStatus | CrmTaskStatus | CallLogStatus | string;
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-  // Lead statuses
-  new: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", dot: "bg-blue-500" },
-  contacted: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" },
-  qualified: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
-  unqualified: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", dot: "bg-gray-500" },
-  junk: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", dot: "bg-red-500" },
-
   // Contact statuses
   lead: { bg: "bg-orange-500/10", text: "text-orange-600 dark:text-orange-400", dot: "bg-orange-500" },
   active: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },

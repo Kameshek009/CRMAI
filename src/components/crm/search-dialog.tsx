@@ -10,7 +10,6 @@ import {
   Building2,
   Handshake,
   Loader2,
-  Zap,
   CheckSquare,
   Plus,
   ArrowRight,
@@ -55,7 +54,6 @@ const typeIcons: Record<string, LucideIcon> = {
   contact: User,
   company: Building2,
   deal: Handshake,
-  lead: Zap,
   task: CheckSquare,
 };
 
@@ -63,7 +61,6 @@ const typeRoutes: Record<string, string> = {
   contact: "/dashboard/contacts",
   company: "/dashboard/companies",
   deal: "/dashboard/deals",
-  lead: "/dashboard/leads",
   task: "/dashboard/tasks",
 };
 
@@ -139,7 +136,6 @@ export function SearchDialog() {
   const staticActions: CommandItem[] = useMemo(() => [
     { id: "create-contact", label: t("nav.search.commands.createContact"), icon: Plus, section: "actions", action: () => navigate("/dashboard/contacts?create=1") },
     { id: "create-deal", label: t("nav.search.commands.createDeal"), icon: Plus, section: "actions", action: () => navigate("/dashboard/deals?create=1") },
-    { id: "create-lead", label: t("nav.search.commands.createLead"), icon: Plus, section: "actions", action: () => navigate("/dashboard/leads?create=1") },
     { id: "create-task", label: t("nav.search.commands.createTask"), icon: Plus, section: "actions", action: () => navigate("/dashboard/tasks?create=1") },
   ], [navigate, t]);
 
@@ -147,7 +143,6 @@ export function SearchDialog() {
     { id: "nav-overview", label: t("nav.search.pages.overview"), sublabel: t("nav.search.pages.overviewSub"), icon: LayoutGrid, section: "navigation", action: () => navigate("/dashboard") },
     { id: "nav-contacts", label: t("nav.search.pages.contacts"), sublabel: t("nav.search.pages.contactsSub"), icon: User, section: "navigation", action: () => navigate("/dashboard/contacts") },
     { id: "nav-deals", label: t("nav.search.pages.deals"), sublabel: t("nav.search.pages.dealsSub"), icon: Handshake, section: "navigation", action: () => navigate("/dashboard/deals") },
-    { id: "nav-leads", label: t("nav.search.pages.leads"), sublabel: t("nav.search.pages.leadsSub"), icon: Zap, section: "navigation", action: () => navigate("/dashboard/leads") },
     { id: "nav-companies", label: t("nav.search.pages.organizations"), sublabel: t("nav.search.pages.organizationsSub"), icon: Building2, section: "navigation", action: () => navigate("/dashboard/companies") },
     { id: "nav-pipeline", label: t("nav.search.pages.pipeline"), sublabel: t("nav.search.pages.pipelineSub"), icon: Kanban, section: "navigation", action: () => navigate("/dashboard/pipeline") },
     { id: "nav-tasks", label: t("nav.search.pages.tasks"), sublabel: t("nav.search.pages.tasksSub"), icon: CheckSquare, section: "navigation", action: () => navigate("/dashboard/tasks") },
