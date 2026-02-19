@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Kanban, Settings2, Timer, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 interface StageColumnProps {
   stage: {
@@ -37,6 +38,7 @@ export function StageColumn({
   compact = false,
 }: StageColumnProps) {
   const { setNodeRef } = useDroppable({ id: stage.id });
+  const { t } = useTranslation();
   const [showSettings, setShowSettings] = useState(false);
   const [rottingDays, setRottingDays] = useState(stage.rotting_days?.toString() || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -48,7 +50,7 @@ export function StageColumn({
     try {
       const value = rottingDays.trim() === "" ? null : parseInt(rottingDays, 10);
       if (value !== null && (isNaN(value) || value < 0)) {
-        toast.error("Invalid number of days");
+        toast.error(t("crm.pipeline.invalidDays"));
         return;
       }
       const res = await fetch(`/api/crm/pipeline/stages/${stage.id}`, {
@@ -58,10 +60,10 @@ export function StageColumn({
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(value ? `Rotting: ${value} days` : "Rotting disabled");
+        toast.success(value ? t("crm.pipeline.rottingSet", { value }) : t("crm.pipeline.rottingDisabled"));
         setShowSettings(false);
       } else {
-        toast.error(json.error || "Failed to save");
+        toast.error(json.error || t("crm.pipeline.saveFailed"));
       }
     } finally {
       setIsSaving(false);
@@ -92,7 +94,7 @@ export function StageColumn({
             </span>
             {rottingCount > 0 && (
               <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold tabular-nums bg-red-500/15 text-red-600">
-                {rottingCount} rotting
+                {t("crm.pipeline.rotting", { count: rottingCount })}
               </span>
             )}
           </div>
@@ -136,7 +138,7 @@ export function StageColumn({
       {showSettings && (
         <div className="border border-t-0 bg-card p-3 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium">Deal rotting (days)</span>
+            <span className="text-xs font-medium">{t("crm.pipeline.rottingDays")}</span>
             <Button variant="ghost" size="icon" className="size-5" onClick={() => setShowSettings(false)}>
               <X className="size-3" />
             </Button>
@@ -148,7 +150,7 @@ export function StageColumn({
               max={365}
               value={rottingDays}
               onChange={(e) => setRottingDays(e.target.value)}
-              placeholder="e.g. 14"
+              placeholder={t("crm.pipeline.rottingPlaceholder")}
               className="h-7 text-xs"
             />
             <Button size="icon" className="size-7 shrink-0" onClick={handleSaveRotting} disabled={isSaving}>
@@ -156,7 +158,7 @@ export function StageColumn({
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Deals without activity for this many days will be marked as rotting. Leave empty to disable.
+            {t("crm.pipeline.rottingHelp")}
           </p>
         </div>
       )}
@@ -178,7 +180,7 @@ export function StageColumn({
         {deals.length === 0 && !isOver && (
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50">
             <Kanban className="size-6 mb-1.5" />
-            <p className="text-xs font-medium">No deals</p>
+            <p className="text-xs font-medium">{t("crm.pipeline.noDeals")}</p>
           </div>
         )}
 
@@ -187,7 +189,7 @@ export function StageColumn({
             className="border-2 border-dashed rounded-xl h-20 flex items-center justify-center"
             style={{ borderColor: `${stage.color}60` }}
           >
-            <p className="text-xs font-semibold" style={{ color: stage.color }}>Drop here</p>
+            <p className="text-xs font-semibold" style={{ color: stage.color }}>{t("crm.pipeline.dropHere")}</p>
           </div>
         )}
       </div>

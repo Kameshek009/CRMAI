@@ -1,0 +1,242 @@
+{
+  "entityForm": {
+    "required": "{field} is required",
+    "invalidEmail": "Invalid email address",
+    "phoneTooLong": "Phone number is too long",
+    "yes": "Yes",
+    "no": "No",
+    "select": "Select...",
+    "cancel": "Cancel",
+    "create": "Create"
+  },
+  "viewControls": {
+    "search": "Search...",
+    "addNew": "Add New",
+    "filter": "Filter",
+    "filterBy": "Filter by",
+    "sort": "Sort",
+    "sortBy": "Sort by",
+    "asc": "A-Z",
+    "desc": "Z-A",
+    "groupBy": "Group by",
+    "none": "None",
+    "export": "Export",
+    "import": "Import",
+    "upgradeToAdd": "Upgrade to Add",
+    "clearAll": "Clear all"
+  },
+  "dataTable": {
+    "noData": "No data found",
+    "showing": "Showing {start}–{end} of {total}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "pipeline": {
+    "title": "New Deal",
+    "dealTitle": "Deal Title",
+    "value": "Value ($)",
+    "expectedClose": "Expected Close",
+    "description": "Description",
+    "newDealPlaceholder": "New deal",
+    "failedMove": "Failed to move deal",
+    "movedTo": "Moved to {stage}",
+    "dealCreated": "Deal created",
+    "failed": "Failed",
+    "notSetUp": "Pipeline not set up",
+    "beingConfigured": "Your deal stages are being configured.",
+    "rotting": "{count} rotting",
+    "rottingDays": "Deal rotting (days)",
+    "rottingPlaceholder": "e.g. 14",
+    "rottingHelp": "Deals without activity for this many days will be marked as rotting. Leave empty to disable.",
+    "noDeals": "No deals",
+    "dropHere": "Drop here",
+    "invalidDays": "Invalid number of days",
+    "rottingSet": "Rotting: {value} days",
+    "rottingDisabled": "Rotting disabled",
+    "saveFailed": "Failed to save"
+  },
+  "contacts": {
+    "title": "Contacts",
+    "new": "New Contact",
+    "created": "Contact created",
+    "searchPlaceholder": "Search contacts...",
+    "noMatching": "No matching contacts",
+    "noYet": "No contacts yet",
+    "noGroup": "No contacts to group",
+    "deleteTitle": "Delete contacts",
+    "deleteConfirm": "Are you sure you want to delete {count} contact(s)? This action cannot be undone.",
+    "changeStatus": "Change Status",
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "jobTitle": "Job Title",
+      "status": "Status",
+      "name": "Name",
+      "organization": "Organization",
+      "engagement": "Engagement"
+    },
+    "statuses": {
+      "lead": "Lead",
+      "active": "Active",
+      "inactive": "Inactive",
+      "churned": "Churned"
+    },
+    "sort": {
+      "created": "Created",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "engagement": "Engagement"
+    },
+    "groupBy": {
+      "status": "Status",
+      "source": "Source"
+    }
+  },
+  "leads": {
+    "title": "Leads",
+    "new": "New Lead",
+    "created": "Lead created",
+    "searchPlaceholder": "Search leads...",
+    "noMatching": "No matching leads",
+    "noYet": "No leads yet",
+    "noGroup": "No leads to group",
+    "deleteTitle": "Delete leads",
+    "deleteConfirm": "Are you sure you want to delete {count} lead(s)? This action cannot be undone.",
+    "changeStatus": "Change Status",
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "mobile": "Mobile",
+      "organization": "Organization",
+      "website": "Website",
+      "jobTitle": "Job Title",
+      "source": "Source",
+      "status": "Status",
+      "name": "Name"
+    },
+    "statuses": {
+      "new": "New",
+      "contacted": "Contacted",
+      "qualified": "Qualified",
+      "unqualified": "Unqualified",
+      "junk": "Junk"
+    },
+    "sources": {
+      "website": "Website",
+      "referral": "Referral",
+      "campaign": "Campaign",
+      "coldCall": "Cold Call",
+      "socialMedia": "Social Media",
+      "event": "Event",
+      "other": "Other"
+    },
+    "sort": {
+      "created": "Created",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "source": "Source",
+      "organization": "Organization"
+    },
+    "groupBy": {
+      "status": "Status",
+      "source": "Source"
+    }
+  },
+  "deals": {
+    "title": "Deals",
+    "new": "New Deal",
+    "created": "Deal created",
+    "searchPlaceholder": "Search deals...",
+    "noMatching": "No matching deals",
+    "noYet": "No deals yet",
+    "noGroup": "No deals to group",
+    "noStages": "No pipeline stages. Open the pipeline first.",
+    "fields": {
+      "title": "Title",
+      "dealTitle": "Deal Title",
+      "value": "Value ($)",
+      "expectedClose": "Expected Close",
+      "winPercent": "Win %",
+      "description": "Description",
+      "stage": "Stage",
+      "contact": "Contact",
+      "organization": "Organization",
+      "status": "Status"
+    },
+    "statuses": {
+      "open": "Open",
+      "won": "Won",
+      "lost": "Lost"
+    },
+    "sort": {
+      "created": "Created",
+      "title": "Title",
+      "value": "Value",
+      "expectedClose": "Expected Close",
+      "winPercent": "Win %"
+    },
+    "groupBy": {
+      "status": "Status"
+    }
+  },
+  "companies": {
+    "title": "Organizations",
+    "new": "New Organization",
+    "created": "Organization created",
+    "searchPlaceholder": "Search organizations...",
+    "noMatching": "No matching organizations",
+    "noYet": "No organizations yet",
+    "noGroup": "No organizations to group",
+    "deleteTitle": "Delete organizations",
+    "deleteConfirm": "Are you sure you want to delete {count} organization(s)?",
+    "fields": {
+      "name": "Name",
+      "companyName": "Company Name",
+      "domain": "Domain",
+      "industry": "Industry",
+      "size": "Company Size",
+      "website": "Website",
+      "phone": "Phone",
+      "health": "Health",
+      "healthScore": "Health Score"
+    },
+    "sort": {
+      "created": "Created",
+      "name": "Name",
+      "industry": "Industry",
+      "healthScore": "Health Score"
+    },
+    "groupBy": {
+      "industry": "Industry",
+      "size": "Size"
+    }
+  },
+  "callLogs": {
+    "fields": {
+      "direction": "Direction",
+      "status": "Status",
+      "from": "From",
+      "to": "To",
+      "duration": "Duration (seconds)",
+      "summary": "Summary"
+    },
+    "directions": {
+      "outbound": "Outbound",
+      "inbound": "Inbound"
+    },
+    "statuses": {
+      "completed": "Completed",
+      "missed": "Missed",
+      "noAnswer": "No Answer",
+      "busy": "Busy",
+      "voicemail": "Voicemail",
+      "cancelled": "Cancelled"
+    }
+  }
+}

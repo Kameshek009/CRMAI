@@ -1,0 +1,242 @@
+{
+  "entityForm": {
+    "required": "Поле «{field}» обязательно",
+    "invalidEmail": "Некорректный email",
+    "phoneTooLong": "Номер телефона слишком длинный",
+    "yes": "Да",
+    "no": "Нет",
+    "select": "Выберите...",
+    "cancel": "Отмена",
+    "create": "Создать"
+  },
+  "viewControls": {
+    "search": "Поиск...",
+    "addNew": "Добавить",
+    "filter": "Фильтр",
+    "filterBy": "Фильтровать по",
+    "sort": "Сортировка",
+    "sortBy": "Сортировать по",
+    "asc": "А-Я",
+    "desc": "Я-А",
+    "groupBy": "Группировка",
+    "none": "Нет",
+    "export": "Экспорт",
+    "import": "Импорт",
+    "upgradeToAdd": "Улучшить план",
+    "clearAll": "Сбросить все"
+  },
+  "dataTable": {
+    "noData": "Данные не найдены",
+    "showing": "Показано {start}–{end} из {total}",
+    "previous": "Назад",
+    "next": "Далее"
+  },
+  "pipeline": {
+    "title": "Новая сделка",
+    "dealTitle": "Название сделки",
+    "value": "Сумма ($)",
+    "expectedClose": "Ожидаемое закрытие",
+    "description": "Описание",
+    "newDealPlaceholder": "Новая сделка",
+    "failedMove": "Не удалось переместить сделку",
+    "movedTo": "Перемещено в {stage}",
+    "dealCreated": "Сделка создана",
+    "failed": "Ошибка",
+    "notSetUp": "Воронка не настроена",
+    "beingConfigured": "Стадии сделок настраиваются.",
+    "rotting": "{count} застой",
+    "rottingDays": "Застой сделки (дней)",
+    "rottingPlaceholder": "напр. 14",
+    "rottingHelp": "Сделки без активности дольше указанного срока будут отмечены как застойные. Оставьте пустым для отключения.",
+    "noDeals": "Нет сделок",
+    "dropHere": "Перетащите сюда",
+    "invalidDays": "Некорректное количество дней",
+    "rottingSet": "Застой: {value} дн.",
+    "rottingDisabled": "Застой отключён",
+    "saveFailed": "Не удалось сохранить"
+  },
+  "contacts": {
+    "title": "Контакты",
+    "new": "Новый контакт",
+    "created": "Контакт создан",
+    "searchPlaceholder": "Поиск контактов...",
+    "noMatching": "Контакты не найдены",
+    "noYet": "Контактов пока нет",
+    "noGroup": "Нет контактов для группировки",
+    "deleteTitle": "Удалить контакты",
+    "deleteConfirm": "Вы уверены, что хотите удалить {count} контакт(ов)? Это действие необратимо.",
+    "changeStatus": "Изменить статус",
+    "fields": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "phone": "Телефон",
+      "jobTitle": "Должность",
+      "status": "Статус",
+      "name": "Имя",
+      "organization": "Организация",
+      "engagement": "Вовлечённость"
+    },
+    "statuses": {
+      "lead": "Лид",
+      "active": "Активный",
+      "inactive": "Неактивный",
+      "churned": "Ушедший"
+    },
+    "sort": {
+      "created": "Дата создания",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "engagement": "Вовлечённость"
+    },
+    "groupBy": {
+      "status": "Статус",
+      "source": "Источник"
+    }
+  },
+  "leads": {
+    "title": "Лиды",
+    "new": "Новый лид",
+    "created": "Лид создан",
+    "searchPlaceholder": "Поиск лидов...",
+    "noMatching": "Лиды не найдены",
+    "noYet": "Лидов пока нет",
+    "noGroup": "Нет лидов для группировки",
+    "deleteTitle": "Удалить лиды",
+    "deleteConfirm": "Вы уверены, что хотите удалить {count} лид(ов)? Это действие необратимо.",
+    "changeStatus": "Изменить статус",
+    "fields": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "phone": "Телефон",
+      "mobile": "Мобильный",
+      "organization": "Организация",
+      "website": "Сайт",
+      "jobTitle": "Должность",
+      "source": "Источник",
+      "status": "Статус",
+      "name": "Имя"
+    },
+    "statuses": {
+      "new": "Новый",
+      "contacted": "Связались",
+      "qualified": "Квалифицирован",
+      "unqualified": "Не квалифицирован",
+      "junk": "Спам"
+    },
+    "sources": {
+      "website": "Сайт",
+      "referral": "Рекомендация",
+      "campaign": "Кампания",
+      "coldCall": "Холодный звонок",
+      "socialMedia": "Соц. сети",
+      "event": "Мероприятие",
+      "other": "Другое"
+    },
+    "sort": {
+      "created": "Дата создания",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "source": "Источник",
+      "organization": "Организация"
+    },
+    "groupBy": {
+      "status": "Статус",
+      "source": "Источник"
+    }
+  },
+  "deals": {
+    "title": "Сделки",
+    "new": "Новая сделка",
+    "created": "Сделка создана",
+    "searchPlaceholder": "Поиск сделок...",
+    "noMatching": "Сделки не найдены",
+    "noYet": "Сделок пока нет",
+    "noGroup": "Нет сделок для группировки",
+    "noStages": "Нет стадий воронки. Сначала откройте воронку.",
+    "fields": {
+      "title": "Название",
+      "dealTitle": "Название сделки",
+      "value": "Сумма ($)",
+      "expectedClose": "Ожидаемое закрытие",
+      "winPercent": "Вероятность %",
+      "description": "Описание",
+      "stage": "Стадия",
+      "contact": "Контакт",
+      "organization": "Организация",
+      "status": "Статус"
+    },
+    "statuses": {
+      "open": "Открыта",
+      "won": "Выиграна",
+      "lost": "Проиграна"
+    },
+    "sort": {
+      "created": "Дата создания",
+      "title": "Название",
+      "value": "Сумма",
+      "expectedClose": "Ожидаемое закрытие",
+      "winPercent": "Вероятность %"
+    },
+    "groupBy": {
+      "status": "Статус"
+    }
+  },
+  "companies": {
+    "title": "Организации",
+    "new": "Новая организация",
+    "created": "Организация создана",
+    "searchPlaceholder": "Поиск организаций...",
+    "noMatching": "Организации не найдены",
+    "noYet": "Организаций пока нет",
+    "noGroup": "Нет организаций для группировки",
+    "deleteTitle": "Удалить организации",
+    "deleteConfirm": "Вы уверены, что хотите удалить {count} организацию(й)?",
+    "fields": {
+      "name": "Название",
+      "companyName": "Название компании",
+      "domain": "Домен",
+      "industry": "Отрасль",
+      "size": "Размер компании",
+      "website": "Сайт",
+      "phone": "Телефон",
+      "health": "Здоровье",
+      "healthScore": "Рейтинг здоровья"
+    },
+    "sort": {
+      "created": "Дата создания",
+      "name": "Название",
+      "industry": "Отрасль",
+      "healthScore": "Рейтинг здоровья"
+    },
+    "groupBy": {
+      "industry": "Отрасль",
+      "size": "Размер"
+    }
+  },
+  "callLogs": {
+    "fields": {
+      "direction": "Направление",
+      "status": "Статус",
+      "from": "От",
+      "to": "Кому",
+      "duration": "Длительность (сек.)",
+      "summary": "Резюме"
+    },
+    "directions": {
+      "outbound": "Исходящий",
+      "inbound": "Входящий"
+    },
+    "statuses": {
+      "completed": "Завершён",
+      "missed": "Пропущен",
+      "noAnswer": "Нет ответа",
+      "busy": "Занято",
+      "voicemail": "Голосовая почта",
+      "cancelled": "Отменён"
+    }
+  }
+}
