@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getAccountId } from "@/lib/crm/helpers";
+import { TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
+import type { SubscriptionTier } from "@/types";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const { data: team } = await supabase
       .from("teams")
-      .select("id, name, description, max_members")
+      .select("id, name, description, max_members, tier")
       .eq("invite_code", code)
       .single();
 
@@ -30,6 +32,9 @@ export async function GET(request: NextRequest) {
       .eq("team_id", team.id)
       .eq("status", "active");
 
+    // Use tier-based max_members (authoritative)
+    const maxMembers = TIER_MAX_MEMBERS[(team.tier as SubscriptionTier) || "free"] ?? team.max_members;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -37,7 +42,7 @@ export async function GET(request: NextRequest) {
         name: team.name,
         description: team.description,
         memberCount: count || 0,
-        maxMembers: team.max_members,
+        maxMembers,
       },
     });
   } catch {

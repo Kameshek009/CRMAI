@@ -91,7 +91,9 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
   }
 
   // Queries 2 & 3 in parallel: workspace check + member/role fetch
-  const [workspaceResult, memberResult] = await Promise.all([
+  // NOTE: Using .limit(1) instead of .single() for team_members — .single()
+  // throws on 0 rows AND >1 rows, making debugging impossible.
+  const [workspaceResult, membersResult] = await Promise.all([
     supabase
       .from("teams")
       .select("id, deleted_at, tier, owner_account_id")
@@ -103,7 +105,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
       .eq("team_id", account.current_team_id)
       .eq("account_id", account.id)
       .eq("status", "active")
-      .single(),
+      .limit(1),
   ]);
 
   const workspace = workspaceResult.data;
@@ -122,102 +124,75 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
     };
   }
 
-  let member = memberResult.data;
-  if (memberResult.error || !member) {
-    // .single() fails on 0 rows AND >1 rows — diagnose which case
-    logger.error("WorkspaceContext", `Member lookup failed for account=${account.id} team=${account.current_team_id}`, {
-      error: memberResult.error?.message,
-      code: memberResult.error?.code,
-      hint: memberResult.error?.hint,
+  let member = membersResult.data?.[0] ?? null;
+
+  if (membersResult.error) {
+    logger.error("WorkspaceContext", `Member query error for account=${account.id} team=${account.current_team_id}`, {
+      error: membersResult.error.message,
+      code: membersResult.error.code,
+      hint: membersResult.error.hint,
     });
+  }
 
-    // Fallback: try without .single() to check for duplicates or missing records
-    const { data: members } = await supabase
-      .from("team_members")
-      .select("id, is_director, fixed_role, status, team_roles(*)")
-      .eq("team_id", account.current_team_id)
-      .eq("account_id", account.id)
-      .eq("status", "active");
+  if (!member) {
+    // No active membership found — try self-repair for team owner
+    const isTeamOwner = workspace.owner_account_id === account.id;
 
-    if (members && members.length > 0) {
-      // Duplicates exist — use first match, log warning
-      logger.warn("WorkspaceContext", `Found ${members.length} active memberships (expected 1), using first`, {
-        accountId: account.id,
-        teamId: account.current_team_id,
-      });
-      member = members[0];
-    } else {
-      // No active membership — try self-repair for team owner
-      const isTeamOwner = workspace.owner_account_id === account.id;
+    logger.error("WorkspaceContext", `No active membership: account=${account.id} team=${account.current_team_id} isOwner=${isTeamOwner}`);
 
+    if (isTeamOwner) {
       // Check if inactive membership exists
-      const { data: anyMember } = await supabase
+      const { data: anyMembers } = await supabase
         .from("team_members")
         .select("id, status, role_id")
         .eq("team_id", account.current_team_id)
         .eq("account_id", account.id)
         .limit(1);
 
-      logger.error("WorkspaceContext", "No active membership found", {
-        accountId: account.id,
-        teamId: account.current_team_id,
-        isTeamOwner,
-        inactiveMember: anyMember?.[0] || null,
-      });
-
-      if (isTeamOwner) {
-        // Self-repair: reactivate or recreate owner membership
-        if (anyMember && anyMember.length > 0) {
-          // Reactivate existing membership
-          await supabase
-            .from("team_members")
-            .update({ status: "active" })
-            .eq("id", anyMember[0].id);
-          logger.info("WorkspaceContext", `Self-repair: reactivated membership ${anyMember[0].id}`);
-        } else {
-          // Recreate owner membership — find Owner role
-          const { data: ownerRole } = await supabase
-            .from("team_roles")
-            .select("id")
-            .eq("team_id", account.current_team_id)
-            .eq("name", "Owner")
-            .single();
-
-          if (ownerRole) {
-            await supabase.from("team_members").insert({
-              team_id: account.current_team_id,
-              account_id: account.id,
-              role_id: ownerRole.id,
-              is_director: true,
-              fixed_role: "owner",
-              status: "active",
-            });
-            logger.info("WorkspaceContext", `Self-repair: recreated owner membership for team ${account.current_team_id}`);
-          }
-        }
-
-        // Retry the member query after self-repair
-        const { data: repairedMember } = await supabase
+      if (anyMembers && anyMembers.length > 0) {
+        // Reactivate existing membership
+        await supabase
           .from("team_members")
-          .select("id, is_director, fixed_role, status, team_roles(*)")
-          .eq("team_id", account.current_team_id)
-          .eq("account_id", account.id)
-          .eq("status", "active")
-          .single();
-
-        if (repairedMember) {
-          logger.info("WorkspaceContext", "Self-repair successful");
-          member = repairedMember;
-        } else {
-          return {
-            context: null,
-            error: NextResponse.json(
-              { success: false, error: "Not a member of current workspace" },
-              { status: 403 }
-            ),
-          };
-        }
+          .update({ status: "active" })
+          .eq("id", anyMembers[0].id);
+        logger.info("WorkspaceContext", `Self-repair: reactivated membership ${anyMembers[0].id}`);
       } else {
+        // Recreate owner membership — find Owner role
+        const { data: ownerRoles } = await supabase
+          .from("team_roles")
+          .select("id")
+          .eq("team_id", account.current_team_id)
+          .eq("name", "Owner")
+          .limit(1);
+
+        if (ownerRoles && ownerRoles.length > 0) {
+          await supabase.from("team_members").insert({
+            team_id: account.current_team_id,
+            account_id: account.id,
+            role_id: ownerRoles[0].id,
+            is_director: true,
+            fixed_role: "owner",
+            status: "active",
+          });
+          logger.info("WorkspaceContext", `Self-repair: recreated owner membership for team ${account.current_team_id}`);
+        }
+      }
+
+      // Retry after self-repair
+      const { data: repairedMembers } = await supabase
+        .from("team_members")
+        .select("id, is_director, fixed_role, status, team_roles(*)")
+        .eq("team_id", account.current_team_id)
+        .eq("account_id", account.id)
+        .eq("status", "active")
+        .limit(1);
+
+      member = repairedMembers?.[0] ?? null;
+
+      if (member) {
+        logger.info("WorkspaceContext", "Self-repair successful");
+      } else {
+        logger.error("WorkspaceContext", "Self-repair failed — still no active membership");
         return {
           context: null,
           error: NextResponse.json(
@@ -226,6 +201,14 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
           ),
         };
       }
+    } else {
+      return {
+        context: null,
+        error: NextResponse.json(
+          { success: false, error: "Not a member of current workspace" },
+          { status: 403 }
+        ),
+      };
     }
   }
 

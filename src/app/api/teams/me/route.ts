@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getAccountId } from "@/lib/crm/helpers";
+import { TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
+import type { SubscriptionTier } from "@/types";
 
 export async function GET() {
   try {
@@ -18,6 +20,22 @@ export async function GET() {
 
     if (memberError) {
       return NextResponse.json({ success: false, error: memberError.message }, { status: 500 });
+    }
+
+    // Auto-sync max_members with tier for all teams (fixes stale DB values)
+    for (const m of memberships || []) {
+      const team = m.teams as Record<string, unknown>;
+      if (!team || team.deleted_at) continue;
+      const tier = (team.tier as string) || "free";
+      const expectedMaxMembers = TIER_MAX_MEMBERS[tier as SubscriptionTier] ?? TIER_MAX_MEMBERS.free;
+      if (team.max_members !== expectedMaxMembers) {
+        await supabase
+          .from("teams")
+          .update({ max_members: expectedMaxMembers })
+          .eq("id", team.id as string);
+        // Update in-place so the response reflects the correct value
+        team.max_members = expectedMaxMembers;
+      }
     }
 
     // Filter out soft-deleted teams, but keep track of restorable ones

@@ -3,6 +3,8 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getAccountId } from "@/lib/crm/helpers";
 import { joinTeamSchema } from "@/lib/crm/team-validation";
 import { updateSubscriptionQuantity } from "@/lib/stripe/server";
+import { TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
+import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
@@ -64,7 +66,9 @@ export async function POST(request: NextRequest) {
       .eq("team_id", team.id)
       .eq("status", "active");
 
-    if (count !== null && count >= team.max_members) {
+    // Use tier-based max_members (authoritative), fallback to DB value
+    const tierMaxMembers = TIER_MAX_MEMBERS[(team.tier as SubscriptionTier) || "free"] ?? team.max_members;
+    if (count !== null && count >= tierMaxMembers) {
       return NextResponse.json({ success: false, error: "Team is full" }, { status: 403 });
     }
 
