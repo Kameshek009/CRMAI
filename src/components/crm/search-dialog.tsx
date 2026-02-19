@@ -1,12 +1,34 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search, User, Building2, Handshake, Loader2 } from "lucide-react";
+import {
+  Search,
+  User,
+  Building2,
+  Handshake,
+  Loader2,
+  Zap,
+  CheckSquare,
+  Plus,
+  ArrowRight,
+  LayoutGrid,
+  Kanban,
+  TrendingUp,
+  MessageSquare,
+  Settings,
+  FileText,
+  Phone,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchStore } from "@/stores/search-store";
+import type { LucideIcon } from "lucide-react";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface SearchResult {
   type: string;
@@ -15,17 +37,46 @@ interface SearchResult {
   subtitle: string;
 }
 
-const typeIcons: Record<string, typeof User> = {
+interface CommandItem {
+  id: string;
+  label: string;
+  sublabel?: string;
+  icon: LucideIcon;
+  section: "actions" | "navigation" | "search";
+  action: () => void;
+}
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const typeIcons: Record<string, LucideIcon> = {
   contact: User,
   company: Building2,
   deal: Handshake,
+  lead: Zap,
+  task: CheckSquare,
 };
 
 const typeRoutes: Record<string, string> = {
   contact: "/dashboard/contacts",
   company: "/dashboard/companies",
   deal: "/dashboard/deals",
+  lead: "/dashboard/leads",
+  task: "/dashboard/tasks",
 };
+
+const typeLabels: Record<string, string> = {
+  contact: "Contacts",
+  company: "Organizations",
+  deal: "Deals",
+  lead: "Leads",
+  task: "Tasks",
+};
+
+// ============================================================================
+// Component
+// ============================================================================
 
 export function SearchDialog() {
   const { open: storeOpen, setOpen: setStoreOpen } = useSearchStore();
@@ -37,7 +88,9 @@ export function SearchDialog() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Keyboard shortcut
   useEffect(() => {
@@ -51,6 +104,15 @@ export function SearchDialog() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [setOpen]);
 
+  // Reset on close
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+      setResults([]);
+      setSelectedIndex(0);
+    }
+  }, [open]);
+
   // Search
   const search = useCallback(async (q: string) => {
     if (q.length < 1) {
@@ -59,11 +121,10 @@ export function SearchDialog() {
     }
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/crm/search?q=${encodeURIComponent(q)}&limit=10`);
+      const res = await fetch(`/api/crm/search?q=${encodeURIComponent(q)}&limit=8`);
       const json = await res.json();
       if (json.success) {
         setResults(json.data);
-        setSelectedIndex(0);
       }
     } finally {
       setIsLoading(false);
@@ -75,33 +136,117 @@ export function SearchDialog() {
     return () => clearTimeout(timer);
   }, [query, search]);
 
-  const handleSelect = (result: SearchResult) => {
-    const route = typeRoutes[result.type];
-    if (route) {
-      router.push(`${route}/${result.id}`);
-      setOpen(false);
-      setQuery("");
+  // Navigate helper
+  const navigate = useCallback((path: string) => {
+    router.push(path);
+    setOpen(false);
+  }, [router, setOpen]);
+
+  // Build command items
+  const staticActions: CommandItem[] = useMemo(() => [
+    { id: "create-contact", label: "Create Contact", icon: Plus, section: "actions", action: () => navigate("/dashboard/contacts?create=1") },
+    { id: "create-deal", label: "Create Deal", icon: Plus, section: "actions", action: () => navigate("/dashboard/deals?create=1") },
+    { id: "create-lead", label: "Create Lead", icon: Plus, section: "actions", action: () => navigate("/dashboard/leads?create=1") },
+    { id: "create-task", label: "Create Task", icon: Plus, section: "actions", action: () => navigate("/dashboard/tasks?create=1") },
+  ], [navigate]);
+
+  const navItems: CommandItem[] = useMemo(() => [
+    { id: "nav-overview", label: "Overview", sublabel: "Dashboard home", icon: LayoutGrid, section: "navigation", action: () => navigate("/dashboard") },
+    { id: "nav-contacts", label: "Contacts", sublabel: "All contacts", icon: User, section: "navigation", action: () => navigate("/dashboard/contacts") },
+    { id: "nav-deals", label: "Deals", sublabel: "All deals", icon: Handshake, section: "navigation", action: () => navigate("/dashboard/deals") },
+    { id: "nav-leads", label: "Leads", sublabel: "All leads", icon: Zap, section: "navigation", action: () => navigate("/dashboard/leads") },
+    { id: "nav-companies", label: "Organizations", sublabel: "All organizations", icon: Building2, section: "navigation", action: () => navigate("/dashboard/companies") },
+    { id: "nav-pipeline", label: "Pipeline", sublabel: "Kanban view", icon: Kanban, section: "navigation", action: () => navigate("/dashboard/pipeline") },
+    { id: "nav-tasks", label: "Tasks", sublabel: "All tasks", icon: CheckSquare, section: "navigation", action: () => navigate("/dashboard/tasks") },
+    { id: "nav-notes", label: "Notes", sublabel: "All notes", icon: FileText, section: "navigation", action: () => navigate("/dashboard/notes") },
+    { id: "nav-call-logs", label: "Call Logs", icon: Phone, section: "navigation", action: () => navigate("/dashboard/call-logs") },
+    { id: "nav-analytics", label: "Analytics", sublabel: "Reports & insights", icon: TrendingUp, section: "navigation", action: () => navigate("/dashboard/analytics") },
+    { id: "nav-chat", label: "AI Chat", sublabel: "Chat with AI", icon: MessageSquare, section: "navigation", action: () => navigate("/dashboard/chats") },
+    { id: "nav-settings", label: "Settings", sublabel: "Workspace settings", icon: Settings, section: "navigation", action: () => navigate("/dashboard/team/settings") },
+  ], [navigate]);
+
+  // Filter static items by query (fuzzy)
+  const filteredStatic = useMemo(() => {
+    if (!query) return [...staticActions, ...navItems];
+    const q = query.toLowerCase();
+    const all = [...staticActions, ...navItems];
+    return all.filter(item =>
+      item.label.toLowerCase().includes(q) ||
+      (item.sublabel && item.sublabel.toLowerCase().includes(q))
+    );
+  }, [query, staticActions, navItems]);
+
+  // Convert search results to command items
+  const searchItems: CommandItem[] = useMemo(() => {
+    return results.map((r) => ({
+      id: `search-${r.type}-${r.id}`,
+      label: r.title,
+      sublabel: r.subtitle,
+      icon: typeIcons[r.type] || User,
+      section: "search" as const,
+      action: () => {
+        const route = typeRoutes[r.type];
+        if (route) navigate(`${route}/${r.id}`);
+      },
+    }));
+  }, [results, navigate]);
+
+  // All items in display order
+  const allItems = useMemo(() => {
+    if (!query) return filteredStatic;
+    // When query exists: show search results first, then filtered static items
+    return [...searchItems, ...filteredStatic];
+  }, [query, searchItems, filteredStatic]);
+
+  // Reset selected index when items change
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [allItems.length]);
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (listRef.current) {
+      const selected = listRef.current.querySelector('[data-selected="true"]');
+      selected?.scrollIntoView({ block: "nearest" });
     }
-  };
+  }, [selectedIndex]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
+      setSelectedIndex((i) => Math.min(i + 1, allItems.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((i) => Math.max(i - 1, 0));
-    } else if (e.key === "Enter" && results[selectedIndex]) {
+    } else if (e.key === "Enter" && allItems[selectedIndex]) {
       e.preventDefault();
-      handleSelect(results[selectedIndex]);
+      allItems[selectedIndex].action();
     }
   };
 
-  // Group results by type
-  const grouped = results.reduce<Record<string, SearchResult[]>>((acc, r) => {
-    (acc[r.type] = acc[r.type] || []).push(r);
-    return acc;
-  }, {});
+  // Group items by section
+  const sections = useMemo(() => {
+    const groups: { label: string; items: { item: CommandItem; globalIndex: number }[] }[] = [];
+    let idx = 0;
+
+    const sectionOrder = ["search", "actions", "navigation"] as const;
+    const sectionLabels = {
+      search: "Search Results",
+      actions: "Actions",
+      navigation: "Go to",
+    };
+
+    for (const section of sectionOrder) {
+      const items = allItems
+        .map((item, i) => ({ item, globalIndex: i }))
+        .filter(({ item }) => item.section === section);
+      if (items.length > 0) {
+        groups.push({ label: sectionLabels[section], items });
+      }
+    }
+
+    return groups;
+  }, [allItems]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -113,57 +258,60 @@ export function SearchDialog() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Search contacts, companies, deals..."
+            placeholder="Type a command or search..."
             className="border-0 shadow-none focus-visible:ring-0 h-12"
             autoFocus
           />
           {isLoading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
         </div>
 
-        {results.length > 0 && (
-          <div className="max-h-80 overflow-y-auto py-2">
-            {Object.entries(grouped).map(([type, items]) => {
-              const Icon = typeIcons[type] || User;
-              return (
-                <div key={type}>
-                  <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
-                    {type}s
-                  </div>
-                  {items.map((item) => {
-                    const globalIndex = results.indexOf(item);
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleSelect(item)}
-                        className={cn(
-                          "flex items-center gap-4 w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors",
-                          globalIndex === selectedIndex && "bg-muted"
-                        )}
-                      >
-                        <Icon className="size-4 text-muted-foreground shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{item.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div ref={listRef} className="max-h-80 overflow-y-auto py-1">
+          {sections.map((section) => (
+            <div key={section.label}>
+              <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                {section.label}
+              </div>
+              {section.items.map(({ item, globalIndex }) => {
+                const Icon = item.icon;
+                const isSelected = globalIndex === selectedIndex;
+                return (
+                  <button
+                    key={item.id}
+                    data-selected={isSelected}
+                    onClick={item.action}
+                    onMouseEnter={() => setSelectedIndex(globalIndex)}
+                    className={cn(
+                      "flex items-center gap-3 w-full px-4 py-2 text-left text-sm transition-colors",
+                      isSelected ? "bg-muted" : "hover:bg-muted/50"
+                    )}
+                  >
+                    <Icon className="size-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <span className="font-medium">{item.label}</span>
+                      {item.sublabel && (
+                        <span className="text-muted-foreground ml-2 text-xs">{item.sublabel}</span>
+                      )}
+                    </div>
+                    {isSelected && (
+                      <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
 
-        {query && !isLoading && results.length === 0 && (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            No results found for &quot;{query}&quot;
-          </div>
-        )}
+          {query && !isLoading && allItems.length === 0 && (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              No results for &quot;{query}&quot;
+            </div>
+          )}
+        </div>
 
         <div className="border-t px-4 py-2 text-xs text-muted-foreground flex items-center gap-4">
-          <span><kbd className="px-2 py-1 rounded bg-muted font-mono text-xs">↑↓</kbd> Navigate</span>
-          <span><kbd className="px-2 py-1 rounded bg-muted font-mono text-xs">↵</kbd> Open</span>
-          <span><kbd className="px-2 py-1 rounded bg-muted font-mono text-xs">Esc</kbd> Close</span>
+          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">↑↓</kbd> Navigate</span>
+          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">↵</kbd> Open</span>
+          <span><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> Close</span>
         </div>
       </DialogContent>
     </Dialog>

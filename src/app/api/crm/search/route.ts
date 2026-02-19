@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const results: { type: string; id: string; title: string; subtitle: string }[] = [];
 
     // Run searches in parallel
-    const [contactsResult, companiesResult, dealsResult] = await Promise.all([
+    const [contactsResult, companiesResult, dealsResult, leadsResult, tasksResult] = await Promise.all([
       supabase
         .from("contacts")
         .select("id, first_name, last_name, email, title")
@@ -49,11 +49,27 @@ export async function GET(request: NextRequest) {
         .eq("is_deleted", false)
         .ilike("title", `%${sq}%`)
         .limit(limit),
+      supabase
+        .from("leads")
+        .select("id, first_name, last_name, email, organization")
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false)
+        .or(`first_name.ilike.%${sq}%,last_name.ilike.%${sq}%,email.ilike.%${sq}%,organization.ilike.%${sq}%`)
+        .limit(limit),
+      supabase
+        .from("crm_tasks")
+        .select("id, title, status, priority")
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false)
+        .ilike("title", `%${sq}%`)
+        .limit(limit),
     ]);
 
     const contacts = contactsResult.data;
     const companies = companiesResult.data;
     const deals = dealsResult.data;
+    const leads = leadsResult.data;
+    const tasks = tasksResult.data;
 
     contacts?.forEach((c) =>
       results.push({
@@ -79,6 +95,24 @@ export async function GET(request: NextRequest) {
         id: d.id,
         title: d.title,
         subtitle: `$${Number(d.value).toLocaleString()} - ${d.status}`,
+      })
+    );
+
+    leads?.forEach((l) =>
+      results.push({
+        type: "lead",
+        id: l.id,
+        title: `${l.first_name} ${l.last_name || ""}`.trim(),
+        subtitle: l.email || l.organization || "",
+      })
+    );
+
+    tasks?.forEach((t) =>
+      results.push({
+        type: "task",
+        id: t.id,
+        title: t.title,
+        subtitle: `${t.priority || "normal"} - ${t.status || "todo"}`,
       })
     );
 
