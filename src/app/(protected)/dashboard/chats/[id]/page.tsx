@@ -376,10 +376,12 @@ export default function ChatDetailPage() {
                 }),
               });
               const notifResult = await notifRes.json();
-              console.log('[Chat] notification saved:', notifResult.success, notifContent);
+              toast.info(`[debug] notif save: ${notifResult.success ? 'OK' : 'FAIL ' + (notifResult.error || '')}, type=${notifResult.message?.message_type}, link=${(notifResult.message?.metadata as Record<string,unknown>)?.link || 'none'}`);
               if (notifResult.success) {
                 setMessages((prev) => {
-                  if (prev.some((m) => m.id === notifResult.message.id)) return prev;
+                  const alreadyExists = prev.some((m) => m.id === notifResult.message.id);
+                  toast.info(`[debug] adding msg, already exists: ${alreadyExists}, total: ${prev.length}`);
+                  if (alreadyExists) return prev;
                   return [...prev, notifResult.message];
                 });
                 if (notifResult.message.created_at) {
@@ -387,7 +389,7 @@ export default function ChatDetailPage() {
                 }
               }
             } catch (notifErr) {
-              console.error('[Chat] notification save error:', notifErr);
+              toast.error(`[debug] notif error: ${String(notifErr)}`);
             }
           }
         }
