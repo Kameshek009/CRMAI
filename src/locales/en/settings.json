@@ -62,10 +62,14 @@
     "description": "Irreversible actions for your account and workspace",
     "deleteAccount": "Delete Account",
     "deleteAccountDescription": "Permanently delete your account and all data",
-    "deleteWorkspace": "Delete Workspace",
-    "deleteWorkspaceDescription": "Delete this workspace. You can restore it within 24 hours.",
-    "confirmDeleteWorkspace": "Are you sure? You can restore the workspace within 24 hours.",
-    "workspaceDeleted": "Workspace deleted. You can restore it within 24 hours.",
+    "deleteWorkspace": "Delete Team",
+    "deleteWorkspaceDescription": "Delete the team and all associated data. Restore available for 24 hours.",
+    "confirmTitle": "Delete Team",
+    "confirmDescription": "You are about to delete the team \"{name}\". This will affect all members.",
+    "confirmWarning": "All team data (contacts, deals, tasks) will become inaccessible. Stripe subscription will be cancelled. Restore is available for 24 hours.",
+    "confirmLabel": "Type \"{name}\" to confirm",
+    "confirmDelete": "Delete Team",
+    "workspaceDeleted": "Team deleted. Restore available for 24 hours.",
     "deleting": "Deleting..."
   }
 }
