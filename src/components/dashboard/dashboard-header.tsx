@@ -30,6 +30,7 @@ const segmentLabels: Record<string, string> = {
   leads: "Leads",
   "call-logs": "Call Logs",
   notes: "Notes",
+  automations: "Automations",
 };
 
 function isUUID(s: string) {

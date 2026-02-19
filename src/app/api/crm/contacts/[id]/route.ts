@@ -4,6 +4,7 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateContactSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit, computeChanges } from "@/lib/crm/audit";
+import { runAutomations } from "@/lib/crm/automation-engine";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -96,13 +97,25 @@ export async function PATCH(
     } catch (e) { logger.warn("Contacts", "Failed to log activity", e); }
 
     // Audit log with changes
+    const changes = oldRecord ? computeChanges(oldRecord, parsed.data) : undefined;
     logAudit({
       teamId: context.workspaceId,
       accountId: context.accountId,
       entityType: "contact",
       entityId: id,
       action: "update",
-      changes: oldRecord ? computeChanges(oldRecord, parsed.data) : undefined,
+      changes,
+    });
+
+    // Run automations (fire-and-forget)
+    runAutomations({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      triggerType: "record_updated",
+      entityType: "contact",
+      entityId: id,
+      changes,
+      record: data,
     });
 
     return NextResponse.json({ success: true, data });

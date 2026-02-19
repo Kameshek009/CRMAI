@@ -4,6 +4,7 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateLeadSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit, computeChanges } from "@/lib/crm/audit";
+import { runAutomations } from "@/lib/crm/automation-engine";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -86,13 +87,24 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Lead not found" }, { status: 404 });
     }
 
+    const changes = oldRecord ? computeChanges(oldRecord, parsed.data) : undefined;
     logAudit({
       teamId: context.workspaceId,
       accountId: context.accountId,
       entityType: "lead",
       entityId: id,
       action: "update",
-      changes: oldRecord ? computeChanges(oldRecord, parsed.data) : undefined,
+      changes,
+    });
+
+    runAutomations({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      triggerType: "record_updated",
+      entityType: "lead",
+      entityId: id,
+      changes,
+      record: data,
     });
 
     return NextResponse.json({ success: true, data });

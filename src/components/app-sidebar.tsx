@@ -83,6 +83,7 @@ const toolsGroup: NavGroup = {
   label: "Tools",
   items: [
     { label: "Pipeline", href: "/dashboard/pipeline", icon: Kanban, permission: "pipeline.read" },
+    { label: "Automations", href: "/dashboard/automations", icon: Zap },
     { label: "Analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
     { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
   ],

@@ -4,6 +4,7 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { updateDealSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit, computeChanges } from "@/lib/crm/audit";
+import { runAutomations } from "@/lib/crm/automation-engine";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -97,13 +98,26 @@ export async function PATCH(
       });
     } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
 
+    const changes = oldRecord ? computeChanges(oldRecord, parsed.data) : undefined;
     logAudit({
       teamId: context.workspaceId,
       accountId: context.accountId,
       entityType: "deal",
       entityId: id,
       action: "update",
-      changes: oldRecord ? computeChanges(oldRecord, parsed.data) : undefined,
+      changes,
+    });
+
+    // Determine trigger type — deal_stage_changed or record_updated
+    const triggerType = changes && changes["stage_id"] ? "deal_stage_changed" as const : "record_updated" as const;
+    runAutomations({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      triggerType,
+      entityType: "deal",
+      entityId: id,
+      changes,
+      record: data,
     });
 
     return NextResponse.json({ success: true, data });

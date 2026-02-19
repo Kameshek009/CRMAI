@@ -4,6 +4,7 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parseListParams, applyListQuery, applyVisibilityFilter } from "@/lib/crm/query-builder";
 import { createLeadSchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
+import { runAutomations } from "@/lib/crm/automation-engine";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -89,6 +90,15 @@ export async function POST(request: NextRequest) {
       entityType: "lead",
       entityId: data.id,
       action: "create",
+    });
+
+    runAutomations({
+      teamId: context.workspaceId,
+      accountId: context.accountId,
+      triggerType: "record_created",
+      entityType: "lead",
+      entityId: data.id,
+      record: data,
     });
 
     return NextResponse.json({ success: true, data });
