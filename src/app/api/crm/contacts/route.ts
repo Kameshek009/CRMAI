@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { parsePagination, sanitizeLike } from "@/lib/crm/helpers";
+import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createContactSchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
 
@@ -13,11 +13,8 @@ export async function GET(request: NextRequest) {
     const permError = requirePermission(context.permissions, "contacts", "read", context.isDirector);
     if (permError) return permError;
 
-    const { searchParams } = new URL(request.url);
-    const { limit, offset } = parsePagination(searchParams);
-    const status = searchParams.get("status");
-    const search = searchParams.get("search");
-    const companyId = searchParams.get("company_id");
+    const url = new URL(request.url);
+    const params = parseListParams(url);
 
     const supabase = createSupabaseAdmin();
 
@@ -25,16 +22,9 @@ export async function GET(request: NextRequest) {
       .from("contacts")
       .select("*, companies(id, name)", { count: "exact" })
       .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .eq("is_deleted", false);
 
-    if (status) query = query.eq("status", status);
-    if (companyId) query = query.eq("company_id", companyId);
-    if (search) {
-      const s = sanitizeLike(search);
-      query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
-    }
+    query = applyListQuery(query, "contacts", params, ["first_name", "last_name", "email"]);
 
     const { data, error: dbError, count } = await query;
 

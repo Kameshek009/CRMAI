@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { parsePagination } from "@/lib/crm/helpers";
+import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createTaskSchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
 
@@ -13,12 +13,8 @@ export async function GET(request: NextRequest) {
     const permError = requirePermission(context.permissions, "tasks", "read", context.isDirector);
     if (permError) return permError;
 
-    const { searchParams } = new URL(request.url);
-    const { limit, offset } = parsePagination(searchParams);
-    const status = searchParams.get("status");
-    const priority = searchParams.get("priority");
-    const contactId = searchParams.get("contact_id");
-    const dealId = searchParams.get("deal_id");
+    const url = new URL(request.url);
+    const params = parseListParams(url);
 
     const supabase = createSupabaseAdmin();
 
@@ -26,14 +22,9 @@ export async function GET(request: NextRequest) {
       .from("crm_tasks")
       .select("*", { count: "exact" })
       .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .order("due_date", { ascending: true, nullsFirst: false })
-      .range(offset, offset + limit - 1);
+      .eq("is_deleted", false);
 
-    if (status) query = query.eq("status", status);
-    if (priority) query = query.eq("priority", priority);
-    if (contactId) query = query.eq("contact_id", contactId);
-    if (dealId) query = query.eq("deal_id", dealId);
+    query = applyListQuery(query, "tasks", params, ["title"]);
 
     const { data, error: dbError, count } = await query;
 

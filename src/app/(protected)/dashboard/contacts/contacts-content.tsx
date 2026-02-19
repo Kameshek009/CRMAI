@@ -1,50 +1,27 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
-import { ContactCard } from "@/components/crm/contact-card";
+import { ViewControls, type FilterOption, type ActiveFilter, type SortOption, type GroupByOption } from "@/components/frappe/view-controls";
+import { DataTable, type Column } from "@/components/frappe/data-table";
+import { KanbanBoard, type KanbanColumn } from "@/components/frappe/kanban-board";
+import { GroupByView, type GroupByGroup } from "@/components/frappe/group-by-view";
+import { StatusBadge } from "@/components/frappe/status-badge";
 import { EntityForm } from "@/components/crm/entity-form";
 import { contactFields } from "@/lib/crm/field-definitions";
 import { ImportWizard } from "@/components/crm/import-wizard";
-import { EmptyState } from "@/components/crm/empty-state";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
-import { useMultiSelect } from "@/hooks/use-multi-select";
-import { cn } from "@/lib/utils";
-import {
-  Plus,
-  Search,
-  Upload,
-  Users,
-  Loader2,
-  ListFilter,
-  UserPlus,
-  UserCheck,
-  UserX,
-  UserMinus,
-} from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Upload, Users } from "lucide-react";
 import { toast } from "sonner";
+import type { ViewMode } from "@/types/crm";
 
-const statusFilters = [
-  { label: "All", value: "" },
-  { label: "Lead", value: "lead" },
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" },
-  { label: "Churned", value: "churned" },
-];
-
-const sortOptions = [
-  { label: "Newest", value: "created_desc" },
-  { label: "Name A-Z", value: "name_asc" },
-  { label: "Name Z-A", value: "name_desc" },
-  { label: "Engagement", value: "engagement_desc" },
-];
+// ============================================================================
+// Types
+// ============================================================================
 
 interface ContactData {
   id: string;
@@ -54,114 +31,109 @@ interface ContactData {
   phone: string | null;
   title: string | null;
   status: string;
-  engagement_score: number;
   source: string | null;
+  engagement_score: number;
   companies: { id: string; name: string } | null;
+  created_at: string;
 }
 
+// ============================================================================
+// Constants
+// ============================================================================
+
+const FILTER_OPTIONS: FilterOption[] = [
+  {
+    field: "status", label: "Status", type: "select",
+    options: [
+      { value: "lead", label: "Lead" },
+      { value: "active", label: "Active" },
+      { value: "inactive", label: "Inactive" },
+      { value: "churned", label: "Churned" },
+    ],
+  },
+];
+
+const SORT_OPTIONS: SortOption[] = [
+  { field: "created_at", label: "Created" },
+  { field: "first_name", label: "First Name" },
+  { field: "last_name", label: "Last Name" },
+  { field: "email", label: "Email" },
+  { field: "engagement_score", label: "Engagement" },
+];
+
+const GROUP_BY_OPTIONS: GroupByOption[] = [
+  { field: "status", label: "Status" },
+  { field: "source", label: "Source" },
+];
+
+const KANBAN_COLUMNS: KanbanColumn[] = [
+  { id: "lead", title: "Lead", color: "bg-indigo-500" },
+  { id: "active", title: "Active", color: "bg-emerald-500" },
+  { id: "inactive", title: "Inactive", color: "bg-gray-500" },
+  { id: "churned", title: "Churned", color: "bg-red-500" },
+];
+
+const PAGE_SIZE = 50;
+
+// ============================================================================
+// Component
+// ============================================================================
+
 export function ContactsContent() {
+  const router = useRouter();
+
+  // Data
   const [contacts, setContacts] = useState<ContactData[]>([]);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  // View
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState(1);
+  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
+  const [groupBy, setGroupBy] = useState<string | null>("status");
+
+  // Forms
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [total, setTotal] = useState(0);
+
+  // Bulk
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [sortBy, setSortBy] = useState("created_desc");
-  const [sourceFilter, setSourceFilter] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
 
-  const PAGE_SIZE = 50;
-
-  const { selectedIds, toggle, selectAll, deselectAll, isSelected, isAllSelected, count } = useMultiSelect();
-
-  const fetchContacts = useCallback(async (offset = 0, append = false) => {
-    if (!append) setIsLoading(true);
-    else setIsLoadingMore(true);
+  // Fetch
+  const fetchContacts = useCallback(async () => {
+    setIsLoading(true);
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
-      if (statusFilter) params.set("status", statusFilter);
+      params.set("sort_by", sortBy);
+      params.set("sort_order", sortOrder);
+      params.set("page", String(page));
       params.set("limit", String(PAGE_SIZE));
-      params.set("offset", String(offset));
-
+      for (const f of activeFilters) {
+        params.set(`filter_${f.field}`, f.value);
+      }
       const res = await fetch(`/api/crm/contacts?${params}`);
       const json = await res.json();
       if (json.success) {
-        setContacts((prev) => append ? [...prev, ...json.data] : json.data);
+        setContacts(json.data);
         setTotal(json.total || 0);
       }
     } finally {
       setIsLoading(false);
-      setIsLoadingMore(false);
     }
-  }, [search, statusFilter]);
+  }, [search, sortBy, sortOrder, page, activeFilters]);
 
-  useEffect(() => {
-    fetchContacts();
-  }, [fetchContacts]);
+  useEffect(() => { fetchContacts(); }, [fetchContacts]);
+  useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
+  useEffect(() => { setPage(1); }, [search, activeFilters, sortBy, sortOrder]);
 
-  useEffect(() => {
-    deselectAll();
-  }, [search, statusFilter, deselectAll]);
-
-  // Client-side filtering and sorting
-  const filteredContacts = useMemo(() => {
-    let result = [...contacts];
-
-    if (sourceFilter) {
-      result = result.filter((c) => c.source?.toLowerCase() === sourceFilter.toLowerCase());
-    }
-
-    result.sort((a, b) => {
-      if (sortBy === "name_asc") {
-        return `${a.first_name} ${a.last_name || ""}`.localeCompare(`${b.first_name} ${b.last_name || ""}`);
-      }
-      if (sortBy === "name_desc") {
-        return `${b.first_name} ${b.last_name || ""}`.localeCompare(`${a.first_name} ${a.last_name || ""}`);
-      }
-      if (sortBy === "engagement_desc") {
-        return b.engagement_score - a.engagement_score;
-      }
-      return 0; // default API order
-    });
-
-    return result;
-  }, [contacts, sourceFilter, sortBy]);
-
-  // Extract unique sources
-  const sources = useMemo(() => {
-    const set = new Set<string>();
-    contacts.forEach((c) => { if (c.source) set.add(c.source); });
-    return Array.from(set).sort();
-  }, [contacts]);
-
-  // Status stats
-  const statusStats = useMemo(() => {
-    const counts: Record<string, number> = { lead: 0, active: 0, inactive: 0, churned: 0 };
-    contacts.forEach((c) => { counts[c.status] = (counts[c.status] || 0) + 1; });
-    return counts;
-  }, [contacts]);
-
-  const hasMore = contacts.length < total;
-
-  const statusIcons: Record<string, typeof Users> = {
-    lead: UserPlus,
-    active: UserCheck,
-    inactive: UserMinus,
-    churned: UserX,
-  };
-
-  const statusColors: Record<string, string> = {
-    lead: "text-indigo-500 bg-indigo-500/10",
-    active: "text-emerald-500 bg-emerald-500/10",
-    inactive: "text-gray-500 bg-gray-500/10",
-    churned: "text-red-500 bg-red-500/10",
-  };
-
+  // Handlers
   const handleCreate = async (values: Record<string, string>) => {
     const res = await fetch("/api/crm/contacts", {
       method: "POST",
@@ -178,18 +150,37 @@ export function ContactsContent() {
     }
   };
 
+  const handleFilterAdd = useCallback((field: string, value: string) => {
+    const option = FILTER_OPTIONS.find(f => f.field === field);
+    const optLabel = option?.options?.find(o => o.value === value)?.label || value;
+    setActiveFilters(prev => {
+      const next = prev.filter(f => f.field !== field);
+      return [...next, { field, value, label: optLabel }];
+    });
+  }, []);
+
+  const handleFilterRemove = useCallback((field: string) => {
+    setActiveFilters(prev => prev.filter(f => f.field !== field));
+  }, []);
+
+  const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+    setSortBy(field);
+    setSortOrder(order);
+  }, []);
+
   const handleBulkDelete = async () => {
     setIsBulkLoading(true);
     try {
+      const ids = Array.from(selectedIds);
       const res = await fetch("/api/crm/contacts/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete", ids: selectedIds }),
+        body: JSON.stringify({ action: "delete", ids }),
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Deleted ${selectedIds.length} contact${selectedIds.length !== 1 ? "s" : ""}`);
-        deselectAll();
+        toast.success(`Deleted ${ids.length} contact${ids.length !== 1 ? "s" : ""}`);
+        setSelectedIds(new Set());
         fetchContacts();
       } else {
         toast.error(json.error || "Failed to delete contacts");
@@ -203,15 +194,16 @@ export function ContactsContent() {
   const handleBulkStatusChange = async (status: string) => {
     setIsBulkLoading(true);
     try {
+      const ids = Array.from(selectedIds);
       const res = await fetch("/api/crm/contacts/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "update_status", ids: selectedIds, status }),
+        body: JSON.stringify({ action: "update_status", ids, status }),
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Updated ${selectedIds.length} contact${selectedIds.length !== 1 ? "s" : ""} to ${status}`);
-        deselectAll();
+        toast.success(`Updated ${ids.length} contact${ids.length !== 1 ? "s" : ""}`);
+        setSelectedIds(new Set());
         fetchContacts();
       } else {
         toast.error(json.error || "Failed to update contacts");
@@ -221,8 +213,79 @@ export function ContactsContent() {
     }
   };
 
-  const visibleIds = filteredContacts.map((c) => c.id);
-  const allSelected = isAllSelected(visibleIds);
+  const handleKanbanMove = async (itemId: string, toColumn: string) => {
+    setContacts(prev => prev.map(c => c.id === itemId ? { ...c, status: toColumn } : c));
+    const res = await fetch(`/api/crm/contacts/${itemId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: toColumn }),
+    });
+    if (!res.ok) {
+      toast.error("Failed to update status");
+      fetchContacts();
+    }
+  };
+
+  // Table columns
+  const columns: Column<ContactData>[] = useMemo(() => [
+    {
+      key: "first_name", label: "Name", sortable: true,
+      render: (c) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-7 w-7">
+            <AvatarFallback className="text-xs bg-primary/10">
+              {(c.first_name[0] || "").toUpperCase()}{(c.last_name?.[0] || "").toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <span className="font-medium">{c.first_name} {c.last_name || ""}</span>
+            {c.title && <p className="text-xs text-muted-foreground">{c.title}</p>}
+          </div>
+        </div>
+      ),
+    },
+    { key: "email", label: "Email", sortable: true },
+    { key: "phone", label: "Phone" },
+    {
+      key: "companies", label: "Organization",
+      render: (c) => c.companies?.name || "—",
+    },
+    {
+      key: "status", label: "Status", sortable: true,
+      render: (c) => <StatusBadge status={c.status} />,
+    },
+    {
+      key: "engagement_score", label: "Engagement", sortable: true, align: "center",
+      render: (c) => <span className="text-xs font-medium">{c.engagement_score || 0}</span>,
+    },
+  ], []);
+
+  // Group by
+  const groups: GroupByGroup<ContactData>[] = useMemo(() => {
+    if (!groupBy) return [];
+    const map = new Map<string, ContactData[]>();
+    for (const c of contacts) {
+      const key = String((c as unknown as Record<string, unknown>)[groupBy] ?? "—");
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(c);
+    }
+    return Array.from(map.entries()).map(([key, items]) => ({
+      key,
+      label: key,
+      count: items.length,
+      items,
+    }));
+  }, [contacts, groupBy]);
+
+  // Kanban data
+  const kanbanColumns: KanbanColumn[] = useMemo(() =>
+    KANBAN_COLUMNS.map(col => ({
+      ...col,
+      count: contacts.filter(c => c.status === col.id).length,
+    })), [contacts]);
+
+  const kanbanItems = useMemo(() =>
+    contacts.map(c => ({ ...c, columnId: c.status })), [contacts]);
 
   return (
     <PageContainer>
@@ -232,168 +295,108 @@ export function ContactsContent() {
             <Upload className="size-4 mr-1" />
             Import
           </Button>
-          <Button size="sm" onClick={() => setShowForm(true)}>
-            <Plus className="size-4 mr-1" />
-            New Contact
-          </Button>
         </div>
       </PageHeader>
 
-      {/* Status Summary */}
-      {contacts.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {(["lead", "active", "inactive", "churned"] as const).map((status, i) => {
-            const Icon = statusIcons[status] || Users;
-            const color = statusColors[status] || "text-muted-foreground bg-muted";
-            return (
-              <div key={status}>
-                <Card
-                  className={cn("glass-card cursor-pointer transition-all", statusFilter === status && "ring-1 ring-primary")}
-                  onClick={() => setStatusFilter(statusFilter === status ? "" : status)}
-                >
-                  <CardContent className="p-4 flex items-center gap-4">
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", color)}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold">{statusStats[status] || 0}</p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">{status}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            );
-          })}
-        </div>
+      <ViewControls
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search contacts..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        filterOptions={FILTER_OPTIONS}
+        activeFilters={activeFilters}
+        onFilterAdd={handleFilterAdd}
+        onFilterRemove={handleFilterRemove}
+        onFiltersClear={() => setActiveFilters([])}
+        sortOptions={SORT_OPTIONS}
+        currentSort={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+        groupByOptions={GROUP_BY_OPTIONS}
+        currentGroupBy={groupBy}
+        onGroupByChange={setGroupBy}
+        totalCount={total}
+        entityName={`contact${total !== 1 ? "s" : ""}`}
+        onAdd={() => setShowForm(true)}
+        addLabel="New Contact"
+      />
+
+      {/* Table View */}
+      {viewMode === "table" && (
+        <DataTable
+          columns={columns}
+          data={contacts}
+          loading={isLoading}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={handleSortChange}
+          selectable
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+          onRowClick={(c) => router.push(`/dashboard/contacts/${c.id}`)}
+          page={page}
+          pageSize={PAGE_SIZE}
+          totalCount={total}
+          onPageChange={setPage}
+          emptyMessage={search || activeFilters.length > 0 ? "No matching contacts" : "No contacts yet"}
+        />
       )}
 
-      {/* Filters */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search contacts..."
-              className="pl-10"
-            />
-          </div>
-          <div className="flex gap-2">
-            {sources.length > 0 && (
-              <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? "bg-muted" : ""}>
-                <ListFilter className="size-4 mr-1" />
-                Sources
-                {sourceFilter && <Badge className="ml-2 h-4 px-1 text-xs">!</Badge>}
-              </Button>
-            )}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="flex h-9 rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
-              aria-label="Sort contacts by"
-            >
-              {sortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex gap-1">
-          {statusFilters.map((f) => (
-            <Badge
-              key={f.value}
-              variant={statusFilter === f.value ? "default" : "outline"}
+      {/* Kanban View */}
+      {viewMode === "kanban" && !isLoading && (
+        <KanbanBoard
+          columns={kanbanColumns}
+          cards={kanbanItems}
+          onCardMove={(id, _from, to) => handleKanbanMove(id, to)}
+          renderCard={(c) => (
+            <div
               className="cursor-pointer"
-              onClick={() => setStatusFilter(f.value)}
+              onClick={() => router.push(`/dashboard/contacts/${c.id}`)}
             >
-              {f.label}
-            </Badge>
-          ))}
-        </div>
-
-        {showFilters && sources.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            <span className="text-xs text-muted-foreground self-center mr-1">Source:</span>
-            <Badge
-              variant={sourceFilter === "" ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setSourceFilter("")}
-            >
-              All
-            </Badge>
-            {sources.map((src) => (
-              <Badge
-                key={src}
-                variant={sourceFilter === src ? "default" : "outline"}
-                className="cursor-pointer capitalize"
-                onClick={() => setSourceFilter(src)}
-              >
-                {src}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Contact List */}
-      {isLoading ? (
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-lg" />
-          ))}
-        </div>
-      ) : filteredContacts.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title={search || statusFilter || sourceFilter ? "No matching contacts" : "No contacts yet"}
-          description={search || statusFilter || sourceFilter ? "Try adjusting your filters." : "Add your first contact to start building your CRM."}
-          actionLabel={!(search || statusFilter || sourceFilter) ? "Add Contact" : undefined}
-          onAction={!(search || statusFilter || sourceFilter) ? () => setShowForm(true) : undefined}
-        />
-      ) : (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-4 py-1">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={allSelected}
-                onCheckedChange={() => allSelected ? deselectAll() : selectAll(visibleIds)}
-                className="size-5"
-              />
-              <span className="text-sm text-muted-foreground">Select all</span>
-            </div>
-            <span className="text-xs text-muted-foreground">{filteredContacts.length} contact{filteredContacts.length !== 1 ? "s" : ""}</span>
-          </div>
-          {filteredContacts.map((contact) => (
-            <ContactCard
-              key={contact.id}
-              id={contact.id}
-              firstName={contact.first_name}
-              lastName={contact.last_name}
-              email={contact.email}
-              phone={contact.phone}
-              title={contact.title}
-              status={contact.status}
-              engagementScore={contact.engagement_score}
-              companyName={contact.companies?.name}
-              selectable
-              selected={isSelected(contact.id)}
-              onSelectToggle={toggle}
-            />
-          ))}
-          {hasMore && (
-            <div className="flex justify-center pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={isLoadingMore}
-                onClick={() => fetchContacts(contacts.length, true)}
-              >
-                {isLoadingMore && <Loader2 className="size-4 mr-2 animate-spin" />}
-                Load More ({contacts.length} of {total})
-              </Button>
+              <div className="flex items-center gap-2 mb-1">
+                <Avatar className="h-6 w-6">
+                  <AvatarFallback className="text-[10px] bg-primary/10">
+                    {(c.first_name[0] || "").toUpperCase()}{(c.last_name?.[0] || "").toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium truncate">{c.first_name} {c.last_name || ""}</span>
+              </div>
+              {c.email && <p className="text-xs text-muted-foreground truncate">{c.email}</p>}
+              {c.companies?.name && <p className="text-xs text-muted-foreground truncate">{c.companies.name}</p>}
             </div>
           )}
-        </div>
+        />
+      )}
+
+      {/* Group By View */}
+      {viewMode === "group_by" && (
+        <GroupByView
+          groups={groups}
+          emptyMessage="No contacts to group"
+          renderItem={(c) => (
+            <div
+              key={c.id}
+              className="flex items-center justify-between px-4 py-2 hover:bg-muted/30 cursor-pointer rounded-md transition-colors"
+              onClick={() => router.push(`/dashboard/contacts/${c.id}`)}
+            >
+              <div className="flex items-center gap-3">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-xs bg-primary/10">
+                    {(c.first_name[0] || "").toUpperCase()}{(c.last_name?.[0] || "").toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <span className="text-sm font-medium">{c.first_name} {c.last_name || ""}</span>
+                  {c.email && <p className="text-xs text-muted-foreground">{c.email}</p>}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusBadge status={c.status} />
+              </div>
+            </div>
+          )}
+        />
       )}
 
       <EntityForm
@@ -411,8 +414,8 @@ export function ContactsContent() {
       />
 
       <BulkActionBar
-        selectedCount={count}
-        onDeselectAll={deselectAll}
+        selectedCount={selectedIds.size}
+        onDeselectAll={() => setSelectedIds(new Set())}
         actions={[
           {
             label: "Change Status",
@@ -436,7 +439,7 @@ export function ContactsContent() {
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title="Delete contacts"
-        description={`Are you sure you want to delete ${count} contact${count !== 1 ? "s" : ""}? This action cannot be undone.`}
+        description={`Are you sure you want to delete ${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""}? This action cannot be undone.`}
         confirmLabel="Delete"
         variant="destructive"
         isLoading={isBulkLoading}

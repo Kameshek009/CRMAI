@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { parsePagination, ensureDealStages } from "@/lib/crm/helpers";
+import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
+import { ensureDealStages } from "@/lib/crm/helpers";
 import { createDealSchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
 
@@ -13,12 +14,8 @@ export async function GET(request: NextRequest) {
     const permError = requirePermission(context.permissions, "deals", "read", context.isDirector);
     if (permError) return permError;
 
-    const { searchParams } = new URL(request.url);
-    const { limit, offset } = parsePagination(searchParams);
-    const status = searchParams.get("status");
-    const stageId = searchParams.get("stage_id");
-    const contactId = searchParams.get("contact_id");
-    const companyId = searchParams.get("company_id");
+    const url = new URL(request.url);
+    const params = parseListParams(url);
 
     const supabase = createSupabaseAdmin();
     await ensureDealStages(context.accountId, context.teamId);
@@ -27,14 +24,9 @@ export async function GET(request: NextRequest) {
       .from("deals")
       .select("*, deal_stages(id, name, color, position, is_won, is_lost), contacts(id, first_name, last_name), companies(id, name)", { count: "exact" })
       .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .eq("is_deleted", false);
 
-    if (status) query = query.eq("status", status);
-    if (stageId) query = query.eq("stage_id", stageId);
-    if (contactId) query = query.eq("contact_id", contactId);
-    if (companyId) query = query.eq("company_id", companyId);
+    query = applyListQuery(query, "deals", params, ["title"]);
 
     const { data, error: dbError, count } = await query;
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { parsePagination, sanitizeLike } from "@/lib/crm/helpers";
+import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createCompanySchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
 
@@ -13,9 +13,8 @@ export async function GET(request: NextRequest) {
     const permError = requirePermission(context.permissions, "companies", "read", context.isDirector);
     if (permError) return permError;
 
-    const { searchParams } = new URL(request.url);
-    const { limit, offset } = parsePagination(searchParams);
-    const search = searchParams.get("search");
+    const url = new URL(request.url);
+    const params = parseListParams(url);
 
     const supabase = createSupabaseAdmin();
 
@@ -23,14 +22,9 @@ export async function GET(request: NextRequest) {
       .from("companies")
       .select("*", { count: "exact" })
       .eq("team_id", context.teamId)
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .eq("is_deleted", false);
 
-    if (search) {
-      const s = sanitizeLike(search);
-      query = query.or(`name.ilike.%${s}%,industry.ilike.%${s}%,domain.ilike.%${s}%`);
-    }
+    query = applyListQuery(query, "companies", params, ["name", "industry", "domain"]);
 
     const { data, error: dbError, count } = await query;
 
