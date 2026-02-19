@@ -8,7 +8,8 @@ import { DataTable, type Column } from "@/components/frappe/data-table";
 import { KanbanBoard, type KanbanColumn } from "@/components/frappe/kanban-board";
 import { GroupByView, type GroupByGroup } from "@/components/frappe/group-by-view";
 import { EntityForm } from "@/components/crm/entity-form";
-import { companyFields } from "@/lib/crm/field-definitions";
+import { getCompanyFields } from "@/lib/crm/field-definitions";
+import { useTranslation } from "@/lib/i18n";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { Building2 } from "lucide-react";
@@ -35,42 +36,6 @@ interface CompanyData {
 // Constants
 // ============================================================================
 
-const FILTER_OPTIONS: FilterOption[] = [
-  {
-    field: "industry", label: "Industry", type: "text",
-  },
-  {
-    field: "size", label: "Size", type: "select",
-    options: [
-      { value: "1-10", label: "1-10" },
-      { value: "11-50", label: "11-50" },
-      { value: "51-200", label: "51-200" },
-      { value: "201-500", label: "201-500" },
-      { value: "500+", label: "500+" },
-    ],
-  },
-];
-
-const SORT_OPTIONS: SortOption[] = [
-  { field: "created_at", label: "Created" },
-  { field: "name", label: "Name" },
-  { field: "industry", label: "Industry" },
-  { field: "ai_health_score", label: "Health Score" },
-];
-
-const GROUP_BY_OPTIONS: GroupByOption[] = [
-  { field: "industry", label: "Industry" },
-  { field: "size", label: "Size" },
-];
-
-const SIZE_KANBAN_COLUMNS: KanbanColumn[] = [
-  { id: "1-10", title: "1-10", color: "bg-blue-500" },
-  { id: "11-50", title: "11-50", color: "bg-cyan-500" },
-  { id: "51-200", title: "51-200", color: "bg-emerald-500" },
-  { id: "201-500", title: "201-500", color: "bg-amber-500" },
-  { id: "500+", title: "500+", color: "bg-purple-500" },
-];
-
 const PAGE_SIZE = 50;
 
 // ============================================================================
@@ -79,6 +44,44 @@ const PAGE_SIZE = 50;
 
 export function CompaniesContent() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const companyFields = useMemo(() => getCompanyFields(t), [t]);
+
+  const FILTER_OPTIONS: FilterOption[] = useMemo(() => [
+    {
+      field: "industry", label: t("crm.companies.fields.industry"), type: "text" as const,
+    },
+    {
+      field: "size", label: t("crm.companies.groupBy.size"), type: "select" as const,
+      options: [
+        { value: "1-10", label: "1-10" },
+        { value: "11-50", label: "11-50" },
+        { value: "51-200", label: "51-200" },
+        { value: "201-500", label: "201-500" },
+        { value: "500+", label: "500+" },
+      ],
+    },
+  ], [t]);
+
+  const SORT_OPTIONS: SortOption[] = useMemo(() => [
+    { field: "created_at", label: t("crm.companies.sort.created") },
+    { field: "name", label: t("crm.companies.sort.name") },
+    { field: "industry", label: t("crm.companies.sort.industry") },
+    { field: "ai_health_score", label: t("crm.companies.sort.healthScore") },
+  ], [t]);
+
+  const GROUP_BY_OPTIONS: GroupByOption[] = useMemo(() => [
+    { field: "industry", label: t("crm.companies.groupBy.industry") },
+    { field: "size", label: t("crm.companies.groupBy.size") },
+  ], [t]);
+
+  const SIZE_KANBAN_COLUMNS: KanbanColumn[] = useMemo(() => [
+    { id: "1-10", title: "1-10", color: "bg-blue-500" },
+    { id: "11-50", title: "11-50", color: "bg-cyan-500" },
+    { id: "51-200", title: "51-200", color: "bg-emerald-500" },
+    { id: "201-500", title: "201-500", color: "bg-amber-500" },
+    { id: "500+", title: "500+", color: "bg-purple-500" },
+  ], []);
 
   const [companies, setCompanies] = useState<CompanyData[]>([]);
   const [total, setTotal] = useState(0);
@@ -132,7 +135,7 @@ export function CompaniesContent() {
     });
     const json = await res.json();
     if (json.success) {
-      toast.success("Organization created");
+      toast.success(t("crm.companies.created"));
       useFeatureLimitStore.getState().incrementUsage("companies");
       fetchCompanies();
     } else {
@@ -148,7 +151,7 @@ export function CompaniesContent() {
       const next = prev.filter(f => f.field !== field);
       return [...next, { field, value, label: optLabel }];
     });
-  }, []);
+  }, [FILTER_OPTIONS]);
 
   const handleFilterRemove = useCallback((field: string) => {
     setActiveFilters(prev => prev.filter(f => f.field !== field));
@@ -191,7 +194,7 @@ export function CompaniesContent() {
 
   const columns: Column<CompanyData>[] = useMemo(() => [
     {
-      key: "name", label: "Name", sortable: true,
+      key: "name", label: t("crm.companies.fields.name"), sortable: true,
       render: (c) => (
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -201,18 +204,18 @@ export function CompaniesContent() {
         </div>
       ),
     },
-    { key: "domain", label: "Domain" },
-    { key: "industry", label: "Industry", sortable: true },
-    { key: "size", label: "Size" },
+    { key: "domain", label: t("crm.companies.fields.domain") },
+    { key: "industry", label: t("crm.companies.fields.industry"), sortable: true },
+    { key: "size", label: t("crm.companies.groupBy.size") },
     {
-      key: "ai_health_score", label: "Health", sortable: true, align: "center",
+      key: "ai_health_score", label: t("crm.companies.fields.health"), sortable: true, align: "center",
       render: (c) => (
         <span className={`text-xs font-semibold ${healthScoreColor(c.ai_health_score)}`}>
           {c.ai_health_score || 0}
         </span>
       ),
     },
-  ], []);
+  ], [t]);
 
   const groups: GroupByGroup<CompanyData>[] = useMemo(() => {
     if (!groupBy) return [];
@@ -231,19 +234,19 @@ export function CompaniesContent() {
     SIZE_KANBAN_COLUMNS.map(col => ({
       ...col,
       count: companies.filter(c => c.size === col.id).length,
-    })), [companies]);
+    })), [companies, SIZE_KANBAN_COLUMNS]);
 
   const kanbanItems = useMemo(() =>
     companies.map(c => ({ ...c, columnId: c.size || "1-10" })), [companies]);
 
   return (
     <PageContainer>
-      <PageHeader title="Organizations" description={`${total} organization${total !== 1 ? "s" : ""}`} />
+      <PageHeader title={t("crm.companies.title")} description={`${total}`} />
 
       <ViewControls
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search organizations..."
+        searchPlaceholder={t("crm.companies.searchPlaceholder")}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         filterOptions={FILTER_OPTIONS}
@@ -259,9 +262,8 @@ export function CompaniesContent() {
         currentGroupBy={groupBy}
         onGroupByChange={setGroupBy}
         totalCount={total}
-        entityName={`organization${total !== 1 ? "s" : ""}`}
         onAdd={() => setShowForm(true)}
-        addLabel="New Organization"
+        addLabel={t("crm.companies.new")}
         featureLimitKey="companies"
       />
 
@@ -281,7 +283,7 @@ export function CompaniesContent() {
           pageSize={PAGE_SIZE}
           totalCount={total}
           onPageChange={setPage}
-          emptyMessage={search || activeFilters.length > 0 ? "No matching organizations" : "No organizations yet"}
+          emptyMessage={search || activeFilters.length > 0 ? t("crm.companies.noMatching") : t("crm.companies.noYet")}
         />
       )}
 
@@ -307,7 +309,7 @@ export function CompaniesContent() {
       {viewMode === "group_by" && (
         <GroupByView
           groups={groups}
-          emptyMessage="No organizations to group"
+          emptyMessage={t("crm.companies.noGroup")}
           renderItem={(c) => (
             <div
               key={c.id}
@@ -332,7 +334,7 @@ export function CompaniesContent() {
       <EntityForm
         open={showForm}
         onOpenChange={setShowForm}
-        title="New Organization"
+        title={t("crm.companies.new")}
         fields={companyFields}
         onSubmit={handleCreate}
       />
@@ -341,16 +343,16 @@ export function CompaniesContent() {
         selectedCount={selectedIds.size}
         onDeselectAll={() => setSelectedIds(new Set())}
         actions={[
-          { label: "Delete", variant: "destructive", onClick: () => setConfirmDelete(true) },
+          { label: t("common.delete"), variant: "destructive", onClick: () => setConfirmDelete(true) },
         ]}
       />
 
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete organizations"
-        description={`Are you sure you want to delete ${selectedIds.size} organization${selectedIds.size !== 1 ? "s" : ""}?`}
-        confirmLabel="Delete"
+        title={t("crm.companies.deleteTitle")}
+        description={t("crm.companies.deleteConfirm", { count: selectedIds.size })}
+        confirmLabel={t("common.delete")}
         variant="destructive"
         isLoading={isBulkLoading}
         onConfirm={handleBulkDelete}
