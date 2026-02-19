@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { User, Palette, Globe, CreditCard, Users, Shield, Link2, AlertTriangle } from "lucide-react";
@@ -37,8 +39,21 @@ const BILLING_NAV = [
   { id: "billing", icon: CreditCard },
 ] as const;
 
+const VALID_TABS = ["profile", "appearance", "language", "team", "members", "roles", "connections", "billing", "danger"];
+
 export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(() =>
+    tabParam && VALID_TABS.includes(tabParam) ? tabParam : "profile"
+  );
+
+  useEffect(() => {
+    if (tabParam && VALID_TABS.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   return (
     <div className="p-8 min-h-full">
@@ -50,7 +65,7 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
         </div>
 
         {/* Tabs layout */}
-        <Tabs defaultValue="profile" orientation="vertical" className="md:flex md:gap-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="md:flex md:gap-8">
           {/* Sidebar navigation */}
           <TabsList
             variant="line"

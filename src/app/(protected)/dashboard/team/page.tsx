@@ -1,8 +1,5 @@
-import type { Metadata } from "next";
-import { TeamContent } from "./team-content";
-
-export const metadata: Metadata = { title: "Team" };
+import { redirect } from "next/navigation";
 
 export default function TeamOverviewPage() {
-  return <TeamContent />;
+  redirect("/dashboard/account?tab=team");
 }
