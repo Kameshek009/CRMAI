@@ -19,7 +19,7 @@ import {
   ChevronUp,
   HelpCircle,
 } from "lucide-react";
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { TIER_LIMITS, type SubscriptionTier } from "@/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -181,9 +181,9 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 /* ------------------------------------------------------------------ */
 
 export function UpgradeContent() {
-  const { currentTeam, isLoading, isDirector } = useTeam();
-  const currentTier = (currentTeam?.tier || "free") as SubscriptionTier;
-  const seatCount = currentTeam?.seatCount || 1;
+  const { currentWorkspace, isLoading, isOwner } = useWorkspace();
+  const currentTier = (currentWorkspace?.tier || "free") as SubscriptionTier;
+  const seatCount = currentWorkspace?.seatCount || 1;
 
   const tierOrder: SubscriptionTier[] = ["free", "pro", "max", "enterprise"];
 
@@ -221,17 +221,17 @@ export function UpgradeContent() {
                     <Badge variant="outline" className="capitalize">{currentTier}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {currentTeam
-                      ? `${formatTokens(currentTeam.tokensUsed)} / ${formatTokens(currentTeam.tokenLimit)} tokens used · ${seatCount} seats`
+                    {currentWorkspace
+                      ? `${formatTokens(currentWorkspace.tokensUsed)} / ${formatTokens(currentWorkspace.tokenLimit)} tokens used · ${seatCount} seats`
                       : "Loading..."}
                   </p>
                 </div>
               </div>
-              {currentTeam && currentTeam.tokenLimit > 0 && (
+              {currentWorkspace && currentWorkspace.tokenLimit > 0 && (
                 <div className="w-full sm:w-48">
-                  <Progress value={Math.min(100, (currentTeam.tokensUsed / currentTeam.tokenLimit) * 100)} className="h-2" />
+                  <Progress value={Math.min(100, (currentWorkspace.tokensUsed / currentWorkspace.tokenLimit) * 100)} className="h-2" />
                   <p className="text-xs text-muted-foreground mt-1 text-right">
-                    {Math.min(100, (currentTeam.tokensUsed / currentTeam.tokenLimit) * 100).toFixed(0)}% used
+                    {Math.min(100, (currentWorkspace.tokensUsed / currentWorkspace.tokenLimit) * 100).toFixed(0)}% used
                   </p>
                 </div>
               )}
@@ -321,14 +321,14 @@ export function UpgradeContent() {
                       <ArrowRight className="ml-2 size-4" />
                     </a>
                   </Button>
-                ) : upgrade && isDirector ? (
+                ) : upgrade && isOwner ? (
                   <Button className="w-full" asChild>
                     <Link href={`/dashboard/account/billing?upgrade=${plan.tier}`}>
                       Upgrade to {plan.name}
                       <ArrowRight className="ml-2 size-4" />
                     </Link>
                   </Button>
-                ) : upgrade && !isDirector ? (
+                ) : upgrade && !isOwner ? (
                   <Button variant="outline" className="w-full" disabled>
                     Ask Director to Upgrade
                   </Button>

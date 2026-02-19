@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { Logo } from "@/components/ui/logo";
 import { NexusBrandSidebar } from "@/components/nexus-brand";
 import { TeamSwitcher } from "@/components/team/team-switcher";
@@ -45,9 +45,6 @@ import {
   CheckSquare,
   TrendingUp,
   Sparkles,
-  Shield,
-  Link2,
-  UserCog,
   Zap,
   Handshake,
   FileText,
@@ -91,13 +88,10 @@ const toolsGroup: NavGroup = {
   ],
 };
 
-const teamGroup: NavGroup = {
-  label: "Settings",
+const workspaceGroup: NavGroup = {
+  label: "Workspace",
   items: [
-    { label: "Team", href: "/dashboard/team", icon: Users },
-    { label: "Members", href: "/dashboard/team/members", icon: UserCog },
-    { label: "Roles", href: "/dashboard/team/roles", icon: Shield, permission: "team_settings.manage" },
-    { label: "Connections", href: "/dashboard/team/connections", icon: Link2 },
+    { label: "Workspace", href: "/dashboard/team", icon: Users },
     { label: "Settings", href: "/dashboard/team/settings", icon: Settings, permission: "team_settings.manage" },
   ],
 };
@@ -115,7 +109,7 @@ const navGroups: NavGroup[] = [
   { items: [{ label: "Overview", href: "/dashboard", icon: LayoutGrid }] },
   crmGroup,
   toolsGroup,
-  teamGroup,
+  workspaceGroup,
   accountGroup,
 ];
 
@@ -136,14 +130,14 @@ const TIER_COLORS: Record<string, string> = {
 function NavUser() {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { currentTeam } = useTeam();
+  const { currentWorkspace } = useWorkspace();
   const { isMobile } = useSidebar();
 
   if (!user) return null;
 
-  const teamTier = currentTeam?.tier || "free";
-  const tierName = TIER_DISPLAY_NAMES[teamTier] || "Free";
-  const tierColor = TIER_COLORS[teamTier] || TIER_COLORS.free;
+  const wsTier = currentWorkspace?.tier || "free";
+  const tierName = TIER_DISPLAY_NAMES[wsTier] || "Free";
+  const tierColor = TIER_COLORS[wsTier] || TIER_COLORS.free;
   const displayName = user.firstName || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "User";
   const email = user.primaryEmailAddress?.emailAddress || "";
   const initials = displayName.slice(0, 2).toUpperCase();
@@ -221,7 +215,7 @@ function NavUser() {
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { can } = useTeam();
+  const { can } = useWorkspace();
 
   return (
     <Sidebar collapsible="icon">

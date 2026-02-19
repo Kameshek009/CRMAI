@@ -12,10 +12,10 @@ import {
 } from "react";
 import { useAccount } from "@/contexts/account-context";
 import { supabase } from "@/lib/supabase/client";
-import type { TeamPermissions } from "@/types/team";
+import type { WorkspacePermissions } from "@/types/team";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
-interface TeamData {
+interface WorkspaceData {
   id: string;
   name: string;
   slug: string;
@@ -32,42 +32,58 @@ interface TeamData {
   stripeCustomerId: string | null;
 }
 
-interface TeamMembership {
-  team: TeamData;
+interface WorkspaceMembership {
+  workspace: WorkspaceData;
   role: {
     id: string;
     name: string;
     color: string;
     priority: number;
-    permissions: TeamPermissions;
+    permissions: WorkspacePermissions;
     isSystem: boolean;
   };
-  isDirector: boolean;
+  isOwner: boolean;
   memberId: string;
   joinedAt: string;
 }
 
-interface DeletedTeamInfo {
-  team: TeamData;
+interface DeletedWorkspaceInfo {
+  workspace: WorkspaceData;
   deletedAt: string;
 }
 
-interface TeamContextValue {
-  currentTeam: TeamData | null;
-  teams: TeamMembership[];
-  deletedTeams: DeletedTeamInfo[];
-  myRole: TeamMembership["role"] | null;
-  permissions: TeamPermissions | null;
+interface WorkspaceContextValue {
+  currentWorkspace: WorkspaceData | null;
+  /** @deprecated Use currentWorkspace */
+  currentTeam: WorkspaceData | null;
+  workspaces: WorkspaceMembership[];
+  /** @deprecated Use workspaces */
+  teams: WorkspaceMembership[];
+  deletedWorkspaces: DeletedWorkspaceInfo[];
+  /** @deprecated Use deletedWorkspaces */
+  deletedTeams: DeletedWorkspaceInfo[];
+  myRole: WorkspaceMembership["role"] | null;
+  permissions: WorkspacePermissions | null;
+  isOwner: boolean;
+  /** @deprecated Use isOwner */
   isDirector: boolean;
   memberId: string | null;
   isLoading: boolean;
   error: Error | null;
-  switchTeam: (teamId: string) => Promise<void>;
+  switchWorkspace: (workspaceId: string) => Promise<void>;
+  /** @deprecated Use switchWorkspace */
+  switchTeam: (workspaceId: string) => Promise<void>;
   refetch: () => Promise<void>;
   can: (permission: string) => boolean;
 }
 
-const DEFAULT_PERMISSIONS: TeamPermissions = {
+// Backward-compat aliases used by existing code
+/** @deprecated Use WorkspaceData */
+export type TeamData = WorkspaceData;
+/** @deprecated Use WorkspaceMembership */
+export type TeamMembership = WorkspaceMembership;
+
+const DEFAULT_PERMISSIONS: WorkspacePermissions = {
   contacts: { read: false, create: false, update: false, delete: false },
   companies: { read: false, create: false, update: false, delete: false },
   deals: { read: false, create: false, update: false, delete: false },
@@ -81,9 +97,9 @@ const DEFAULT_PERMISSIONS: TeamPermissions = {
   ai_chat: { allowed: false },
 };
 
-const TeamContext = createContext<TeamContextValue | undefined>(undefined);
+const WorkspaceCtx = createContext<WorkspaceContextValue | undefined>(undefined);
 
-function transformTeam(raw: Record<string, unknown>): TeamData {
+function transformWorkspace(raw: Record<string, unknown>): WorkspaceData {
   return {
     id: raw.id as string,
     name: raw.name as string,
@@ -102,36 +118,36 @@ function transformTeam(raw: Record<string, unknown>): TeamData {
   };
 }
 
-function transformRole(raw: Record<string, unknown>): TeamMembership["role"] {
+function transformRole(raw: Record<string, unknown>): WorkspaceMembership["role"] {
   return {
     id: raw.id as string,
     name: raw.name as string,
     color: raw.color as string,
     priority: raw.priority as number,
-    permissions: raw.permissions as TeamPermissions,
+    permissions: raw.permissions as WorkspacePermissions,
     isSystem: raw.is_system as boolean,
   };
 }
 
-interface TeamProviderProps {
+interface WorkspaceProviderProps {
   children: ReactNode;
 }
 
-export function TeamProvider({ children }: TeamProviderProps) {
+export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
   const { account } = useAccount();
-  const [currentTeam, setCurrentTeam] = useState<TeamData | null>(null);
-  const [teams, setTeams] = useState<TeamMembership[]>([]);
-  const [deletedTeams, setDeletedTeams] = useState<DeletedTeamInfo[]>([]);
-  const [myRole, setMyRole] = useState<TeamMembership["role"] | null>(null);
-  const [permissions, setPermissions] = useState<TeamPermissions | null>(null);
-  const [isDirector, setIsDirector] = useState(false);
+  const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceData | null>(null);
+  const [workspaces, setWorkspaces] = useState<WorkspaceMembership[]>([]);
+  const [deletedWorkspaces, setDeletedWorkspaces] = useState<DeletedWorkspaceInfo[]>([]);
+  const [myRole, setMyRole] = useState<WorkspaceMembership["role"] | null>(null);
+  const [permissions, setPermissions] = useState<WorkspacePermissions | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
   const [memberId, setMemberId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  const fetchTeams = useCallback(async () => {
+  const fetchWorkspaces = useCallback(async () => {
     if (!account?.id) {
       setIsLoading(false);
       return;
@@ -140,117 +156,115 @@ export function TeamProvider({ children }: TeamProviderProps) {
     try {
       setError(null);
       const res = await fetch("/api/teams/me");
-      if (!res.ok) throw new Error("Failed to fetch team data");
+      if (!res.ok) throw new Error("Failed to fetch workspace data");
 
       const result = await res.json();
-      if (!result.success) throw new Error(result.error || "Failed to fetch teams");
+      if (!result.success) throw new Error(result.error || "Failed to fetch workspaces");
 
       const { data } = result;
 
-      // Transform teams
-      const teamMemberships: TeamMembership[] = (data.teams || []).map(
+      // Transform workspaces (API still returns "teams" key)
+      const memberships: WorkspaceMembership[] = (data.teams || []).map(
         (m: { team: Record<string, unknown>; role: Record<string, unknown>; isDirector: boolean; memberId: string; joinedAt: string }) => ({
-          team: transformTeam(m.team),
+          workspace: transformWorkspace(m.team),
           role: transformRole(m.role),
-          isDirector: m.isDirector,
+          isOwner: m.isDirector,
           memberId: m.memberId,
           joinedAt: m.joinedAt,
         })
       );
-      setTeams(teamMemberships);
+      setWorkspaces(memberships);
 
-      // Deleted teams that can be restored
-      const deleted: DeletedTeamInfo[] = (data.deletedTeams || []).map(
+      // Deleted workspaces that can be restored
+      const deleted: DeletedWorkspaceInfo[] = (data.deletedTeams || []).map(
         (d: { team: Record<string, unknown>; deletedAt: string }) => ({
-          team: transformTeam(d.team),
+          workspace: transformWorkspace(d.team),
           deletedAt: d.deletedAt,
         })
       );
-      setDeletedTeams(deleted);
+      setDeletedWorkspaces(deleted);
 
-      // Set current team
+      // Set current workspace
       if (data.currentTeam) {
-        setCurrentTeam(transformTeam(data.currentTeam));
+        setCurrentWorkspace(transformWorkspace(data.currentTeam));
       }
       if (data.currentRole) {
         const role = transformRole(data.currentRole);
         setMyRole(role);
         setPermissions(role.permissions);
       }
-      setIsDirector(data.isDirector || false);
+      setIsOwner(data.isDirector || false);
       setMemberId(data.memberId || null);
     } catch (err) {
-      console.error("[TeamContext] Error loading teams:", err);
+      console.error("[WorkspaceContext] Error loading workspaces:", err);
       setError(err instanceof Error ? err : new Error("Unknown error"));
     } finally {
       setIsLoading(false);
     }
   }, [account?.id]);
 
-  const switchTeam = useCallback(async (teamId: string) => {
+  const switchWorkspace = useCallback(async (workspaceId: string) => {
     try {
       const res = await fetch("/api/teams/switch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ team_id: teamId }),
+        body: JSON.stringify({ team_id: workspaceId }),
       });
-      if (!res.ok) throw new Error("Failed to switch team");
+      if (!res.ok) throw new Error("Failed to switch workspace");
 
-      // Refetch to update state
-      await fetchTeams();
+      await fetchWorkspaces();
     } catch (err) {
-      console.error("[TeamContext] Error switching team:", err);
+      console.error("[WorkspaceContext] Error switching workspace:", err);
       throw err;
     }
-  }, [fetchTeams]);
+  }, [fetchWorkspaces]);
 
   const can = useCallback(
     (permission: string): boolean => {
-      // Directors always have all permissions
-      if (isDirector) return true;
+      // Owners always have all permissions
+      if (isOwner) return true;
       if (!permissions) return false;
       // permission format: "resource.action" e.g. "contacts.create", "pipeline.manage"
       const [resource, action] = permission.split(".");
-      const resourcePerms = permissions[resource as keyof TeamPermissions];
+      const resourcePerms = permissions[resource as keyof WorkspacePermissions];
       if (!resourcePerms) return false;
       return (resourcePerms as Record<string, boolean>)[action] === true;
     },
-    [permissions, isDirector]
+    [permissions, isOwner]
   );
 
   // Fetch on mount when account is available
   useEffect(() => {
     if (account?.id) {
-      fetchTeams();
+      fetchWorkspaces();
     }
-  }, [account?.id, fetchTeams]);
+  }, [account?.id, fetchWorkspaces]);
 
   // Subscribe to team_members changes for realtime updates
   useEffect(() => {
-    if (!currentTeam?.id) return;
+    if (!currentWorkspace?.id) return;
 
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
     }
 
     const channel = supabase
-      .channel(`team:${currentTeam.id}`)
+      .channel(`workspace:${currentWorkspace.id}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "team_members",
-          filter: `team_id=eq.${currentTeam.id}`,
+          filter: `team_id=eq.${currentWorkspace.id}`,
         },
         () => {
-          // Refetch on any team_members change
-          fetchTeams();
+          fetchWorkspaces();
         }
       )
       .subscribe((status: string, err?: Error) => {
         if (err) {
-          console.error("[TeamContext] Realtime subscription error:", err.message);
+          console.error("[WorkspaceContext] Realtime subscription error:", err.message);
         }
       });
 
@@ -262,35 +276,47 @@ export function TeamProvider({ children }: TeamProviderProps) {
         channelRef.current = null;
       }
     };
-  }, [currentTeam?.id, fetchTeams]);
+  }, [currentWorkspace?.id, fetchWorkspaces]);
 
-  const value: TeamContextValue = useMemo(
+  const value: WorkspaceContextValue = useMemo(
     () => ({
-      currentTeam,
-      teams,
-      deletedTeams,
+      currentWorkspace,
+      currentTeam: currentWorkspace, // backward compat
+      workspaces,
+      teams: workspaces, // backward compat
+      deletedWorkspaces,
+      deletedTeams: deletedWorkspaces, // backward compat
       myRole,
       permissions: permissions || DEFAULT_PERMISSIONS,
-      isDirector,
+      isOwner,
+      isDirector: isOwner, // backward compat
       memberId,
       isLoading,
       error,
-      switchTeam,
-      refetch: fetchTeams,
+      switchWorkspace,
+      switchTeam: switchWorkspace, // backward compat
+      refetch: fetchWorkspaces,
       can,
     }),
-    [currentTeam, teams, deletedTeams, myRole, permissions, isDirector, memberId, isLoading, error, switchTeam, fetchTeams, can]
+    [currentWorkspace, workspaces, deletedWorkspaces, myRole, permissions, isOwner, memberId, isLoading, error, switchWorkspace, fetchWorkspaces, can]
   );
 
   return (
-    <TeamContext.Provider value={value}>{children}</TeamContext.Provider>
+    <WorkspaceCtx.Provider value={value}>{children}</WorkspaceCtx.Provider>
   );
 }
 
-export function useTeam() {
-  const context = useContext(TeamContext);
+/** Primary hook — use this */
+export function useWorkspace() {
+  const context = useContext(WorkspaceCtx);
   if (context === undefined) {
-    throw new Error("useTeam must be used within a TeamProvider");
+    throw new Error("useWorkspace must be used within a WorkspaceProvider");
   }
   return context;
 }
+
+/** @deprecated Use useWorkspace */
+export const useTeam = useWorkspace;
+
+/** @deprecated Use WorkspaceProvider */
+export const TeamProvider = WorkspaceProvider;

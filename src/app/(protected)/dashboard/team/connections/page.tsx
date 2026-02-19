@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,27 +21,27 @@ interface ConnectionData {
 }
 
 export default function TeamConnectionsPage() {
-  const { currentTeam, isDirector, can } = useTeam();
+  const { currentWorkspace, can } = useWorkspace();
   const [connections, setConnections] = useState<ConnectionData[]>([]);
   const [connectCode, setConnectCode] = useState("");
   const [connecting, setConnecting] = useState(false);
 
   const fetchConnections = useCallback(async () => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/connections`);
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/connections`);
     const json = await res.json();
     if (json.success) setConnections(json.data || []);
-  }, [currentTeam]);
+  }, [currentWorkspace]);
 
   useEffect(() => {
     fetchConnections();
   }, [fetchConnections]);
 
   const handleConnect = async () => {
-    if (!currentTeam || !connectCode.trim()) return;
+    if (!currentWorkspace || !connectCode.trim()) return;
     setConnecting(true);
     try {
-      const res = await fetch(`/api/teams/${currentTeam.id}/connections`, {
+      const res = await fetch(`/api/teams/${currentWorkspace.id}/connections`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ connection_code: connectCode.trim() }),
@@ -62,8 +62,8 @@ export default function TeamConnectionsPage() {
   };
 
   const handleRespond = async (connId: string, status: "accepted" | "rejected") => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/connections/${connId}`, {
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/connections/${connId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -79,18 +79,18 @@ export default function TeamConnectionsPage() {
 
   return (
     <PageContainer>
-      <PageHeader title="Connections" description="Connect with other teams" />
+      <PageHeader title="Connections" description="Connect with other workspaces" />
 
-      {can("team_settings.manage") && currentTeam && (
+      {can("team_settings.manage") && currentWorkspace && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-base">Your Connection Code</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Share this with another team&apos;s director to connect.
+              Share this with another workspace&apos;s director to connect.
             </p>
-            <InviteCodeDisplay code={currentTeam.inviteCode} teamId={currentTeam.id} />
+            <InviteCodeDisplay code={currentWorkspace.inviteCode} teamId={currentWorkspace.id} />
           </CardContent>
         </Card>
       )}
@@ -98,14 +98,14 @@ export default function TeamConnectionsPage() {
       {can("team_settings.manage") && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Connect to Another Team</CardTitle>
+            <CardTitle className="text-base">Connect to Another Workspace</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
               <Input
                 value={connectCode}
                 onChange={(e) => setConnectCode(e.target.value)}
-                placeholder="Enter team's connection code"
+                placeholder="Enter workspace's connection code"
               />
               <Button onClick={handleConnect} disabled={connecting || !connectCode.trim()}>
                 <Plus className="size-4 mr-2" />
@@ -124,8 +124,8 @@ export default function TeamConnectionsPage() {
           </div>
         )}
         {connections.map((conn) => {
-          const otherTeam = conn.requester_team_id === currentTeam?.id ? conn.target : conn.requester;
-          const isIncoming = conn.target_team_id === currentTeam?.id;
+          const otherTeam = conn.requester_team_id === currentWorkspace?.id ? conn.target : conn.requester;
+          const isIncoming = conn.target_team_id === currentWorkspace?.id;
 
           return (
             <Card key={conn.id}>

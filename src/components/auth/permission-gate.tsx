@@ -1,6 +1,6 @@
 "use client";
 
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { ReactNode } from "react";
 
 interface PermissionGateProps {
@@ -10,7 +10,7 @@ interface PermissionGateProps {
 }
 
 export function PermissionGate({ permission, children, fallback = null }: PermissionGateProps) {
-  const { can } = useTeam();
+  const { can } = useWorkspace();
 
   if (!can(permission)) {
     return <>{fallback}</>;

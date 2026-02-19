@@ -1,6 +1,6 @@
 "use client";
 
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,14 +12,14 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export function TeamContent() {
-  const { currentTeam, teams, deletedTeams, myRole, isDirector, can, refetch, switchTeam } = useTeam();
-  const [inviteCode, setInviteCode] = useState(currentTeam?.inviteCode || "");
+  const { currentWorkspace, workspaces, deletedWorkspaces, myRole, isOwner, can, refetch, switchWorkspace } = useWorkspace();
+  const [inviteCode, setInviteCode] = useState(currentWorkspace?.inviteCode || "");
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [restoring, setRestoring] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!currentTeam?.id) return;
-    fetch(`/api/teams/${currentTeam.id}/members`)
+    if (!currentWorkspace?.id) return;
+    fetch(`/api/teams/${currentWorkspace.id}/members`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data) {
@@ -27,15 +27,15 @@ export function TeamContent() {
         }
       })
       .catch(() => {});
-  }, [currentTeam?.id]);
+  }, [currentWorkspace?.id]);
 
-  const handleRestore = async (teamId: string) => {
-    setRestoring(teamId);
+  const handleRestore = async (wsId: string) => {
+    setRestoring(wsId);
     try {
-      const res = await fetch(`/api/teams/${teamId}/restore`, { method: "POST" });
+      const res = await fetch(`/api/teams/${wsId}/restore`, { method: "POST" });
       const json = await res.json();
       if (json.success) {
-        toast.success("Team restored!");
+        toast.success("Workspace restored!");
         await refetch();
       } else {
         toast.error(json.error || "Failed to restore");
@@ -45,22 +45,22 @@ export function TeamContent() {
     }
   };
 
-  // Show restore banner and/or team switcher when no current team
-  if (!currentTeam) {
+  // Show restore banner and/or workspace switcher when no current workspace
+  if (!currentWorkspace) {
     return (
       <PageContainer>
-        <PageHeader title="Team" description={deletedTeams.length > 0 ? "Your team was deleted" : "No team selected"} />
+        <PageHeader title="Workspace" description={deletedWorkspaces.length > 0 ? "Your workspace was deleted" : "No workspace selected"} />
         <div className="space-y-4 max-w-lg">
-          {/* Deleted teams — restore option */}
-          {deletedTeams.map((dt) => {
-            const deletedAt = new Date(dt.deletedAt).getTime();
+          {/* Deleted workspaces — restore option */}
+          {deletedWorkspaces.map((dw) => {
+            const deletedAt = new Date(dw.deletedAt).getTime();
             const expiresAt = deletedAt + 24 * 60 * 60 * 1000;
             const hoursLeft = Math.max(0, Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60)));
             return (
-              <Card key={dt.team.id} className="border-warning/50">
+              <Card key={dw.workspace.id} className="border-warning/50">
                 <CardContent className="flex items-center justify-between gap-4 p-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{dt.team.name}</p>
+                    <p className="text-sm font-medium truncate">{dw.workspace.name}</p>
                     <p className="text-xs text-muted-foreground">
                       Deleted — restore available for {hoursLeft}h
                     </p>
@@ -68,32 +68,32 @@ export function TeamContent() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleRestore(dt.team.id)}
-                    disabled={restoring === dt.team.id}
+                    onClick={() => handleRestore(dw.workspace.id)}
+                    disabled={restoring === dw.workspace.id}
                   >
                     <Undo2 className="size-3.5 mr-2" />
-                    {restoring === dt.team.id ? "Restoring..." : "Restore"}
+                    {restoring === dw.workspace.id ? "Restoring..." : "Restore"}
                   </Button>
                 </CardContent>
               </Card>
             );
           })}
-          {/* Other available teams — switch */}
-          {teams.length > 0 && (
+          {/* Other available workspaces — switch */}
+          {workspaces.length > 0 && (
             <>
-              {deletedTeams.length > 0 && (
-                <p className="text-sm text-muted-foreground pt-2">Or switch to an active team:</p>
+              {deletedWorkspaces.length > 0 && (
+                <p className="text-sm text-muted-foreground pt-2">Or switch to an active workspace:</p>
               )}
-              {teams.map((tm) => (
-                <Card key={tm.team.id}>
+              {workspaces.map((wm) => (
+                <Card key={wm.workspace.id}>
                   <CardContent className="flex items-center justify-between gap-4 p-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{tm.team.name}</p>
-                      <p className="text-xs text-muted-foreground">{tm.role.name}</p>
+                      <p className="text-sm font-medium truncate">{wm.workspace.name}</p>
+                      <p className="text-xs text-muted-foreground">{wm.role.name}</p>
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => { switchTeam(tm.team.id).then(() => refetch()); }}
+                      onClick={() => { switchWorkspace(wm.workspace.id).then(() => refetch()); }}
                     >
                       Switch
                     </Button>
@@ -107,11 +107,11 @@ export function TeamContent() {
     );
   }
 
-  const currentMembership = teams.find((t) => t.team.id === currentTeam.id);
+  const currentMembership = workspaces.find((w) => w.workspace.id === currentWorkspace.id);
 
   return (
     <PageContainer>
-      <PageHeader title={currentTeam.name} description={currentTeam.description || "Team overview"}>
+      <PageHeader title={currentWorkspace.name} description={currentWorkspace.description || "Workspace overview"}>
         {myRole && <RoleBadge name={myRole.name} color={myRole.color} />}
       </PageHeader>
 
@@ -124,10 +124,10 @@ export function TeamContent() {
           <CardContent>
             <div className="text-2xl font-bold">{memberCount ?? "..."}</div>
             <div className="mt-2 space-y-1">
-              {memberCount !== null && currentTeam.maxMembers <= 1000 ? (
+              {memberCount !== null && currentWorkspace.maxMembers <= 1000 ? (
                 <>
-                  <Progress value={Math.round((memberCount / currentTeam.maxMembers) * 100)} className="h-1.5" />
-                  <p className="text-xs text-muted-foreground">{memberCount} / {currentTeam.maxMembers} slots</p>
+                  <Progress value={Math.round((memberCount / currentWorkspace.maxMembers) * 100)} className="h-1.5" />
+                  <p className="text-xs text-muted-foreground">{memberCount} / {currentWorkspace.maxMembers} slots</p>
                 </>
               ) : (
                 <p className="text-xs text-muted-foreground">Unlimited</p>
@@ -143,21 +143,21 @@ export function TeamContent() {
           <CardContent>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold">{myRole?.name || "—"}</span>
-              {currentMembership?.isDirector && <Crown className="size-4 text-amber-500" />}
+              {currentMembership?.isOwner && <Crown className="size-4 text-amber-500" />}
             </div>
             <p className="text-xs text-muted-foreground">
-              {currentMembership?.isDirector ? "Director" : `Priority ${myRole?.priority || 0}`}
+              {currentMembership?.isOwner ? "Owner" : `Priority ${myRole?.priority || 0}`}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Teams</CardTitle>
+            <CardTitle className="text-sm font-medium">Workspaces</CardTitle>
             <Link2 className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{teams.length}</div>
-            <p className="text-xs text-muted-foreground">Joined teams</p>
+            <div className="text-2xl font-bold">{workspaces.length}</div>
+            <p className="text-xs text-muted-foreground">Joined workspaces</p>
           </CardContent>
         </Card>
         <Card>
@@ -181,11 +181,11 @@ export function TeamContent() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Share this code with people you want to invite to your team.
+              Share this code with people you want to invite to your workspace.
             </p>
             <InviteCodeDisplay
-              code={inviteCode || currentTeam.inviteCode}
-              teamId={currentTeam.id}
+              code={inviteCode || currentWorkspace.inviteCode}
+              teamId={currentWorkspace.id}
               canRegenerate
               onRegenerate={setInviteCode}
             />

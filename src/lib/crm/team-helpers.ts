@@ -1,24 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import type { TeamContext, TeamPermissions, TeamRoleRow } from "@/types/team";
+import type { WorkspaceContext, WorkspacePermissions, WorkspaceRoleRow } from "@/types/team";
 
-type TeamContextResult =
-  | { context: TeamContext; error: null }
+type WorkspaceContextResult =
+  | { context: WorkspaceContext; error: null }
   | { context: null; error: NextResponse };
 
-// In-memory cache + request deduplication for getTeamContext.
+// In-memory cache + request deduplication for getWorkspaceContext.
 // When 6 API calls fire simultaneously, only the first one runs DB queries;
 // the other 5 await the same promise.
 const CACHE_TTL = 30_000;
-const contextCache = new Map<string, { result: TeamContextResult; ts: number }>();
-const inflight = new Map<string, Promise<TeamContextResult>>();
+const contextCache = new Map<string, { result: WorkspaceContextResult; ts: number }>();
+const inflight = new Map<string, Promise<WorkspaceContextResult>>();
 
 /**
- * Get team context for the currently authenticated user.
+ * Get workspace context for the currently authenticated user.
  * Uses in-memory cache (30s TTL) and request deduplication.
  */
-export async function getTeamContext(): Promise<TeamContextResult> {
+export async function getWorkspaceContext(): Promise<WorkspaceContextResult> {
   const { userId } = await auth();
 
   if (!userId) {
@@ -41,7 +41,7 @@ export async function getTeamContext(): Promise<TeamContextResult> {
   const pending = inflight.get(userId);
   if (pending) return pending;
 
-  const promise = fetchTeamContext(userId);
+  const promise = fetchWorkspaceContext(userId);
   inflight.set(userId, promise);
 
   try {
@@ -55,7 +55,10 @@ export async function getTeamContext(): Promise<TeamContextResult> {
   }
 }
 
-async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
+/** @deprecated Use getWorkspaceContext */
+export const getTeamContext = getWorkspaceContext;
+
+async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextResult> {
   const supabase = createSupabaseAdmin();
 
   // Query 1: Get account (must run first — others depend on current_team_id)
@@ -79,14 +82,14 @@ async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
     return {
       context: null,
       error: NextResponse.json(
-        { success: false, error: "No team selected" },
+        { success: false, error: "No workspace selected" },
         { status: 400 }
       ),
     };
   }
 
-  // Queries 2 & 3 in parallel: team check + member/role fetch
-  const [teamResult, memberResult] = await Promise.all([
+  // Queries 2 & 3 in parallel: workspace check + member/role fetch
+  const [workspaceResult, memberResult] = await Promise.all([
     supabase
       .from("teams")
       .select("id, deleted_at")
@@ -101,8 +104,8 @@ async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
       .single(),
   ]);
 
-  const team = teamResult.data;
-  if (!team || team.deleted_at) {
+  const workspace = workspaceResult.data;
+  if (!workspace || workspace.deleted_at) {
     await supabase
       .from("accounts")
       .update({ current_team_id: null })
@@ -111,7 +114,7 @@ async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
     return {
       context: null,
       error: NextResponse.json(
-        { success: false, error: "No team selected" },
+        { success: false, error: "No workspace selected" },
         { status: 400 }
       ),
     };
@@ -122,22 +125,24 @@ async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
     return {
       context: null,
       error: NextResponse.json(
-        { success: false, error: "Not a member of current team" },
+        { success: false, error: "Not a member of current workspace" },
         { status: 403 }
       ),
     };
   }
 
-  const role = member.team_roles as unknown as TeamRoleRow;
+  const role = member.team_roles as unknown as WorkspaceRoleRow;
 
   return {
     context: {
       accountId: account.id,
-      teamId: account.current_team_id,
+      workspaceId: account.current_team_id,
+      teamId: account.current_team_id, // backward compat
       memberId: member.id,
       role: {
         id: role.id,
-        teamId: role.team_id,
+        workspaceId: role.team_id,
+        teamId: role.team_id, // backward compat
         name: role.name,
         color: role.color,
         priority: role.priority,
@@ -147,7 +152,8 @@ async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
         updatedAt: role.updated_at,
       },
       permissions: role.permissions,
-      isDirector: member.is_director,
+      isOwner: member.is_director,
+      isDirector: member.is_director, // backward compat
     },
     error: null,
   };
@@ -155,15 +161,15 @@ async function fetchTeamContext(userId: string): Promise<TeamContextResult> {
 
 /**
  * Check if a user has a specific permission.
- * Directors always have all permissions.
+ * Owners always have all permissions.
  */
 export function hasPermission(
-  permissions: TeamPermissions,
-  resource: keyof TeamPermissions,
+  permissions: WorkspacePermissions,
+  resource: keyof WorkspacePermissions,
   action: string,
-  isDirector?: boolean
+  isOwner?: boolean
 ): boolean {
-  if (isDirector) return true;
+  if (isOwner) return true;
   const resourcePerms = permissions[resource];
   if (!resourcePerms) return false;
   return (resourcePerms as Record<string, boolean>)[action] === true;
@@ -171,15 +177,15 @@ export function hasPermission(
 
 /**
  * Return 403 response if permission is denied, null if allowed.
- * Directors always pass.
+ * Owners always pass.
  */
 export function requirePermission(
-  permissions: TeamPermissions,
-  resource: keyof TeamPermissions,
+  permissions: WorkspacePermissions,
+  resource: keyof WorkspacePermissions,
   action: string,
-  isDirector?: boolean
+  isOwner?: boolean
 ): NextResponse | null {
-  if (!hasPermission(permissions, resource, action, isDirector)) {
+  if (!hasPermission(permissions, resource, action, isOwner)) {
     return NextResponse.json(
       { success: false, error: "Permission denied" },
       { status: 403 }

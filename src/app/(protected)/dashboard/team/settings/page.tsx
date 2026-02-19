@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { useRouter } from "next/navigation";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,37 +23,37 @@ interface AiPerms {
 }
 
 export default function TeamSettingsPage() {
-  const { currentTeam, isDirector, refetch } = useTeam();
+  const { currentWorkspace, isOwner, refetch } = useWorkspace();
   const router = useRouter();
-  const [name, setName] = useState(currentTeam?.name || "");
-  const [description, setDescription] = useState(currentTeam?.description || "");
+  const [name, setName] = useState(currentWorkspace?.name || "");
+  const [description, setDescription] = useState(currentWorkspace?.description || "");
   const [saving, setSaving] = useState(false);
   const [aiPerms, setAiPerms] = useState<AiPerms | null>(null);
   const [savingAi, setSavingAi] = useState(false);
 
   const fetchAiPerms = useCallback(async () => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/ai-permissions`);
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/ai-permissions`);
     const json = await res.json();
     if (json.success) setAiPerms(json.data);
-  }, [currentTeam]);
+  }, [currentWorkspace]);
 
   useEffect(() => {
     fetchAiPerms();
   }, [fetchAiPerms]);
 
   const handleSaveInfo = async () => {
-    if (!currentTeam) return;
+    if (!currentWorkspace) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/teams/${currentTeam.id}`, {
+      const res = await fetch(`/api/teams/${currentWorkspace.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), description: description.trim() || null }),
       });
       const json = await res.json();
       if (json.success) {
-        toast.success("Team updated");
+        toast.success("Workspace updated");
         refetch();
       } else {
         toast.error(json.error || "Failed");
@@ -64,10 +64,10 @@ export default function TeamSettingsPage() {
   };
 
   const handleSaveAi = async () => {
-    if (!currentTeam || !aiPerms) return;
+    if (!currentWorkspace || !aiPerms) return;
     setSavingAi(true);
     try {
-      const res = await fetch(`/api/teams/${currentTeam.id}/ai-permissions`, {
+      const res = await fetch(`/api/teams/${currentWorkspace.id}/ai-permissions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(aiPerms),
@@ -86,15 +86,15 @@ export default function TeamSettingsPage() {
   const [deleting, setDeleting] = useState(false);
 
   const handleDeleteTeam = async () => {
-    if (!currentTeam) return;
-    if (!confirm("Are you sure? You can restore the team within 24 hours.")) return;
+    if (!currentWorkspace) return;
+    if (!confirm("Are you sure? You can restore the workspace within 24 hours.")) return;
 
     setDeleting(true);
     try {
-      const res = await fetch(`/api/teams/${currentTeam.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/teams/${currentWorkspace.id}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        toast.success("Team deleted. You can restore it within 24 hours.");
+        toast.success("Workspace deleted. You can restore it within 24 hours.");
         await refetch();
         router.push("/dashboard/team");
       } else {
@@ -105,27 +105,27 @@ export default function TeamSettingsPage() {
     }
   };
 
-  if (!isDirector) {
+  if (!isOwner) {
     return (
       <PageContainer>
-        <PageHeader title="Settings" description="Only directors can manage team settings." />
+        <PageHeader title="Settings" description="Only workspace owners can manage settings." />
       </PageContainer>
     );
   }
 
   return (
     <PageContainer>
-      <PageHeader title="Team Settings" description="Manage your team configuration" />
+      <PageHeader title="Workspace Settings" description="Manage your workspace configuration" />
 
       <div className="space-y-6 max-w-2xl">
         {/* Team Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Team Information</CardTitle>
+            <CardTitle className="text-base">Workspace Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Team Name</Label>
+              <Label>Workspace Name</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={100} />
             </div>
             <div className="space-y-2">
@@ -143,7 +143,7 @@ export default function TeamSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">AI Permissions</CardTitle>
-              <CardDescription>Control what the AI agent can do in your team</CardDescription>
+              <CardDescription>Control what the AI agent can do in your workspace</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -194,11 +194,11 @@ export default function TeamSettingsPage() {
             <Separator className="mb-4" />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Delete Team</p>
-                <p className="text-xs text-muted-foreground">Delete this team. You can restore it within 24 hours.</p>
+                <p className="text-sm font-medium">Delete Workspace</p>
+                <p className="text-xs text-muted-foreground">Delete this workspace. You can restore it within 24 hours.</p>
               </div>
               <Button variant="destructive" size="sm" onClick={handleDeleteTeam} disabled={deleting}>
-                {deleting ? "Deleting..." : "Delete Team"}
+                {deleting ? "Deleting..." : "Delete Workspace"}
               </Button>
             </div>
           </CardContent>

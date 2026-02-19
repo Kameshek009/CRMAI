@@ -1,8 +1,9 @@
 // ============================================================================
-// Team Types for Nexxus CRM
+// Workspace Types for Nexxus CRM
+// (DB table remains "teams" for backwards compatibility)
 // ============================================================================
 
-export interface TeamPermissions {
+export interface WorkspacePermissions {
   contacts: { read: boolean; create: boolean; update: boolean; delete: boolean };
   companies: { read: boolean; create: boolean; update: boolean; delete: boolean };
   deals: { read: boolean; create: boolean; update: boolean; delete: boolean };
@@ -16,7 +17,10 @@ export interface TeamPermissions {
   ai_chat: { allowed: boolean };
 }
 
-export interface Team {
+/** @deprecated Use WorkspacePermissions */
+export type TeamPermissions = WorkspacePermissions;
+
+export interface Workspace {
   id: string;
   name: string;
   slug: string;
@@ -29,7 +33,10 @@ export interface Team {
   updatedAt: string;
 }
 
-export interface TeamRow {
+/** @deprecated Use Workspace */
+export type Team = Workspace;
+
+export interface WorkspaceRow {
   id: string;
   name: string;
   slug: string;
@@ -42,7 +49,10 @@ export interface TeamRow {
   updated_at: string;
 }
 
-export function transformTeamRow(row: TeamRow): Team {
+/** @deprecated Use WorkspaceRow */
+export type TeamRow = WorkspaceRow;
+
+export function transformWorkspaceRow(row: WorkspaceRow): Workspace {
   return {
     id: row.id,
     name: row.name,
@@ -57,34 +67,46 @@ export function transformTeamRow(row: TeamRow): Team {
   };
 }
 
-export interface TeamRole {
+/** @deprecated Use transformWorkspaceRow */
+export const transformTeamRow = transformWorkspaceRow;
+
+export interface WorkspaceRole {
   id: string;
+  workspaceId: string;
+  /** @deprecated Use workspaceId */
   teamId: string;
   name: string;
   color: string;
   priority: number;
-  permissions: TeamPermissions;
+  permissions: WorkspacePermissions;
   isSystem: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface TeamRoleRow {
+/** @deprecated Use WorkspaceRole */
+export type TeamRole = WorkspaceRole;
+
+export interface WorkspaceRoleRow {
   id: string;
   team_id: string;
   name: string;
   color: string;
   priority: number;
-  permissions: TeamPermissions;
+  permissions: WorkspacePermissions;
   is_system: boolean;
   created_at: string;
   updated_at: string;
 }
 
-export function transformTeamRoleRow(row: TeamRoleRow): TeamRole {
+/** @deprecated Use WorkspaceRoleRow */
+export type TeamRoleRow = WorkspaceRoleRow;
+
+export function transformWorkspaceRoleRow(row: WorkspaceRoleRow): WorkspaceRole {
   return {
     id: row.id,
-    teamId: row.team_id,
+    workspaceId: row.team_id,
+    teamId: row.team_id, // backward compat
     name: row.name,
     color: row.color,
     priority: row.priority,
@@ -95,66 +117,92 @@ export function transformTeamRoleRow(row: TeamRoleRow): TeamRole {
   };
 }
 
-export type TeamMemberStatus = "active" | "invited" | "suspended";
+/** @deprecated Use transformWorkspaceRoleRow */
+export const transformTeamRoleRow = transformWorkspaceRoleRow;
 
-export interface TeamMember {
+export type WorkspaceMemberStatus = "active" | "invited" | "suspended";
+
+/** @deprecated Use WorkspaceMemberStatus */
+export type TeamMemberStatus = WorkspaceMemberStatus;
+
+export interface WorkspaceMember {
   id: string;
-  teamId: string;
+  workspaceId: string;
   accountId: string;
   roleId: string;
+  isOwner: boolean;
+  /** @deprecated Use isOwner */
   isDirector: boolean;
-  status: TeamMemberStatus;
+  status: WorkspaceMemberStatus;
   joinedAt: string;
   createdAt: string;
   updatedAt: string;
   // Joined fields
-  role?: TeamRole;
+  role?: WorkspaceRole;
   account?: { id: string; clerk_user_id: string; name?: string; email?: string };
 }
 
-export interface TeamMemberRow {
+/** @deprecated Use WorkspaceMember */
+export type TeamMember = WorkspaceMember;
+
+export interface WorkspaceMemberRow {
   id: string;
   team_id: string;
   account_id: string;
   role_id: string;
   is_director: boolean;
-  status: TeamMemberStatus;
+  status: WorkspaceMemberStatus;
   joined_at: string;
   created_at: string;
   updated_at: string;
-  team_roles?: TeamRoleRow;
+  team_roles?: WorkspaceRoleRow;
 }
 
-export type TeamInviteStatus = "pending" | "accepted" | "expired" | "revoked";
+/** @deprecated Use WorkspaceMemberRow */
+export type TeamMemberRow = WorkspaceMemberRow;
 
-export interface TeamInvite {
+export type WorkspaceInviteStatus = "pending" | "accepted" | "expired" | "revoked";
+
+/** @deprecated Use WorkspaceInviteStatus */
+export type TeamInviteStatus = WorkspaceInviteStatus;
+
+export interface WorkspaceInvite {
   id: string;
-  teamId: string;
+  workspaceId: string;
   code: string;
   roleId: string | null;
   invitedEmail: string | null;
   invitedBy: string;
-  status: TeamInviteStatus;
+  status: WorkspaceInviteStatus;
   expiresAt: string;
   createdAt: string;
 }
 
-export type TeamConnectionStatus = "pending" | "accepted" | "rejected";
+/** @deprecated Use WorkspaceInvite */
+export type TeamInvite = WorkspaceInvite;
 
-export interface TeamConnection {
+export type WorkspaceConnectionStatus = "pending" | "accepted" | "rejected";
+
+/** @deprecated Use WorkspaceConnectionStatus */
+export type TeamConnectionStatus = WorkspaceConnectionStatus;
+
+export interface WorkspaceConnection {
   id: string;
-  requesterTeamId: string;
-  targetTeamId: string;
+  requesterWorkspaceId: string;
+  targetWorkspaceId: string;
   connectionCode: string | null;
   sharedResources: Record<string, unknown>;
-  status: TeamConnectionStatus;
+  status: WorkspaceConnectionStatus;
   createdAt: string;
   updatedAt: string;
 }
 
+/** @deprecated Use WorkspaceConnection */
+export type TeamConnection = WorkspaceConnection;
+
 export interface AiPermissions {
   id: string;
-  teamId: string;
+  workspaceId: string;
   permissionLevel: number;
   canCreateContacts: boolean;
   canCreateDeals: boolean;
@@ -174,11 +222,18 @@ export interface AiPermissionsRow {
   max_assignable_role_priority: number;
 }
 
-export interface TeamContext {
+export interface WorkspaceContext {
   accountId: string;
+  workspaceId: string;
+  /** @deprecated Use workspaceId */
   teamId: string;
   memberId: string;
-  role: TeamRole;
-  permissions: TeamPermissions;
+  role: WorkspaceRole;
+  permissions: WorkspacePermissions;
+  isOwner: boolean;
+  /** @deprecated Use isOwner */
   isDirector: boolean;
 }
+
+/** @deprecated Use WorkspaceContext */
+export type TeamContext = WorkspaceContext;

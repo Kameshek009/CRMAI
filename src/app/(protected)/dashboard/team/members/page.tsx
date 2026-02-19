@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,25 +29,25 @@ interface MemberData {
 }
 
 export default function TeamMembersPage() {
-  const { currentTeam, can } = useTeam();
+  const { currentWorkspace, can } = useWorkspace();
   const [members, setMembers] = useState<MemberData[]>([]);
   const [roles, setRoles] = useState<{ id: string; name: string; color: string }[]>([]);
   const [kickTarget, setKickTarget] = useState<{ id: string; name: string } | null>(null);
   const [kicking, setKicking] = useState(false);
 
   const fetchMembers = useCallback(async () => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/members`);
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/members`);
     const json = await res.json();
     if (json.success) setMembers(json.data || []);
-  }, [currentTeam]);
+  }, [currentWorkspace]);
 
   const fetchRoles = useCallback(async () => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/roles`);
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/roles`);
     const json = await res.json();
     if (json.success) setRoles(json.data || []);
-  }, [currentTeam]);
+  }, [currentWorkspace]);
 
   useEffect(() => {
     fetchMembers();
@@ -55,10 +55,10 @@ export default function TeamMembersPage() {
   }, [fetchMembers, fetchRoles]);
 
   const handleKick = async () => {
-    if (!kickTarget || !currentTeam) return;
+    if (!kickTarget || !currentWorkspace) return;
     setKicking(true);
     try {
-      const res = await fetch(`/api/teams/${currentTeam.id}/members/kick`, {
+      const res = await fetch(`/api/teams/${currentWorkspace.id}/members/kick`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ member_id: kickTarget.id }),
@@ -79,8 +79,8 @@ export default function TeamMembersPage() {
   };
 
   const handleRoleChange = async (memberId: string, roleId: string) => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/members/${memberId}`, {
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/members/${memberId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role_id: roleId }),
@@ -101,13 +101,13 @@ export default function TeamMembersPage() {
     return m.accounts?.email || "Unknown";
   };
 
-  const maxMembers = currentTeam?.maxMembers || 0;
+  const maxMembers = currentWorkspace?.maxMembers || 0;
   const capacityPercent = maxMembers > 0 ? Math.round((members.length / maxMembers) * 100) : 0;
   const isNearFull = capacityPercent >= 80;
 
   return (
     <PageContainer>
-      <PageHeader title="Members" description={`${members.length} team members`}>
+      <PageHeader title="Members" description={`${members.length} workspace members`}>
         <Badge variant="outline" className="gap-2">
           <Users className="size-3" />
           {members.length} / {maxMembers > 1000 ? "∞" : maxMembers}
@@ -118,7 +118,7 @@ export default function TeamMembersPage() {
       {maxMembers <= 1000 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Team capacity</span>
+            <span>Workspace capacity</span>
             <span className={isNearFull ? "text-amber-500 font-medium" : ""}>
               {capacityPercent}%
             </span>

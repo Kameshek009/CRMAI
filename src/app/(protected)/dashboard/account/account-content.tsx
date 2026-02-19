@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Loader2, Crown, Settings, CreditCard, AlertTriangle, ArrowRight, Palette, Users, Plus, Pencil } from "lucide-react";
 import { ThemeToggleSlider } from "@/components/theme-toggle-slider";
 import { TeamCreateWizard } from "@/components/team/team-create-wizard";
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { toast } from "sonner";
 import type { UsageStats } from "@/types";
 import type { CustomerBillingInfoData, InvoiceInfo } from "@/components/billing";
@@ -163,21 +163,21 @@ function JoinTeamForm({ onJoined }: { onJoined: () => void }) {
   );
 }
 
-function TeamCard() {
-  const { currentTeam, teams, refetch } = useTeam();
+function WorkspaceCard() {
+  const { currentWorkspace, workspaces, refetch } = useWorkspace();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Users className="size-4" />
-          Team
+          Workspace
         </CardTitle>
         <CardDescription>
-          {currentTeam
-            ? `Current team: ${currentTeam.name}`
-            : "You are not in a team yet"}
-          {teams.length > 1 && ` (${teams.length} teams total)`}
+          {currentWorkspace
+            ? `Current workspace: ${currentWorkspace.name}`
+            : "You are not in a workspace yet"}
+          {workspaces.length > 1 && ` (${workspaces.length} workspaces total)`}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -185,11 +185,11 @@ function TeamCard() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="join" className="gap-2">
               <ArrowRight className="size-4" />
-              Join Team
+              Join Workspace
             </TabsTrigger>
             <TabsTrigger value="create" className="gap-2">
               <Plus className="size-4" />
-              Create Team
+              Create Workspace
             </TabsTrigger>
           </TabsList>
           <TabsContent value="join" className="mt-4">
@@ -455,7 +455,7 @@ export function AccountContent({ email, name: initialName, imageUrl }: AccountCo
       )}
 
       {/* Team */}
-      <TeamCard />
+      <WorkspaceCard />
 
       {/* Danger Zone */}
       <Card className="border-destructive/50">

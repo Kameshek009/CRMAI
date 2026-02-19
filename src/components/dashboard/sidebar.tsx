@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import {
   LayoutGrid,
   Settings,
@@ -63,7 +63,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { currentTeam } = useTeam();
+  const { currentWorkspace: currentTeam } = useWorkspace();
 
   const tierName = currentTeam?.tier ? TIER_DISPLAY_NAMES[currentTeam.tier] || "Free" : "Free";
 

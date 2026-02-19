@@ -1,14 +1,14 @@
 "use client";
 
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { type ReactNode } from "react";
 
-interface TeamGuardProps {
+interface WorkspaceGuardProps {
   children: ReactNode;
 }
 
-export function TeamGuard({ children }: TeamGuardProps) {
-  const { isLoading } = useTeam();
+export function WorkspaceGuard({ children }: WorkspaceGuardProps) {
+  const { isLoading } = useWorkspace();
 
   if (isLoading) {
     return (
@@ -20,3 +20,6 @@ export function TeamGuard({ children }: TeamGuardProps) {
 
   return <>{children}</>;
 }
+
+/** @deprecated Use WorkspaceGuard */
+export const TeamGuard = WorkspaceGuard;

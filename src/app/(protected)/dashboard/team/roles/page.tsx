@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,37 +9,37 @@ import { RoleBadge } from "@/components/team/role-badge";
 import { RoleEditor } from "@/components/team/role-editor";
 import { Plus, Pencil, Trash2, Shield } from "lucide-react";
 import { toast } from "sonner";
-import type { TeamPermissions } from "@/types/team";
+import type { WorkspacePermissions } from "@/types/team";
 
 interface RoleData {
   id: string;
   name: string;
   color: string;
   priority: number;
-  permissions: TeamPermissions;
+  permissions: WorkspacePermissions;
   is_system: boolean;
 }
 
 export default function TeamRolesPage() {
-  const { currentTeam, isDirector } = useTeam();
+  const { currentWorkspace, isOwner } = useWorkspace();
   const [roles, setRoles] = useState<RoleData[]>([]);
   const [editingRole, setEditingRole] = useState<RoleData | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
   const fetchRoles = useCallback(async () => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/roles`);
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/roles`);
     const json = await res.json();
     if (json.success) setRoles(json.data || []);
-  }, [currentTeam]);
+  }, [currentWorkspace]);
 
   useEffect(() => {
     fetchRoles();
   }, [fetchRoles]);
 
   const handleDeleteRole = async (roleId: string) => {
-    if (!currentTeam) return;
-    const res = await fetch(`/api/teams/${currentTeam.id}/roles/${roleId}`, { method: "DELETE" });
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/roles/${roleId}`, { method: "DELETE" });
     const json = await res.json();
     if (json.success) {
       toast.success("Role deleted");
@@ -49,20 +49,20 @@ export default function TeamRolesPage() {
     }
   };
 
-  const getPermissionSummary = (permissions: TeamPermissions) => {
+  const getPermissionSummary = (permissions: WorkspacePermissions) => {
     const canDo: string[] = [];
     if (permissions.contacts?.create) canDo.push("Create contacts");
     if (permissions.deals?.create) canDo.push("Create deals");
     if (permissions.pipeline?.manage) canDo.push("Manage pipeline");
-    if (permissions.team_settings?.manage) canDo.push("Manage team");
+    if (permissions.team_settings?.manage) canDo.push("Manage workspace");
     if (canDo.length === 0) canDo.push("Read only");
     return canDo.join(", ");
   };
 
   return (
     <PageContainer>
-      <PageHeader title="Roles" description="Manage team roles and permissions">
-        {isDirector && (
+      <PageHeader title="Roles" description="Manage workspace roles and permissions">
+        {isOwner && (
           <Button size="sm" onClick={() => setShowCreate(true)}>
             <Plus className="size-4 mr-2" /> Create Role
           </Button>
@@ -86,7 +86,7 @@ export default function TeamRolesPage() {
               <p className="text-xs text-muted-foreground mb-4">
                 {getPermissionSummary(role.permissions)}
               </p>
-              {isDirector && (
+              {isOwner && (
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -112,12 +112,12 @@ export default function TeamRolesPage() {
         ))}
       </div>
 
-      {currentTeam && (
+      {currentWorkspace && (
         <>
           <RoleEditor
             open={!!editingRole}
             onOpenChange={(open) => !open && setEditingRole(null)}
-            teamId={currentTeam.id}
+            teamId={currentWorkspace.id}
             role={editingRole ? {
               ...editingRole,
               isSystem: editingRole.is_system,
@@ -127,7 +127,7 @@ export default function TeamRolesPage() {
           <RoleEditor
             open={showCreate}
             onOpenChange={setShowCreate}
-            teamId={currentTeam.id}
+            teamId={currentWorkspace.id}
             onSaved={fetchRoles}
           />
         </>

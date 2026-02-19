@@ -1,6 +1,6 @@
 "use client";
 
-import { useTeam } from "@/contexts/team-context";
+import { useWorkspace } from "@/contexts/team-context";
 import { Check, ChevronsUpDown, Plus, Users } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,10 +19,10 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 export function TeamSwitcher() {
-  const { currentTeam, teams, myRole, switchTeam } = useTeam();
+  const { currentWorkspace, workspaces, myRole, switchWorkspace } = useWorkspace();
   const { isMobile } = useSidebar();
 
-  if (!currentTeam) return null;
+  if (!currentWorkspace) return null;
 
   return (
     <SidebarMenu>
@@ -37,7 +37,7 @@ export function TeamSwitcher() {
                 <Users className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{currentTeam.name}</span>
+                <span className="truncate font-medium">{currentWorkspace.name}</span>
                 {myRole && (
                   <span className="truncate text-xs text-muted-foreground">
                     {myRole.name}
@@ -53,24 +53,24 @@ export function TeamSwitcher() {
             align="start"
             sideOffset={4}
           >
-            {teams.map((membership) => (
+            {workspaces.map((membership) => (
               <DropdownMenuItem
-                key={membership.team.id}
-                onClick={() => switchTeam(membership.team.id)}
+                key={membership.workspace.id}
+                onClick={() => switchWorkspace(membership.workspace.id)}
                 className="gap-2"
               >
                 <div className="flex aspect-square size-6 items-center justify-center rounded bg-primary/10 text-primary">
                   <Users className="size-3" />
                 </div>
                 <div className="flex-1 truncate">
-                  <span className="text-sm">{membership.team.name}</span>
+                  <span className="text-sm">{membership.workspace.name}</span>
                 </div>
-                {membership.isDirector && (
+                {membership.isOwner && (
                   <Badge variant="outline" className="text-[10px] px-1 py-0">
-                    Director
+                    Owner
                   </Badge>
                 )}
-                {membership.team.id === currentTeam.id && (
+                {membership.workspace.id === currentWorkspace.id && (
                   <Check className="size-4 text-primary" />
                 )}
               </DropdownMenuItem>
@@ -79,7 +79,7 @@ export function TeamSwitcher() {
             <DropdownMenuItem asChild>
               <Link href="/dashboard/account" className="gap-2">
                 <Plus className="size-4" />
-                Create or Join Team
+                Create or Join Workspace
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
