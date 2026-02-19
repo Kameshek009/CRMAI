@@ -9,7 +9,8 @@ import { KanbanBoard, type KanbanColumn } from "@/components/frappe/kanban-board
 import { GroupByView, type GroupByGroup } from "@/components/frappe/group-by-view";
 import { StatusBadge } from "@/components/frappe/status-badge";
 import { EntityForm } from "@/components/crm/entity-form";
-import { leadFields } from "@/lib/crm/field-definitions";
+import { getLeadFields } from "@/lib/crm/field-definitions";
+import { useTranslation } from "@/lib/i18n";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -36,57 +37,6 @@ interface LeadData {
   created_at: string;
 }
 
-// ============================================================================
-// Constants
-// ============================================================================
-
-const FILTER_OPTIONS: FilterOption[] = [
-  {
-    field: "status", label: "Status", type: "select",
-    options: [
-      { value: "new", label: "New" },
-      { value: "contacted", label: "Contacted" },
-      { value: "qualified", label: "Qualified" },
-      { value: "unqualified", label: "Unqualified" },
-      { value: "junk", label: "Junk" },
-    ],
-  },
-  {
-    field: "source", label: "Source", type: "select",
-    options: [
-      { value: "website", label: "Website" },
-      { value: "referral", label: "Referral" },
-      { value: "campaign", label: "Campaign" },
-      { value: "cold_call", label: "Cold Call" },
-      { value: "social_media", label: "Social Media" },
-      { value: "event", label: "Event" },
-      { value: "other", label: "Other" },
-    ],
-  },
-];
-
-const SORT_OPTIONS: SortOption[] = [
-  { field: "created_at", label: "Created" },
-  { field: "first_name", label: "First Name" },
-  { field: "last_name", label: "Last Name" },
-  { field: "email", label: "Email" },
-  { field: "source", label: "Source" },
-  { field: "organization", label: "Organization" },
-];
-
-const GROUP_BY_OPTIONS: GroupByOption[] = [
-  { field: "status", label: "Status" },
-  { field: "source", label: "Source" },
-];
-
-const KANBAN_COLUMNS: KanbanColumn[] = [
-  { id: "new", title: "New", color: "bg-blue-500" },
-  { id: "contacted", title: "Contacted", color: "bg-amber-500" },
-  { id: "qualified", title: "Qualified", color: "bg-emerald-500" },
-  { id: "unqualified", title: "Unqualified", color: "bg-gray-500" },
-  { id: "junk", title: "Junk", color: "bg-red-500" },
-];
-
 const PAGE_SIZE = 50;
 
 // ============================================================================
@@ -95,6 +45,56 @@ const PAGE_SIZE = 50;
 
 export function LeadsContent() {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const leadFields = useMemo(() => getLeadFields(t), [t]);
+
+  const filterOptions: FilterOption[] = useMemo(() => [
+    {
+      field: "status", label: t("crm.leads.fields.status"), type: "select",
+      options: [
+        { value: "new", label: t("crm.leads.statuses.new") },
+        { value: "contacted", label: t("crm.leads.statuses.contacted") },
+        { value: "qualified", label: t("crm.leads.statuses.qualified") },
+        { value: "unqualified", label: t("crm.leads.statuses.unqualified") },
+        { value: "junk", label: t("crm.leads.statuses.junk") },
+      ],
+    },
+    {
+      field: "source", label: t("crm.leads.fields.source"), type: "select",
+      options: [
+        { value: "website", label: t("crm.leads.sources.website") },
+        { value: "referral", label: t("crm.leads.sources.referral") },
+        { value: "campaign", label: t("crm.leads.sources.campaign") },
+        { value: "cold_call", label: t("crm.leads.sources.coldCall") },
+        { value: "social_media", label: t("crm.leads.sources.socialMedia") },
+        { value: "event", label: t("crm.leads.sources.event") },
+        { value: "other", label: t("crm.leads.sources.other") },
+      ],
+    },
+  ], [t]);
+
+  const sortOptions: SortOption[] = useMemo(() => [
+    { field: "created_at", label: t("crm.leads.sort.created") },
+    { field: "first_name", label: t("crm.leads.sort.firstName") },
+    { field: "last_name", label: t("crm.leads.sort.lastName") },
+    { field: "email", label: t("crm.leads.sort.email") },
+    { field: "source", label: t("crm.leads.sort.source") },
+    { field: "organization", label: t("crm.leads.sort.organization") },
+  ], [t]);
+
+  const groupByOptions: GroupByOption[] = useMemo(() => [
+    { field: "status", label: t("crm.leads.groupBy.status") },
+    { field: "source", label: t("crm.leads.groupBy.source") },
+  ], [t]);
+
+  const kanbanColumnsDef: KanbanColumn[] = useMemo(() => [
+    { id: "new", title: t("crm.leads.statuses.new"), color: "bg-blue-500" },
+    { id: "contacted", title: t("crm.leads.statuses.contacted"), color: "bg-amber-500" },
+    { id: "qualified", title: t("crm.leads.statuses.qualified"), color: "bg-emerald-500" },
+    { id: "unqualified", title: t("crm.leads.statuses.unqualified"), color: "bg-gray-500" },
+    { id: "junk", title: t("crm.leads.statuses.junk"), color: "bg-red-500" },
+  ], [t]);
 
   const [leads, setLeads] = useState<LeadData[]>([]);
   const [total, setTotal] = useState(0);
@@ -148,7 +148,7 @@ export function LeadsContent() {
     });
     const json = await res.json();
     if (json.success) {
-      toast.success("Lead created");
+      toast.success(t("crm.leads.created"));
       useFeatureLimitStore.getState().incrementUsage("leads");
       fetchLeads();
     } else {
@@ -158,13 +158,13 @@ export function LeadsContent() {
   };
 
   const handleFilterAdd = useCallback((field: string, value: string) => {
-    const option = FILTER_OPTIONS.find(f => f.field === field);
+    const option = filterOptions.find(f => f.field === field);
     const optLabel = option?.options?.find(o => o.value === value)?.label || value;
     setActiveFilters(prev => {
       const next = prev.filter(f => f.field !== field);
       return [...next, { field, value, label: optLabel }];
     });
-  }, []);
+  }, [filterOptions]);
 
   const handleFilterRemove = useCallback((field: string) => {
     setActiveFilters(prev => prev.filter(f => f.field !== field));
@@ -233,7 +233,7 @@ export function LeadsContent() {
 
   const columns: Column<LeadData>[] = useMemo(() => [
     {
-      key: "first_name", label: "Name", sortable: true,
+      key: "first_name", label: t("crm.leads.fields.name"), sortable: true,
       render: (l) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-7 w-7">
@@ -248,15 +248,15 @@ export function LeadsContent() {
         </div>
       ),
     },
-    { key: "email", label: "Email", sortable: true },
-    { key: "phone", label: "Phone" },
-    { key: "organization", label: "Organization", sortable: true },
-    { key: "source", label: "Source", sortable: true },
+    { key: "email", label: t("crm.leads.fields.email"), sortable: true },
+    { key: "phone", label: t("crm.leads.fields.phone") },
+    { key: "organization", label: t("crm.leads.fields.organization"), sortable: true },
+    { key: "source", label: t("crm.leads.fields.source"), sortable: true },
     {
-      key: "status", label: "Status", sortable: true,
+      key: "status", label: t("crm.leads.fields.status"), sortable: true,
       render: (l) => <StatusBadge status={l.status} />,
     },
-  ], []);
+  ], [t]);
 
   const groups: GroupByGroup<LeadData>[] = useMemo(() => {
     if (!groupBy) return [];
@@ -272,40 +272,39 @@ export function LeadsContent() {
   }, [leads, groupBy]);
 
   const kanbanColumns: KanbanColumn[] = useMemo(() =>
-    KANBAN_COLUMNS.map(col => ({
+    kanbanColumnsDef.map(col => ({
       ...col,
       count: leads.filter(l => l.status === col.id).length,
-    })), [leads]);
+    })), [leads, kanbanColumnsDef]);
 
   const kanbanItems = useMemo(() =>
     leads.map(l => ({ ...l, columnId: l.status })), [leads]);
 
   return (
     <PageContainer>
-      <PageHeader title="Leads" description={`${total} lead${total !== 1 ? "s" : ""}`} />
+      <PageHeader title={t("crm.leads.title")} description={`${total}`} />
 
       <ViewControls
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search leads..."
+        searchPlaceholder={t("crm.leads.searchPlaceholder")}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-        filterOptions={FILTER_OPTIONS}
+        filterOptions={filterOptions}
         activeFilters={activeFilters}
         onFilterAdd={handleFilterAdd}
         onFilterRemove={handleFilterRemove}
         onFiltersClear={() => setActiveFilters([])}
-        sortOptions={SORT_OPTIONS}
+        sortOptions={sortOptions}
         currentSort={sortBy}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
-        groupByOptions={GROUP_BY_OPTIONS}
+        groupByOptions={groupByOptions}
         currentGroupBy={groupBy}
         onGroupByChange={setGroupBy}
         totalCount={total}
-        entityName={`lead${total !== 1 ? "s" : ""}`}
         onAdd={() => setShowForm(true)}
-        addLabel="New Lead"
+        addLabel={t("crm.leads.new")}
         featureLimitKey="leads"
       />
 
@@ -325,7 +324,7 @@ export function LeadsContent() {
           pageSize={PAGE_SIZE}
           totalCount={total}
           onPageChange={setPage}
-          emptyMessage={search || activeFilters.length > 0 ? "No matching leads" : "No leads yet"}
+          emptyMessage={search || activeFilters.length > 0 ? t("crm.leads.noMatching") : t("crm.leads.noYet")}
         />
       )}
 
@@ -357,7 +356,7 @@ export function LeadsContent() {
       {viewMode === "group_by" && (
         <GroupByView
           groups={groups}
-          emptyMessage="No leads to group"
+          emptyMessage={t("crm.leads.noGroup")}
           renderItem={(l) => (
             <div
               key={l.id}
@@ -384,7 +383,7 @@ export function LeadsContent() {
       <EntityForm
         open={showForm}
         onOpenChange={setShowForm}
-        title="New Lead"
+        title={t("crm.leads.new")}
         fields={leadFields}
         onSubmit={handleCreate}
       />
@@ -394,18 +393,18 @@ export function LeadsContent() {
         onDeselectAll={() => setSelectedIds(new Set())}
         actions={[
           {
-            label: "Change Status",
+            label: t("crm.leads.changeStatus"),
             dropdown: [
-              { label: "New", value: "new" },
-              { label: "Contacted", value: "contacted" },
-              { label: "Qualified", value: "qualified" },
-              { label: "Unqualified", value: "unqualified" },
-              { label: "Junk", value: "junk" },
+              { label: t("crm.leads.statuses.new"), value: "new" },
+              { label: t("crm.leads.statuses.contacted"), value: "contacted" },
+              { label: t("crm.leads.statuses.qualified"), value: "qualified" },
+              { label: t("crm.leads.statuses.unqualified"), value: "unqualified" },
+              { label: t("crm.leads.statuses.junk"), value: "junk" },
             ],
             onDropdownSelect: handleBulkStatusChange,
           },
           {
-            label: "Delete",
+            label: t("common.delete"),
             variant: "destructive",
             onClick: () => setConfirmDelete(true),
           },
@@ -415,9 +414,9 @@ export function LeadsContent() {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete leads"
-        description={`Are you sure you want to delete ${selectedIds.size} lead${selectedIds.size !== 1 ? "s" : ""}? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("crm.leads.deleteTitle")}
+        description={t("crm.leads.deleteConfirm", { count: selectedIds.size })}
+        confirmLabel={t("common.delete")}
         variant="destructive"
         isLoading={isBulkLoading}
         onConfirm={handleBulkDelete}
