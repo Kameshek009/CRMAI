@@ -74,13 +74,17 @@ export function TeamSwitcher() {
                 )}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard/account" className="gap-2">
-                <Plus className="size-4" />
-                Create or Join Workspace
-              </Link>
-            </DropdownMenuItem>
+            {workspaces.length === 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/account" className="gap-2">
+                    <Plus className="size-4" />
+                    Create or Join Workspace
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
