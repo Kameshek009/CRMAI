@@ -9,7 +9,7 @@ export function buildSystemPrompt(userLocale?: string): string {
       ? "The user's interface language is English. Respond in English."
       : "IMPORTANT: You MUST respond in the SAME language the user writes in. If the user writes in Russian — respond in Russian. If in English — respond in English. NEVER switch to a different language.";
 
-  return `You are the Nexxus CRM AI assistant. You help sales teams manage their contacts, deals, leads, and pipeline.
+  return `You are the Nexxus CRM AI assistant. You help sales teams manage their contacts, deals, and pipeline.
 
 ${lang}
 
@@ -17,10 +17,9 @@ RULES:
 1. When the user asks to create, add, update, delete, or complete something — use the appropriate tool silently. Do NOT mention tool/function names in your responses. Instead, describe what you did in natural language (e.g. "Готово! Я создал 5 контактов для вас.").
 2. When describing your capabilities, speak naturally — NEVER write technical names like create_contact or <function>.
 3. Be concise and friendly.
-4. When the user asks to create multiple items (e.g. "create 10 leads"), call the create tool multiple times — once for each item. Generate realistic varied data for each item (different names, emails, etc.).
+4. When the user asks to create multiple items (e.g. "create 10 contacts"), call the create tool multiple times — once for each item. Generate realistic varied data for each item (different names, emails, etc.).
 
 You can:
-- Create leads (potential customers, first stage before they become contacts)
 - Create contacts (with name, email, phone, company, etc.)
 - Update existing contacts (change email, phone, status, company, etc.)
 - Create deals in the pipeline (with value, stage, expected close date)
@@ -28,7 +27,7 @@ You can:
 - Create tasks (calls, emails, meetings, follow-ups)
 - Update tasks (change priority, due date, status)
 - Complete tasks
-- Delete contacts, deals, leads, or tasks
+- Delete contacts, deals, or tasks
 - Get detailed info about a specific contact or deal
 - List upcoming or overdue tasks
 - Search across contacts, companies, and deals
@@ -40,27 +39,6 @@ You can:
 export const CRM_SYSTEM_PROMPT = buildSystemPrompt();
 
 export const CRM_TOOLS = [
-  {
-    type: "function" as const,
-    function: {
-      name: "create_lead",
-      description: "Create a new lead (potential customer) in the CRM. Leads are the first stage before they become contacts.",
-      parameters: {
-        type: "object",
-        properties: {
-          first_name: { type: "string", description: "Lead's first name" },
-          last_name: { type: "string", description: "Lead's last name" },
-          email: { type: "string", description: "Lead's email address" },
-          phone: { type: "string", description: "Lead's phone number" },
-          organization: { type: "string", description: "Company/organization name" },
-          job_title: { type: "string", description: "Job title" },
-          source: { type: "string", description: "Lead source (website, referral, cold_call, etc.)" },
-          status: { type: "string", enum: ["new", "contacted", "qualified", "unqualified"], description: "Lead status (default: new)" },
-        },
-        required: ["first_name"],
-      },
-    },
-  },
   {
     type: "function" as const,
     function: {
@@ -234,7 +212,7 @@ export const CRM_TOOLS = [
       parameters: {
         type: "object",
         properties: {
-          record_type: { type: "string", enum: ["contact", "deal", "task", "lead"], description: "Type of record to delete" },
+          record_type: { type: "string", enum: ["contact", "deal", "task"], description: "Type of record to delete" },
           record_name: { type: "string", description: "Name/title of the record to find" },
           record_id: { type: "string", description: "Record UUID (if known)" },
         },

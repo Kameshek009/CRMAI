@@ -216,57 +216,6 @@ export const bulkCompaniesSchema = z.discriminatedUnion("action", [
 ]);
 
 // ============================================================================
-// Lead schemas
-// ============================================================================
-
-export const createLeadSchema = z.object({
-  first_name: z.string().min(1, "First name is required").max(100),
-  last_name: z.string().max(100).optional(),
-  email: z.string().email().max(254).optional().or(z.literal("")),
-  phone: z.string().max(30).optional(),
-  mobile: z.string().max(30).optional(),
-  organization: z.string().max(200).optional(),
-  website: z.string().max(2000).optional(),
-  job_title: z.string().max(200).optional(),
-  source: z.string().max(100).optional(),
-  status: z.enum(["new", "contacted", "qualified", "unqualified", "junk"]).optional(),
-  lead_owner_account_id: z.string().uuid().optional().nullable(),
-  notes: z.string().max(10000).optional(),
-  tags: z.array(z.string().max(50)).max(20).optional(),
-  metadata: metadataField,
-});
-
-export const updateLeadSchema = z.object({
-  first_name: z.string().min(1).max(100).optional(),
-  last_name: z.string().max(100).optional().nullable(),
-  email: z.string().email().max(254).optional().nullable().or(z.literal("")),
-  phone: z.string().max(30).optional().nullable(),
-  mobile: z.string().max(30).optional().nullable(),
-  organization: z.string().max(200).optional().nullable(),
-  website: z.string().max(2000).optional().nullable(),
-  job_title: z.string().max(200).optional().nullable(),
-  source: z.string().max(100).optional().nullable(),
-  status: z.enum(["new", "contacted", "qualified", "unqualified", "junk"]).optional(),
-  lead_owner_account_id: z.string().uuid().optional().nullable(),
-  notes: z.string().max(10000).optional().nullable(),
-  tags: z.array(z.string().max(50)).max(20).optional(),
-  metadata: metadataField,
-});
-
-export const convertLeadSchema = z.object({
-  create_contact: z.boolean().default(true),
-  create_deal: z.boolean().default(true),
-  deal_title: z.string().max(200).optional(),
-  deal_value: z.number().min(0).optional(),
-  deal_stage_id: z.string().uuid().optional(),
-});
-
-export const bulkLeadsSchema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("delete"), ids: bulkIds }),
-  z.object({ action: z.literal("update_status"), ids: bulkIds, status: z.enum(["new", "contacted", "qualified", "unqualified", "junk"]) }),
-]);
-
-// ============================================================================
 // Call Log schemas
 // ============================================================================
 

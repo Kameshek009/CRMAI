@@ -114,41 +114,6 @@ export function getDealFields(t: T): FormField[] {
   ];
 }
 
-export function getLeadFields(t: T): FormField[] {
-  return [
-    { name: "first_name", label: t("crm.leads.fields.firstName"), type: "text", required: true, placeholder: "John" },
-    { name: "last_name", label: t("crm.leads.fields.lastName"), type: "text", placeholder: "Doe" },
-    { name: "email", label: t("crm.leads.fields.email"), type: "email", placeholder: "john@example.com" },
-    { name: "phone", label: t("crm.leads.fields.phone"), type: "tel", placeholder: "+1 (555) 123-4567" },
-    { name: "mobile", label: t("crm.leads.fields.mobile"), type: "tel" },
-    { name: "organization", label: t("crm.leads.fields.organization"), type: "text", placeholder: "Acme Inc" },
-    { name: "website", label: t("crm.leads.fields.website"), type: "text", placeholder: "https://acme.com" },
-    { name: "job_title", label: t("crm.leads.fields.jobTitle"), type: "text" },
-    {
-      name: "source", label: t("crm.leads.fields.source"), type: "select",
-      options: [
-        { label: t("crm.leads.sources.website"), value: "website" },
-        { label: t("crm.leads.sources.referral"), value: "referral" },
-        { label: t("crm.leads.sources.campaign"), value: "campaign" },
-        { label: t("crm.leads.sources.coldCall"), value: "cold_call" },
-        { label: t("crm.leads.sources.socialMedia"), value: "social_media" },
-        { label: t("crm.leads.sources.event"), value: "event" },
-        { label: t("crm.leads.sources.other"), value: "other" },
-      ],
-    },
-    {
-      name: "status", label: t("crm.leads.fields.status"), type: "select",
-      options: [
-        { label: t("crm.leads.statuses.new"), value: "new" },
-        { label: t("crm.leads.statuses.contacted"), value: "contacted" },
-        { label: t("crm.leads.statuses.qualified"), value: "qualified" },
-        { label: t("crm.leads.statuses.unqualified"), value: "unqualified" },
-        { label: t("crm.leads.statuses.junk"), value: "junk" },
-      ],
-    },
-  ];
-}
-
 export function getCallLogFields(t: T): FormField[] {
   return [
     {
@@ -185,5 +150,4 @@ const id = (key: string) => key.split(".").pop() || key;
 export const contactFields = getContactFields(id);
 export const companyFields = getCompanyFields(id);
 export const dealFields = getDealFields(id);
-export const leadFields = getLeadFields(id);
 export const callLogFields = getCallLogFields(id);
