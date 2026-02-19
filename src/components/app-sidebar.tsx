@@ -48,6 +48,10 @@ import {
   Shield,
   Link2,
   UserCog,
+  Zap,
+  Handshake,
+  FileText,
+  Phone,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -57,7 +61,6 @@ interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
-  external?: boolean;
   permission?: string;
 }
 
@@ -66,41 +69,54 @@ interface NavGroup {
   items: NavItem[];
 }
 
+const crmGroup: NavGroup = {
+  label: "CRM",
+  items: [
+    { label: "Leads", href: "/dashboard/leads", icon: Zap, permission: "leads.read" },
+    { label: "Contacts", href: "/dashboard/contacts", icon: Users, permission: "contacts.read" },
+    { label: "Deals", href: "/dashboard/deals", icon: Handshake, permission: "deals.read" },
+    { label: "Organizations", href: "/dashboard/companies", icon: Building2, permission: "companies.read" },
+    { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare, permission: "tasks.read" },
+    { label: "Notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
+    { label: "Call Logs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
+  ],
+};
+
+const toolsGroup: NavGroup = {
+  label: "Tools",
+  items: [
+    { label: "Pipeline", href: "/dashboard/pipeline", icon: Kanban, permission: "pipeline.read" },
+    { label: "Analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
+    { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
+  ],
+};
+
+const teamGroup: NavGroup = {
+  label: "Settings",
+  items: [
+    { label: "Team", href: "/dashboard/team", icon: Users },
+    { label: "Members", href: "/dashboard/team/members", icon: UserCog },
+    { label: "Roles", href: "/dashboard/team/roles", icon: Shield, permission: "team_settings.manage" },
+    { label: "Connections", href: "/dashboard/team/connections", icon: Link2 },
+    { label: "Settings", href: "/dashboard/team/settings", icon: Settings, permission: "team_settings.manage" },
+  ],
+};
+
+const accountGroup: NavGroup = {
+  items: [
+    { label: "Account", href: "/dashboard/account", icon: Settings },
+    { label: "Usage", href: "/dashboard/usage", icon: BarChart3 },
+    { label: "Upgrade", href: "/dashboard/upgrade", icon: Sparkles },
+    { label: "Billing", href: "/dashboard/account/billing", icon: CreditCard },
+  ],
+};
+
 const navGroups: NavGroup[] = [
-  {
-    items: [
-      { label: "Overview", href: "/dashboard", icon: LayoutGrid },
-      { label: "AI Chat", href: "/dashboard/chats", icon: MessageSquare },
-    ],
-  },
-  {
-    label: "CRM",
-    items: [
-      { label: "Contacts", href: "/dashboard/contacts", icon: Users },
-      { label: "Companies", href: "/dashboard/companies", icon: Building2 },
-      { label: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
-      { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
-      { label: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
-    ],
-  },
-  {
-    label: "Team",
-    items: [
-      { label: "Overview", href: "/dashboard/team", icon: Users },
-      { label: "Members", href: "/dashboard/team/members", icon: UserCog },
-      { label: "Roles", href: "/dashboard/team/roles", icon: Shield, permission: "team_settings.manage" },
-      { label: "Connections", href: "/dashboard/team/connections", icon: Link2 },
-      { label: "Settings", href: "/dashboard/team/settings", icon: Settings, permission: "team_settings.manage" },
-    ],
-  },
-  {
-    items: [
-      { label: "Settings", href: "/dashboard/account", icon: Settings },
-      { label: "Usage", href: "/dashboard/usage", icon: BarChart3 },
-      { label: "Upgrade", href: "/dashboard/upgrade", icon: Sparkles },
-      { label: "Billing", href: "/dashboard/account/billing", icon: CreditCard },
-    ],
-  },
+  { items: [{ label: "Overview", href: "/dashboard", icon: LayoutGrid }] },
+  crmGroup,
+  toolsGroup,
+  teamGroup,
+  accountGroup,
 ];
 
 const TIER_DISPLAY_NAMES: Record<string, string> = {

@@ -7,6 +7,9 @@ export interface TeamPermissions {
   companies: { read: boolean; create: boolean; update: boolean; delete: boolean };
   deals: { read: boolean; create: boolean; update: boolean; delete: boolean };
   tasks: { read: boolean; create: boolean; update: boolean; delete: boolean };
+  leads: { read: boolean; create: boolean; update: boolean; delete: boolean };
+  call_logs: { read: boolean; create: boolean; update: boolean; delete: boolean };
+  notes: { read: boolean; create: boolean; update: boolean; delete: boolean };
   pipeline: { read: boolean; manage: boolean };
   analytics: { read: boolean };
   team_settings: { read: boolean; manage: boolean };

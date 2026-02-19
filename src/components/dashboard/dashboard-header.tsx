@@ -9,10 +9,10 @@ import { useSearchStore } from "@/stores/search-store";
 const segmentLabels: Record<string, string> = {
   dashboard: "Home",
   contacts: "Contacts",
-  companies: "Companies",
+  companies: "Organizations",
   pipeline: "Pipeline",
   tasks: "Tasks",
-  chats: "Chats",
+  chats: "AI Chat",
   analytics: "Analytics",
   team: "Team",
   account: "Account",
@@ -27,6 +27,9 @@ const segmentLabels: Record<string, string> = {
   settings: "Settings",
   connections: "Connections",
   deals: "Deals",
+  leads: "Leads",
+  "call-logs": "Call Logs",
+  notes: "Notes",
 };
 
 function isUUID(s: string) {
