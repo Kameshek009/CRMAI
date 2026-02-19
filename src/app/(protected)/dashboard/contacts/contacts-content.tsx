@@ -9,7 +9,7 @@ import { KanbanBoard, type KanbanColumn } from "@/components/frappe/kanban-board
 import { GroupByView, type GroupByGroup } from "@/components/frappe/group-by-view";
 import { StatusBadge } from "@/components/frappe/status-badge";
 import { EntityForm } from "@/components/crm/entity-form";
-import { contactFields } from "@/lib/crm/field-definitions";
+import { getContactFields } from "@/lib/crm/field-definitions";
 import { ImportWizard } from "@/components/crm/import-wizard";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
@@ -19,6 +19,7 @@ import { Upload, Users } from "lucide-react";
 import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
+import { useTranslation } from "@/lib/i18n";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -43,38 +44,6 @@ interface ContactData {
 // Constants
 // ============================================================================
 
-const FILTER_OPTIONS: FilterOption[] = [
-  {
-    field: "status", label: "Status", type: "select",
-    options: [
-      { value: "lead", label: "Lead" },
-      { value: "active", label: "Active" },
-      { value: "inactive", label: "Inactive" },
-      { value: "churned", label: "Churned" },
-    ],
-  },
-];
-
-const SORT_OPTIONS: SortOption[] = [
-  { field: "created_at", label: "Created" },
-  { field: "first_name", label: "First Name" },
-  { field: "last_name", label: "Last Name" },
-  { field: "email", label: "Email" },
-  { field: "engagement_score", label: "Engagement" },
-];
-
-const GROUP_BY_OPTIONS: GroupByOption[] = [
-  { field: "status", label: "Status" },
-  { field: "source", label: "Source" },
-];
-
-const KANBAN_COLUMNS: KanbanColumn[] = [
-  { id: "lead", title: "Lead", color: "bg-indigo-500" },
-  { id: "active", title: "Active", color: "bg-emerald-500" },
-  { id: "inactive", title: "Inactive", color: "bg-gray-500" },
-  { id: "churned", title: "Churned", color: "bg-red-500" },
-];
-
 const PAGE_SIZE = 50;
 
 // ============================================================================
@@ -83,6 +52,42 @@ const PAGE_SIZE = 50;
 
 export function ContactsContent() {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const contactFields = useMemo(() => getContactFields(t), [t]);
+
+  // Translated options
+  const FILTER_OPTIONS: FilterOption[] = useMemo(() => [
+    {
+      field: "status", label: t("crm.contacts.fields.status"), type: "select",
+      options: [
+        { value: "lead", label: t("crm.contacts.statuses.lead") },
+        { value: "active", label: t("crm.contacts.statuses.active") },
+        { value: "inactive", label: t("crm.contacts.statuses.inactive") },
+        { value: "churned", label: t("crm.contacts.statuses.churned") },
+      ],
+    },
+  ], [t]);
+
+  const SORT_OPTIONS: SortOption[] = useMemo(() => [
+    { field: "created_at", label: t("crm.contacts.sort.created") },
+    { field: "first_name", label: t("crm.contacts.sort.firstName") },
+    { field: "last_name", label: t("crm.contacts.sort.lastName") },
+    { field: "email", label: t("crm.contacts.sort.email") },
+    { field: "engagement_score", label: t("crm.contacts.sort.engagement") },
+  ], [t]);
+
+  const GROUP_BY_OPTIONS: GroupByOption[] = useMemo(() => [
+    { field: "status", label: t("crm.contacts.groupBy.status") },
+    { field: "source", label: t("crm.contacts.groupBy.source") },
+  ], [t]);
+
+  const KANBAN_COLUMNS_BASE: KanbanColumn[] = useMemo(() => [
+    { id: "lead", title: t("crm.contacts.statuses.lead"), color: "bg-indigo-500" },
+    { id: "active", title: t("crm.contacts.statuses.active"), color: "bg-emerald-500" },
+    { id: "inactive", title: t("crm.contacts.statuses.inactive"), color: "bg-gray-500" },
+    { id: "churned", title: t("crm.contacts.statuses.churned"), color: "bg-red-500" },
+  ], [t]);
 
   // Data
   const [contacts, setContacts] = useState<ContactData[]>([]);
@@ -144,7 +149,7 @@ export function ContactsContent() {
     });
     const json = await res.json();
     if (json.success) {
-      toast.success("Contact created");
+      toast.success(t("crm.contacts.created"));
       useFeatureLimitStore.getState().incrementUsage("contacts");
       fetchContacts();
     } else {
@@ -160,7 +165,7 @@ export function ContactsContent() {
       const next = prev.filter(f => f.field !== field);
       return [...next, { field, value, label: optLabel }];
     });
-  }, []);
+  }, [FILTER_OPTIONS]);
 
   const handleFilterRemove = useCallback((field: string) => {
     setActiveFilters(prev => prev.filter(f => f.field !== field));
@@ -232,7 +237,7 @@ export function ContactsContent() {
   // Table columns
   const columns: Column<ContactData>[] = useMemo(() => [
     {
-      key: "first_name", label: "Name", sortable: true,
+      key: "first_name", label: t("crm.contacts.fields.name"), sortable: true,
       render: (c) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-7 w-7">
@@ -247,28 +252,28 @@ export function ContactsContent() {
         </div>
       ),
     },
-    { key: "email", label: "Email", sortable: true },
-    { key: "phone", label: "Phone" },
+    { key: "email", label: t("crm.contacts.fields.email"), sortable: true },
+    { key: "phone", label: t("crm.contacts.fields.phone") },
     {
-      key: "companies", label: "Organization",
-      render: (c) => c.companies?.name || "—",
+      key: "companies", label: t("crm.contacts.fields.organization"),
+      render: (c) => c.companies?.name || "\u2014",
     },
     {
-      key: "status", label: "Status", sortable: true,
+      key: "status", label: t("crm.contacts.fields.status"), sortable: true,
       render: (c) => <StatusBadge status={c.status} />,
     },
     {
-      key: "engagement_score", label: "Engagement", sortable: true, align: "center",
+      key: "engagement_score", label: t("crm.contacts.fields.engagement"), sortable: true, align: "center",
       render: (c) => <span className="text-xs font-medium">{c.engagement_score || 0}</span>,
     },
-  ], []);
+  ], [t]);
 
   // Group by
   const groups: GroupByGroup<ContactData>[] = useMemo(() => {
     if (!groupBy) return [];
     const map = new Map<string, ContactData[]>();
     for (const c of contacts) {
-      const key = String((c as unknown as Record<string, unknown>)[groupBy] ?? "—");
+      const key = String((c as unknown as Record<string, unknown>)[groupBy] ?? "\u2014");
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(c);
     }
@@ -282,21 +287,21 @@ export function ContactsContent() {
 
   // Kanban data
   const kanbanColumns: KanbanColumn[] = useMemo(() =>
-    KANBAN_COLUMNS.map(col => ({
+    KANBAN_COLUMNS_BASE.map(col => ({
       ...col,
       count: contacts.filter(c => c.status === col.id).length,
-    })), [contacts]);
+    })), [contacts, KANBAN_COLUMNS_BASE]);
 
   const kanbanItems = useMemo(() =>
     contacts.map(c => ({ ...c, columnId: c.status })), [contacts]);
 
   return (
     <PageContainer>
-      <PageHeader title="Contacts" description={`${total} contact${total !== 1 ? "s" : ""}`}>
+      <PageHeader title={t("crm.contacts.title")} description={`${total}`}>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
             <Upload className="size-4 mr-1" />
-            Import
+            {t("crm.viewControls.import")}
           </Button>
         </div>
       </PageHeader>
@@ -304,7 +309,7 @@ export function ContactsContent() {
       <ViewControls
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search contacts..."
+        searchPlaceholder={t("crm.contacts.searchPlaceholder")}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         filterOptions={FILTER_OPTIONS}
@@ -320,9 +325,8 @@ export function ContactsContent() {
         currentGroupBy={groupBy}
         onGroupByChange={setGroupBy}
         totalCount={total}
-        entityName={`contact${total !== 1 ? "s" : ""}`}
         onAdd={() => setShowForm(true)}
-        addLabel="New Contact"
+        addLabel={t("crm.contacts.new")}
         featureLimitKey="contacts"
       />
 
@@ -343,7 +347,7 @@ export function ContactsContent() {
           pageSize={PAGE_SIZE}
           totalCount={total}
           onPageChange={setPage}
-          emptyMessage={search || activeFilters.length > 0 ? "No matching contacts" : "No contacts yet"}
+          emptyMessage={search || activeFilters.length > 0 ? t("crm.contacts.noMatching") : t("crm.contacts.noYet")}
         />
       )}
 
@@ -377,7 +381,7 @@ export function ContactsContent() {
       {viewMode === "group_by" && (
         <GroupByView
           groups={groups}
-          emptyMessage="No contacts to group"
+          emptyMessage={t("crm.contacts.noGroup")}
           renderItem={(c) => (
             <div
               key={c.id}
@@ -406,7 +410,7 @@ export function ContactsContent() {
       <EntityForm
         open={showForm}
         onOpenChange={setShowForm}
-        title="New Contact"
+        title={t("crm.contacts.new")}
         fields={contactFields}
         onSubmit={handleCreate}
       />
@@ -422,17 +426,17 @@ export function ContactsContent() {
         onDeselectAll={() => setSelectedIds(new Set())}
         actions={[
           {
-            label: "Change Status",
+            label: t("crm.contacts.changeStatus"),
             dropdown: [
-              { label: "Lead", value: "lead" },
-              { label: "Active", value: "active" },
-              { label: "Inactive", value: "inactive" },
-              { label: "Churned", value: "churned" },
+              { label: t("crm.contacts.statuses.lead"), value: "lead" },
+              { label: t("crm.contacts.statuses.active"), value: "active" },
+              { label: t("crm.contacts.statuses.inactive"), value: "inactive" },
+              { label: t("crm.contacts.statuses.churned"), value: "churned" },
             ],
             onDropdownSelect: handleBulkStatusChange,
           },
           {
-            label: "Delete",
+            label: t("common.delete"),
             variant: "destructive",
             onClick: () => setConfirmDelete(true),
           },
@@ -442,9 +446,9 @@ export function ContactsContent() {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete contacts"
-        description={`Are you sure you want to delete ${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""}? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("crm.contacts.deleteTitle")}
+        description={t("crm.contacts.deleteConfirm", { count: selectedIds.size })}
+        confirmLabel={t("common.delete")}
         variant="destructive"
         isLoading={isBulkLoading}
         onConfirm={handleBulkDelete}
