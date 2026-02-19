@@ -27,21 +27,53 @@ export async function PATCH(
 
     const supabase = createSupabaseAdmin();
 
-    // Verify the role belongs to this team
-    const { data: role } = await supabase
-      .from("team_roles")
-      .select("id")
-      .eq("id", parsed.data.role_id)
+    // Don't allow changing the owner's role
+    const { data: targetMember } = await supabase
+      .from("team_members")
+      .select("is_director")
+      .eq("id", memberId)
       .eq("team_id", id)
       .single();
 
-    if (!role) {
-      return NextResponse.json({ success: false, error: "Role not found in this team" }, { status: 404 });
+    if (!targetMember) {
+      return NextResponse.json({ success: false, error: "Member not found" }, { status: 404 });
+    }
+
+    if (targetMember.is_director) {
+      return NextResponse.json({ success: false, error: "Cannot change owner's role" }, { status: 400 });
+    }
+
+    const updateData: Record<string, unknown> = {};
+
+    // Update fixed_role (for Free/Pro tiers)
+    if (parsed.data.fixed_role) {
+      updateData.fixed_role = parsed.data.fixed_role;
+    }
+
+    // Update role_id (for Max/Enterprise tiers with custom roles)
+    if (parsed.data.role_id) {
+      // Verify the role belongs to this team
+      const { data: role } = await supabase
+        .from("team_roles")
+        .select("id")
+        .eq("id", parsed.data.role_id)
+        .eq("team_id", id)
+        .single();
+
+      if (!role) {
+        return NextResponse.json({ success: false, error: "Role not found in this workspace" }, { status: 404 });
+      }
+
+      updateData.role_id = parsed.data.role_id;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ success: false, error: "No changes provided" }, { status: 400 });
     }
 
     const { data, error: dbError } = await supabase
       .from("team_members")
-      .update({ role_id: parsed.data.role_id })
+      .update(updateData)
       .eq("id", memberId)
       .eq("team_id", id)
       .select("*, team_roles(*)")

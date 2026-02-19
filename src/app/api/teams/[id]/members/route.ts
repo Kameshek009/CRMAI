@@ -26,6 +26,7 @@ export async function GET(
       .eq("team_id", id)
       .neq("status", "suspended")
       .order("is_director", { ascending: false })
+      .order("fixed_role")
       .order("joined_at", { ascending: true });
 
     if (dbError) {

@@ -25,6 +25,7 @@ export async function GET() {
       team: m.teams,
       role: m.team_roles,
       isDirector: m.is_director,
+      fixedRole: (m as Record<string, unknown>).fixed_role || (m.is_director ? "owner" : "member"),
       memberId: m.id,
       joinedAt: m.joined_at,
     }));
@@ -70,6 +71,7 @@ export async function GET() {
         currentTeamId,
         currentRole,
         isDirector: currentMembership?.is_director || false,
+        fixedRole: (currentMembership as Record<string, unknown> | undefined)?.fixed_role || (currentMembership?.is_director ? "owner" : "member"),
         memberId: currentMembership?.id || null,
       },
     });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useWorkspace } from "@/contexts/team-context";
+import { FIXED_ROLE_LABELS } from "@/types/team";
 import { Check, ChevronsUpDown, Plus, Users } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 export function TeamSwitcher() {
-  const { currentWorkspace, workspaces, myRole, switchWorkspace } = useWorkspace();
+  const { currentWorkspace, workspaces, myRole, fixedRole, usesFixedRoles, switchWorkspace } = useWorkspace();
   const { isMobile } = useSidebar();
 
   if (!currentWorkspace) return null;
@@ -38,11 +39,9 @@ export function TeamSwitcher() {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{currentWorkspace.name}</span>
-                {myRole && (
-                  <span className="truncate text-xs text-muted-foreground">
-                    {myRole.name}
-                  </span>
-                )}
+                <span className="truncate text-xs text-muted-foreground">
+                  {usesFixedRoles ? FIXED_ROLE_LABELS[fixedRole] : myRole?.name}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>

@@ -43,7 +43,8 @@ export const kickMemberSchema = z.object({
 });
 
 export const updateMemberRoleSchema = z.object({
-  role_id: z.string().uuid(),
+  role_id: z.string().uuid().optional(),
+  fixed_role: z.enum(["admin", "member", "viewer"]).optional(),
 });
 
 export const updateAiPermissionsSchema = z.object({

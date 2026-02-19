@@ -12,7 +12,8 @@ import {
 } from "react";
 import { useAccount } from "@/contexts/account-context";
 import { supabase } from "@/lib/supabase/client";
-import type { WorkspacePermissions } from "@/types/team";
+import type { WorkspacePermissions, FixedRole } from "@/types/team";
+import { FIXED_ROLE_PERMISSIONS, tierUsesFixedRoles } from "@/types/team";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface WorkspaceData {
@@ -42,6 +43,7 @@ interface WorkspaceMembership {
     permissions: WorkspacePermissions;
     isSystem: boolean;
   };
+  fixedRole: FixedRole;
   isOwner: boolean;
   memberId: string;
   joinedAt: string;
@@ -63,13 +65,16 @@ interface WorkspaceContextValue {
   /** @deprecated Use deletedWorkspaces */
   deletedTeams: DeletedWorkspaceInfo[];
   myRole: WorkspaceMembership["role"] | null;
-  permissions: WorkspacePermissions | null;
+  fixedRole: FixedRole;
+  permissions: WorkspacePermissions;
   isOwner: boolean;
   /** @deprecated Use isOwner */
   isDirector: boolean;
   memberId: string | null;
   isLoading: boolean;
   error: Error | null;
+  /** True if current tier uses fixed roles (Free/Pro) */
+  usesFixedRoles: boolean;
   switchWorkspace: (workspaceId: string) => Promise<void>;
   /** @deprecated Use switchWorkspace */
   switchTeam: (workspaceId: string) => Promise<void>;
@@ -139,7 +144,8 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
   const [workspaces, setWorkspaces] = useState<WorkspaceMembership[]>([]);
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<DeletedWorkspaceInfo[]>([]);
   const [myRole, setMyRole] = useState<WorkspaceMembership["role"] | null>(null);
-  const [permissions, setPermissions] = useState<WorkspacePermissions | null>(null);
+  const [fixedRole, setFixedRole] = useState<FixedRole>("member");
+  const [permissions, setPermissions] = useState<WorkspacePermissions>(DEFAULT_PERMISSIONS);
   const [isOwner, setIsOwner] = useState(false);
   const [memberId, setMemberId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,9 +171,10 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
 
       // Transform workspaces (API still returns "teams" key)
       const memberships: WorkspaceMembership[] = (data.teams || []).map(
-        (m: { team: Record<string, unknown>; role: Record<string, unknown>; isDirector: boolean; memberId: string; joinedAt: string }) => ({
+        (m: { team: Record<string, unknown>; role: Record<string, unknown>; isDirector: boolean; fixedRole?: string; memberId: string; joinedAt: string }) => ({
           workspace: transformWorkspace(m.team),
           role: transformRole(m.role),
+          fixedRole: (m.fixedRole || (m.isDirector ? "owner" : "member")) as FixedRole,
           isOwner: m.isDirector,
           memberId: m.memberId,
           joinedAt: m.joinedAt,
@@ -188,10 +195,20 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       if (data.currentTeam) {
         setCurrentWorkspace(transformWorkspace(data.currentTeam));
       }
+      const currentFixedRole = (data.fixedRole || (data.isDirector ? "owner" : "member")) as FixedRole;
+      setFixedRole(currentFixedRole);
+
       if (data.currentRole) {
         const role = transformRole(data.currentRole);
         setMyRole(role);
-        setPermissions(role.permissions);
+
+        // For Free/Pro: use fixed role permissions; for Max/Enterprise: use custom role permissions
+        const currentTier = (data.currentTeam as Record<string, unknown>)?.tier as string || "free";
+        if (tierUsesFixedRoles(currentTier)) {
+          setPermissions(FIXED_ROLE_PERMISSIONS[currentFixedRole]);
+        } else {
+          setPermissions(role.permissions);
+        }
       }
       setIsOwner(data.isDirector || false);
       setMemberId(data.memberId || null);
@@ -223,7 +240,6 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
     (permission: string): boolean => {
       // Owners always have all permissions
       if (isOwner) return true;
-      if (!permissions) return false;
       // permission format: "resource.action" e.g. "contacts.create", "pipeline.manage"
       const [resource, action] = permission.split(".");
       const resourcePerms = permissions[resource as keyof WorkspacePermissions];
@@ -232,6 +248,8 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
     },
     [permissions, isOwner]
   );
+
+  const usesFixedRoles = tierUsesFixedRoles(currentWorkspace?.tier || "free");
 
   // Fetch on mount when account is available
   useEffect(() => {
@@ -287,18 +305,20 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       deletedWorkspaces,
       deletedTeams: deletedWorkspaces, // backward compat
       myRole,
-      permissions: permissions || DEFAULT_PERMISSIONS,
+      fixedRole,
+      permissions,
       isOwner,
       isDirector: isOwner, // backward compat
       memberId,
       isLoading,
       error,
+      usesFixedRoles,
       switchWorkspace,
       switchTeam: switchWorkspace, // backward compat
       refetch: fetchWorkspaces,
       can,
     }),
-    [currentWorkspace, workspaces, deletedWorkspaces, myRole, permissions, isOwner, memberId, isLoading, error, switchWorkspace, fetchWorkspaces, can]
+    [currentWorkspace, workspaces, deletedWorkspaces, myRole, fixedRole, permissions, isOwner, memberId, isLoading, error, usesFixedRoles, switchWorkspace, fetchWorkspaces, can]
   );
 
   return (

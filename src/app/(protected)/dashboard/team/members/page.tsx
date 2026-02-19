@@ -19,17 +19,23 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { UserMinus, Crown, Users } from "lucide-react";
 import { toast } from "sonner";
+import {
+  FIXED_ROLE_LABELS,
+  FIXED_ROLE_COLORS,
+  type FixedRole,
+} from "@/types/team";
 
 interface MemberData {
   id: string;
   is_director: boolean;
+  fixed_role: FixedRole;
   joined_at: string;
   team_roles: { id: string; name: string; color: string; priority: number };
   accounts: { id: string; name?: string; email?: string };
 }
 
 export default function TeamMembersPage() {
-  const { currentWorkspace, can } = useWorkspace();
+  const { currentWorkspace, can, usesFixedRoles } = useWorkspace();
   const [members, setMembers] = useState<MemberData[]>([]);
   const [roles, setRoles] = useState<{ id: string; name: string; color: string }[]>([]);
   const [kickTarget, setKickTarget] = useState<{ id: string; name: string } | null>(null);
@@ -43,11 +49,11 @@ export default function TeamMembersPage() {
   }, [currentWorkspace]);
 
   const fetchRoles = useCallback(async () => {
-    if (!currentWorkspace) return;
+    if (!currentWorkspace || usesFixedRoles) return;
     const res = await fetch(`/api/teams/${currentWorkspace.id}/roles`);
     const json = await res.json();
     if (json.success) setRoles(json.data || []);
-  }, [currentWorkspace]);
+  }, [currentWorkspace, usesFixedRoles]);
 
   useEffect(() => {
     fetchMembers();
@@ -78,7 +84,25 @@ export default function TeamMembersPage() {
     }
   };
 
-  const handleRoleChange = async (memberId: string, roleId: string) => {
+  // Change fixed role (Free/Pro)
+  const handleFixedRoleChange = async (memberId: string, fixedRole: FixedRole) => {
+    if (!currentWorkspace) return;
+    const res = await fetch(`/api/teams/${currentWorkspace.id}/members/${memberId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fixed_role: fixedRole }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      toast.success("Role updated");
+      fetchMembers();
+    } else {
+      toast.error(json.error || "Failed to update");
+    }
+  };
+
+  // Change custom role (Max/Enterprise)
+  const handleCustomRoleChange = async (memberId: string, roleId: string) => {
     if (!currentWorkspace) return;
     const res = await fetch(`/api/teams/${currentWorkspace.id}/members/${memberId}`, {
       method: "PATCH",
@@ -95,15 +119,16 @@ export default function TeamMembersPage() {
   };
 
   const getMemberName = (m: MemberData) => {
-    if (m.accounts?.name) {
-      return m.accounts.name;
-    }
+    if (m.accounts?.name) return m.accounts.name;
     return m.accounts?.email || "Unknown";
   };
 
   const maxMembers = currentWorkspace?.maxMembers || 0;
   const capacityPercent = maxMembers > 0 ? Math.round((members.length / maxMembers) * 100) : 0;
   const isNearFull = capacityPercent >= 80;
+
+  // Fixed roles available for assignment (not 'owner' — that's automatic)
+  const assignableFixedRoles: FixedRole[] = ["admin", "member", "viewer"];
 
   return (
     <PageContainer>
@@ -149,22 +174,49 @@ export default function TeamMembersPage() {
                 </span>
               </div>
 
+              {/* Role selector */}
               {can("team_settings.manage") && !member.is_director ? (
-                <Select
-                  value={member.team_roles.id}
-                  onValueChange={(val) => handleRoleChange(member.id, val)}
-                >
-                  <SelectTrigger className="w-32 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                usesFixedRoles ? (
+                  // Fixed roles dropdown (Free/Pro)
+                  <Select
+                    value={member.fixed_role || "member"}
+                    onValueChange={(val) => handleFixedRoleChange(member.id, val as FixedRole)}
+                  >
+                    <SelectTrigger className="w-28 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assignableFixedRoles.map((r) => (
+                        <SelectItem key={r} value={r}>{FIXED_ROLE_LABELS[r]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  // Custom roles dropdown (Max/Enterprise)
+                  <Select
+                    value={member.team_roles.id}
+                    onValueChange={(val) => handleCustomRoleChange(member.id, val)}
+                  >
+                    <SelectTrigger className="w-32 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )
               ) : (
-                <RoleBadge name={member.team_roles.name} color={member.team_roles.color} />
+                // Display-only badge
+                usesFixedRoles ? (
+                  <RoleBadge
+                    name={member.is_director ? "Owner" : FIXED_ROLE_LABELS[member.fixed_role || "member"]}
+                    color={member.is_director ? FIXED_ROLE_COLORS.owner : FIXED_ROLE_COLORS[member.fixed_role || "member"]}
+                  />
+                ) : (
+                  <RoleBadge name={member.team_roles.name} color={member.team_roles.color} />
+                )
               )}
 
               <span className="text-xs text-muted-foreground whitespace-nowrap">

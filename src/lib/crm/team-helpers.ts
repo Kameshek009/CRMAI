@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import type { WorkspaceContext, WorkspacePermissions, WorkspaceRoleRow } from "@/types/team";
+import type { WorkspaceContext, WorkspacePermissions, WorkspaceRoleRow, FixedRole } from "@/types/team";
+import { FIXED_ROLE_PERMISSIONS, tierUsesFixedRoles } from "@/types/team";
 
 type WorkspaceContextResult =
   | { context: WorkspaceContext; error: null }
@@ -92,12 +93,12 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
   const [workspaceResult, memberResult] = await Promise.all([
     supabase
       .from("teams")
-      .select("id, deleted_at")
+      .select("id, deleted_at, tier")
       .eq("id", account.current_team_id)
       .single(),
     supabase
       .from("team_members")
-      .select("id, is_director, status, team_roles(*)")
+      .select("id, is_director, fixed_role, status, team_roles(*)")
       .eq("team_id", account.current_team_id)
       .eq("account_id", account.id)
       .eq("status", "active")
@@ -132,6 +133,13 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
   }
 
   const role = member.team_roles as unknown as WorkspaceRoleRow;
+  const fixedRole = (member.fixed_role || (member.is_director ? "owner" : "member")) as FixedRole;
+  const tier = (workspace.tier as string) || "free";
+
+  // For Free/Pro: use fixed role permissions; for Max/Enterprise: use custom role permissions
+  const permissions = tierUsesFixedRoles(tier)
+    ? FIXED_ROLE_PERMISSIONS[fixedRole]
+    : role.permissions;
 
   return {
     context: {
@@ -139,6 +147,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
       workspaceId: account.current_team_id,
       teamId: account.current_team_id, // backward compat
       memberId: member.id,
+      fixedRole,
       role: {
         id: role.id,
         workspaceId: role.team_id,
@@ -151,7 +160,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
         createdAt: role.created_at,
         updatedAt: role.updated_at,
       },
-      permissions: role.permissions,
+      permissions,
       isOwner: member.is_director,
       isDirector: member.is_director, // backward compat
     },

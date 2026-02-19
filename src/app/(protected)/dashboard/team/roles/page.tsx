@@ -7,9 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/team/role-badge";
 import { RoleEditor } from "@/components/team/role-editor";
-import { Plus, Pencil, Trash2, Shield } from "lucide-react";
+import { Plus, Pencil, Trash2, Shield, Lock } from "lucide-react";
 import { toast } from "sonner";
-import type { WorkspacePermissions } from "@/types/team";
+import {
+  FIXED_ROLE_LABELS,
+  FIXED_ROLE_COLORS,
+  FIXED_ROLE_PERMISSIONS,
+  FIXED_ROLE_PRIORITIES,
+  type WorkspacePermissions,
+  type FixedRole,
+} from "@/types/team";
 
 interface RoleData {
   id: string;
@@ -21,7 +28,7 @@ interface RoleData {
 }
 
 export default function TeamRolesPage() {
-  const { currentWorkspace, isOwner } = useWorkspace();
+  const { currentWorkspace, isOwner, usesFixedRoles } = useWorkspace();
   const [roles, setRoles] = useState<RoleData[]>([]);
   const [editingRole, setEditingRole] = useState<RoleData | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -59,6 +66,43 @@ export default function TeamRolesPage() {
     return canDo.join(", ");
   };
 
+  // For Free/Pro: show fixed roles as read-only cards
+  if (usesFixedRoles) {
+    const fixedRoles: FixedRole[] = ["owner", "admin", "member", "viewer"];
+
+    return (
+      <PageContainer>
+        <PageHeader title="Roles" description="Fixed roles for your plan. Upgrade to Max for custom roles.">
+          <RoleBadge name="Fixed" color="#6b7280" />
+        </PageHeader>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {fixedRoles.map((role) => (
+            <Card key={role}>
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                <div className="flex items-center gap-2">
+                  <Shield className="size-4" style={{ color: FIXED_ROLE_COLORS[role] }} />
+                  <CardTitle className="text-sm font-semibold">{FIXED_ROLE_LABELS[role]}</CardTitle>
+                </div>
+                <RoleBadge name={`P${FIXED_ROLE_PRIORITIES[role]}`} color={FIXED_ROLE_COLORS[role]} />
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {getPermissionSummary(FIXED_ROLE_PERMISSIONS[role])}
+                </p>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Lock className="size-3" />
+                  <span>Built-in role</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </PageContainer>
+    );
+  }
+
+  // For Max/Enterprise: full custom roles management
   return (
     <PageContainer>
       <PageHeader title="Roles" description="Manage workspace roles and permissions">

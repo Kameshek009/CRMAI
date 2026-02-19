@@ -20,6 +20,97 @@ export interface WorkspacePermissions {
 /** @deprecated Use WorkspacePermissions */
 export type TeamPermissions = WorkspacePermissions;
 
+// ============================================================================
+// Fixed Roles (used on Free/Pro tiers)
+// ============================================================================
+
+export type FixedRole = "owner" | "admin" | "member" | "viewer";
+
+export const FIXED_ROLE_LABELS: Record<FixedRole, string> = {
+  owner: "Owner",
+  admin: "Admin",
+  member: "Member",
+  viewer: "Viewer",
+};
+
+export const FIXED_ROLE_COLORS: Record<FixedRole, string> = {
+  owner: "#ef4444",
+  admin: "#f59e0b",
+  member: "#3b82f6",
+  viewer: "#6b7280",
+};
+
+export const FIXED_ROLE_PRIORITIES: Record<FixedRole, number> = {
+  owner: 1000,
+  admin: 900,
+  member: 500,
+  viewer: 100,
+};
+
+const ALL_CRUD = { read: true, create: true, update: true, delete: true };
+const READ_CREATE_UPDATE = { read: true, create: true, update: true, delete: false };
+const READ_ONLY_CRUD = { read: true, create: false, update: false, delete: false };
+
+export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
+  owner: {
+    contacts: ALL_CRUD,
+    companies: ALL_CRUD,
+    deals: ALL_CRUD,
+    tasks: ALL_CRUD,
+    leads: ALL_CRUD,
+    call_logs: ALL_CRUD,
+    notes: ALL_CRUD,
+    pipeline: { read: true, manage: true },
+    analytics: { read: true },
+    team_settings: { read: true, manage: true },
+    ai_chat: { allowed: true },
+  },
+  admin: {
+    contacts: ALL_CRUD,
+    companies: ALL_CRUD,
+    deals: ALL_CRUD,
+    tasks: ALL_CRUD,
+    leads: ALL_CRUD,
+    call_logs: ALL_CRUD,
+    notes: ALL_CRUD,
+    pipeline: { read: true, manage: true },
+    analytics: { read: true },
+    team_settings: { read: true, manage: false },
+    ai_chat: { allowed: true },
+  },
+  member: {
+    contacts: READ_CREATE_UPDATE,
+    companies: READ_CREATE_UPDATE,
+    deals: READ_CREATE_UPDATE,
+    tasks: READ_CREATE_UPDATE,
+    leads: READ_CREATE_UPDATE,
+    call_logs: READ_CREATE_UPDATE,
+    notes: READ_CREATE_UPDATE,
+    pipeline: { read: true, manage: false },
+    analytics: { read: true },
+    team_settings: { read: false, manage: false },
+    ai_chat: { allowed: true },
+  },
+  viewer: {
+    contacts: READ_ONLY_CRUD,
+    companies: READ_ONLY_CRUD,
+    deals: READ_ONLY_CRUD,
+    tasks: READ_ONLY_CRUD,
+    leads: READ_ONLY_CRUD,
+    call_logs: READ_ONLY_CRUD,
+    notes: READ_ONLY_CRUD,
+    pipeline: { read: true, manage: false },
+    analytics: { read: true },
+    team_settings: { read: false, manage: false },
+    ai_chat: { allowed: false },
+  },
+};
+
+/** Check if a tier uses fixed roles (Free/Pro) vs custom roles (Max/Enterprise) */
+export function tierUsesFixedRoles(tier: string): boolean {
+  return tier === "free" || tier === "pro";
+}
+
 export interface Workspace {
   id: string;
   name: string;
@@ -130,6 +221,7 @@ export interface WorkspaceMember {
   workspaceId: string;
   accountId: string;
   roleId: string;
+  fixedRole: FixedRole;
   isOwner: boolean;
   /** @deprecated Use isOwner */
   isDirector: boolean;
@@ -150,6 +242,7 @@ export interface WorkspaceMemberRow {
   team_id: string;
   account_id: string;
   role_id: string;
+  fixed_role: FixedRole;
   is_director: boolean;
   status: WorkspaceMemberStatus;
   joined_at: string;
@@ -228,6 +321,7 @@ export interface WorkspaceContext {
   /** @deprecated Use workspaceId */
   teamId: string;
   memberId: string;
+  fixedRole: FixedRole;
   role: WorkspaceRole;
   permissions: WorkspacePermissions;
   isOwner: boolean;

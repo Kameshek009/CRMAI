@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
         account_id: accountId,
         role_id: memberRole.id,
         is_director: false,
+        fixed_role: "member",
         status: "active",
       });
 
