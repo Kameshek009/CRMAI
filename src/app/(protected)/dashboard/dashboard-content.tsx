@@ -42,6 +42,7 @@ import { JoinTeamDialog } from "@/components/team/join-team-dialog";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
 import { ListWidget } from "@/components/dashboard/widgets/list-widget";
 import { TableWidget } from "@/components/dashboard/widgets/table-widget";
+import { useTranslation } from "@/lib/i18n";
 import type { CrmStats, AIInsight } from "@/types/crm";
 
 const DashboardCharts = dynamic(
@@ -101,13 +102,6 @@ const TASK_STATUS_COLORS: Record<string, string> = {
   cancelled: "#a1a1aa",
 };
 
-const TASK_STATUS_LABELS: Record<string, string> = {
-  todo: "To Do",
-  in_progress: "In Progress",
-  done: "Done",
-  cancelled: "Cancelled",
-};
-
 const PRIORITY_BG: Record<string, string> = {
   urgent: "bg-red-500/10 border-red-500/20",
   high: "bg-orange-500/10 border-orange-500/20",
@@ -158,33 +152,11 @@ const INSIGHT_COLORS: Record<string, string> = {
 };
 
 // ============================================================================
-// Helpers
-// ============================================================================
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
-}
-
-function getGreeting(): { text: string; icon: LucideIcon } {
-  const hour = new Date().getHours();
-  if (hour < 12) return { text: "Good morning", icon: Sun };
-  if (hour < 17) return { text: "Good afternoon", icon: Sunset };
-  return { text: "Good evening", icon: Moon };
-}
-
-// ============================================================================
 // Component
 // ============================================================================
 
 export function DashboardContent({ userName }: DashboardContentProps) {
+  const { t } = useTranslation();
   const { account, usage, isLoading: accountLoading } = useAccount();
   const { currentWorkspace, isLoading: workspaceLoading, can, refetch } = useWorkspace();
   const { isOpen, modalProps, closeUpgradeModal } = useUpgradeModal();
@@ -199,6 +171,34 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   const [activities, setActivities] = useState<ActivityRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [revenueTrend, setRevenueTrend] = useState<{ date: string; revenue: number; cumulative: number }[]>([]);
+
+  function timeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return t("crm.activity.justNow");
+    if (minutes < 60) return t("crm.activity.mAgo", { count: minutes });
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return t("crm.activity.hAgo", { count: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 7) return t("crm.activity.dAgo", { count: days });
+    return new Date(dateStr).toLocaleDateString();
+  }
+
+  function getGreeting(): { text: string; icon: LucideIcon } {
+    const hour = new Date().getHours();
+    if (hour < 12) return { text: t("crm.dashboard.goodMorning"), icon: Sun };
+    if (hour < 17) return { text: t("crm.dashboard.goodAfternoon"), icon: Sunset };
+    return { text: t("crm.dashboard.goodEvening"), icon: Moon };
+  }
+
+  function getTaskStatusLabels(): Record<string, string> {
+    return {
+      todo: t("crm.tasks.statuses.todo"),
+      in_progress: t("crm.tasks.statuses.inProgress"),
+      done: t("crm.tasks.statuses.done"),
+      cancelled: t("crm.tasks.statuses.cancelled"),
+    };
+  }
 
   useEffect(() => {
     // Don't fetch CRM data if no workspace or no permissions
@@ -227,15 +227,17 @@ export function DashboardContent({ userName }: DashboardContentProps) {
     }).finally(() => setIsLoading(false));
   }, [currentWorkspace, can]);
 
+  const taskStatusLabels = getTaskStatusLabels();
+
   const taskStatusData = useMemo(() => {
     const counts: Record<string, number> = {};
     tasks.forEach((t) => { counts[t.status] = (counts[t.status] || 0) + 1; });
     return Object.entries(counts).map(([status, count]) => ({
-      name: TASK_STATUS_LABELS[status] || status,
+      name: taskStatusLabels[status] || status,
       value: count,
       color: TASK_STATUS_COLORS[status] || "#a1a1aa",
     }));
-  }, [tasks]);
+  }, [tasks, taskStatusLabels]);
 
   const upcomingTasks = useMemo(() =>
     tasks
@@ -268,19 +270,19 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <Users className="w-8 h-8 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Нет активной команды</h2>
+            <h2 className="text-xl font-semibold">{t("crm.dashboard.noActiveTeam")}</h2>
             <p className="text-sm text-muted-foreground">
-              Создайте новую команду или присоединитесь к существующей, чтобы начать работу с CRM.
+              {t("crm.dashboard.noActiveTeamDesc")}
             </p>
           </div>
           <div className="flex items-center justify-center gap-3">
             <Button onClick={() => setCreateDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Создать команду
+              {t("crm.dashboard.createTeam")}
             </Button>
             <Button variant="outline" onClick={() => setJoinDialogOpen(true)}>
               <Users className="w-4 h-4 mr-2" />
-              Присоединиться
+              {t("crm.dashboard.join")}
             </Button>
           </div>
         </div>
@@ -333,8 +335,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 {greeting.text}, <span>{userName}</span>
               </h1>
               <p className="text-sm text-muted-foreground">
-                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-                {crmStats && ` \u00B7 ${crmStats.tasksDueToday} tasks due today \u00B7 ${crmStats.openDeals} open deals`}
+                {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                {crmStats && ` \u00B7 ${t("crm.dashboard.tasksDueToday", { count: crmStats.tasksDueToday })} \u00B7 ${t("crm.dashboard.openDeals", { count: crmStats.openDeals })}`}
               </p>
             </div>
           </div>
@@ -342,13 +344,13 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
               <Link href="/dashboard/contacts">
                 <Users className="w-3.5 h-3.5 mr-2" />
-                Contacts
+                {t("crm.contacts.title")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard/pipeline">
                 <Kanban className="w-3.5 h-3.5 mr-2" />
-                Pipeline
+                {t("crm.pipeline.title")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
@@ -369,33 +371,33 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatWidget
               href="/dashboard/deals"
-              label="Open Deals"
+              label={t("crm.dashboard.openDealsLabel")}
               value={crmStats?.openDeals ?? 0}
-              subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} pipeline`}
+              subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} ${t("crm.dashboard.pipeline")}`}
               icon={Handshake}
             />
             <StatWidget
               href="/dashboard/analytics"
-              label="Won This Month"
+              label={t("crm.dashboard.wonThisMonth")}
               value={crmStats?.wonValueThisMonth ?? 0}
               formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`}
-              subtitle={`${crmStats?.wonDealsThisMonth ?? 0} deal${(crmStats?.wonDealsThisMonth ?? 0) !== 1 ? "s" : ""} closed`}
+              subtitle={t("crm.dashboard.dealsClosed", { count: crmStats?.wonDealsThisMonth ?? 0 })}
               icon={DollarSign}
               trend={(crmStats?.wonDealsThisMonth ?? 0) > 0 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` } : undefined}
             />
             <StatWidget
               href="/dashboard/contacts"
-              label="Contacts"
+              label={t("crm.dashboard.contactsLabel")}
               value={crmStats?.totalContacts ?? 0}
-              subtitle={`+${crmStats?.newContactsThisWeek ?? 0} this week`}
+              subtitle={t("crm.dashboard.thisWeek", { count: crmStats?.newContactsThisWeek ?? 0 })}
               icon={Users}
               trend={(crmStats?.newContactsThisWeek ?? 0) > 0 ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` } : undefined}
             />
             <StatWidget
               href="/dashboard/tasks"
-              label="Tasks Due"
+              label={t("crm.dashboard.tasksDue")}
               value={crmStats?.tasksDueToday ?? 0}
-              subtitle={crmStats?.overdueTasksCount ? `${crmStats.overdueTasksCount} overdue` : "All on track"}
+              subtitle={crmStats?.overdueTasksCount ? t("crm.dashboard.overdue", { count: crmStats.overdueTasksCount }) : t("crm.dashboard.allOnTrack")}
               icon={CheckSquare}
               trend={crmStats?.overdueTasksCount ? { direction: "down", text: `${crmStats.overdueTasksCount} late` } : undefined}
             />
@@ -405,41 +407,41 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatWidget
               href="/dashboard/analytics"
-              label="Win Rate"
+              label={t("crm.dashboard.winRate")}
               value={crmStats && (crmStats.wonDealsThisMonth + (crmStats.totalDeals - crmStats.openDeals - crmStats.wonDealsThisMonth)) > 0
                 ? Math.round((crmStats.wonDealsThisMonth / Math.max(crmStats.totalDeals - crmStats.openDeals, 1)) * 100)
                 : 0}
               formattedValue={`${crmStats && (crmStats.wonDealsThisMonth + (crmStats.totalDeals - crmStats.openDeals - crmStats.wonDealsThisMonth)) > 0
                 ? Math.round((crmStats.wonDealsThisMonth / Math.max(crmStats.totalDeals - crmStats.openDeals, 1)) * 100)
                 : 0}%`}
-              subtitle="Closed deals ratio"
+              subtitle={t("crm.dashboard.closedRatio")}
               icon={Target}
             />
             <StatWidget
               href="/dashboard/analytics"
-              label="Forecast"
+              label={t("crm.dashboard.forecast")}
               value={crmStats?.weightedForecast ?? 0}
               formattedValue={`$${(crmStats?.weightedForecast ?? 0).toLocaleString()}`}
-              subtitle="Weighted pipeline"
+              subtitle={t("crm.dashboard.weightedPipeline")}
               icon={Zap}
             />
             <StatWidget
               href="/dashboard/companies"
-              label="Organizations"
+              label={t("crm.dashboard.organizations")}
               value={crmStats?.totalDeals ?? 0}
-              subtitle="Total deals tracked"
+              subtitle={t("crm.dashboard.totalDeals")}
               icon={Building2}
             />
             <StatWidget
               href="/dashboard/analytics"
-              label="Avg Deal"
+              label={t("crm.dashboard.avgDeal")}
               value={crmStats?.wonDealsThisMonth && crmStats?.wonValueThisMonth
                 ? Math.round(crmStats.wonValueThisMonth / crmStats.wonDealsThisMonth)
                 : 0}
               formattedValue={`$${crmStats?.wonDealsThisMonth && crmStats?.wonValueThisMonth
                 ? Math.round(crmStats.wonValueThisMonth / crmStats.wonDealsThisMonth).toLocaleString()
                 : "0"}`}
-              subtitle="Average won deal size"
+              subtitle={t("crm.dashboard.avgWonSize")}
               icon={BarChart3}
             />
           </div>
@@ -447,12 +449,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           {/* Row 3: Lists — Recent Activity, AI Insights, Upcoming Tasks */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <ListWidget
-              title="Recent"
+              title={t("crm.dashboard.recent")}
               icon={Clock}
               href="/dashboard/activity"
               isEmpty={activities.length === 0}
               emptyIcon={Clock}
-              emptyMessage="No recent activity yet"
+              emptyMessage={t("crm.dashboard.noActivityYet")}
             >
               <div className="space-y-0">
                 {activities.slice(0, 5).map((a) => {
@@ -474,12 +476,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </ListWidget>
 
             <ListWidget
-              title="AI Insights"
+              title={t("crm.dashboard.aiInsights")}
               icon={Sparkles}
               href="/dashboard/chats"
               isEmpty={insights.length === 0}
               emptyIcon={Sparkles}
-              emptyMessage="No insights yet. Add data to get AI-powered tips."
+              emptyMessage={t("crm.dashboard.noInsightsYet")}
             >
               <div className="space-y-2">
                 {insights.slice(0, 4).map((insight) => {
@@ -501,12 +503,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </ListWidget>
 
             <ListWidget
-              title="Upcoming Tasks"
+              title={t("crm.dashboard.upcomingTasks")}
               icon={CheckSquare}
               href="/dashboard/tasks"
               isEmpty={upcomingTasks.length === 0}
               emptyIcon={CheckSquare}
-              emptyMessage="No upcoming tasks"
+              emptyMessage={t("crm.dashboard.noUpcomingTasks")}
             >
               <div className="space-y-2">
                 {upcomingTasks.map((task) => {
@@ -534,9 +536,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         <p className="text-xs font-medium truncate">{task.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {task.due_date
-                            ? new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                            : "No due date"}
-                          {isOverdue && <span className="text-red-500 ml-1 font-medium">overdue</span>}
+                            ? new Date(task.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+                            : t("crm.dashboard.noDueDate")}
+                          {isOverdue && <span className="text-red-500 ml-1 font-medium">{t("crm.dashboard.overdueLabel")}</span>}
                         </p>
                       </div>
                       <Badge
@@ -558,28 +560,28 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
           {/* Row 4: Deals Table */}
           <TableWidget
-            title="Deals"
+            title={t("crm.dashboard.dealsLabel")}
             icon={Handshake}
             href="/dashboard/deals"
             totalCount={deals.length}
             isEmpty={deals.length === 0}
             emptyIcon={Handshake}
-            emptyMessage="No deals yet"
+            emptyMessage={t("crm.dashboard.noDealsYet")}
           >
             {/* Table header - Desktop */}
             <div className="hidden lg:grid grid-cols-[1fr_100px_140px_80px_80px_70px] gap-2 px-4 pb-2 border-b border-border">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stage</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Progress</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Close</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.dashboard.name")}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.dashboard.stage")}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.dashboard.progress")}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.dashboard.value")}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.dashboard.close")}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.deals.fields.winPercent")}</span>
             </div>
             {/* Table header - Mobile */}
             <div className="grid lg:hidden grid-cols-[1fr_80px_70px] gap-2 px-4 pb-2 border-b border-border">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Value</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Win %</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.dashboard.name")}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.dashboard.value")}</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("crm.deals.fields.winPercent")}</span>
             </div>
 
             <div>
@@ -618,7 +620,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         </div>
                         <span className="text-xs font-medium text-foreground">${deal.value.toLocaleString()}</span>
                         <span className="text-xs text-muted-foreground">
-                          {deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "\u2014"}
+                          {deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "\u2014"}
                         </span>
                         <span className={cn("text-xs font-semibold", winProb >= 70 ? "text-emerald-500" : winProb >= 40 ? "text-amber-500" : "text-red-400")}>
                           {winProb}%
@@ -666,15 +668,15 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">
-                    {usage.percentUsed >= 100 ? "Usage limit reached" : "Running low on tokens"}
+                    {usage.percentUsed >= 100 ? t("crm.dashboard.usageLimitReached") : t("crm.dashboard.runningLow")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {usage.percentUsed >= 100 ? "Upgrade to continue." : `${Math.round(usage.percentUsed)}% used this month.`}
+                    {usage.percentUsed >= 100 ? t("crm.dashboard.upgradeToContnue") : t("crm.dashboard.usedThisMonth", { percent: Math.round(usage.percentUsed) })}
                   </p>
                 </div>
                 <Button size="sm" asChild>
                   <Link href="/dashboard/account/billing">
-                    Upgrade
+                    {t("crm.dashboard.upgrade")}
                     <ArrowRight className="w-3.5 h-3.5 ml-2" />
                   </Link>
                 </Button>
