@@ -27,8 +27,7 @@
   "entities": {
     "contacts": "Контакты",
     "companies": "Организации",
-    "deals": "Сделки",
-    "leads": "Лиды"
+    "deals": "Сделки"
   },
   "types": {
     "text": "Текст",

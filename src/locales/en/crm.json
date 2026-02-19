@@ -95,59 +95,6 @@
       "source": "Source"
     }
   },
-  "leads": {
-    "title": "Leads",
-    "new": "New Lead",
-    "created": "Lead created",
-    "searchPlaceholder": "Search leads...",
-    "noMatching": "No matching leads",
-    "noYet": "No leads yet",
-    "noGroup": "No leads to group",
-    "deleteTitle": "Delete leads",
-    "deleteConfirm": "Are you sure you want to delete {count} lead(s)? This action cannot be undone.",
-    "changeStatus": "Change Status",
-    "fields": {
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "email": "Email",
-      "phone": "Phone",
-      "mobile": "Mobile",
-      "organization": "Organization",
-      "website": "Website",
-      "jobTitle": "Job Title",
-      "source": "Source",
-      "status": "Status",
-      "name": "Name"
-    },
-    "statuses": {
-      "new": "New",
-      "contacted": "Contacted",
-      "qualified": "Qualified",
-      "unqualified": "Unqualified",
-      "junk": "Junk"
-    },
-    "sources": {
-      "website": "Website",
-      "referral": "Referral",
-      "campaign": "Campaign",
-      "coldCall": "Cold Call",
-      "socialMedia": "Social Media",
-      "event": "Event",
-      "other": "Other"
-    },
-    "sort": {
-      "created": "Created",
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "email": "Email",
-      "source": "Source",
-      "organization": "Organization"
-    },
-    "groupBy": {
-      "status": "Status",
-      "source": "Source"
-    }
-  },
   "deals": {
     "title": "Deals",
     "new": "New Deal",

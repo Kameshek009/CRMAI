@@ -7,7 +7,6 @@
     "workspace": "Команда"
   },
   "items": {
-    "leads": "Лиды",
     "contacts": "Контакты",
     "deals": "Сделки",
     "organizations": "Организации",
@@ -59,7 +58,6 @@
     "commands": {
       "createContact": "Создать контакт",
       "createDeal": "Создать сделку",
-      "createLead": "Создать лид",
       "createTask": "Создать задачу"
     },
     "pages": {
@@ -69,8 +67,6 @@
       "contactsSub": "Все контакты",
       "deals": "Сделки",
       "dealsSub": "Все сделки",
-      "leads": "Лиды",
-      "leadsSub": "Все лиды",
       "organizations": "Организации",
       "organizationsSub": "Все организации",
       "pipeline": "Воронка",

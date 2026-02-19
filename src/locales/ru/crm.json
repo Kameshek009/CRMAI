@@ -95,59 +95,6 @@
       "source": "Источник"
     }
   },
-  "leads": {
-    "title": "Лиды",
-    "new": "Новый лид",
-    "created": "Лид создан",
-    "searchPlaceholder": "Поиск лидов...",
-    "noMatching": "Лиды не найдены",
-    "noYet": "Лидов пока нет",
-    "noGroup": "Нет лидов для группировки",
-    "deleteTitle": "Удалить лиды",
-    "deleteConfirm": "Вы уверены, что хотите удалить {count} лид(ов)? Это действие необратимо.",
-    "changeStatus": "Изменить статус",
-    "fields": {
-      "firstName": "Имя",
-      "lastName": "Фамилия",
-      "email": "Email",
-      "phone": "Телефон",
-      "mobile": "Мобильный",
-      "organization": "Организация",
-      "website": "Сайт",
-      "jobTitle": "Должность",
-      "source": "Источник",
-      "status": "Статус",
-      "name": "Имя"
-    },
-    "statuses": {
-      "new": "Новый",
-      "contacted": "Связались",
-      "qualified": "Квалифицирован",
-      "unqualified": "Не квалифицирован",
-      "junk": "Спам"
-    },
-    "sources": {
-      "website": "Сайт",
-      "referral": "Рекомендация",
-      "campaign": "Кампания",
-      "coldCall": "Холодный звонок",
-      "socialMedia": "Соц. сети",
-      "event": "Мероприятие",
-      "other": "Другое"
-    },
-    "sort": {
-      "created": "Дата создания",
-      "firstName": "Имя",
-      "lastName": "Фамилия",
-      "email": "Email",
-      "source": "Источник",
-      "organization": "Организация"
-    },
-    "groupBy": {
-      "status": "Статус",
-      "source": "Источник"
-    }
-  },
   "deals": {
     "title": "Сделки",
     "new": "Новая сделка",

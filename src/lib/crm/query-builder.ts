@@ -26,7 +26,6 @@ const ALLOWED_SORT_FIELDS: Record<string, string[]> = {
   companies: ["created_at", "name", "industry", "size", "ai_health_score"],
   deals: ["created_at", "title", "value", "status", "expected_close_date", "ai_win_probability"],
   tasks: ["created_at", "title", "due_date", "priority", "status", "type"],
-  leads: ["created_at", "first_name", "last_name", "email", "status", "source", "organization"],
   call_logs: ["created_at", "direction", "status", "duration_seconds"],
   notes: ["created_at", "updated_at", "is_pinned"],
 };
@@ -37,7 +36,6 @@ const ALLOWED_FILTER_FIELDS: Record<string, string[]> = {
   companies: ["industry", "size"],
   deals: ["status", "stage_id"],
   tasks: ["status", "priority", "type"],
-  leads: ["status", "source"],
   call_logs: ["status", "direction"],
   notes: ["is_pinned"],
 };
@@ -149,8 +147,8 @@ export function applyVisibilityFilter(
   }
 
   // Members: workspace records + own + assigned + group records
-  const hasAssignedTo = ["contacts", "deals", "leads"].includes(entityType);
-  const hasVisGroup = ["contacts", "companies", "deals", "leads"].includes(entityType);
+  const hasAssignedTo = ["contacts", "deals"].includes(entityType);
+  const hasVisGroup = ["contacts", "companies", "deals"].includes(entityType);
 
   const conditions = [
     `visibility.eq.workspace`,

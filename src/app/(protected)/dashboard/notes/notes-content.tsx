@@ -25,7 +25,6 @@ interface NoteData {
   contact_id: string | null;
   deal_id: string | null;
   company_id: string | null;
-  lead_id: string | null;
 }
 
 // ============================================================================
@@ -138,7 +137,6 @@ export function NotesContent() {
     if (note.contact_id) return { label: t("notes.linked.contact"), href: `/dashboard/contacts/${note.contact_id}` };
     if (note.deal_id) return { label: t("notes.linked.deal"), href: `/dashboard/deals/${note.deal_id}` };
     if (note.company_id) return { label: t("notes.linked.organization"), href: `/dashboard/companies/${note.company_id}` };
-    if (note.lead_id) return { label: t("notes.linked.lead"), href: `/dashboard/leads/${note.lead_id}` };
     return null;
   };
 

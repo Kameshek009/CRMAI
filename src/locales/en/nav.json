@@ -7,7 +7,6 @@
     "workspace": "Workspace"
   },
   "items": {
-    "leads": "Leads",
     "contacts": "Contacts",
     "deals": "Deals",
     "organizations": "Organizations",
@@ -59,7 +58,6 @@
     "commands": {
       "createContact": "Create Contact",
       "createDeal": "Create Deal",
-      "createLead": "Create Lead",
       "createTask": "Create Task"
     },
     "pages": {
@@ -69,8 +67,6 @@
       "contactsSub": "All contacts",
       "deals": "Deals",
       "dealsSub": "All deals",
-      "leads": "Leads",
-      "leadsSub": "All leads",
       "organizations": "Organizations",
       "organizationsSub": "All organizations",
       "pipeline": "Pipeline",

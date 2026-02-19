@@ -147,7 +147,6 @@ async function executeAction(
         const table = params.entityType === "contact" ? "contacts"
           : params.entityType === "company" ? "companies"
           : params.entityType === "deal" ? "deals"
-          : params.entityType === "lead" ? "leads"
           : null;
 
         if (!table) return { success: false, error: `Unknown entity type: ${params.entityType}` };
@@ -166,7 +165,6 @@ async function executeAction(
         const assigneeId = String(config.account_id);
         const table = params.entityType === "contact" ? "contacts"
           : params.entityType === "deal" ? "deals"
-          : params.entityType === "lead" ? "leads"
           : null;
 
         if (!table) return { success: false, error: `Entity type ${params.entityType} does not support assignment` };

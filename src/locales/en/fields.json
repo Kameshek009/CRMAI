@@ -27,8 +27,7 @@
   "entities": {
     "contacts": "Contacts",
     "companies": "Organizations",
-    "deals": "Deals",
-    "leads": "Leads"
+    "deals": "Deals"
   },
   "types": {
     "text": "Text",
