@@ -210,7 +210,7 @@ export function TasksContent() {
   // Photo handlers
   const handlePhotoUpload = async (file: File) => {
     if (formMode.type !== "edit") return;
-    if (attachments.length >= 5) {
+    if (attachments.length >= 15) {
       toast.error(t("crm.tasks.maxPhotos", { max: 5 }));
       return;
     }
@@ -635,7 +635,7 @@ export function TasksContent() {
                       </button>
                     </div>
                   ))}
-                  {attachments.length < 5 && (
+                  {attachments.length < 15 && (
                     <label className="size-20 rounded-md border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
                       {isUploading ? (
                         <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -657,7 +657,7 @@ export function TasksContent() {
                   )}
                 </div>
                 {attachments.length > 0 && (
-                  <p className="text-xs text-muted-foreground">{attachments.length} / 5</p>
+                  <p className="text-xs text-muted-foreground">{attachments.length} / 15</p>
                 )}
               </div>
             )}

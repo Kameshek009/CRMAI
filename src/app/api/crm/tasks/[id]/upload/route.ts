@@ -5,7 +5,7 @@ import { uploadTaskImage, deleteTaskImage, type Attachment } from "@/lib/supabas
 import { logger } from "@/lib/logger";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_ATTACHMENTS = 5;
+const MAX_ATTACHMENTS = 15;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 export async function POST(
