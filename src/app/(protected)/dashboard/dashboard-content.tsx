@@ -191,7 +191,7 @@ function getGreeting(): { text: string; icon: LucideIcon } {
 
 export function DashboardContent({ userName }: DashboardContentProps) {
   const { account, usage, isLoading: accountLoading } = useAccount();
-  const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
+  const { currentWorkspace, isLoading: workspaceLoading, can } = useWorkspace();
   const { isOpen, modalProps, closeUpgradeModal } = useUpgradeModal();
 
   const [crmStats, setCrmStats] = useState<CrmStats | null>(null);
@@ -203,8 +203,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   const [revenueTrend, setRevenueTrend] = useState<{ date: string; revenue: number; cumulative: number }[]>([]);
 
   useEffect(() => {
-    // Don't fetch CRM data if no workspace selected
-    if (!currentWorkspace) {
+    // Don't fetch CRM data if no workspace or no permissions
+    if (!currentWorkspace || !can("contacts.read")) {
       setIsLoading(false);
       return;
     }
@@ -227,7 +227,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       if (activitiesRes.success) setActivities(activitiesRes.data);
       if (revenueTrendRes.success) setRevenueTrend(revenueTrendRes.data);
     }).finally(() => setIsLoading(false));
-  }, [currentWorkspace]);
+  }, [currentWorkspace, can]);
 
   const taskStatusData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -260,8 +260,9 @@ export function DashboardContent({ userName }: DashboardContentProps) {
   const greeting = getGreeting();
   const GreetingIcon = greeting.icon;
 
-  // No active workspace — show empty state
-  if (!workspaceLoading && !currentWorkspace) {
+  // No active workspace or no CRM permissions — show empty state
+  const hasCrmAccess = currentWorkspace && can("contacts.read");
+  if (!workspaceLoading && !hasCrmAccess) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8">
         <div className="mx-auto max-w-md text-center space-y-6">
