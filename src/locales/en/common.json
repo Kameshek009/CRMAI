@@ -1,0 +1,13 @@
+{
+  "save": "Save",
+  "saveChanges": "Save Changes",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "loading": "Loading...",
+  "saving": "Saving...",
+  "verify": "Verify",
+  "join": "Join",
+  "add": "Add",
+  "create": "Create",
+  "error": "Something went wrong"
+}

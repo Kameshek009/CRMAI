@@ -1,0 +1,62 @@
+{
+  "page": {
+    "title": "Settings",
+    "description": "Manage your account and preferences"
+  },
+  "nav": {
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "language": "Language",
+    "billing": "Subscription & Billing",
+    "workspace": "Workspace",
+    "danger": "Danger Zone"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Your display name is visible to team members",
+    "displayName": "Display Name",
+    "email": "Email",
+    "nameUpdated": "Name updated"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "description": "Customize how NexusCRM looks for you",
+    "theme": "Theme",
+    "themeDescription": "Switch between light and dark mode"
+  },
+  "language": {
+    "title": "Language",
+    "description": "Choose your preferred language for the interface",
+    "displayLanguage": "Display Language",
+    "displayLanguageDescription": "All interface elements will be shown in the selected language"
+  },
+  "billing": {
+    "title": "Subscription & Billing",
+    "description": "Your current plan and payment details",
+    "currentPlan": "Current Plan",
+    "active": "Active",
+    "tokensPerMonth": "{count} tokens per month",
+    "unlimited": "Unlimited tokens (credit-based)",
+    "upgrade": "Upgrade",
+    "managePlan": "Manage Plan"
+  },
+  "workspace": {
+    "title": "Workspace",
+    "description": "Manage your workspace membership",
+    "current": "Current workspace: {name}",
+    "none": "You are not in a workspace yet",
+    "total": "({count} workspaces total)",
+    "inviteCode": "Invite Code",
+    "enterCode": "Enter invite code",
+    "joinWorkspace": "Join Workspace",
+    "createWorkspace": "Create Workspace",
+    "members": "{count} / {max} members",
+    "joined": "Joined {name}!"
+  },
+  "danger": {
+    "title": "Danger Zone",
+    "description": "Irreversible actions for your account",
+    "deleteAccount": "Delete Account",
+    "deleteDescription": "Permanently delete your account and all data"
+  }
+}

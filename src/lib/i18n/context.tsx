@@ -1,0 +1,97 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  type ReactNode,
+} from "react";
+import type { Locale } from "./types";
+import { defaultLocale } from "./languages";
+
+import enCommon from "@/locales/en/common.json";
+import enSettings from "@/locales/en/settings.json";
+import ruCommon from "@/locales/ru/common.json";
+import ruSettings from "@/locales/ru/settings.json";
+
+const translations: Record<Locale, Record<string, unknown>> = {
+  en: { common: enCommon, settings: enSettings },
+  ru: { common: ruCommon, settings: ruSettings },
+};
+
+const STORAGE_KEY = "nexxus-language";
+
+interface I18nContextValue {
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
+}
+
+const I18nContext = createContext<I18nContextValue | undefined>(undefined);
+
+function resolveKey(obj: unknown, path: string): string | undefined {
+  const parts = path.split(".");
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current == null || typeof current !== "object") return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return typeof current === "string" ? current : undefined;
+}
+
+function getInitialLocale(): Locale {
+  if (typeof window === "undefined") return defaultLocale;
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === "en" || stored === "ru") return stored;
+  return defaultLocale;
+}
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, locale);
+  }, [locale]);
+
+  const setLocale = useCallback((newLocale: Locale) => {
+    setLocaleState(newLocale);
+  }, []);
+
+  const t = useCallback(
+    (key: string, params?: Record<string, string | number>): string => {
+      let value =
+        resolveKey(translations[locale], key) ??
+        resolveKey(translations[defaultLocale], key) ??
+        key;
+
+      if (params) {
+        for (const [k, v] of Object.entries(params)) {
+          value = value.replace(`{${k}}`, String(v));
+        }
+      }
+
+      return value;
+    },
+    [locale]
+  );
+
+  const contextValue = useMemo(
+    () => ({ locale, setLocale, t }),
+    [locale, setLocale, t]
+  );
+
+  return (
+    <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>
+  );
+}
+
+export function useTranslation() {
+  const context = useContext(I18nContext);
+  if (!context) {
+    throw new Error("useTranslation must be used within a LanguageProvider");
+  }
+  return context;
+}

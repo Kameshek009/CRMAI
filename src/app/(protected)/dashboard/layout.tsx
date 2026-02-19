@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/contexts/account-context";
 import { WorkspaceProvider } from "@/contexts/team-context";
+import { LanguageProvider } from "@/lib/i18n";
 import { WorkspaceGuard } from "@/components/auth/team-guard";
 import { CrmOverlays } from "@/components/crm/crm-overlays";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -18,6 +19,7 @@ export default async function DashboardLayout({
 
   return (
     <AccountProvider>
+      <LanguageProvider>
       <WorkspaceProvider>
         <SidebarProvider defaultOpen={defaultOpen}>
           <AppSidebar />
@@ -36,6 +38,7 @@ export default async function DashboardLayout({
           <CrmOverlays />
         </SidebarProvider>
       </WorkspaceProvider>
+      </LanguageProvider>
     </AccountProvider>
   );
 }
