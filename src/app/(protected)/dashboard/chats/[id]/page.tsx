@@ -30,7 +30,7 @@ export default function ChatDetailPage() {
   const chatId = params.id as string;
   const { account } = useAccount();
   const { user } = useUser();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const [chat, setChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -255,7 +255,7 @@ export default function ChatDetailPage() {
         const aiRes = await fetch('/api/crm/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: content, history: recentMessages }),
+          body: JSON.stringify({ message: content, history: recentMessages, locale: locale }),
           signal: aiController.signal,
         });
         clearTimeout(aiTimeout);
@@ -270,7 +270,7 @@ export default function ChatDetailPage() {
             const remaining = Math.max(0, (teamTokenLimit || 0) - (teamTokensUsed || 0));
             const formatT = (n: number) =>
               n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(1)}K` : String(n);
-            aiContent += `\n\n---\n*Tokens: -${formatT(tokensUsed)} | Remaining: ${formatT(remaining)} / ${formatT(teamTokenLimit || 0)}*`;
+            aiContent += `\n\n---\n*${locale === 'ru' ? 'Использовано' : 'Used'}: ${formatT(tokensUsed)} | ${locale === 'ru' ? 'Осталось' : 'Remaining'}: ${formatT(remaining)} / ${formatT(teamTokenLimit || 0)}*`;
           }
           setRateLimitResetsAt(null);
         } else if (aiJson.reason === 'weekly_cap_exceeded' || aiJson.reason === 'monthly_cap_exceeded') {

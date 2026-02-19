@@ -13,6 +13,8 @@ export async function executeCrmToolCall(
   const supabase = createSupabaseAdmin();
 
   switch (functionName) {
+    case "create_lead":
+      return createLead(supabase, accountId, teamId, args);
     case "create_contact":
       return createContact(supabase, accountId, teamId, args);
     case "create_deal":
@@ -84,6 +86,49 @@ async function findOrCreateCompany(
 }
 
 // ─── Existing tool handlers (updated with teamId) ──────────
+
+async function createLead(
+  supabase: SupabaseClient,
+  accountId: string,
+  teamId: string,
+  args: Record<string, unknown>
+) {
+  const { data: lead, error } = await supabase
+    .from("leads")
+    .insert({
+      account_id: accountId,
+      team_id: teamId,
+      first_name: String(args.first_name || ""),
+      last_name: args.last_name ? String(args.last_name) : null,
+      email: args.email ? String(args.email) : null,
+      phone: args.phone ? String(args.phone) : null,
+      organization: args.organization ? String(args.organization) : null,
+      job_title: args.job_title ? String(args.job_title) : null,
+      source: args.source ? String(args.source) : null,
+      status: args.status ? String(args.status) : "new",
+    })
+    .select("id, first_name, last_name, email")
+    .single();
+
+  if (error) {
+    return { success: false, result: `Failed to create lead: ${error.message}` };
+  }
+
+  await supabase.from("crm_activities").insert({
+    account_id: accountId,
+    team_id: teamId,
+    lead_id: lead.id,
+    type: "lead_created",
+    title: `Lead created: ${lead.first_name} ${lead.last_name || ""}`.trim(),
+  });
+
+  const name = `${lead.first_name} ${lead.last_name || ""}`.trim();
+  return {
+    success: true,
+    result: `Created lead "${name}"${lead.email ? ` (${lead.email})` : ""}`,
+    data: lead,
+  };
+}
 
 async function createContact(
   supabase: SupabaseClient,
@@ -763,6 +808,7 @@ async function deleteRecord(
     contact: "contacts",
     deal: "deals",
     task: "crm_tasks",
+    lead: "leads",
   };
   const table = tableMap[recordType];
   if (!table) {
@@ -772,9 +818,10 @@ async function deleteRecord(
   // Find the record
   let record: { id: string; first_name?: string; last_name?: string | null; title?: string } | null = null;
 
-  if (recordType === "contact") {
+  if (recordType === "contact" || recordType === "lead") {
+    const tbl = recordType === "contact" ? "contacts" as const : "leads" as const;
     let q = supabase
-      .from("contacts")
+      .from(tbl)
       .select("id, first_name, last_name")
       .eq("account_id", accountId)
       .eq("team_id", teamId)
@@ -788,7 +835,7 @@ async function deleteRecord(
       return { success: false, result: "Please provide a name/title or ID of the record to delete." };
     }
     const { data, error: fe } = await q.limit(1).single();
-    if (fe || !data) return { success: false, result: "Contact not found." };
+    if (fe || !data) return { success: false, result: `${recordType} not found.` };
     record = data;
   } else {
     const tbl = recordType === "deal" ? "deals" as const : "crm_tasks" as const;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { CRM_SYSTEM_PROMPT, CRM_TOOLS } from "@/lib/crm/ai-prompts";
+import { buildSystemPrompt, CRM_TOOLS } from "@/lib/crm/ai-prompts";
 import { executeCrmToolCall } from "@/lib/crm/ai-executor";
 import { checkTeamUsageAllowed } from "@/lib/usage/check";
 import type { SubscriptionTier } from "@/types";
@@ -69,9 +69,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { message, history = [] } = body as {
+    const { message, history = [], locale } = body as {
       message: string;
       history?: { role: "user" | "assistant"; content: string }[];
+      locale?: string;
     };
 
     if (!message || typeof message !== "string") {
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     const messages = [
-      { role: "system" as const, content: CRM_SYSTEM_PROMPT },
+      { role: "system" as const, content: buildSystemPrompt(locale) },
       ...history.slice(-10),
       { role: "user" as const, content: message },
     ];
