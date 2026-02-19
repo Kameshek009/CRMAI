@@ -312,8 +312,9 @@ export default function ChatDetailPage() {
         }
 
         // Send notification messages for created entities (tasks, contacts, deals)
-        if (aiJson.success && aiJson.data.toolResults?.length > 0) {
-          const toolResults = aiJson.data.toolResults as { name: string; result: string; data?: { id: string; title?: string; first_name?: string } }[];
+        if (aiJson.success && aiJson.data.toolResults) {
+          const toolResults = aiJson.data.toolResults as { name: string; success?: boolean; result: string; data?: Record<string, unknown> }[];
+          console.log('[Chat] toolResults:', JSON.stringify(toolResults.map(r => ({ name: r.name, success: r.success, hasData: !!r.data, dataId: r.data?.id }))));
 
           const entityLinks: Record<string, string> = {
             create_task: '/dashboard/tasks',
@@ -326,51 +327,63 @@ export default function ChatDetailPage() {
             create_deal: 'deal',
           };
           const entityLabels: Record<string, [string, string]> = {
-            task: ['task', 'tasks'],
-            contact: ['contact', 'contacts'],
-            deal: ['deal', 'deals'],
+            task: ['задача', 'задач'],
+            contact: ['контакт', 'контактов'],
+            deal: ['сделка', 'сделок'],
           };
 
-          // Group by entity type
+          // Group by entity type — match any create_ tool, with or without data.id
           const grouped = new Map<string, typeof toolResults>();
           for (const r of toolResults) {
-            if ((r.name === 'create_task' || r.name === 'create_contact' || r.name === 'create_deal') && r.data?.id) {
-              const type = r.name;
-              if (!grouped.has(type)) grouped.set(type, []);
-              grouped.get(type)!.push(r);
+            if (r.name in entityLinks) {
+              if (!grouped.has(r.name)) grouped.set(r.name, []);
+              grouped.get(r.name)!.push(r);
             }
           }
 
+          console.log('[Chat] notification groups:', [...grouped.entries()].map(([k, v]) => `${k}: ${v.length}`));
+
           for (const [toolName, results] of grouped) {
             const eType = entityTypes[toolName];
-            const [, plural] = entityLabels[eType];
+            const [single, plural] = entityLabels[eType] || ['item', 'items'];
 
-            // Single → show title; multiple → show count
             const notifContent = results.length === 1
-              ? (results[0].data?.title || results[0].data?.first_name || results[0].result)
-              : `${results.length} ${plural} created`;
+              ? (results[0].data?.title as string || results[0].data?.first_name as string || results[0].result)
+              : `Создано ${results.length} ${plural}`;
 
-            const notifRes = await fetch(`/api/chats/${chatId}/messages`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                role: 'assistant',
-                content: notifContent,
-                message_type: 'notification',
-                metadata: {
-                  entity_type: eType,
-                  count: results.length,
-                  entity_ids: results.map((r) => r.data!.id),
-                  link: entityLinks[toolName],
-                },
-              }),
-            });
-            const notifResult = await notifRes.json();
-            if (notifResult.success) {
-              setMessages((prev) => [...prev, notifResult.message]);
-              if (notifResult.message.created_at) {
-                lastSSETimestamp.current = notifResult.message.created_at;
+            const entityIds = results
+              .filter((r) => r.data?.id)
+              .map((r) => r.data!.id as string);
+
+            try {
+              const notifRes = await fetch(`/api/chats/${chatId}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  role: 'assistant',
+                  content: notifContent,
+                  message_type: 'notification',
+                  metadata: {
+                    entity_type: eType,
+                    count: results.length,
+                    entity_ids: entityIds,
+                    link: entityLinks[toolName],
+                  },
+                }),
+              });
+              const notifResult = await notifRes.json();
+              console.log('[Chat] notification saved:', notifResult.success, notifContent);
+              if (notifResult.success) {
+                setMessages((prev) => {
+                  if (prev.some((m) => m.id === notifResult.message.id)) return prev;
+                  return [...prev, notifResult.message];
+                });
+                if (notifResult.message.created_at) {
+                  lastSSETimestamp.current = notifResult.message.created_at;
+                }
               }
+            } catch (notifErr) {
+              console.error('[Chat] notification save error:', notifErr);
             }
           }
         }
