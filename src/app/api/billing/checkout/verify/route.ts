@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getCheckoutSession } from "@/lib/stripe/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
+import { TIER_TOKEN_LIMITS, TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
 import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 
@@ -67,11 +67,14 @@ export async function GET(request: NextRequest) {
 
           logger.info("Checkout", `[Verify] FALLBACK: Updating team ${teamId} to tier=${tier}`);
 
+          const maxMembers = TIER_MAX_MEMBERS[tier] || TIER_MAX_MEMBERS.free;
+
           const { error: updateError } = await supabase
             .from("teams")
             .update({
               tier,
               token_limit: tokenLimit,
+              max_members: maxMembers,
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
               tokens_used: 0,

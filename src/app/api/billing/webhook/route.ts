@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe, getTierFromPriceId, TIER_TOKEN_LIMITS } from "@/lib/stripe/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
 import type Stripe from "stripe";
 import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
@@ -142,6 +143,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const seatCount = sub.items.data[0]?.quantity || 1;
 
   // Update team with billing data
+  const maxMembers = TIER_MAX_MEMBERS[tier] || TIER_MAX_MEMBERS.free;
   const { error: updateError } = await supabase
     .from("teams")
     .update({
@@ -149,6 +151,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripe_customer_id: customerId,
       stripe_subscription_id: subscriptionId,
       token_limit: tokenLimit,
+      max_members: maxMembers,
       tokens_used: 0,
       weekly_tokens_used: 0,
       week_start_date: new Date().toISOString(),
@@ -236,11 +239,13 @@ async function handleSubscriptionChange(
   const oldTier = team.tier;
 
   // Update team
+  const maxMembers = TIER_MAX_MEMBERS[tier] || TIER_MAX_MEMBERS.free;
   const { error: updateError } = await supabase
     .from("teams")
     .update({
       tier,
       token_limit: tokenLimit,
+      max_members: maxMembers,
       stripe_subscription_id: subscription.id,
       seat_count: quantity,
     })
@@ -325,6 +330,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .update({
       tier: "free",
       token_limit: TIER_TOKEN_LIMITS.free,
+      max_members: TIER_MAX_MEMBERS.free,
       stripe_subscription_id: null,
     })
     .eq("id", team.id);
