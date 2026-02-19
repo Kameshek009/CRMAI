@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 const MAX_NOTE_LENGTH = 10000;
 
@@ -13,7 +14,8 @@ interface NoteEditorProps {
   placeholder?: string;
 }
 
-export function NoteEditor({ onSubmit, placeholder = "Add a note..." }: NoteEditorProps) {
+export function NoteEditor({ onSubmit, placeholder }: NoteEditorProps) {
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,7 +40,7 @@ export function NoteEditor({ onSubmit, placeholder = "Add a note..." }: NoteEdit
       <Textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder || t("notes.placeholder")}
         rows={3}
         className={cn("resize-none", isOverLimit && "border-destructive focus-visible:ring-destructive")}
         aria-label="Note content"
@@ -62,7 +64,7 @@ export function NoteEditor({ onSubmit, placeholder = "Add a note..." }: NoteEdit
           disabled={!canSubmit}
         >
           {isSubmitting ? <Loader2 className="size-4 mr-1 animate-spin" /> : <Send className="size-4 mr-1" />}
-          Add Note
+          {t("notes.addNote")}
         </Button>
       </div>
     </div>

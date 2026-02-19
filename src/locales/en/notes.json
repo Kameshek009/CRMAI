@@ -1,0 +1,21 @@
+{
+  "title": "Notes",
+  "placeholder": "Write a note...",
+  "empty": "No notes yet",
+  "added": "Note added",
+  "updated": "Note updated",
+  "deleted": "Note deleted",
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "pin": "Pin",
+  "unpin": "Unpin",
+  "addNote": "Add Note",
+  "linked": {
+    "contact": "Contact",
+    "deal": "Deal",
+    "organization": "Organization",
+    "lead": "Lead"
+  }
+}
