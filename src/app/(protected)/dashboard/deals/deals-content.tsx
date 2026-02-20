@@ -9,6 +9,8 @@ import { KanbanBoard, type KanbanColumn } from "@/components/frappe/kanban-board
 import { GroupByView, type GroupByGroup } from "@/components/frappe/group-by-view";
 import { StatusBadge } from "@/components/frappe/status-badge";
 import { EntityForm, type FormField } from "@/components/crm/entity-form";
+import { BulkActionBar } from "@/components/crm/bulk-action-bar";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { Handshake } from "lucide-react";
 import { toast } from "sonner";
 import type { ViewMode } from "@/types/crm";
@@ -68,6 +70,11 @@ export function DealsContent() {
   const [page, setPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [groupBy, setGroupBy] = useState<string | null>("status");
+
+  // Bulk
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isBulkLoading, setIsBulkLoading] = useState(false);
 
   const FILTER_OPTIONS: FilterOption[] = useMemo(() => [
     {
@@ -132,6 +139,7 @@ export function DealsContent() {
   }, [search, sortBy, sortOrder, page, activeFilters]);
 
   useEffect(() => { fetchDeals(); }, [fetchDeals]);
+  useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
   useEffect(() => { setPage(1); }, [search, activeFilters, sortBy, sortOrder]);
 
   // Also fetch stages separately on mount for kanban + create form
@@ -205,6 +213,51 @@ export function DealsContent() {
     } else {
       toast.error(json.error || t("common.failed"));
       throw new Error(json.error);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setIsBulkLoading(true);
+    try {
+      const ids = Array.from(selectedIds);
+      const res = await fetch("/api/crm/deals/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", ids }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Deleted ${ids.length} deal${ids.length !== 1 ? "s" : ""}`);
+        setSelectedIds(new Set());
+        fetchDeals();
+      } else {
+        toast.error(json.error || "Failed to delete deals");
+      }
+    } finally {
+      setIsBulkLoading(false);
+      setConfirmDelete(false);
+    }
+  };
+
+  const handleBulkStatusChange = async (status: string) => {
+    setIsBulkLoading(true);
+    try {
+      const ids = Array.from(selectedIds);
+      const res = await fetch("/api/crm/deals/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_status", ids, status }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Updated ${ids.length} deal${ids.length !== 1 ? "s" : ""}`);
+        setSelectedIds(new Set());
+        fetchDeals();
+      } else {
+        toast.error(json.error || "Failed to update deals");
+      }
+    } finally {
+      setIsBulkLoading(false);
     }
   };
 
@@ -331,6 +384,9 @@ export function DealsContent() {
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={handleSortChange}
+          selectable
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
           onRowClick={(d) => router.push(`/dashboard/deals/${d.id}`)}
           page={page}
           pageSize={PAGE_SIZE}
@@ -394,6 +450,38 @@ export function DealsContent() {
         title={t("crm.deals.new")}
         fields={dealFormFields}
         onSubmit={handleCreateDeal}
+      />
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onDeselectAll={() => setSelectedIds(new Set())}
+        actions={[
+          {
+            label: t("crm.deals.changeStatus"),
+            dropdown: [
+              { label: t("crm.deals.statuses.open"), value: "open" },
+              { label: t("crm.deals.statuses.won"), value: "won" },
+              { label: t("crm.deals.statuses.lost"), value: "lost" },
+            ],
+            onDropdownSelect: handleBulkStatusChange,
+          },
+          {
+            label: t("common.delete"),
+            variant: "destructive",
+            onClick: () => setConfirmDelete(true),
+          },
+        ]}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={t("crm.deals.deleteTitle")}
+        description={t("crm.deals.deleteConfirm", { count: selectedIds.size })}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        isLoading={isBulkLoading}
+        onConfirm={handleBulkDelete}
       />
     </PageContainer>
   );

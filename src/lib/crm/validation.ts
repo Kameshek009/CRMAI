@@ -215,6 +215,11 @@ export const bulkCompaniesSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("delete"), ids: bulkIds }),
 ]);
 
+export const bulkDealsSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("delete"), ids: bulkIds }),
+  z.object({ action: z.literal("update_status"), ids: bulkIds, status: z.enum(["open", "won", "lost"]) }),
+]);
+
 // ============================================================================
 // Call Log schemas
 // ============================================================================

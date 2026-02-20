@@ -130,7 +130,10 @@
     },
     "groupBy": {
       "status": "Status"
-    }
+    },
+    "deleteTitle": "Delete deals",
+    "deleteConfirm": "Are you sure you want to delete {count} deal(s)? This action cannot be undone.",
+    "changeStatus": "Change Status"
   },
   "companies": {
     "title": "Organizations",
