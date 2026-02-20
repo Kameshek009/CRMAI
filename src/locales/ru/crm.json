@@ -32,6 +32,7 @@
     "next": "Далее"
   },
   "pipeline": {
+    "pageTitle": "Воронка",
     "title": "Новая сделка",
     "dealTitle": "Название сделки",
     "value": "Сумма ($)",
@@ -45,6 +46,7 @@
     "notSetUp": "Воронка не настроена",
     "beingConfigured": "Стадии сделок настраиваются.",
     "rotting": "{count} застой",
+    "rottingLabel": "Застой",
     "rottingDays": "Застой сделки (дней)",
     "rottingPlaceholder": "напр. 14",
     "rottingHelp": "Сделки без активности дольше указанного срока будут отмечены как застойные. Оставьте пустым для отключения.",
@@ -53,7 +55,16 @@
     "invalidDays": "Некорректное количество дней",
     "rottingSet": "Застой: {value} дн.",
     "rottingDisabled": "Застой отключён",
-    "saveFailed": "Не удалось сохранить"
+    "saveFailed": "Не удалось сохранить",
+    "forecast": "прогноз",
+    "searchDeals": "Поиск сделок...",
+    "hot": "Горячий",
+    "warm": "Тёплый",
+    "atRisk": "Под угрозой",
+    "quickAddPlaceholder": "Название + Enter",
+    "quickAddFailed": "Не удалось создать сделку",
+    "totalDeals": "{count} сделок",
+    "addDeal": "Добавить сделку"
   },
   "contacts": {
     "title": "Контакты",

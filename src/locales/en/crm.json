@@ -32,6 +32,7 @@
     "next": "Next"
   },
   "pipeline": {
+    "pageTitle": "Pipeline",
     "title": "New Deal",
     "dealTitle": "Deal Title",
     "value": "Value ($)",
@@ -45,6 +46,7 @@
     "notSetUp": "Pipeline not set up",
     "beingConfigured": "Your deal stages are being configured.",
     "rotting": "{count} rotting",
+    "rottingLabel": "Rotting",
     "rottingDays": "Deal rotting (days)",
     "rottingPlaceholder": "e.g. 14",
     "rottingHelp": "Deals without activity for this many days will be marked as rotting. Leave empty to disable.",
@@ -53,7 +55,16 @@
     "invalidDays": "Invalid number of days",
     "rottingSet": "Rotting: {value} days",
     "rottingDisabled": "Rotting disabled",
-    "saveFailed": "Failed to save"
+    "saveFailed": "Failed to save",
+    "forecast": "forecast",
+    "searchDeals": "Search deals...",
+    "hot": "Hot",
+    "warm": "Warm",
+    "atRisk": "At Risk",
+    "quickAddPlaceholder": "Deal name + Enter",
+    "quickAddFailed": "Failed to create deal",
+    "totalDeals": "{count} deals",
+    "addDeal": "Add deal"
   },
   "contacts": {
     "title": "Contacts",

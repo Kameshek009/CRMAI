@@ -96,21 +96,25 @@ export function PipelineContent() {
     fetchPipeline();
   }, [fetchPipeline]);
 
-  // Filtered columns by search
+  // Search by title, value, company name, or contact name
   const filteredColumns = useMemo(() => {
     if (!search) return columns;
     const q = search.toLowerCase();
     return columns.map((col) => ({
       ...col,
-      deals: col.deals.filter(
-        (d) =>
-          d.title?.toLowerCase().includes(q) ||
-          d.value?.toString().includes(q)
-      ),
+      deals: col.deals.filter((d) => {
+        if (d.title?.toLowerCase().includes(q)) return true;
+        if (d.value?.toString().includes(q)) return true;
+        if (d.companies?.name?.toLowerCase().includes(q)) return true;
+        if (d.contacts) {
+          const name = `${d.contacts.first_name} ${d.contacts.last_name || ""}`.toLowerCase();
+          if (name.includes(q)) return true;
+        }
+        return false;
+      }),
     }));
   }, [columns, search]);
 
-  // Resolve an ID (could be a stage or a deal) to a stage ID
   const resolveStageId = useCallback(
     (id: string): string | null => {
       if (stages.find((s) => s.id === id)) return id;
@@ -153,7 +157,6 @@ export function PipelineContent() {
     const targetStageId = resolveStageId(String(over.id));
     if (!targetStageId) return;
 
-    // Find current stage
     let currentStageId = "";
     for (const col of columns) {
       if (col.deals.find((d) => d.id === dealId)) {
@@ -165,7 +168,6 @@ export function PipelineContent() {
 
     const targetStage = stages.find((s) => s.id === targetStageId);
 
-    // Optimistic update
     setColumns((prev) =>
       prev.map((col) => {
         if (col.stage.id === currentStageId) {
@@ -191,7 +193,6 @@ export function PipelineContent() {
       })
     );
 
-    // API call
     const res = await fetch(`/api/crm/deals/${dealId}/stage`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -226,6 +227,26 @@ export function PipelineContent() {
     }
   };
 
+  const handleQuickAdd = useCallback(async (stageId: string, title: string) => {
+    const res = await fetch("/api/crm/deals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        stage_id: stageId,
+        value: 0,
+      }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      toast.success(t("crm.pipeline.dealCreated"));
+      fetchPipeline();
+    } else {
+      toast.error(json.error || t("crm.pipeline.quickAddFailed"));
+      throw new Error(json.error);
+    }
+  }, [t, fetchPipeline]);
+
   // ── Loading ───────────────────────────────────────────────────────────
 
   if (isLoading) {
@@ -234,11 +255,17 @@ export function PipelineContent() {
         <div className="px-4 py-4 border-b">
           <Skeleton className="h-8 w-48" />
         </div>
-        <div className="flex gap-4 p-4 overflow-x-auto flex-1">
+        <div className="flex gap-0 flex-1">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="w-72 shrink-0 space-y-2">
-              <Skeleton className="h-16 w-full rounded-xl" />
-              <Skeleton className="h-48 w-full rounded-xl" />
+            <div key={i} className="flex-1 min-w-[260px] border-r last:border-r-0 p-3 space-y-3">
+              <Skeleton className="h-1 w-full rounded-full" />
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-3 w-16" />
+              <div className="space-y-2 mt-4">
+                <Skeleton className="h-[100px] w-full rounded-lg" />
+                <Skeleton className="h-[100px] w-full rounded-lg" />
+                <Skeleton className="h-[100px] w-full rounded-lg" />
+              </div>
             </div>
           ))}
         </div>
@@ -267,6 +294,7 @@ export function PipelineContent() {
         weightedForecast={weightedForecast}
         search={search}
         onSearchChange={setSearch}
+        dealCount={columns.reduce((sum, c) => sum + c.count, 0)}
       />
 
       <DndContext
@@ -277,8 +305,8 @@ export function PipelineContent() {
         onDragEnd={handleDragEnd}
       >
         <div className="flex-1 overflow-x-auto overflow-y-hidden">
-          <div className="flex gap-4 p-4 h-full min-w-min">
-            {filteredColumns.map((column) => (
+          <div className="flex h-full min-w-min">
+            {filteredColumns.map((column, i) => (
               <StageColumn
                 key={column.stage.id}
                 stage={column.stage}
@@ -286,10 +314,12 @@ export function PipelineContent() {
                 totalValue={column.totalValue}
                 count={column.count}
                 isOver={activeOverStageId === column.stage.id}
+                isLast={i === filteredColumns.length - 1}
                 onAddDeal={() => {
                   setNewDealStageId(column.stage.id);
                   setShowForm(true);
                 }}
+                onQuickAdd={handleQuickAdd}
               />
             ))}
           </div>

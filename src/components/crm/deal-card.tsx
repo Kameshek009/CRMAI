@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Building2, User, GripVertical, Calendar, AlertTriangle } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 import Link from "next/link";
 
 export interface DealForCard {
@@ -25,10 +26,14 @@ function DealCardInner({
   deal,
   dragHandle,
   className,
+  locale,
+  t,
 }: {
   deal: DealForCard;
   dragHandle?: React.ReactNode;
   className?: string;
+  locale?: string;
+  t?: (key: string, params?: Record<string, string | number>) => string;
 }) {
   const contactName = deal.contacts
     ? `${deal.contacts.first_name} ${deal.contacts.last_name || ""}`.trim()
@@ -41,12 +46,16 @@ function DealCardInner({
       : prob >= 40
         ? "text-amber-600 border-amber-200 dark:border-amber-800/40 bg-amber-500/10"
         : "text-red-600 border-red-200 dark:border-red-800/40 bg-red-500/10";
-  const probLabel = prob >= 70 ? "Hot" : prob >= 40 ? "Warm" : "At Risk";
+  const probLabel = t
+    ? (prob >= 70 ? t("crm.pipeline.hot") : prob >= 40 ? t("crm.pipeline.warm") : t("crm.pipeline.atRisk"))
+    : (prob >= 70 ? "Hot" : prob >= 40 ? "Warm" : "At Risk");
   const probDot = prob >= 70 ? "bg-emerald-500" : prob >= 40 ? "bg-amber-500" : "bg-red-500";
+
+  const dateLocale = locale === "ru" ? "ru-RU" : "en-US";
 
   return (
     <Card className={cn(
-      "p-4 transition-all group premium-card card-shine border bg-card",
+      "p-3 transition-all group premium-card card-shine border bg-card",
       deal.is_rotting && "border-l-[3px] border-l-red-500",
       className
     )}>
@@ -59,12 +68,12 @@ function DealCardInner({
           >
             {deal.title}
           </Link>
-          <p className="text-base font-bold mt-1 tracking-tight">
+          <p className="text-base font-bold mt-0.5 tracking-tight tabular-nums">
             ${Number(deal.value).toLocaleString()}
           </p>
 
           {(contactName || deal.companies?.name) && (
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11px] text-muted-foreground">
               {deal.companies?.name && (
                 <span className="flex items-center gap-1 truncate max-w-[120px] hover:text-foreground transition-colors">
                   <Building2 className="size-3 shrink-0" />
@@ -90,17 +99,17 @@ function DealCardInner({
                 <div className={cn("w-1.5 h-1.5 rounded-full mr-1", probDot)} />
                 {probLabel} {prob}%
               </Badge>
-              {deal.is_rotting && (
+              {deal.is_rotting && t && (
                 <Badge variant="outline" className="text-[10px] px-2 py-0 text-red-600 border-red-200 dark:border-red-800/40 bg-red-500/10">
                   <AlertTriangle className="size-2.5 mr-1" />
-                  Rotting
+                  {t("crm.pipeline.rottingLabel")}
                 </Badge>
               )}
             </div>
             {deal.expected_close_date && (
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Calendar className="size-2.5" />
-                {new Date(deal.expected_close_date).toLocaleDateString("en-US", {
+                {new Date(deal.expected_close_date).toLocaleDateString(dateLocale, {
                   month: "short",
                   day: "numeric",
                 })}
@@ -119,6 +128,7 @@ export function DealCard({ deal }: { deal: DealForCard }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: deal.id,
   });
+  const { t, locale } = useTranslation();
 
   const style = transform
     ? { transform: CSS.Transform.toString(transform), opacity: isDragging ? 0.3 : 1 }
@@ -140,6 +150,8 @@ export function DealCard({ deal }: { deal: DealForCard }) {
       <DealCardInner
         deal={deal}
         dragHandle={handle}
+        locale={locale}
+        t={t}
         className={isDragging ? "shadow-xl ring-2 ring-primary/20 scale-[1.02]" : "hover:shadow-md"}
       />
     </div>

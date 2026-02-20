@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { DealCard, type DealForCard } from "@/components/crm/deal-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Kanban, Settings2, Timer, X, Check } from "lucide-react";
+import { Plus, Settings2, Timer, X, Check, Trophy, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
@@ -24,7 +24,9 @@ interface StageColumnProps {
   totalValue: number;
   count: number;
   isOver: boolean;
+  isLast: boolean;
   onAddDeal: () => void;
+  onQuickAdd: (stageId: string, title: string) => Promise<void>;
 }
 
 export function StageColumn({
@@ -33,15 +35,27 @@ export function StageColumn({
   totalValue,
   count,
   isOver,
+  isLast,
   onAddDeal,
+  onQuickAdd,
 }: StageColumnProps) {
   const { setNodeRef } = useDroppable({ id: stage.id });
   const { t } = useTranslation();
   const [showSettings, setShowSettings] = useState(false);
   const [rottingDays, setRottingDays] = useState(stage.rotting_days?.toString() || "");
   const [isSaving, setIsSaving] = useState(false);
+  const [quickAddValue, setQuickAddValue] = useState("");
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const quickAddRef = useRef<HTMLInputElement>(null);
 
   const rottingCount = deals.filter((d) => d.is_rotting).length;
+
+  useEffect(() => {
+    if (showQuickAdd && quickAddRef.current) {
+      quickAddRef.current.focus();
+    }
+  }, [showQuickAdd]);
 
   const handleSaveRotting = async () => {
     setIsSaving(true);
@@ -68,73 +82,93 @@ export function StageColumn({
     }
   };
 
+  const handleQuickAdd = async () => {
+    const title = quickAddValue.trim();
+    if (!title || isAdding) return;
+    setIsAdding(true);
+    try {
+      await onQuickAdd(stage.id, title);
+      setQuickAddValue("");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const stageIcon = stage.is_won ? (
+    <Trophy className="size-3.5 text-emerald-500" />
+  ) : stage.is_lost ? (
+    <XCircle className="size-3.5 text-red-500" />
+  ) : null;
+
   return (
-    <div className="w-72 shrink-0 flex flex-col h-full min-h-0">
+    <div
+      className={cn(
+        "flex-1 min-w-[260px] max-w-[380px] flex flex-col h-full min-h-0",
+        !isLast && "border-r border-border/40"
+      )}
+    >
       {/* Header */}
-      <div
-        className="flex items-center justify-between p-3 rounded-t-xl bg-card border border-b-0 relative overflow-hidden"
-        style={{ borderTopColor: stage.color || "#6b7280", borderTopWidth: 3 }}
-      >
-        {/* Subtle color wash */}
+      <div className="px-3 pt-3 pb-2 shrink-0">
+        {/* Color bar */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{ background: `linear-gradient(135deg, ${stage.color}, transparent)` }}
+          className="h-1 w-full rounded-full mb-3"
+          style={{ backgroundColor: stage.color || "#6b7280" }}
         />
-        <div className="relative z-[1]">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stage.color, boxShadow: `0 0 8px ${stage.color}50` }} />
-            <h3 className="font-bold text-sm">{stage.name}</h3>
-            <span
-              className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold tabular-nums"
-              style={{ backgroundColor: `${stage.color}15`, color: stage.color }}
-            >
-              {count}
-            </span>
-            {rottingCount > 0 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold tabular-nums bg-red-500/15 text-red-600">
-                {t("crm.pipeline.rotting", { count: rottingCount })}
+        <div className="flex items-center justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              {stageIcon}
+              <h3 className="font-semibold text-sm truncate">{stage.name}</h3>
+              <span
+                className="text-[11px] px-1.5 py-0.5 rounded-md font-medium tabular-nums shrink-0"
+                style={{ backgroundColor: `${stage.color}15`, color: stage.color }}
+              >
+                {count}
               </span>
-            )}
+              {rottingCount > 0 && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium tabular-nums bg-red-500/10 text-red-500 shrink-0">
+                  {t("crm.pipeline.rotting", { count: rottingCount })}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-muted-foreground font-medium tabular-nums">
+                ${totalValue.toLocaleString()}
+              </p>
+              {stage.rotting_days && (
+                <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/50">
+                  <Timer className="size-2.5" />
+                  {stage.rotting_days}d
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs text-muted-foreground font-medium">
-              ${totalValue.toLocaleString()}
-            </p>
-            {stage.rotting_days && (
-              <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60">
-                <Timer className="size-2.5" />
-                {stage.rotting_days}d
-              </span>
+          <div className="flex items-center gap-0.5 shrink-0">
+            {!stage.is_won && !stage.is_lost && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowSettings(!showSettings)}
+              >
+                <Settings2 className="size-3.5" />
+              </Button>
             )}
-          </div>
-        </div>
-        <div className="flex items-center gap-0.5 relative z-[1]">
-          {!stage.is_won && !stage.is_lost && (
             <Button
               variant="ghost"
               size="icon"
-              className="size-7 hover:bg-muted/80"
-              onClick={() => setShowSettings(!showSettings)}
-              aria-label={`Settings for ${stage.name}`}
+              className="size-7 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowQuickAdd(true)}
             >
-              <Settings2 className="size-3.5" />
+              <Plus className="size-4" />
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 hover:bg-muted/80"
-            onClick={onAddDeal}
-            aria-label={`Add deal to ${stage.name}`}
-          >
-            <Plus className="size-4" />
-          </Button>
+          </div>
         </div>
       </div>
 
-      {/* Rotting settings popover */}
+      {/* Rotting settings */}
       {showSettings && (
-        <div className="border border-t-0 bg-card p-3 space-y-2">
+        <div className="mx-3 mb-2 p-2.5 rounded-lg bg-muted/50 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium">{t("crm.pipeline.rottingDays")}</span>
             <Button variant="ghost" size="icon" className="size-5" onClick={() => setShowSettings(false)}>
@@ -165,32 +199,67 @@ export function StageColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex-1 p-2 space-y-2 min-h-0 overflow-y-auto rounded-b-xl border border-t-0 transition-all duration-200",
-          isOver
-            ? "bg-primary/5 border-primary/40 ring-2 ring-primary/20 shadow-inner"
-            : "bg-muted/10 dark:bg-muted/5"
+          "flex-1 px-2 pb-2 space-y-2 min-h-0 overflow-y-auto transition-colors duration-200",
+          isOver && "bg-primary/5"
         )}
       >
         {deals.map((deal) => (
           <DealCard key={deal.id} deal={deal} />
         ))}
 
-        {deals.length === 0 && !isOver && (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50">
-            <Kanban className="size-6 mb-1.5" />
+        {deals.length === 0 && !isOver && !showQuickAdd && (
+          <button
+            onClick={() => setShowQuickAdd(true)}
+            className="w-full py-8 flex flex-col items-center justify-center text-muted-foreground/40 hover:text-muted-foreground/60 hover:bg-muted/30 rounded-lg transition-colors cursor-pointer"
+          >
+            <Plus className="size-5 mb-1" />
             <p className="text-xs font-medium">{t("crm.pipeline.noDeals")}</p>
-          </div>
+          </button>
         )}
 
         {isOver && (
           <div
-            className="border-2 border-dashed rounded-xl h-20 flex items-center justify-center"
-            style={{ borderColor: `${stage.color}60` }}
+            className="border-2 border-dashed rounded-lg h-16 flex items-center justify-center transition-colors"
+            style={{ borderColor: `${stage.color}50` }}
           >
-            <p className="text-xs font-semibold" style={{ color: stage.color }}>{t("crm.pipeline.dropHere")}</p>
+            <p className="text-xs font-medium" style={{ color: stage.color }}>{t("crm.pipeline.dropHere")}</p>
           </div>
         )}
       </div>
+
+      {/* Inline quick-add */}
+      {showQuickAdd && (
+        <div className="px-2 pb-2 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <Input
+              ref={quickAddRef}
+              value={quickAddValue}
+              onChange={(e) => setQuickAddValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleQuickAdd();
+                if (e.key === "Escape") {
+                  setShowQuickAdd(false);
+                  setQuickAddValue("");
+                }
+              }}
+              placeholder={t("crm.pipeline.quickAddPlaceholder")}
+              className="h-8 text-sm"
+              disabled={isAdding}
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-8 shrink-0 text-muted-foreground"
+              onClick={() => {
+                setShowQuickAdd(false);
+                setQuickAddValue("");
+              }}
+            >
+              <X className="size-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

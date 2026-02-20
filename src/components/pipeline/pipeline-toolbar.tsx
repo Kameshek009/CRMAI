@@ -2,13 +2,15 @@
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, Search } from "lucide-react";
+import { DollarSign, TrendingUp, Search, LayoutGrid } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface PipelineToolbarProps {
   totalValue: number;
   weightedForecast: number;
   search: string;
   onSearchChange: (value: string) => void;
+  dealCount: number;
 }
 
 export function PipelineToolbar({
@@ -16,19 +18,29 @@ export function PipelineToolbar({
   weightedForecast,
   search,
   onSearchChange,
+  dealCount,
 }: PipelineToolbarProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-2.5 border-b bg-background/80 backdrop-blur-xl shrink-0 header-shimmer">
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-bold tracking-tight">Pipeline</h1>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-2">
+          <LayoutGrid className="size-5 text-primary" />
+          <h1 className="text-lg font-bold tracking-tight">{t("crm.pipeline.pageTitle")}</h1>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 text-sm">
+          <Badge variant="outline" className="flex items-center gap-1 font-medium px-2.5 py-1 text-muted-foreground">
+            <LayoutGrid className="size-3" />
+            {t("crm.pipeline.totalDeals", { count: dealCount })}
+          </Badge>
           <Badge variant="outline" className="flex items-center gap-1 font-semibold px-2.5 py-1 bg-emerald-500/5 text-emerald-600 border-emerald-200/50 dark:border-emerald-800/30">
             <DollarSign className="size-3.5" />
             {totalValue.toLocaleString()}
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1 font-medium px-2.5 py-1 text-muted-foreground">
             <TrendingUp className="size-3.5" />
-            ${weightedForecast.toLocaleString()} forecast
+            ${weightedForecast.toLocaleString()} {t("crm.pipeline.forecast")}
           </Badge>
         </div>
       </div>
@@ -38,7 +50,7 @@ export function PipelineToolbar({
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search deals..."
+          placeholder={t("crm.pipeline.searchDeals")}
           className="h-8 w-48 pl-8 text-sm glass-input rounded-lg"
         />
       </div>
