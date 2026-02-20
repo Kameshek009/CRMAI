@@ -136,14 +136,32 @@ export async function POST(request: NextRequest) {
 
     let realTokensUsed = 0;
 
-    const completion = await groq.chat.completions.create({
-      messages,
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.3,
-      max_completion_tokens: 4096,
-      tools: CRM_TOOLS,
-      stream: false,
-    });
+    let completion;
+    try {
+      completion = await groq.chat.completions.create({
+        messages,
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.3,
+        max_completion_tokens: 4096,
+        tools: CRM_TOOLS,
+        stream: false,
+      });
+    } catch (groqErr) {
+      // If tool call failed (LLM generated invalid tool args), retry without tools
+      const errBody = groqErr instanceof Error ? groqErr.message : String(groqErr);
+      if (errBody.includes("tool_use_failed") || errBody.includes("tool call validation")) {
+        logger.warn("CrmAI", "Tool call failed, retrying without tools", errBody);
+        completion = await groq.chat.completions.create({
+          messages,
+          model: "llama-3.3-70b-versatile",
+          temperature: 0.3,
+          max_completion_tokens: 4096,
+          stream: false,
+        });
+      } else {
+        throw groqErr;
+      }
+    }
 
     realTokensUsed += completion.usage?.total_tokens || 0;
 
@@ -257,7 +275,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    logger.error("CrmAI", "Chat error", err);
-    return NextResponse.json({ success: false, error: "AI chat failed", details: errMsg }, { status: 500 });
+    logger.error("CrmAI", "Chat error", errMsg);
+    return NextResponse.json({ success: false, error: "AI chat failed" }, { status: 500 });
   }
 }
