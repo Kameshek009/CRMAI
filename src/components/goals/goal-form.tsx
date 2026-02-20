@@ -63,7 +63,7 @@ export function GoalForm({
           period,
           start_date: range.start,
           end_date: range.end,
-          account_id: isTeam ? null : undefined,
+          account_id: isTeam ? null : "self",
         }),
       });
       const json = await res.json();

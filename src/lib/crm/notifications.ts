@@ -27,18 +27,18 @@ export async function createNotification(params: NotificationParams): Promise<vo
 
     const prefs = (account?.notification_preferences || {}) as Record<string, boolean>;
 
-    // Map notification type to preference key
+    // Map notification type to preference key (from account settings)
     const prefMap: Record<string, string> = {
-      deal_assigned: "inApp",
-      task_due_soon: "inApp",
-      task_overdue: "inApp",
-      deal_stage_changed: "dealUpdates",
-      new_team_member: "teamUpdates",
-      goal_achieved: "inApp",
+      deal_assigned: "deal_assigned",
+      deal_stage_changed: "deal_assigned",
+      task_due_soon: "task_due",
+      task_overdue: "task_due",
+      new_team_member: "new_team_member",
+      goal_achieved: "deal_assigned",
     };
 
-    const prefKey = prefMap[params.type] || "inApp";
-    if (prefs[prefKey] === false) return;
+    const prefKey = prefMap[params.type];
+    if (prefKey && prefs[prefKey] === false) return;
 
     await supabase.from("notifications").insert({
       account_id: params.accountId,

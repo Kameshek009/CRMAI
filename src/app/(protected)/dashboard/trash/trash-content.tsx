@@ -41,19 +41,24 @@ const ENTITY_COLORS: Record<string, string> = {
   call_logs: "bg-cyan-500/10 text-cyan-600",
 };
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+function useTimeAgo() {
+  const { t } = useTranslation();
+  return (dateStr: string): string => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t("crm.activity.justNow");
+    if (mins < 60) return t("crm.activity.mAgo", { count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t("crm.activity.hAgo", { count: hours });
+    const days = Math.floor(hours / 24);
+    return t("crm.activity.dAgo", { count: days });
+  };
 }
 
 export function TrashContent() {
   const { t } = useTranslation();
   const { isOwner } = useWorkspace();
+  const timeAgo = useTimeAgo();
   const [items, setItems] = useState<TrashItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -68,11 +73,15 @@ export function TrashContent() {
       const json = await res.json();
       if (json.success) {
         setItems(json.data || []);
+      } else {
+        toast.error(t("crm.trash.failedRestore"));
       }
+    } catch {
+      toast.error(t("crm.trash.failedRestore"));
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, t]);
 
   useEffect(() => { fetchTrash(); }, [fetchTrash]);
 

@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
     .from(table)
     .update({ is_deleted: false, deleted_at: null, deleted_by: null })
     .eq("id", id)
-    .eq("team_id", context.workspaceId);
+    .eq("team_id", context.workspaceId)
+    .eq("is_deleted", true);
 
   if (dbError) {
     return NextResponse.json({ success: false, error: "Failed to restore" }, { status: 500 });

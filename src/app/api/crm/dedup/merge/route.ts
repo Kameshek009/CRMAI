@@ -23,6 +23,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid entity_type" }, { status: 400 });
   }
 
+  if (merge_ids.includes(master_id)) {
+    return NextResponse.json({ success: false, error: "master_id cannot be in merge_ids" }, { status: 400 });
+  }
+
   const supabase = createSupabaseAdmin();
   const table = entity_type === "contacts" ? "contacts" : "companies";
 

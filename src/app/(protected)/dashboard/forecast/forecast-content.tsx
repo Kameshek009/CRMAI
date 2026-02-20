@@ -37,8 +37,11 @@ export function ForecastContent() {
     (async () => {
       try {
         const res = await fetch("/api/crm/stats/forecast");
+        if (!res.ok) return;
         const json = await res.json();
         if (json.success) setData(json.data);
+      } catch {
+        // silent — no data state will show
       } finally {
         setLoading(false);
       }

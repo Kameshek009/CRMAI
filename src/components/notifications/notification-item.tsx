@@ -1,6 +1,6 @@
 "use client";
 
-import { Handshake, CheckSquare, Users, Bell, type LucideIcon } from "lucide-react";
+import { Handshake, CheckSquare, Users, Bell, Target, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Notification {
@@ -20,6 +20,7 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   task_due_soon: CheckSquare,
   task_overdue: CheckSquare,
   new_team_member: Users,
+  goal_achieved: Target,
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -28,6 +29,7 @@ const TYPE_COLORS: Record<string, string> = {
   task_due_soon: "text-purple-500",
   task_overdue: "text-red-500",
   new_team_member: "text-blue-500",
+  goal_achieved: "text-emerald-500",
 };
 
 function timeAgo(dateStr: string): string {

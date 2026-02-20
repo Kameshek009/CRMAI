@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     .from("goals")
     .insert({
       team_id: context.workspaceId,
-      account_id: account_id || null,
+      account_id: account_id === "self" ? context.accountId : account_id || null,
       created_by: context.accountId,
       type,
       target_value,
