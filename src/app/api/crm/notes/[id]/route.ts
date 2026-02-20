@@ -32,6 +32,7 @@ export async function PATCH(
       .update(parsed.data)
       .eq("id", id)
       .eq("team_id", context.teamId)
+      .eq("account_id", context.accountId)
       .select()
       .single();
 
@@ -80,13 +81,15 @@ export async function DELETE(
       .select("contact_id, deal_id, company_id")
       .eq("id", id)
       .eq("team_id", context.teamId)
+      .eq("account_id", context.accountId)
       .single();
 
     const { error: dbError } = await supabase
       .from("crm_notes")
       .update({ is_deleted: true })
       .eq("id", id)
-      .eq("team_id", context.teamId);
+      .eq("team_id", context.teamId)
+      .eq("account_id", context.accountId);
 
     if (dbError) {
       logger.error("Notes", "DB error", dbError);
