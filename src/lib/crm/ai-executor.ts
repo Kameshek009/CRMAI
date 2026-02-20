@@ -202,8 +202,10 @@ async function createDeal(
 
   await ensureDealStages(accountId, teamId);
 
-  let stageId: string;
+  let stageId: string | null = null;
   const stageName = String(args.stage_name || "Lead");
+
+  // 1. Try exact stage name for this team
   const { data: stage } = await supabase
     .from("deal_stages")
     .select("id")
@@ -215,8 +217,11 @@ async function createDeal(
 
   if (stage) {
     stageId = stage.id;
-  } else {
-    const { data: firstStage } = await supabase
+  }
+
+  // 2. Fallback: first stage for this team
+  if (!stageId) {
+    const { data: firstTeamStage } = await supabase
       .from("deal_stages")
       .select("id")
       .eq("account_id", accountId)
@@ -224,10 +229,23 @@ async function createDeal(
       .order("position", { ascending: true })
       .limit(1)
       .single();
-    if (!firstStage) {
-      return { success: false, result: "No pipeline stages found. Please open the pipeline first to set up stages." };
-    }
-    stageId = firstStage.id;
+    stageId = firstTeamStage?.id || null;
+  }
+
+  // 3. Fallback: any stage for this account (cross-team)
+  if (!stageId) {
+    const { data: anyStage } = await supabase
+      .from("deal_stages")
+      .select("id")
+      .eq("account_id", accountId)
+      .order("position", { ascending: true })
+      .limit(1)
+      .single();
+    stageId = anyStage?.id || null;
+  }
+
+  if (!stageId) {
+    return { success: false, result: "No pipeline stages found. Please open the pipeline first to set up stages." };
   }
 
   let contactId: string | null = null;
