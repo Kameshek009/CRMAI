@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { parseListParams, applyListQuery, applyVisibilityFilter } from "@/lib/crm/query-builder";
+import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { ensureDealStages } from "@/lib/crm/helpers";
 import { createDealSchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
@@ -28,13 +28,6 @@ export async function GET(request: NextRequest) {
       .select("*, deal_stages(id, name, color, position, is_won, is_lost), contacts(id, first_name, last_name), companies(id, name)", { count: "exact" })
       .eq("team_id", context.workspaceId)
       .eq("is_deleted", false);
-
-    query = applyVisibilityFilter(query, "deals", {
-      accountId: context.accountId,
-      isOwner: context.isOwner,
-      fixedRole: context.fixedRole,
-      visibilityGroupIds: context.visibilityGroupIds,
-    });
 
     query = applyListQuery(query, "deals", params, ["title"]);
 
