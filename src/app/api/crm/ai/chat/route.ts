@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       messages,
       model: "llama-3.3-70b-versatile",
       temperature: 0.3,
-      max_completion_tokens: 8192,
+      max_completion_tokens: 4096,
       tools: CRM_TOOLS,
       stream: false,
     });
@@ -256,7 +256,8 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
     logger.error("CrmAI", "Chat error", err);
-    return NextResponse.json({ success: false, error: "AI chat failed" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "AI chat failed", details: errMsg }, { status: 500 });
   }
 }

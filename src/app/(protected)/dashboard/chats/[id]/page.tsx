@@ -278,7 +278,9 @@ export default function ChatDetailPage() {
           aiContent = t('chat.dailyLimitMessage');
         } else {
           console.error('[Chat AI] Error response:', aiJson);
-          aiContent = aiJson.error || t('chat.aiError');
+          aiContent = aiJson.details
+            ? `${aiJson.error}: ${aiJson.details}`
+            : (aiJson.error || t('chat.aiError'));
         }
 
         // Save AI response
