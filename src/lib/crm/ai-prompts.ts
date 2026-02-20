@@ -14,10 +14,12 @@ export function buildSystemPrompt(userLocale?: string): string {
 ${lang}
 
 RULES:
-1. When the user asks to create, add, update, delete, or complete something — use the appropriate tool silently. Do NOT mention tool/function names in your responses. Instead, describe what you did in natural language (e.g. "Готово! Я создал 5 контактов для вас.").
-2. When describing your capabilities, speak naturally — NEVER write technical names like create_contact or <function>.
-3. Be concise and friendly.
-4. When the user asks to create multiple items (e.g. "create 10 contacts"), call the create tool multiple times — once for each item. Generate realistic varied data for each item (different names, emails, etc.).
+1. When the user asks to create, add, update, delete, or complete something — you MUST use the appropriate tool. Do NOT mention tool/function names in your responses. Instead, describe what you did in natural language (e.g. "Готово! Я создал 5 контактов для вас.").
+2. CRITICAL: You MUST ALWAYS call tools to perform actions. NEVER pretend or claim you did something without actually calling the tool. If you cannot do something, say so honestly.
+3. When describing your capabilities, speak naturally — NEVER write technical names like create_contact or <function>.
+4. Be concise and friendly.
+5. When the user asks to create multiple items (e.g. "create 10 contacts"), use the "count" parameter on the create tool to create them in one call. Do NOT call the tool multiple times.
+6. There is NO "lead" entity in this CRM. If the user asks to create leads, create contacts instead.
 
 You can:
 - Create contacts (with name, email, phone, company, etc.)
@@ -43,7 +45,7 @@ export const CRM_TOOLS = [
     type: "function" as const,
     function: {
       name: "create_contact",
-      description: "Create a new contact in the CRM",
+      description: "Create one or more contacts in the CRM. Use count parameter for bulk creation.",
       parameters: {
         type: "object",
         properties: {
@@ -54,6 +56,7 @@ export const CRM_TOOLS = [
           title: { type: "string", description: "Job title" },
           company_name: { type: "string", description: "Company name (will find or create)" },
           source: { type: "string", description: "Lead source (website, referral, cold_call, etc.)" },
+          count: { type: "number", description: "Number of contacts to create (for bulk creation, max 50). Names are auto-generated." },
         },
         required: ["first_name"],
       },
@@ -63,7 +66,7 @@ export const CRM_TOOLS = [
     type: "function" as const,
     function: {
       name: "create_deal",
-      description: "Create a new deal in the pipeline",
+      description: "Create one or more deals in the pipeline. Use count parameter for bulk creation.",
       parameters: {
         type: "object",
         properties: {
@@ -73,6 +76,7 @@ export const CRM_TOOLS = [
           company_name: { type: "string", description: "Company name to link to" },
           stage_name: { type: "string", description: "Pipeline stage name (Lead, Qualified, Proposal, Negotiation)" },
           expected_close_date: { type: "string", description: "Expected close date (YYYY-MM-DD)" },
+          count: { type: "number", description: "Number of deals to create (for bulk creation, max 50). Titles are auto-generated." },
         },
         required: ["title"],
       },

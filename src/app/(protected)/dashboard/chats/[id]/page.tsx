@@ -345,13 +345,24 @@ export default function ChatDetailPage() {
             const eType = entityTypes[toolName];
             const [single, plural] = entityLabels[eType] || ['item', 'items'];
 
-            const notifContent = results.length === 1
-              ? (results[0].data?.title as string || results[0].data?.first_name as string || results[0].result)
-              : `Создано ${results.length} ${plural}`;
+            // Calculate actual count (accounting for batch results with count field)
+            let totalCount = 0;
+            const entityIds: string[] = [];
+            for (const r of results) {
+              const batchCount = (r.data?.count as number) || 0;
+              if (batchCount > 1) {
+                totalCount += batchCount;
+                const items = r.data?.items as { id: string }[] | undefined;
+                if (items) entityIds.push(...items.map(item => item.id));
+              } else {
+                totalCount += 1;
+                if (r.data?.id) entityIds.push(r.data.id as string);
+              }
+            }
 
-            const entityIds = results
-              .filter((r) => r.data?.id)
-              .map((r) => r.data!.id as string);
+            const notifContent = totalCount === 1
+              ? (results[0].data?.title as string || results[0].data?.first_name as string || results[0].result)
+              : `Создано ${totalCount} ${plural}`;
 
             try {
               const notifRes = await fetch(`/api/chats/${chatId}/messages`, {
@@ -363,7 +374,7 @@ export default function ChatDetailPage() {
                   message_type: 'notification',
                   metadata: {
                     entity_type: eType,
-                    count: results.length,
+                    count: totalCount,
                     entity_ids: entityIds,
                     link: entityLinks[toolName],
                   },

@@ -49,6 +49,22 @@ export async function executeCrmToolCall(
 
 type SupabaseClient = ReturnType<typeof createSupabaseAdmin>;
 
+// Sample names for bulk contact creation
+const FIRST_NAMES = [
+  "Alex", "Maria", "Ivan", "Elena", "Dmitry", "Anna", "Sergei", "Olga", "Nikolai", "Tatiana",
+  "Pavel", "Svetlana", "Andrei", "Yulia", "Viktor", "Natalia", "Roman", "Irina", "Mikhail", "Ekaterina",
+  "Artem", "Daria", "Maxim", "Ksenia", "Denis", "Alina", "Oleg", "Polina", "Kirill", "Vera",
+  "Timur", "Lilia", "Ruslan", "Nina", "Vadim", "Yana", "Igor", "Kristina", "Georgi", "Marina",
+  "Valentin", "Sofia", "Boris", "Galina", "Fyodor", "Tamara", "Lev", "Nadezhda", "Konstantin", "Lyudmila",
+];
+const LAST_NAMES = [
+  "Petrov", "Ivanova", "Smirnov", "Kuznetsova", "Popov", "Sokolova", "Lebedev", "Kozlova", "Novikov", "Morozova",
+  "Volkov", "Pavlova", "Semyonov", "Golubeva", "Vinogradov", "Bogdanova", "Voronov", "Belova", "Medvedev", "Fedorova",
+  "Orlov", "Andreeva", "Makarov", "Nikolaeva", "Zaitsev", "Romanova", "Alekseev", "Kovalenko", "Stepanov", "Egorova",
+  "Baranov", "Tarasova", "Gusev", "Fomina", "Titov", "Vlasova", "Belov", "Danilova", "Karpov", "Grigorieva",
+  "Mironov", "Kulikova", "Zhukov", "Lobanova", "Frolov", "Suvorova", "Nikitin", "Shestakova", "Sorokin", "Kazakova",
+];
+
 // ─── Helpers ────────────────────────────────────────────────
 
 /** Escape special LIKE/ILIKE characters to prevent injection */
@@ -91,46 +107,88 @@ async function createContact(
   teamId: string,
   args: Record<string, unknown>
 ) {
-  let companyId: string | null = null;
+  const count = Math.min(Math.max(1, Number(args.count) || 1), 50);
 
+  let companyId: string | null = null;
   if (args.company_name) {
     companyId = await findOrCreateCompany(supabase, accountId, teamId, String(args.company_name));
   }
 
-  const { data: contact, error } = await supabase
-    .from("contacts")
-    .insert({
+  // Single contact creation
+  if (count === 1) {
+    const { data: contact, error } = await supabase
+      .from("contacts")
+      .insert({
+        account_id: accountId,
+        team_id: teamId,
+        first_name: String(args.first_name || ""),
+        last_name: args.last_name ? String(args.last_name) : null,
+        email: args.email ? String(args.email) : null,
+        phone: args.phone ? String(args.phone) : null,
+        title: args.title ? String(args.title) : null,
+        company_id: companyId,
+        source: args.source ? String(args.source) : null,
+      })
+      .select("id, first_name, last_name, email")
+      .single();
+
+    if (error) {
+      return { success: false, result: `Failed to create contact: ${error.message}` };
+    }
+
+    await supabase.from("crm_activities").insert({
       account_id: accountId,
       team_id: teamId,
-      first_name: String(args.first_name || ""),
-      last_name: args.last_name ? String(args.last_name) : null,
+      contact_id: contact.id,
+      company_id: companyId,
+      type: "contact_created",
+      title: `Contact created: ${contact.first_name} ${contact.last_name || ""}`.trim(),
+    });
+
+    const name = `${contact.first_name} ${contact.last_name || ""}`.trim();
+    return {
+      success: true,
+      result: `Created contact "${name}"${contact.email ? ` (${contact.email})` : ""}`,
+      data: contact,
+    };
+  }
+
+  // Bulk contact creation
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    rows.push({
+      account_id: accountId,
+      team_id: teamId,
+      first_name: FIRST_NAMES[i % FIRST_NAMES.length],
+      last_name: LAST_NAMES[i % LAST_NAMES.length],
       email: args.email ? String(args.email) : null,
       phone: args.phone ? String(args.phone) : null,
       title: args.title ? String(args.title) : null,
       company_id: companyId,
       source: args.source ? String(args.source) : null,
-    })
-    .select("id, first_name, last_name, email")
-    .single();
+    });
+  }
+
+  const { data: contacts, error } = await supabase
+    .from("contacts")
+    .insert(rows)
+    .select("id, first_name, last_name");
 
   if (error) {
-    return { success: false, result: `Failed to create contact: ${error.message}` };
+    return { success: false, result: `Failed to create contacts: ${error.message}` };
   }
 
   await supabase.from("crm_activities").insert({
     account_id: accountId,
     team_id: teamId,
-    contact_id: contact.id,
-    company_id: companyId,
     type: "contact_created",
-    title: `Contact created: ${contact.first_name} ${contact.last_name || ""}`.trim(),
+    title: `Bulk created ${contacts.length} contacts`,
   });
 
-  const name = `${contact.first_name} ${contact.last_name || ""}`.trim();
   return {
     success: true,
-    result: `Created contact "${name}"${contact.email ? ` (${contact.email})` : ""}`,
-    data: contact,
+    result: `Created ${contacts.length} contacts`,
+    data: { items: contacts, count: contacts.length },
   };
 }
 
@@ -140,6 +198,8 @@ async function createDeal(
   teamId: string,
   args: Record<string, unknown>
 ) {
+  const count = Math.min(Math.max(1, Number(args.count) || 1), 50);
+
   await ensureDealStages(accountId, teamId);
 
   let stageId: string;
@@ -198,40 +258,81 @@ async function createDeal(
     companyId = company?.id || null;
   }
 
-  const { data: deal, error } = await supabase
-    .from("deals")
-    .insert({
+  // Single deal creation
+  if (count === 1) {
+    const { data: deal, error } = await supabase
+      .from("deals")
+      .insert({
+        account_id: accountId,
+        team_id: teamId,
+        stage_id: stageId,
+        title: String(args.title),
+        value: Math.max(0, Number(args.value) || 0),
+        contact_id: contactId,
+        company_id: companyId,
+        expected_close_date: args.expected_close_date ? String(args.expected_close_date) : null,
+      })
+      .select("id, title, value")
+      .single();
+
+    if (error) {
+      return { success: false, result: `Failed to create deal: ${error.message}` };
+    }
+
+    await supabase.from("crm_activities").insert({
+      account_id: accountId,
+      team_id: teamId,
+      deal_id: deal.id,
+      contact_id: contactId,
+      company_id: companyId,
+      type: "deal_created",
+      title: `Deal created: ${deal.title}`,
+      metadata: { value: deal.value, stage: stageName },
+    });
+
+    return {
+      success: true,
+      result: `Created deal "${deal.title}" ($${Number(deal.value).toLocaleString()}) in ${stageName}`,
+      data: deal,
+    };
+  }
+
+  // Bulk deal creation
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    rows.push({
       account_id: accountId,
       team_id: teamId,
       stage_id: stageId,
-      title: String(args.title),
+      title: `${String(args.title)} ${i + 1}`,
       value: Math.max(0, Number(args.value) || 0),
       contact_id: contactId,
       company_id: companyId,
       expected_close_date: args.expected_close_date ? String(args.expected_close_date) : null,
-    })
-    .select("id, title, value")
-    .single();
+    });
+  }
+
+  const { data: deals, error } = await supabase
+    .from("deals")
+    .insert(rows)
+    .select("id, title, value");
 
   if (error) {
-    return { success: false, result: `Failed to create deal: ${error.message}` };
+    return { success: false, result: `Failed to create deals: ${error.message}` };
   }
 
   await supabase.from("crm_activities").insert({
     account_id: accountId,
     team_id: teamId,
-    deal_id: deal.id,
-    contact_id: contactId,
-    company_id: companyId,
     type: "deal_created",
-    title: `Deal created: ${deal.title}`,
-    metadata: { value: deal.value, stage: stageName },
+    title: `Bulk created ${deals.length} deals in ${stageName}`,
+    metadata: { count: deals.length, stage: stageName },
   });
 
   return {
     success: true,
-    result: `Created deal "${deal.title}" ($${Number(deal.value).toLocaleString()}) in ${stageName}`,
-    data: deal,
+    result: `Created ${deals.length} deals in ${stageName}`,
+    data: { items: deals, count: deals.length },
   };
 }
 

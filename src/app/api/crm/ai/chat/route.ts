@@ -46,8 +46,9 @@ function calculateBillableTokens(
   let total = 0;
   for (const tc of toolCalls) {
     const cost = TOOL_COSTS[tc.name] || { base: 200, perField: 0 };
-    const fieldCount = tc.args ? Object.keys(tc.args).length : 0;
-    total += cost.base + cost.perField * fieldCount;
+    const fieldCount = tc.args ? Object.keys(tc.args).filter(k => k !== "count").length : 0;
+    const count = Math.max(1, Number(tc.args?.count) || 1);
+    total += (cost.base + cost.perField * fieldCount) * count;
   }
   return total;
 }
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest) {
       messages,
       model: "llama-3.3-70b-versatile",
       temperature: 0.3,
-      max_completion_tokens: 2048,
+      max_completion_tokens: 8192,
       tools: CRM_TOOLS,
       stream: false,
     });
