@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { ViewControls, type FilterOption, type ActiveFilter, type SortOption, type GroupByOption } from "@/components/frappe/view-controls";
@@ -60,6 +60,8 @@ export function DealsContent() {
   const [deals, setDeals] = useState<DealData[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const pageRef = useRef(1);
   const [stages, setStages] = useState<DealStage[]>([]);
   const [showForm, setShowForm] = useState(false);
 
@@ -67,7 +69,6 @@ export function DealsContent() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [page, setPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [groupBy, setGroupBy] = useState<string | null>("status");
 
@@ -106,14 +107,18 @@ export function DealsContent() {
     { name: "description", label: t("crm.deals.fields.description"), type: "textarea" as const },
   ], [t]);
 
-  const fetchDeals = useCallback(async () => {
-    setIsLoading(true);
+  const fetchDeals = useCallback(async (pageNum: number, append: boolean) => {
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       params.set("sort_by", sortBy);
       params.set("sort_order", sortOrder);
-      params.set("page", String(page));
+      params.set("page", String(pageNum));
       params.set("limit", String(PAGE_SIZE));
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
@@ -121,7 +126,11 @@ export function DealsContent() {
       const res = await fetch(`/api/crm/deals?${params}`);
       const json = await res.json();
       if (json.success) {
-        setDeals(json.data);
+        if (append) {
+          setDeals(prev => [...prev, ...json.data]);
+        } else {
+          setDeals(json.data);
+        }
         setTotal(json.total || 0);
         // Extract unique stages
         const stageMap = new Map<string, DealStage>();
@@ -135,12 +144,22 @@ export function DealsContent() {
       }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [search, sortBy, sortOrder, page, activeFilters]);
+  }, [search, sortBy, sortOrder, activeFilters]);
 
-  useEffect(() => { fetchDeals(); }, [fetchDeals]);
+  useEffect(() => {
+    pageRef.current = 1;
+    fetchDeals(1, false);
+  }, [fetchDeals]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
-  useEffect(() => { setPage(1); }, [search, activeFilters, sortBy, sortOrder]);
+
+  const handleLoadMore = useCallback(() => {
+    if (isLoadingMore || deals.length >= total) return;
+    const nextPage = pageRef.current + 1;
+    pageRef.current = nextPage;
+    fetchDeals(nextPage, true);
+  }, [isLoadingMore, deals.length, total, fetchDeals]);
 
   // Also fetch stages separately on mount for kanban + create form
   useEffect(() => {
@@ -182,7 +201,7 @@ export function DealsContent() {
     });
     if (!res.ok) {
       toast.error("Failed to update deal stage");
-      fetchDeals();
+      pageRef.current = 1; fetchDeals(1, false);
     }
   };
 
@@ -209,7 +228,7 @@ export function DealsContent() {
     const json = await res.json();
     if (json.success) {
       toast.success(t("crm.deals.created"));
-      fetchDeals();
+      pageRef.current = 1; fetchDeals(1, false);
     } else {
       toast.error(json.error || t("common.failed"));
       throw new Error(json.error);
@@ -229,7 +248,7 @@ export function DealsContent() {
       if (json.success) {
         toast.success(`Deleted ${ids.length} deal${ids.length !== 1 ? "s" : ""}`);
         setSelectedIds(new Set());
-        fetchDeals();
+        pageRef.current = 1; fetchDeals(1, false);
       } else {
         toast.error(json.error || "Failed to delete deals");
       }
@@ -252,7 +271,7 @@ export function DealsContent() {
       if (json.success) {
         toast.success(`Updated ${ids.length} deal${ids.length !== 1 ? "s" : ""}`);
         setSelectedIds(new Set());
-        fetchDeals();
+        pageRef.current = 1; fetchDeals(1, false);
       } else {
         toast.error(json.error || "Failed to update deals");
       }
@@ -388,10 +407,10 @@ export function DealsContent() {
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
           onRowClick={(d) => router.push(`/dashboard/deals/${d.id}`)}
-          page={page}
-          pageSize={PAGE_SIZE}
           totalCount={total}
-          onPageChange={setPage}
+          onLoadMore={handleLoadMore}
+          isLoadingMore={isLoadingMore}
+          hasMore={deals.length < total}
           emptyMessage={search || activeFilters.length ? t("crm.deals.noMatching") : t("crm.deals.noYet")}
         />
       )}

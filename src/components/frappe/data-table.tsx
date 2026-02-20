@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
+import { ArrowUp, ArrowDown, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "@/lib/i18n";
 
 // ============================================================================
@@ -32,11 +32,15 @@ interface DataTableProps<T extends { id: string }> {
   onSelectionChange?: (ids: Set<string>) => void;
   // Row click
   onRowClick?: (item: T) => void;
-  // Pagination
+  // Pagination (legacy — used as fallback when onLoadMore is not provided)
   page?: number;
   pageSize?: number;
   totalCount?: number;
   onPageChange?: (page: number) => void;
+  // Infinite scroll
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
+  hasMore?: boolean;
   // State
   loading?: boolean;
   emptyMessage?: string;
@@ -61,12 +65,17 @@ export function DataTable<T extends { id: string }>({
   pageSize = 50,
   totalCount,
   onPageChange,
+  onLoadMore,
+  isLoadingMore = false,
+  hasMore = false,
   loading = false,
   emptyMessage,
   className,
 }: DataTableProps<T>) {
   const { t } = useTranslation();
   const resolvedEmptyMessage = emptyMessage || t("crm.dataTable.noData");
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
   const allSelected = useMemo(
     () => data.length > 0 && data.every((item) => selectedIds.has(item.id)),
     [data, selectedIds]
@@ -107,6 +116,27 @@ export function DataTable<T extends { id: string }>({
     [sortBy, sortOrder, onSort]
   );
 
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    if (!onLoadMore || !hasMore || isLoadingMore || loading) return;
+
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [onLoadMore, hasMore, isLoadingMore, loading]);
+
+  const useInfiniteScroll = !!onLoadMore;
   const total = totalCount ?? data.length;
   const totalPages = Math.ceil(total / pageSize);
 
@@ -218,12 +248,29 @@ export function DataTable<T extends { id: string }>({
                 </tr>
               ))
             )}
+
+            {/* Loading more indicator */}
+            {isLoadingMore && (
+              <tr>
+                <td
+                  colSpan={columns.length + (selectable ? 1 : 0)}
+                  className="px-3 py-4 text-center"
+                >
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mx-auto" />
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {/* Infinite scroll sentinel */}
+      {useInfiniteScroll && hasMore && !loading && (
+        <div ref={sentinelRef} className="h-1" />
+      )}
+
+      {/* Legacy pagination (when infinite scroll is not used) */}
+      {!useInfiniteScroll && totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-border px-4 py-2">
           <span className="text-xs text-muted-foreground">
             {t("crm.dataTable.showing", { start: (page - 1) * pageSize + 1, end: Math.min(page * pageSize, total), total })}

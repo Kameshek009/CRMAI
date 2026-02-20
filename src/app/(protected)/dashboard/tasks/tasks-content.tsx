@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { ViewControls, type FilterOption, type ActiveFilter, type SortOption, type GroupByOption } from "@/components/frappe/view-controls";
 import { DataTable, type Column } from "@/components/frappe/data-table";
@@ -77,12 +77,13 @@ export function TasksContent() {
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const pageRef = useRef(1);
 
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [page, setPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [groupBy, setGroupBy] = useState<string | null>("status");
 
@@ -154,14 +155,18 @@ export function TasksContent() {
     meeting: { name: "location", label: t("crm.tasks.fields.location"), inputType: "text", icon: MapPin, placeholder: t("crm.tasks.placeholders.location") },
   }), [t]);
 
-  const fetchTasks = useCallback(async () => {
-    setIsLoading(true);
+  const fetchTasks = useCallback(async (pageNum: number, append: boolean) => {
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       params.set("sort_by", sortBy);
       params.set("sort_order", sortOrder);
-      params.set("page", String(page));
+      params.set("page", String(pageNum));
       params.set("limit", String(PAGE_SIZE));
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
@@ -169,17 +174,31 @@ export function TasksContent() {
       const res = await fetch(`/api/crm/tasks?${params}`);
       const json = await res.json();
       if (json.success) {
-        setTasks(json.data);
+        if (append) {
+          setTasks(prev => [...prev, ...json.data]);
+        } else {
+          setTasks(json.data);
+        }
         setTotal(json.total || 0);
       }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [search, sortBy, sortOrder, page, activeFilters]);
+  }, [search, sortBy, sortOrder, activeFilters]);
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+  useEffect(() => {
+    pageRef.current = 1;
+    fetchTasks(1, false);
+  }, [fetchTasks]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
-  useEffect(() => { setPage(1); }, [search, activeFilters, sortBy, sortOrder]);
+
+  const handleLoadMore = useCallback(() => {
+    if (isLoadingMore || tasks.length >= total) return;
+    const nextPage = pageRef.current + 1;
+    pageRef.current = nextPage;
+    fetchTasks(nextPage, true);
+  }, [isLoadingMore, tasks.length, total, fetchTasks]);
 
   // Form init
   useEffect(() => {
@@ -279,7 +298,7 @@ export function TasksContent() {
     });
     if (!res.ok) {
       toast.error(t("crm.tasks.failedStatus"));
-      fetchTasks();
+      pageRef.current = 1; fetchTasks(1, false);
     }
   };
 
@@ -307,7 +326,7 @@ export function TasksContent() {
       if (json.success) {
         toast.success(isEdit ? t("crm.tasks.updated") : t("crm.tasks.created"));
         if (!isEdit) useFeatureLimitStore.getState().incrementUsage("tasks");
-        fetchTasks();
+        pageRef.current = 1; fetchTasks(1, false);
         setFormMode({ type: "closed" });
       } else {
         handleApiError(json);
@@ -330,7 +349,7 @@ export function TasksContent() {
       if (json.success) {
         toast.success(t("crm.tasks.deleted", { count: ids.length }));
         setSelectedIds(new Set());
-        fetchTasks();
+        pageRef.current = 1; fetchTasks(1, false);
       } else {
         toast.error(json.error || t("common.failed"));
       }
@@ -353,7 +372,7 @@ export function TasksContent() {
       if (json.success) {
         toast.success(t("crm.tasks.statusUpdated", { count: ids.length }));
         setSelectedIds(new Set());
-        fetchTasks();
+        pageRef.current = 1; fetchTasks(1, false);
       } else {
         toast.error(json.error || t("common.failed"));
       }
@@ -488,10 +507,10 @@ export function TasksContent() {
             const found = tasks.find(x => x.id === task.id);
             if (found) setFormMode({ type: "edit", task: found });
           }}
-          page={page}
-          pageSize={PAGE_SIZE}
           totalCount={total}
-          onPageChange={setPage}
+          onLoadMore={handleLoadMore}
+          isLoadingMore={isLoadingMore}
+          hasMore={tasks.length < total}
           emptyMessage={search || activeFilters.length ? t("crm.tasks.noMatching") : t("crm.tasks.noYet")}
         />
       )}

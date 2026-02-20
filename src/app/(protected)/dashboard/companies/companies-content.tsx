@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { ViewControls, type FilterOption, type ActiveFilter, type SortOption, type GroupByOption } from "@/components/frappe/view-controls";
@@ -84,12 +84,13 @@ export function CompaniesContent() {
   const [companies, setCompanies] = useState<CompanyData[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const pageRef = useRef(1);
 
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [page, setPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [groupBy, setGroupBy] = useState<string | null>("industry");
 
@@ -98,14 +99,18 @@ export function CompaniesContent() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
 
-  const fetchCompanies = useCallback(async () => {
-    setIsLoading(true);
+  const fetchCompanies = useCallback(async (pageNum: number, append: boolean) => {
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       params.set("sort_by", sortBy);
       params.set("sort_order", sortOrder);
-      params.set("page", String(page));
+      params.set("page", String(pageNum));
       params.set("limit", String(PAGE_SIZE));
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
@@ -113,17 +118,31 @@ export function CompaniesContent() {
       const res = await fetch(`/api/crm/companies?${params}`);
       const json = await res.json();
       if (json.success) {
-        setCompanies(json.data);
+        if (append) {
+          setCompanies(prev => [...prev, ...json.data]);
+        } else {
+          setCompanies(json.data);
+        }
         setTotal(json.total || 0);
       }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [search, sortBy, sortOrder, page, activeFilters]);
+  }, [search, sortBy, sortOrder, activeFilters]);
 
-  useEffect(() => { fetchCompanies(); }, [fetchCompanies]);
+  useEffect(() => {
+    pageRef.current = 1;
+    fetchCompanies(1, false);
+  }, [fetchCompanies]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
-  useEffect(() => { setPage(1); }, [search, activeFilters, sortBy, sortOrder]);
+
+  const handleLoadMore = useCallback(() => {
+    if (isLoadingMore || companies.length >= total) return;
+    const nextPage = pageRef.current + 1;
+    pageRef.current = nextPage;
+    fetchCompanies(nextPage, true);
+  }, [isLoadingMore, companies.length, total, fetchCompanies]);
 
   const handleCreate = async (values: Record<string, string>) => {
     const res = await fetch("/api/crm/companies", {
@@ -135,7 +154,7 @@ export function CompaniesContent() {
     if (json.success) {
       toast.success(t("crm.companies.created"));
       useFeatureLimitStore.getState().incrementUsage("companies");
-      fetchCompanies();
+      pageRef.current = 1; fetchCompanies(1, false);
     } else {
       handleApiError(json);
       throw new Error(json.error);
@@ -173,7 +192,7 @@ export function CompaniesContent() {
       if (json.success) {
         toast.success(`Deleted ${ids.length} organization${ids.length !== 1 ? "s" : ""}`);
         setSelectedIds(new Set());
-        fetchCompanies();
+        pageRef.current = 1; fetchCompanies(1, false);
       } else {
         toast.error(json.error || "Failed to delete");
       }
@@ -262,10 +281,10 @@ export function CompaniesContent() {
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
           onRowClick={(c) => router.push(`/dashboard/companies/${c.id}`)}
-          page={page}
-          pageSize={PAGE_SIZE}
           totalCount={total}
-          onPageChange={setPage}
+          onLoadMore={handleLoadMore}
+          isLoadingMore={isLoadingMore}
+          hasMore={companies.length < total}
           emptyMessage={search || activeFilters.length > 0 ? t("crm.companies.noMatching") : t("crm.companies.noYet")}
         />
       )}

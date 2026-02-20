@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { ViewControls, type FilterOption, type ActiveFilter, type SortOption, type GroupByOption } from "@/components/frappe/view-controls";
@@ -93,13 +93,14 @@ export function ContactsContent() {
   const [contacts, setContacts] = useState<ContactData[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const pageRef = useRef(1);
 
   // View
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [page, setPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [groupBy, setGroupBy] = useState<string | null>("status");
 
@@ -113,14 +114,18 @@ export function ContactsContent() {
   const [isBulkLoading, setIsBulkLoading] = useState(false);
 
   // Fetch
-  const fetchContacts = useCallback(async () => {
-    setIsLoading(true);
+  const fetchContacts = useCallback(async (pageNum: number, append: boolean) => {
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       params.set("sort_by", sortBy);
       params.set("sort_order", sortOrder);
-      params.set("page", String(page));
+      params.set("page", String(pageNum));
       params.set("limit", String(PAGE_SIZE));
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
@@ -128,17 +133,31 @@ export function ContactsContent() {
       const res = await fetch(`/api/crm/contacts?${params}`);
       const json = await res.json();
       if (json.success) {
-        setContacts(json.data);
+        if (append) {
+          setContacts(prev => [...prev, ...json.data]);
+        } else {
+          setContacts(json.data);
+        }
         setTotal(json.total || 0);
       }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [search, sortBy, sortOrder, page, activeFilters]);
+  }, [search, sortBy, sortOrder, activeFilters]);
 
-  useEffect(() => { fetchContacts(); }, [fetchContacts]);
+  useEffect(() => {
+    pageRef.current = 1;
+    fetchContacts(1, false);
+  }, [fetchContacts]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
-  useEffect(() => { setPage(1); }, [search, activeFilters, sortBy, sortOrder]);
+
+  const handleLoadMore = useCallback(() => {
+    if (isLoadingMore || contacts.length >= total) return;
+    const nextPage = pageRef.current + 1;
+    pageRef.current = nextPage;
+    fetchContacts(nextPage, true);
+  }, [isLoadingMore, contacts.length, total, fetchContacts]);
 
   // Handlers
   const handleCreate = async (values: Record<string, string>) => {
@@ -151,7 +170,7 @@ export function ContactsContent() {
     if (json.success) {
       toast.success(t("crm.contacts.created"));
       useFeatureLimitStore.getState().incrementUsage("contacts");
-      fetchContacts();
+      pageRef.current = 1; fetchContacts(1, false);
     } else {
       handleApiError(json);
       throw new Error(json.error);
@@ -189,7 +208,7 @@ export function ContactsContent() {
       if (json.success) {
         toast.success(`Deleted ${ids.length} contact${ids.length !== 1 ? "s" : ""}`);
         setSelectedIds(new Set());
-        fetchContacts();
+        pageRef.current = 1; fetchContacts(1, false);
       } else {
         toast.error(json.error || "Failed to delete contacts");
       }
@@ -212,7 +231,7 @@ export function ContactsContent() {
       if (json.success) {
         toast.success(`Updated ${ids.length} contact${ids.length !== 1 ? "s" : ""}`);
         setSelectedIds(new Set());
-        fetchContacts();
+        pageRef.current = 1; fetchContacts(1, false);
       } else {
         toast.error(json.error || "Failed to update contacts");
       }
@@ -230,7 +249,7 @@ export function ContactsContent() {
     });
     if (!res.ok) {
       toast.error("Failed to update status");
-      fetchContacts();
+      pageRef.current = 1; fetchContacts(1, false);
     }
   };
 
@@ -343,10 +362,10 @@ export function ContactsContent() {
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
           onRowClick={(c) => router.push(`/dashboard/contacts/${c.id}`)}
-          page={page}
-          pageSize={PAGE_SIZE}
           totalCount={total}
-          onPageChange={setPage}
+          onLoadMore={handleLoadMore}
+          isLoadingMore={isLoadingMore}
+          hasMore={contacts.length < total}
           emptyMessage={search || activeFilters.length > 0 ? t("crm.contacts.noMatching") : t("crm.contacts.noYet")}
         />
       )}
@@ -418,7 +437,7 @@ export function ContactsContent() {
       <ImportWizard
         open={showImport}
         onOpenChange={setShowImport}
-        onComplete={fetchContacts}
+        onComplete={() => { pageRef.current = 1; fetchContacts(1, false); }}
       />
 
       <BulkActionBar
