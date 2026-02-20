@@ -102,8 +102,9 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       }
       if (notesRes.success) setNotes(notesRes.data);
       if (tasksRes.success) setTasks(tasksRes.data);
-      if (stagesRes.success) {
-        setStages(stagesRes.data.sort((a: DealStage, b: DealStage) => a.position - b.position));
+      if (stagesRes.success && stagesRes.data?.columns) {
+        const parsed = stagesRes.data.columns.map((c: { stage: DealStage }) => c.stage);
+        setStages(parsed.sort((a: DealStage, b: DealStage) => a.position - b.position));
       }
       setIsLoading(false);
     });
