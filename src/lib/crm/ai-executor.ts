@@ -164,7 +164,10 @@ async function createDeal(
       .order("position", { ascending: true })
       .limit(1)
       .single();
-    stageId = firstStage?.id || "";
+    if (!firstStage) {
+      return { success: false, result: "No pipeline stages found. Please open the pipeline first to set up stages." };
+    }
+    stageId = firstStage.id;
   }
 
   let contactId: string | null = null;

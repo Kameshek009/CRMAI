@@ -332,10 +332,10 @@ export default function ChatDetailPage() {
             deal: ['сделка', 'сделок'],
           };
 
-          // Group by entity type — match any create_ tool, with or without data.id
+          // Group by entity type — only count SUCCESSFUL tool calls
           const grouped = new Map<string, typeof toolResults>();
           for (const r of toolResults) {
-            if (r.name in entityLinks) {
+            if (r.name in entityLinks && r.success !== false) {
               if (!grouped.has(r.name)) grouped.set(r.name, []);
               grouped.get(r.name)!.push(r);
             }

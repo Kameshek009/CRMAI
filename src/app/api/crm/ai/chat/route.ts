@@ -18,7 +18,6 @@ const CHAT_BASE_COST = 150; // simple conversation message
 const CHAT_LONG_REPLY_COST = 300; // longer AI reply (>200 chars)
 
 const TOOL_COSTS: Record<string, { base: number; perField: number }> = {
-  create_lead:         { base: 200, perField: 80 },
   create_contact:      { base: 200, perField: 80 },
   create_deal:         { base: 300, perField: 100 },
   create_task:         { base: 200, perField: 60 },
