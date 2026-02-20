@@ -133,7 +133,33 @@
     },
     "deleteTitle": "Удалить сделки",
     "deleteConfirm": "Вы уверены, что хотите удалить {count} сделок? Это действие необратимо.",
-    "changeStatus": "Изменить статус"
+    "changeStatus": "Изменить статус",
+    "detail": {
+      "breadcrumb": "Сделки",
+      "notFound": "Сделка не найдена",
+      "delete": "Удалить",
+      "deleteDealTitle": "Удалить сделку",
+      "deleteDealConfirm": "Вы уверены, что хотите удалить \"{title}\"? Это действие необратимо.",
+      "updated": "Обновлено",
+      "failedUpdate": "Не удалось обновить",
+      "stageUpdated": "Стадия обновлена",
+      "failedStage": "Не удалось обновить стадию",
+      "noteAdded": "Заметка добавлена",
+      "dealDeleted": "Сделка удалена",
+      "failedDelete": "Не удалось удалить",
+      "tabs": {
+        "activity": "Активность",
+        "notes": "Заметки",
+        "tasks": "Задачи",
+        "emails": "Письма"
+      },
+      "noActivity": "Активности пока нет",
+      "noNotes": "Заметок пока нет",
+      "noTasks": "Нет связанных задач",
+      "pipeline": "Воронка",
+      "winProbability": "Вероятность выигрыша",
+      "created": "Создано"
+    }
   },
   "companies": {
     "title": "Организации",

@@ -133,7 +133,33 @@
     },
     "deleteTitle": "Delete deals",
     "deleteConfirm": "Are you sure you want to delete {count} deal(s)? This action cannot be undone.",
-    "changeStatus": "Change Status"
+    "changeStatus": "Change Status",
+    "detail": {
+      "breadcrumb": "Deals",
+      "notFound": "Deal not found",
+      "delete": "Delete",
+      "deleteDealTitle": "Delete deal",
+      "deleteDealConfirm": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+      "updated": "Updated",
+      "failedUpdate": "Failed to update",
+      "stageUpdated": "Stage updated",
+      "failedStage": "Failed to update stage",
+      "noteAdded": "Note added",
+      "dealDeleted": "Deal deleted",
+      "failedDelete": "Failed to delete",
+      "tabs": {
+        "activity": "Activity",
+        "notes": "Notes",
+        "tasks": "Tasks",
+        "emails": "Emails"
+      },
+      "noActivity": "No activity yet",
+      "noNotes": "No notes yet",
+      "noTasks": "No tasks linked",
+      "pipeline": "Pipeline",
+      "winProbability": "Win Probability",
+      "created": "Created"
+    }
   },
   "companies": {
     "title": "Organizations",

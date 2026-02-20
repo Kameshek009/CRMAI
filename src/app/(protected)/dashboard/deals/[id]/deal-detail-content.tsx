@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
+import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -70,6 +71,7 @@ interface NoteData {
 
 export function DealDetailContent({ dealId }: { dealId: string }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [deal, setDeal] = useState<Deal | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [notes, setNotes] = useState<NoteData[]>([]);
@@ -119,11 +121,11 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
     const json = await res.json();
     if (json.success) {
       setDeal(json.data);
-      toast.success("Updated");
+      toast.success(t("crm.deals.detail.updated"));
     } else {
-      toast.error("Failed to update");
+      toast.error(t("crm.deals.detail.failedUpdate"));
     }
-  }, [dealId]);
+  }, [dealId, t]);
 
   const handleUpdateMetadata = useCallback(async (key: string, value: string) => {
     const currentMeta = deal?.metadata || {};
@@ -136,11 +138,11 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
     const json = await res.json();
     if (json.success) {
       setDeal(json.data);
-      toast.success("Updated");
+      toast.success(t("crm.deals.detail.updated"));
     } else {
-      toast.error("Failed to update");
+      toast.error(t("crm.deals.detail.failedUpdate"));
     }
-  }, [dealId, deal?.metadata]);
+  }, [dealId, deal?.metadata, t]);
 
   const handleStageChange = async (stageId: string) => {
     const res = await fetch(`/api/crm/deals/${dealId}`, {
@@ -151,9 +153,9 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
     const json = await res.json();
     if (json.success) {
       setDeal(json.data);
-      toast.success("Stage updated");
+      toast.success(t("crm.deals.detail.stageUpdated"));
     } else {
-      toast.error("Failed to update stage");
+      toast.error(t("crm.deals.detail.failedStage"));
     }
   };
 
@@ -166,7 +168,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
     const json = await res.json();
     if (json.success) {
       setNotes([json.data, ...notes]);
-      toast.success("Note added");
+      toast.success(t("crm.deals.detail.noteAdded"));
     }
   };
 
@@ -176,10 +178,10 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       const res = await fetch(`/api/crm/deals/${dealId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        toast.success("Deal deleted");
+        toast.success(t("crm.deals.detail.dealDeleted"));
         router.push("/dashboard/deals");
       } else {
-        toast.error("Failed to delete");
+        toast.error(t("crm.deals.detail.failedDelete"));
       }
     } finally {
       setIsDeleting(false);
@@ -203,7 +205,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   }
 
   if (!deal) {
-    return <PageContainer><p className="text-muted-foreground">Deal not found</p></PageContainer>;
+    return <PageContainer><p className="text-muted-foreground">{t("crm.deals.detail.notFound")}</p></PageContainer>;
   }
 
   const formatCurrency = (value: number | null) => {
@@ -217,18 +219,18 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   const tabs = [
     {
       value: "activity",
-      label: "Activity",
+      label: t("crm.deals.detail.tabs.activity"),
       count: activities.length,
       content: (
         <ActivityStream
           activities={activities}
-          emptyMessage="No activity yet"
+          emptyMessage={t("crm.deals.detail.noActivity")}
         />
       ),
     },
     {
       value: "notes",
-      label: "Notes",
+      label: t("crm.deals.detail.tabs.notes"),
       count: notes.length,
       content: (
         <div className="space-y-4">
@@ -237,17 +239,17 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
             <div key={note.id} className="border-l-2 border-muted-foreground/20 pl-4 py-2">
               <p className="text-sm whitespace-pre-wrap">{note.content}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {new Date(note.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {new Date(note.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
           ))}
-          {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No notes yet</p>}
+          {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.deals.detail.noNotes")}</p>}
         </div>
       ),
     },
     {
       value: "tasks",
-      label: "Tasks",
+      label: t("crm.deals.detail.tabs.tasks"),
       count: tasks.length,
       content: tasks.length > 0 ? (
         <div className="space-y-2">
@@ -260,7 +262,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
               <div className="flex items-center gap-2">
                 {task.due_date && (
                   <span className="text-xs text-muted-foreground">
-                    {new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {new Date(task.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </span>
                 )}
                 {task.priority && (
@@ -272,12 +274,12 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground py-8 text-center">No tasks linked</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.deals.detail.noTasks")}</p>
       ),
     },
     {
       value: "emails",
-      label: "Emails",
+      label: t("crm.deals.detail.tabs.emails"),
       content: <EmailList entityType="deal" entityId={dealId} />,
     },
   ];
@@ -295,13 +297,13 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       </div>
 
       <InlineEditField
-        label="Title"
+        label={t("crm.deals.fields.title")}
         value={deal.title}
         type="text"
         onSave={(v) => updateField("title", v)}
       />
       <InlineEditField
-        label="Value"
+        label={t("crm.deals.fields.value")}
         value={deal.value != null ? String(deal.value) : null}
         type="number"
         onSave={(v) => updateField("value", v)}
@@ -310,7 +312,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       {/* Stage selector */}
       {stageOptions.length > 0 && (
         <InlineEditField
-          label="Stage"
+          label={t("crm.deals.fields.stage")}
           value={deal.stage_id}
           type="select"
           options={stageOptions}
@@ -321,7 +323,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       {/* Visual stage pipeline */}
       {stages.length > 0 && (
         <div className="pt-2 border-t border-border">
-          <div className="text-xs text-muted-foreground mb-2">Pipeline</div>
+          <div className="text-xs text-muted-foreground mb-2">{t("crm.deals.detail.pipeline")}</div>
           <div className="flex gap-1">
             {stages.map(s => {
               const isActive = s.id === deal.stage_id;
@@ -352,18 +354,18 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       )}
 
       <InlineEditField
-        label="Status"
+        label={t("crm.deals.fields.status")}
         value={deal.status}
         type="select"
         options={[
-          { value: "open", label: "Open" },
-          { value: "won", label: "Won" },
-          { value: "lost", label: "Lost" },
+          { value: "open", label: t("crm.deals.statuses.open") },
+          { value: "won", label: t("crm.deals.statuses.won") },
+          { value: "lost", label: t("crm.deals.statuses.lost") },
         ]}
         onSave={(v) => updateField("status", v)}
       />
       <InlineEditField
-        label="Expected Close"
+        label={t("crm.deals.fields.expectedClose")}
         value={deal.expected_close_date}
         type="date"
         onSave={(v) => updateField("expected_close_date", v)}
@@ -376,7 +378,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       />
 
       <div className="pt-2 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-1">Win Probability</div>
+        <div className="text-xs text-muted-foreground mb-1">{t("crm.deals.detail.winProbability")}</div>
         <div className="text-sm font-semibold">
           {deal.ai_win_probability != null ? `${deal.ai_win_probability}%` : "—"}
         </div>
@@ -384,7 +386,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
 
       {deal.contacts && (
         <div className="pt-2 border-t border-border">
-          <div className="text-xs text-muted-foreground mb-1">Contact</div>
+          <div className="text-xs text-muted-foreground mb-1">{t("crm.deals.fields.contact")}</div>
           <Link href={`/dashboard/contacts/${deal.contacts.id}`} className="text-sm font-medium hover:underline">
             {deal.contacts.first_name} {deal.contacts.last_name || ""}
           </Link>
@@ -393,7 +395,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
 
       {deal.companies && (
         <div className="pt-2 border-t border-border">
-          <div className="text-xs text-muted-foreground mb-1">Organization</div>
+          <div className="text-xs text-muted-foreground mb-1">{t("crm.deals.fields.organization")}</div>
           <Link href={`/dashboard/companies/${deal.companies.id}`} className="text-sm font-medium hover:underline">
             {deal.companies.name}
           </Link>
@@ -401,10 +403,10 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       )}
 
       <div className="pt-2 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-1">Created</div>
+        <div className="text-xs text-muted-foreground mb-1">{t("crm.deals.detail.created")}</div>
         <div className="text-sm">
           {deal.created_at
-            ? new Date(deal.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+            ? new Date(deal.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
             : "—"}
         </div>
       </div>
@@ -415,7 +417,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
     <PageContainer>
       <DetailLayout
         breadcrumbs={[
-          { label: "Deals", href: "/dashboard/deals" },
+          { label: t("crm.deals.detail.breadcrumb"), href: "/dashboard/deals" },
           { label: deal.title },
         ]}
         title={deal.title}
@@ -437,7 +439,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
         actions={
           <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
             <Trash2 className="size-3.5 mr-1.5" />
-            Delete
+            {t("crm.deals.detail.delete")}
           </Button>
         }
         tabs={tabs}
@@ -448,9 +450,9 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete deal"
-        description={`Are you sure you want to delete "${deal.title}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("crm.deals.detail.deleteDealTitle")}
+        description={t("crm.deals.detail.deleteDealConfirm", { title: deal.title })}
+        confirmLabel={t("crm.deals.detail.delete")}
         variant="destructive"
         isLoading={isDeleting}
         onConfirm={handleDelete}
