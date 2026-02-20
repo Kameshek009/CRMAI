@@ -136,19 +136,31 @@ export async function ensureDealStages(accountId: string, teamId?: string | null
       .limit(1);
 
     if (!checkAgain || checkAgain.length === 0) {
+      // Find max position to avoid unique constraint on (account_id, position)
+      const { data: maxPos } = await supabase
+        .from("deal_stages")
+        .select("position")
+        .eq("account_id", accountId)
+        .order("position", { ascending: false })
+        .limit(1)
+        .single();
+
+      const startPos = (maxPos?.position ?? -1) + 1;
+
       const defaultStages = [
-        { name: "Lead", position: 0, win_probability: 10 },
-        { name: "Qualified", position: 1, win_probability: 25 },
-        { name: "Proposal", position: 2, win_probability: 50 },
-        { name: "Negotiation", position: 3, win_probability: 75 },
-        { name: "Closed Won", position: 4, win_probability: 100, is_won: true, is_lost: false },
-        { name: "Closed Lost", position: 5, win_probability: 0, is_won: false, is_lost: true },
+        { name: "Lead", color: "#94a3b8", is_won: false, is_lost: false },
+        { name: "Qualified", color: "#6366f1", is_won: false, is_lost: false },
+        { name: "Proposal", color: "#f59e0b", is_won: false, is_lost: false },
+        { name: "Negotiation", color: "#f97316", is_won: false, is_lost: false },
+        { name: "Won", color: "#22c55e", is_won: true, is_lost: false },
+        { name: "Lost", color: "#ef4444", is_won: false, is_lost: true },
       ];
 
       await supabase.from("deal_stages").insert(
-        defaultStages.map((s) => ({
+        defaultStages.map((s, i) => ({
           account_id: accountId,
           team_id: teamId,
+          position: startPos + i,
           ...s,
         }))
       );
