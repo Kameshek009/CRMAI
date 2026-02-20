@@ -581,6 +581,10 @@ function SidebarMenuBadge({
   )
 }
 
+// Deterministic widths to avoid hydration mismatch from Math.random()
+const SKELETON_WIDTHS = ["70%", "55%", "85%", "60%", "75%", "65%", "80%", "50%"]
+let skeletonIndex = 0
+
 function SidebarMenuSkeleton({
   className,
   showIcon = false,
@@ -588,9 +592,10 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
   const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
+    const w = SKELETON_WIDTHS[skeletonIndex % SKELETON_WIDTHS.length]
+    skeletonIndex++
+    return w
   }, [])
 
   return (

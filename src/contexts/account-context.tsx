@@ -313,11 +313,15 @@ export function AccountProvider({ children }: AccountProviderProps) {
     };
   }, [account?.id, subscribeToRealtime]);
 
-  // Calculate usage stats (memoized to prevent unnecessary consumer re-renders)
-  const usage = useMemo(
-    () => (account ? calculateUsageStats(account) : null),
-    [account]
-  );
+  // Calculate usage stats only on the client (uses new Date() which differs server/client)
+  const [usage, setUsage] = useState<UsageStats | null>(null);
+  useEffect(() => {
+    if (account) {
+      setUsage(calculateUsageStats(account));
+    } else {
+      setUsage(null);
+    }
+  }, [account]);
 
   const value: AccountContextValue = useMemo(
     () => ({ account, usage, isLoading, error, refetch, isConnected }),

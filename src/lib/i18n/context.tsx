@@ -54,15 +54,16 @@ function resolveKey(obj: unknown, path: string): string | undefined {
   return typeof current === "string" ? current : undefined;
 }
 
-function getInitialLocale(): Locale {
-  if (typeof window === "undefined") return defaultLocale;
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "ru") return stored;
-  return defaultLocale;
-}
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
+
+  // Sync locale from localStorage after mount to avoid hydration mismatch
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "en" || stored === "ru") {
+      setLocaleState(stored);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, locale);
