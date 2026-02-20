@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
 import {
   DndContext,
@@ -18,10 +18,7 @@ import { DealCardOverlay, type DealForCard } from "@/components/crm/deal-card";
 import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { EmptyState } from "@/components/crm/empty-state";
 import { PipelineToolbar } from "@/components/pipeline/pipeline-toolbar";
-import { PipelineCanvas } from "@/components/pipeline/pipeline-canvas";
-import { PipelineMinimap } from "@/components/pipeline/pipeline-minimap";
 import { StageColumn } from "@/components/pipeline/stage-column";
-import { useCanvasTransform } from "@/hooks/use-canvas-transform";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Kanban } from "lucide-react";
 import { toast } from "sonner";
@@ -44,11 +41,6 @@ interface PipelineColumn {
   totalValue: number;
   count: number;
 }
-
-// ── Constants ───────────────────────────────────────────────────────────
-
-const COLUMN_WIDTH = 288;
-const COLUMN_GAP = 16;
 
 // ── Pipeline Page ───────────────────────────────────────────────────────
 
@@ -76,23 +68,13 @@ export function PipelineContent() {
   const [showForm, setShowForm] = useState(false);
   const [newDealStageId, setNewDealStageId] = useState("");
 
-  // Canvas transform
-  const { transform, setTransform, zoomIn, zoomOut, resetView, fitToScreen, handlers } = useCanvasTransform();
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Adjust sensor activation distance for zoom level
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: Math.max(5, 8 / transform.scale) },
+      activationConstraint: { distance: 5 },
     }),
     useSensor(TouchSensor, {
       activationConstraint: { delay: 200, tolerance: 5 },
     })
-  );
-
-  const contentWidth = useMemo(
-    () => columns.length * (COLUMN_WIDTH + COLUMN_GAP) + COLUMN_GAP,
-    [columns.length]
   );
 
   const fetchPipeline = useCallback(async () => {
@@ -244,19 +226,6 @@ export function PipelineContent() {
     }
   };
 
-  const handleFitToScreen = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    fitToScreen(container.clientWidth, contentWidth);
-  }, [fitToScreen, contentWidth]);
-
-  const handleMinimapNavigate = useCallback(
-    (x: number, y: number) => {
-      setTransform((prev) => ({ ...prev, x, y }));
-    },
-    [setTransform]
-  );
-
   // ── Loading ───────────────────────────────────────────────────────────
 
   if (isLoading) {
@@ -265,7 +234,7 @@ export function PipelineContent() {
         <div className="px-4 py-4 border-b">
           <Skeleton className="h-8 w-48" />
         </div>
-        <div className="flex gap-4 p-4 overflow-hidden flex-1">
+        <div className="flex gap-4 p-4 overflow-x-auto flex-1">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="w-72 shrink-0 space-y-2">
               <Skeleton className="h-16 w-full rounded-xl" />
@@ -289,9 +258,6 @@ export function PipelineContent() {
     );
   }
 
-  // Determine compact mode for low zoom
-  const compact = transform.scale < 0.6;
-
   // ── Render ────────────────────────────────────────────────────────────
 
   return (
@@ -301,11 +267,6 @@ export function PipelineContent() {
         weightedForecast={weightedForecast}
         search={search}
         onSearchChange={setSearch}
-        scale={transform.scale}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onFit={handleFitToScreen}
-        onReset={resetView}
       />
 
       <DndContext
@@ -315,8 +276,8 @@ export function PipelineContent() {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <PipelineCanvas ref={containerRef} transform={transform} handlers={handlers}>
-          <div className="flex gap-4 p-4" style={{ minWidth: contentWidth }}>
+        <div className="flex-1 overflow-x-auto overflow-y-hidden">
+          <div className="flex gap-4 p-4 h-full min-w-min">
             {filteredColumns.map((column) => (
               <StageColumn
                 key={column.stage.id}
@@ -325,7 +286,6 @@ export function PipelineContent() {
                 totalValue={column.totalValue}
                 count={column.count}
                 isOver={activeOverStageId === column.stage.id}
-                compact={compact}
                 onAddDeal={() => {
                   setNewDealStageId(column.stage.id);
                   setShowForm(true);
@@ -333,26 +293,12 @@ export function PipelineContent() {
               />
             ))}
           </div>
-        </PipelineCanvas>
+        </div>
 
         <DragOverlay dropAnimation={null}>
           {activeDeal && <DealCardOverlay deal={activeDeal} />}
         </DragOverlay>
       </DndContext>
-
-      {/* Minimap - bottom right */}
-      <div className="absolute bottom-4 right-4 z-10">
-        <PipelineMinimap
-          transform={transform}
-          columnCount={columns.length}
-          containerWidth={containerRef.current?.clientWidth || 800}
-          containerHeight={containerRef.current?.clientHeight || 600}
-          contentWidth={contentWidth}
-          contentHeight={600}
-          stageColors={columns.map((c) => c.stage.color)}
-          onNavigate={handleMinimapNavigate}
-        />
-      </div>
 
       <EntityForm
         open={showForm}

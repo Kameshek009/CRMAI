@@ -25,7 +25,6 @@ interface StageColumnProps {
   count: number;
   isOver: boolean;
   onAddDeal: () => void;
-  compact?: boolean;
 }
 
 export function StageColumn({
@@ -35,7 +34,6 @@ export function StageColumn({
   count,
   isOver,
   onAddDeal,
-  compact = false,
 }: StageColumnProps) {
   const { setNodeRef } = useDroppable({ id: stage.id });
   const { t } = useTranslation();
@@ -71,7 +69,7 @@ export function StageColumn({
   };
 
   return (
-    <div className={cn("shrink-0 flex flex-col", compact ? "w-56" : "w-72")}>
+    <div className="w-72 shrink-0 flex flex-col h-full min-h-0">
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 rounded-t-xl bg-card border border-b-0 relative overflow-hidden"
@@ -85,7 +83,7 @@ export function StageColumn({
         <div className="relative z-[1]">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stage.color, boxShadow: `0 0 8px ${stage.color}50` }} />
-            <h3 className={cn("font-bold", compact ? "text-xs" : "text-sm")}>{stage.name}</h3>
+            <h3 className="font-bold text-sm">{stage.name}</h3>
             <span
               className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold tabular-nums"
               style={{ backgroundColor: `${stage.color}15`, color: stage.color }}
@@ -99,10 +97,10 @@ export function StageColumn({
             )}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className={cn("text-muted-foreground font-medium", compact ? "text-[10px]" : "text-xs")}>
+            <p className="text-xs text-muted-foreground font-medium">
               ${totalValue.toLocaleString()}
             </p>
-            {stage.rotting_days && !compact && (
+            {stage.rotting_days && (
               <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60">
                 <Timer className="size-2.5" />
                 {stage.rotting_days}d
@@ -163,11 +161,11 @@ export function StageColumn({
         </div>
       )}
 
-      {/* Drop zone */}
+      {/* Drop zone — scrollable card list */}
       <div
         ref={setNodeRef}
         className={cn(
-          "flex-1 p-2 space-y-2 min-h-[120px] sm:min-h-[200px] rounded-b-xl border border-t-0 transition-all duration-200",
+          "flex-1 p-2 space-y-2 min-h-0 overflow-y-auto rounded-b-xl border border-t-0 transition-all duration-200",
           isOver
             ? "bg-primary/5 border-primary/40 ring-2 ring-primary/20 shadow-inner"
             : "bg-muted/10 dark:bg-muted/5"

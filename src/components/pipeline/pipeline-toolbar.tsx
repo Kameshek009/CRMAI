@@ -2,7 +2,6 @@
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { PipelineZoomControls } from "./pipeline-zoom-controls";
 import { DollarSign, TrendingUp, Search } from "lucide-react";
 
 interface PipelineToolbarProps {
@@ -10,11 +9,6 @@ interface PipelineToolbarProps {
   weightedForecast: number;
   search: string;
   onSearchChange: (value: string) => void;
-  scale: number;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onFit: () => void;
-  onReset: () => void;
 }
 
 export function PipelineToolbar({
@@ -22,11 +16,6 @@ export function PipelineToolbar({
   weightedForecast,
   search,
   onSearchChange,
-  scale,
-  onZoomIn,
-  onZoomOut,
-  onFit,
-  onReset,
 }: PipelineToolbarProps) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-2.5 border-b bg-background/80 backdrop-blur-xl shrink-0 header-shimmer">
@@ -44,22 +33,13 @@ export function PipelineToolbar({
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search deals..."
-            className="h-8 w-48 pl-8 text-sm glass-input rounded-lg"
-          />
-        </div>
-        <PipelineZoomControls
-          scale={scale}
-          onZoomIn={onZoomIn}
-          onZoomOut={onZoomOut}
-          onFit={onFit}
-          onReset={onReset}
+      <div className="relative">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search deals..."
+          className="h-8 w-48 pl-8 text-sm glass-input rounded-lg"
         />
       </div>
     </div>
