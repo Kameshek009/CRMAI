@@ -97,7 +97,7 @@ export function parsePagination(searchParams: URLSearchParams) {
 }
 
 /**
- * Ensure deal stages exist for an account, seeding defaults if needed
+ * Ensure deal stages exist for an account+team, seeding defaults if needed
  */
 export async function ensureDealStages(accountId: string, teamId?: string | null) {
   const supabase = createSupabaseAdmin();
@@ -114,15 +114,44 @@ export async function ensureDealStages(accountId: string, teamId?: string | null
 
   const { data: stages } = await query;
 
-  if (!stages || stages.length === 0) {
-    await supabase.rpc("seed_default_deal_stages", { p_account_id: accountId });
-    // Update newly seeded stages with team_id
-    if (teamId) {
-      await supabase
-        .from("deal_stages")
-        .update({ team_id: teamId })
-        .eq("account_id", accountId)
-        .is("team_id", null);
+  if (stages && stages.length > 0) return;
+
+  // Try seeding via RPC
+  await supabase.rpc("seed_default_deal_stages", { p_account_id: accountId });
+
+  if (teamId) {
+    // Assign any unassigned stages to this team
+    await supabase
+      .from("deal_stages")
+      .update({ team_id: teamId })
+      .eq("account_id", accountId)
+      .is("team_id", null);
+
+    // If still no stages (RPC skipped because stages exist for other teams), create defaults manually
+    const { data: checkAgain } = await supabase
+      .from("deal_stages")
+      .select("id")
+      .eq("account_id", accountId)
+      .eq("team_id", teamId)
+      .limit(1);
+
+    if (!checkAgain || checkAgain.length === 0) {
+      const defaultStages = [
+        { name: "Lead", position: 0, win_probability: 10 },
+        { name: "Qualified", position: 1, win_probability: 25 },
+        { name: "Proposal", position: 2, win_probability: 50 },
+        { name: "Negotiation", position: 3, win_probability: 75 },
+        { name: "Closed Won", position: 4, win_probability: 100, is_won: true, is_lost: false },
+        { name: "Closed Lost", position: 5, win_probability: 0, is_won: false, is_lost: true },
+      ];
+
+      await supabase.from("deal_stages").insert(
+        defaultStages.map((s) => ({
+          account_id: accountId,
+          team_id: teamId,
+          ...s,
+        }))
+      );
     }
   }
 }
