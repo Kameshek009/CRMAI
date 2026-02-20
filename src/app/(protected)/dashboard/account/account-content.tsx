@@ -4,16 +4,20 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { User, Palette, Globe, CreditCard, Users, Shield, Link2, AlertTriangle } from "lucide-react";
+import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
 import { LanguageSection } from "./sections/language-section";
+import { NotificationsSection } from "./sections/notifications-section";
+import { SecuritySection } from "./sections/security-section";
 import { BillingSection } from "./sections/billing-section";
 import { TeamSection } from "./sections/team-section";
 import { MembersSection } from "./sections/members-section";
 import { RolesSection } from "./sections/roles-section";
 import { ConnectionsSection } from "./sections/connections-section";
+import { ExportSection } from "./sections/export-section";
+import { IntegrationsSection } from "./sections/integrations-section";
 import { DangerSection } from "./sections/danger-section";
 
 interface AccountContentProps {
@@ -26,6 +30,8 @@ const PERSONAL_NAV = [
   { id: "profile", icon: User },
   { id: "appearance", icon: Palette },
   { id: "language", icon: Globe },
+  { id: "notifications", icon: Bell },
+  { id: "security", icon: Lock },
 ] as const;
 
 const TEAM_NAV = [
@@ -33,13 +39,19 @@ const TEAM_NAV = [
   { id: "members", icon: Users },
   { id: "roles", icon: Shield },
   { id: "connections", icon: Link2 },
+  { id: "export", icon: Download },
+  { id: "integrations", icon: Plug },
 ] as const;
 
 const BILLING_NAV = [
   { id: "billing", icon: CreditCard },
 ] as const;
 
-const VALID_TABS = ["profile", "appearance", "language", "team", "members", "roles", "connections", "billing", "danger"];
+const VALID_TABS = [
+  "profile", "appearance", "language", "notifications", "security",
+  "team", "members", "roles", "connections", "export", "integrations",
+  "billing", "danger",
+];
 
 export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
   const { t } = useTranslation();
@@ -134,6 +146,12 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             <TabsContent value="language">
               <LanguageSection />
             </TabsContent>
+            <TabsContent value="notifications">
+              <NotificationsSection />
+            </TabsContent>
+            <TabsContent value="security">
+              <SecuritySection />
+            </TabsContent>
             <TabsContent value="team">
               <TeamSection />
             </TabsContent>
@@ -145,6 +163,12 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             </TabsContent>
             <TabsContent value="connections">
               <ConnectionsSection />
+            </TabsContent>
+            <TabsContent value="export">
+              <ExportSection />
+            </TabsContent>
+            <TabsContent value="integrations">
+              <IntegrationsSection />
             </TabsContent>
             <TabsContent value="billing">
               <BillingSection />

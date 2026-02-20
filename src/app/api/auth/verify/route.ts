@@ -37,6 +37,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if account is deactivated
+    if (account && account.is_active === false) {
+      return NextResponse.json(
+        { success: false, error: "Account deactivated", code: "ACCOUNT_DEACTIVATED" },
+        { status: 403 }
+      );
+    }
+
     // If no account exists, create one
     if (!account) {
       const supabaseAdmin = createSupabaseAdmin();

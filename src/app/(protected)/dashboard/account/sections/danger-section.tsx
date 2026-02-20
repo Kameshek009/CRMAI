@@ -15,18 +15,28 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslation } from "@/lib/i18n";
 import { useWorkspace } from "@/contexts/team-context";
+import { useClerk } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { AlertTriangle, Loader2 } from "lucide-react";
 
 export function DangerSection() {
   const { t } = useTranslation();
   const { currentWorkspace, isOwner, refetch } = useWorkspace();
+  const { signOut } = useClerk();
+
+  // Workspace deletion state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [confirmName, setConfirmName] = useState("");
   const [deleting, setDeleting] = useState(false);
 
+  // Account deactivation state
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [deactivateConfirm, setDeactivateConfirm] = useState("");
+  const [deactivating, setDeactivating] = useState(false);
+
   const workspaceName = currentWorkspace?.name || "";
   const nameMatches = confirmName.trim() === workspaceName;
+  const deactivateMatches = deactivateConfirm.trim() === "DEACTIVATE";
 
   const handleDeleteWorkspace = async () => {
     if (!currentWorkspace || !nameMatches) return;
@@ -50,6 +60,26 @@ export function DangerSection() {
     }
   };
 
+  const handleDeactivateAccount = async () => {
+    if (!deactivateMatches) return;
+
+    setDeactivating(true);
+    try {
+      const res = await fetch("/api/account/deactivate", { method: "POST" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.danger.deactivated"));
+        await signOut({ redirectUrl: "/sign-in" });
+      } else {
+        toast.error(json.error || t("common.error"));
+      }
+    } catch {
+      toast.error(t("common.error"));
+    } finally {
+      setDeactivating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -58,15 +88,23 @@ export function DangerSection() {
       </div>
       <Separator />
 
-      {/* Delete Account */}
+      {/* Deactivate Account */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="font-medium text-sm">{t("settings.danger.deleteAccount")}</p>
+          <p className="font-medium text-sm">{t("settings.danger.deactivateAccount")}</p>
           <p className="text-sm text-muted-foreground">
-            {t("settings.danger.deleteAccountDescription")}
+            {t("settings.danger.deactivateAccountDescription")}
           </p>
         </div>
-        <Button variant="destructive">{t("settings.danger.deleteAccount")}</Button>
+        <Button
+          variant="destructive"
+          onClick={() => {
+            setDeactivateConfirm("");
+            setDeactivateDialogOpen(true);
+          }}
+        >
+          {t("settings.danger.deactivateAccount")}
+        </Button>
       </div>
 
       {/* Delete Workspace */}
@@ -145,6 +183,60 @@ export function DangerSection() {
           </Dialog>
         </>
       )}
+
+      {/* Deactivate Account Dialog */}
+      <Dialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              {t("settings.danger.deactivateConfirmTitle")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("settings.danger.deactivateConfirmDescription")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+              {t("settings.danger.deactivateConfirmWarning")}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-deactivate">
+                {t("settings.danger.deactivateConfirmLabel")}
+              </Label>
+              <Input
+                id="confirm-deactivate"
+                value={deactivateConfirm}
+                onChange={(e) => setDeactivateConfirm(e.target.value)}
+                placeholder="DEACTIVATE"
+                autoComplete="off"
+                onKeyDown={(e) => e.key === "Enter" && deactivateMatches && handleDeactivateAccount()}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeactivateDialogOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeactivateAccount}
+              disabled={!deactivateMatches || deactivating}
+            >
+              {deactivating ? (
+                <>
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                  {t("settings.danger.deactivating")}
+                </>
+              ) : (
+                t("settings.danger.deactivateConfirm")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

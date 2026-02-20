@@ -198,6 +198,11 @@ export function AccountProvider({ children }: AccountProviderProps) {
       const result = await response.json();
 
       if (!result.success) {
+        // If account is deactivated, sign out and redirect
+        if (result.code === "ACCOUNT_DEACTIVATED") {
+          window.location.href = "/sign-in";
+          return;
+        }
         throw new Error(result.error || "Failed to fetch account data");
       }
 
