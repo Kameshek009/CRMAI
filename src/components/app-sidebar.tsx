@@ -51,6 +51,10 @@ import {
   FileText,
   Phone,
   Mail,
+  Trash2,
+  GitMerge,
+  Target,
+  LineChart,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -88,11 +92,15 @@ const toolsGroup: NavGroup = {
     { labelKey: "nav.items.sequences", href: "/dashboard/sequences", icon: Mail },
     { labelKey: "nav.items.analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
     { labelKey: "nav.items.aiChat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
+    { labelKey: "nav.items.dedup", href: "/dashboard/dedup", icon: GitMerge },
+    { labelKey: "nav.items.goals", href: "/dashboard/goals", icon: Target },
+    { labelKey: "nav.items.forecast", href: "/dashboard/forecast", icon: LineChart },
   ],
 };
 
 const accountGroup: NavGroup = {
   items: [
+    { labelKey: "nav.items.trash", href: "/dashboard/trash", icon: Trash2 },
     { labelKey: "nav.items.settings", href: "/dashboard/account", icon: Settings },
     { labelKey: "nav.items.usage", href: "/dashboard/usage", icon: BarChart3 },
     { labelKey: "nav.items.upgrade", href: "/dashboard/upgrade", icon: Sparkles },

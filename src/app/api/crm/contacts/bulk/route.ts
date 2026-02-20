@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
       const { error: dbError } = await supabase
         .from("contacts")
-        .update({ is_deleted: true })
+        .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: context.accountId })
         .in("id", ids)
         .eq("account_id", context.accountId)
         .eq("team_id", context.teamId);

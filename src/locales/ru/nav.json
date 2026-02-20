@@ -29,7 +29,11 @@
     "connections": "Подключения",
     "activity": "Активность",
     "sessions": "Сессии",
-    "console": "Консоль"
+    "console": "Консоль",
+    "trash": "Корзина",
+    "dedup": "Дедупликация",
+    "goals": "Цели",
+    "forecast": "Прогноз"
   },
   "breadcrumb": {
     "home": "Главная",

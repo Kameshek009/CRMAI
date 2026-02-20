@@ -29,7 +29,11 @@
     "connections": "Connections",
     "activity": "Activity",
     "sessions": "Sessions",
-    "console": "Console"
+    "console": "Console",
+    "trash": "Trash",
+    "dedup": "Deduplication",
+    "goals": "Goals",
+    "forecast": "Forecast"
   },
   "breadcrumb": {
     "home": "Home",

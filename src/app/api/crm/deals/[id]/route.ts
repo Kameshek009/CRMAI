@@ -5,6 +5,7 @@ import { updateDealSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { runAutomations } from "@/lib/crm/automation-engine";
+import { createNotification } from "@/lib/crm/notifications";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -108,6 +109,31 @@ export async function PATCH(
       changes,
     });
 
+    // Notify on deal assignment change
+    if (changes?.["assigned_to"] && changes["assigned_to"].new && changes["assigned_to"].new !== context.accountId) {
+      createNotification({
+        accountId: changes["assigned_to"].new as string,
+        teamId: context.workspaceId,
+        type: "deal_assigned",
+        title: `Deal assigned to you: ${data.title}`,
+        entityType: "deal",
+        entityId: id,
+      });
+    }
+
+    // Notify assignee on stage change
+    if (changes?.["stage_id"] && oldRecord?.assigned_to && oldRecord.assigned_to !== context.accountId) {
+      createNotification({
+        accountId: oldRecord.assigned_to as string,
+        teamId: context.workspaceId,
+        type: "deal_stage_changed",
+        title: `Deal stage changed: ${data.title}`,
+        message: `Stage updated to ${data.deal_stages?.name || "new stage"}`,
+        entityType: "deal",
+        entityId: id,
+      });
+    }
+
     // Determine trigger type — deal_stage_changed or record_updated
     const triggerType = changes && changes["stage_id"] ? "deal_stage_changed" as const : "record_updated" as const;
     runAutomations({
@@ -153,7 +179,7 @@ export async function DELETE(
 
     const { error: dbError } = await supabase
       .from("deals")
-      .update({ is_deleted: true })
+      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: context.accountId })
       .eq("id", id)
       .eq("team_id", context.workspaceId);
 

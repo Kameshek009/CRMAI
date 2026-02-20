@@ -6,6 +6,7 @@ import { ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/stores/search-store";
 import { useTranslation } from "@/lib/i18n";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 const segmentKeys: Record<string, string> = {
   dashboard: "nav.breadcrumb.home",
@@ -32,6 +33,10 @@ const segmentKeys: Record<string, string> = {
   notes: "nav.items.notes",
   automations: "nav.items.automations",
   sequences: "nav.items.sequences",
+  trash: "nav.items.trash",
+  dedup: "nav.items.dedup",
+  goals: "nav.items.goals",
+  forecast: "nav.items.forecast",
 };
 
 function isUUID(s: string) {
@@ -76,18 +81,21 @@ export function DashboardHeader() {
         ))}
       </nav>
 
-      <Button
-        variant="outline"
-        size="sm"
-        className="gap-2 text-muted-foreground"
-        onClick={() => setOpen(true)}
-      >
-        <Search className="size-3.5" />
-        <span className="hidden sm:inline">{t("nav.search.buttonLabel")}</span>
-        <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-2 font-mono text-xs font-medium">
-          <span className="text-xs">⌘</span>K
-        </kbd>
-      </Button>
+      <div className="flex items-center gap-1">
+        <NotificationBell />
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 text-muted-foreground"
+          onClick={() => setOpen(true)}
+        >
+          <Search className="size-3.5" />
+          <span className="hidden sm:inline">{t("nav.search.buttonLabel")}</span>
+          <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-2 font-mono text-xs font-medium">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </Button>
+      </div>
     </div>
   );
 }
