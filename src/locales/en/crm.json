@@ -156,9 +156,27 @@
       "noActivity": "No activity yet",
       "noNotes": "No notes yet",
       "noTasks": "No tasks linked",
+      "noEmails": "No emails yet",
       "pipeline": "Pipeline",
       "winProbability": "Win Probability",
-      "created": "Created"
+      "created": "Created",
+      "taskCreated": "Task created",
+      "failedTask": "Failed to create task",
+      "addTask": "Add task",
+      "taskPlaceholder": "Task title...",
+      "activityLogged": "Activity logged",
+      "failedActivity": "Failed to log activity",
+      "logActivity": "Log activity",
+      "activityTitle": "Title",
+      "activityTitlePlaceholder": "Call with client...",
+      "activityDescription": "Description",
+      "activityDescPlaceholder": "Details...",
+      "activityTypes": {
+        "call": "Call",
+        "email": "Email",
+        "meeting": "Meeting",
+        "note": "Note"
+      }
     }
   },
   "companies": {

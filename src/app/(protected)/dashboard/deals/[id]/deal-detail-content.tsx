@@ -10,8 +10,11 @@ import { StatusBadge } from "@/components/frappe/status-badge";
 import { NoteEditor } from "@/components/crm/note-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Handshake, CheckSquare, Trash2 } from "lucide-react";
+import { Handshake, CheckSquare, Trash2, Plus, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
@@ -81,6 +84,16 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Quick task form
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+
+  // Activity log form
+  const [activityType, setActivityType] = useState("call");
+  const [activityTitle, setActivityTitle] = useState("");
+  const [activityDesc, setActivityDesc] = useState("");
+  const [isLoggingActivity, setIsLoggingActivity] = useState(false);
+
   useEffect(() => {
     const safeFetch = (url: string) =>
       fetch(url).then(r => r.ok ? r.json() : { success: false }).catch(() => ({ success: false }));
@@ -96,9 +109,14 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       if (actRes.success) {
         setActivities(actRes.data.map((a: Record<string, unknown>) => ({
           id: a.id as string,
+          accountId: a.account_id as string,
+          contactId: (a.contact_id as string) || null,
+          dealId: (a.deal_id as string) || null,
+          companyId: (a.company_id as string) || null,
           type: a.type as string,
           title: a.title as string,
-          description: a.description as string | null,
+          description: (a.description as string) || null,
+          metadata: (a.metadata as Record<string, unknown>) || {},
           createdAt: a.created_at as string,
         })));
       }
@@ -172,6 +190,71 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
     }
   };
 
+  const handleAddTask = async () => {
+    const trimmed = newTaskTitle.trim();
+    if (!trimmed) return;
+    setIsCreatingTask(true);
+    try {
+      const res = await fetch("/api/crm/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: trimmed, deal_id: dealId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setTasks([json.data, ...tasks]);
+        setNewTaskTitle("");
+        toast.success(t("crm.deals.detail.taskCreated"));
+      } else {
+        toast.error(t("crm.deals.detail.failedTask"));
+      }
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
+
+  const handleLogActivity = async () => {
+    const trimmedTitle = activityTitle.trim();
+    if (!trimmedTitle) return;
+    setIsLoggingActivity(true);
+    try {
+      const res = await fetch("/api/crm/activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: activityType,
+          title: trimmedTitle,
+          description: activityDesc.trim() || undefined,
+          deal_id: dealId,
+          contact_id: deal?.contacts?.id || undefined,
+          company_id: deal?.companies?.id || undefined,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setActivities([{
+          id: json.data.id,
+          accountId: json.data.account_id || "",
+          contactId: json.data.contact_id || null,
+          dealId: json.data.deal_id || null,
+          companyId: json.data.company_id || null,
+          type: json.data.type,
+          title: json.data.title,
+          description: json.data.description || null,
+          metadata: json.data.metadata || {},
+          createdAt: json.data.created_at,
+        }, ...activities]);
+        setActivityTitle("");
+        setActivityDesc("");
+        toast.success(t("crm.deals.detail.activityLogged"));
+      } else {
+        toast.error(t("crm.deals.detail.failedActivity"));
+      }
+    } finally {
+      setIsLoggingActivity(false);
+    }
+  };
+
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -216,16 +299,70 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   const stage = deal.deal_stages;
   const stageOptions = stages.map(s => ({ value: s.id, label: s.name }));
 
+  const activityTypeOptions = [
+    { value: "call", label: t("crm.deals.detail.activityTypes.call") },
+    { value: "email", label: t("crm.deals.detail.activityTypes.email") },
+    { value: "meeting", label: t("crm.deals.detail.activityTypes.meeting") },
+    { value: "note", label: t("crm.deals.detail.activityTypes.note") },
+  ];
+
   const tabs = [
     {
       value: "activity",
       label: t("crm.deals.detail.tabs.activity"),
       count: activities.length,
       content: (
-        <ActivityStream
-          activities={activities}
-          emptyMessage={t("crm.deals.detail.noActivity")}
-        />
+        <div className="space-y-4">
+          {/* Log activity form */}
+          <div className="rounded-lg border p-3 space-y-3">
+            <div className="flex gap-2">
+              <Select value={activityType} onValueChange={setActivityType}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {activityTypeOptions.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                value={activityTitle}
+                onChange={(e) => setActivityTitle(e.target.value)}
+                placeholder={t("crm.deals.detail.activityTitlePlaceholder")}
+                className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleLogActivity();
+                  }
+                }}
+              />
+            </div>
+            <Textarea
+              value={activityDesc}
+              onChange={(e) => setActivityDesc(e.target.value)}
+              placeholder={t("crm.deals.detail.activityDescPlaceholder")}
+              rows={2}
+              className="resize-none"
+            />
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                onClick={handleLogActivity}
+                disabled={!activityTitle.trim() || isLoggingActivity}
+              >
+                {isLoggingActivity ? <Loader2 className="size-4 mr-1 animate-spin" /> : <Send className="size-4 mr-1" />}
+                {t("crm.deals.detail.logActivity")}
+              </Button>
+            </div>
+          </div>
+
+          <ActivityStream
+            activities={activities}
+            emptyMessage={t("crm.deals.detail.noActivity")}
+          />
+        </div>
       ),
     },
     {
@@ -251,30 +388,58 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       value: "tasks",
       label: t("crm.deals.detail.tabs.tasks"),
       count: tasks.length,
-      content: tasks.length > 0 ? (
-        <div className="space-y-2">
-          {tasks.map(task => (
-            <div key={task.id} className="flex items-center justify-between rounded-lg border p-3">
-              <div className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{task.title}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {task.due_date && (
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(task.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                  </span>
-                )}
-                {task.priority && (
-                  <Badge variant="outline" className="text-xs capitalize">{task.priority}</Badge>
-                )}
-                <StatusBadge status={task.status || "todo"} />
-              </div>
+      content: (
+        <div className="space-y-4">
+          {/* Quick task creation form */}
+          <div className="flex gap-2">
+            <Input
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              placeholder={t("crm.deals.detail.taskPlaceholder")}
+              className="flex-1"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddTask();
+                }
+              }}
+            />
+            <Button
+              size="sm"
+              onClick={handleAddTask}
+              disabled={!newTaskTitle.trim() || isCreatingTask}
+            >
+              {isCreatingTask ? <Loader2 className="size-4 mr-1 animate-spin" /> : <Plus className="size-4 mr-1" />}
+              {t("crm.deals.detail.addTask")}
+            </Button>
+          </div>
+
+          {tasks.length > 0 ? (
+            <div className="space-y-2">
+              {tasks.map(task => (
+                <div key={task.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <CheckSquare className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{task.title}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {task.due_date && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(task.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </span>
+                    )}
+                    {task.priority && (
+                      <Badge variant="outline" className="text-xs capitalize">{task.priority}</Badge>
+                    )}
+                    <StatusBadge status={task.status || "todo"} />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          ) : (
+            <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.deals.detail.noTasks")}</p>
+          )}
         </div>
-      ) : (
-        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.deals.detail.noTasks")}</p>
       ),
     },
     {

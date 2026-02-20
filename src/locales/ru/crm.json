@@ -156,9 +156,27 @@
       "noActivity": "Активности пока нет",
       "noNotes": "Заметок пока нет",
       "noTasks": "Нет связанных задач",
+      "noEmails": "Писем пока нет",
       "pipeline": "Воронка",
       "winProbability": "Вероятность выигрыша",
-      "created": "Создано"
+      "created": "Создано",
+      "taskCreated": "Задача создана",
+      "failedTask": "Не удалось создать задачу",
+      "addTask": "Добавить задачу",
+      "taskPlaceholder": "Название задачи...",
+      "activityLogged": "Активность записана",
+      "failedActivity": "Не удалось записать активность",
+      "logActivity": "Записать",
+      "activityTitle": "Заголовок",
+      "activityTitlePlaceholder": "Звонок клиенту...",
+      "activityDescription": "Описание",
+      "activityDescPlaceholder": "Подробности...",
+      "activityTypes": {
+        "call": "Звонок",
+        "email": "Письмо",
+        "meeting": "Встреча",
+        "note": "Заметка"
+      }
     }
   },
   "companies": {
