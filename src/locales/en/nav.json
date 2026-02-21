@@ -33,7 +33,8 @@
     "trash": "Trash",
     "dedup": "Deduplication",
     "goals": "Goals",
-    "forecast": "Forecast"
+    "forecast": "Forecast",
+    "leads": "Leads"
   },
   "breadcrumb": {
     "home": "Home",

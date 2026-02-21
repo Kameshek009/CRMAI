@@ -16,6 +16,7 @@ export interface DealForCard {
   ai_win_probability: number;
   expected_close_date: string | null;
   is_rotting?: boolean;
+  assigned_to?: string | null;
   contacts: { id: string; first_name: string; last_name: string | null } | null;
   companies: { id: string; name: string } | null;
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { useWorkspace } from "@/contexts/team-context";
 import {
   DndContext,
   DragOverlay,
@@ -17,7 +18,7 @@ import {
 import { DealCardOverlay, type DealForCard } from "@/components/crm/deal-card";
 import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { EmptyState } from "@/components/crm/empty-state";
-import { PipelineToolbar } from "@/components/pipeline/pipeline-toolbar";
+import { PipelineToolbar, type PipelineFilterOption, type PipelineActiveFilter } from "@/components/pipeline/pipeline-toolbar";
 import { StageColumn } from "@/components/pipeline/stage-column";
 import { LostReasonDialog } from "@/components/pipeline/lost-reason-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,6 +48,7 @@ interface PipelineColumn {
 
 export function PipelineContent() {
   const { t } = useTranslation();
+  const { currentWorkspace } = useWorkspace();
 
   const dealFields: FormField[] = useMemo(() => [
     { name: "title", label: t("crm.pipeline.dealTitle"), type: "text" as const, required: true, placeholder: t("crm.pipeline.newDealPlaceholder") },
@@ -60,6 +62,8 @@ export function PipelineContent() {
   const [weightedForecast, setWeightedForecast] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [activeFilters, setActiveFilters] = useState<PipelineActiveFilter[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ account_id: string; name: string }[]>([]);
 
   // DnD state
   const [activeDeal, setActiveDeal] = useState<DealForCard | null>(null);
@@ -89,13 +93,27 @@ export function PipelineContent() {
 
   const fetchPipeline = useCallback(async () => {
     try {
-      const res = await fetch("/api/crm/pipeline");
-      const json = await res.json();
-      if (json.success) {
-        setColumns(json.data.columns);
-        setStages(json.data.columns.map((c: PipelineColumn) => c.stage));
-        setTotalValue(json.data.totalValue);
-        setWeightedForecast(json.data.weightedForecast);
+      const [pipelineRes, membersRes] = await Promise.all([
+        fetch("/api/crm/pipeline"),
+        currentWorkspace?.id ? fetch(`/api/teams/${currentWorkspace.id}/members`) : Promise.resolve(null),
+      ]);
+      const pipelineJson = await pipelineRes.json();
+      if (pipelineJson.success) {
+        setColumns(pipelineJson.data.columns);
+        setStages(pipelineJson.data.columns.map((c: PipelineColumn) => c.stage));
+        setTotalValue(pipelineJson.data.totalValue);
+        setWeightedForecast(pipelineJson.data.weightedForecast);
+      }
+      if (membersRes && membersRes.ok) {
+        const membersJson = await membersRes.json();
+        if (membersJson.success) {
+          setTeamMembers(
+            (membersJson.data || []).map((m: { account_id: string; accounts: { id: string; name: string; email: string } }) => ({
+              account_id: m.account_id,
+              name: m.accounts.name || m.accounts.email,
+            }))
+          );
+        }
       }
     } finally {
       setIsLoading(false);
@@ -106,24 +124,89 @@ export function PipelineContent() {
     fetchPipeline();
   }, [fetchPipeline]);
 
-  // Search by title, value, company name, or contact name
+  // Filter options for toolbar
+  const filterOptions: PipelineFilterOption[] = useMemo(() => {
+    const opts: PipelineFilterOption[] = [];
+    if (teamMembers.length > 0) {
+      opts.push({
+        field: "assigned_to",
+        label: t("crm.pipeline.filters.assignedTo"),
+        options: teamMembers.map((m) => ({ value: m.account_id, label: m.name })),
+      });
+    }
+    opts.push({
+      field: "win_probability",
+      label: t("crm.pipeline.filters.winProb"),
+      options: [
+        { value: "hot", label: t("crm.pipeline.filters.hot") },
+        { value: "warm", label: t("crm.pipeline.filters.warm") },
+        { value: "at_risk", label: t("crm.pipeline.filters.atRisk") },
+      ],
+    });
+    opts.push({
+      field: "is_rotting",
+      label: t("crm.pipeline.filters.rotting"),
+      options: [
+        { value: "true", label: t("crm.pipeline.filters.rottingOnly") },
+      ],
+    });
+    return opts;
+  }, [t, teamMembers]);
+
+  const handleFilterAdd = useCallback((field: string, value: string) => {
+    const opt = filterOptions.find((f) => f.field === field);
+    const label = opt?.options.find((o) => o.value === value)?.label || value;
+    setActiveFilters((prev) => [...prev.filter((f) => f.field !== field), { field, value, label }]);
+  }, [filterOptions]);
+
+  const handleFilterRemove = useCallback((field: string) => {
+    setActiveFilters((prev) => prev.filter((f) => f.field !== field));
+  }, []);
+
+  // Apply filters then search
   const filteredColumns = useMemo(() => {
-    if (!search) return columns;
-    const q = search.toLowerCase();
-    return columns.map((col) => ({
-      ...col,
-      deals: col.deals.filter((d) => {
-        if (d.title?.toLowerCase().includes(q)) return true;
-        if (d.value?.toString().includes(q)) return true;
-        if (d.companies?.name?.toLowerCase().includes(q)) return true;
-        if (d.contacts) {
-          const name = `${d.contacts.first_name} ${d.contacts.last_name || ""}`.toLowerCase();
-          if (name.includes(q)) return true;
-        }
-        return false;
-      }),
-    }));
-  }, [columns, search]);
+    let result = columns;
+
+    // Apply active filters
+    if (activeFilters.length > 0) {
+      result = result.map((col) => ({
+        ...col,
+        deals: col.deals.filter((d) => {
+          for (const f of activeFilters) {
+            if (f.field === "assigned_to" && d.assigned_to !== f.value) return false;
+            if (f.field === "win_probability") {
+              const prob = d.ai_win_probability ?? 0;
+              if (f.value === "hot" && prob < 70) return false;
+              if (f.value === "warm" && (prob < 40 || prob >= 70)) return false;
+              if (f.value === "at_risk" && prob >= 40) return false;
+            }
+            if (f.field === "is_rotting" && !d.is_rotting) return false;
+          }
+          return true;
+        }),
+      }));
+    }
+
+    // Apply search
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.map((col) => ({
+        ...col,
+        deals: col.deals.filter((d) => {
+          if (d.title?.toLowerCase().includes(q)) return true;
+          if (d.value?.toString().includes(q)) return true;
+          if (d.companies?.name?.toLowerCase().includes(q)) return true;
+          if (d.contacts) {
+            const name = `${d.contacts.first_name} ${d.contacts.last_name || ""}`.toLowerCase();
+            if (name.includes(q)) return true;
+          }
+          return false;
+        }),
+      }));
+    }
+
+    return result;
+  }, [columns, activeFilters, search]);
 
   const resolveStageId = useCallback(
     (id: string): string | null => {
@@ -347,6 +430,10 @@ export function PipelineContent() {
         search={search}
         onSearchChange={setSearch}
         dealCount={columns.reduce((sum, c) => sum + c.count, 0)}
+        filterOptions={filterOptions}
+        activeFilters={activeFilters}
+        onFilterAdd={handleFilterAdd}
+        onFilterRemove={handleFilterRemove}
       />
 
       <DndContext

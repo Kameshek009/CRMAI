@@ -32,7 +32,7 @@ export async function GET() {
     // Get all open deals for pipeline view
     const { data: deals } = await supabase
       .from("deals")
-      .select("*, contacts(id, first_name, last_name), companies(id, name)")
+      .select("*, contacts(id, first_name, last_name), companies(id, name), accounts!deals_assigned_to_fkey(id, first_name, last_name)")
       .eq("team_id", context.teamId)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });

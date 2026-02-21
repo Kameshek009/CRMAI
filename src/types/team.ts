@@ -10,6 +10,7 @@ export interface WorkspacePermissions {
   tasks: { read: boolean; create: boolean; update: boolean; delete: boolean };
   call_logs: { read: boolean; create: boolean; update: boolean; delete: boolean };
   notes: { read: boolean; create: boolean; update: boolean; delete: boolean };
+  leads: { read: boolean; create: boolean; update: boolean; delete: boolean };
   pipeline: { read: boolean; manage: boolean };
   analytics: { read: boolean };
   team_settings: { read: boolean; manage: boolean };
@@ -58,6 +59,7 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     tasks: ALL_CRUD,
     call_logs: ALL_CRUD,
     notes: ALL_CRUD,
+    leads: ALL_CRUD,
     pipeline: { read: true, manage: true },
     analytics: { read: true },
     team_settings: { read: true, manage: true },
@@ -70,6 +72,7 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     tasks: ALL_CRUD,
     call_logs: ALL_CRUD,
     notes: ALL_CRUD,
+    leads: ALL_CRUD,
     pipeline: { read: true, manage: true },
     analytics: { read: true },
     team_settings: { read: true, manage: false },
@@ -82,6 +85,7 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     tasks: READ_CREATE_UPDATE,
     call_logs: READ_CREATE_UPDATE,
     notes: READ_CREATE_UPDATE,
+    leads: READ_CREATE_UPDATE,
     pipeline: { read: true, manage: false },
     analytics: { read: true },
     team_settings: { read: false, manage: false },
@@ -94,6 +98,7 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     tasks: READ_ONLY_CRUD,
     call_logs: READ_ONLY_CRUD,
     notes: READ_ONLY_CRUD,
+    leads: READ_ONLY_CRUD,
     pipeline: { read: true, manage: false },
     analytics: { read: true },
     team_settings: { read: false, manage: false },

@@ -55,6 +55,7 @@ import {
   GitMerge,
   Target,
   LineChart,
+  UserPlus,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -81,6 +82,7 @@ const crmGroup: NavGroup = {
     { labelKey: "nav.items.tasks", href: "/dashboard/tasks", icon: CheckSquare, permission: "tasks.read" },
     { labelKey: "nav.items.notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
     { labelKey: "nav.items.callLogs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
+    { labelKey: "nav.items.leads", href: "/dashboard/leads", icon: UserPlus, permission: "leads.read" },
   ],
 };
 

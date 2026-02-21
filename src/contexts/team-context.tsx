@@ -96,6 +96,7 @@ const DEFAULT_PERMISSIONS: WorkspacePermissions = {
   tasks: { read: false, create: false, update: false, delete: false },
   call_logs: { read: false, create: false, update: false, delete: false },
   notes: { read: false, create: false, update: false, delete: false },
+  leads: { read: false, create: false, update: false, delete: false },
   pipeline: { read: false, manage: false },
   analytics: { read: false },
   team_settings: { read: false, manage: false },

@@ -69,7 +69,18 @@
     "quickAddPlaceholder": "Название + Enter",
     "quickAddFailed": "Не удалось создать сделку",
     "totalDeals": "{count} сделок",
-    "addDeal": "Добавить сделку"
+    "addDeal": "Добавить сделку",
+    "filters": {
+      "title": "Фильтры",
+      "clearAll": "Сбросить",
+      "assignedTo": "Ответственный",
+      "winProb": "Вероятность",
+      "hot": "Горячий (70%+)",
+      "warm": "Тёплый (30-69%)",
+      "atRisk": "Под угрозой (<30%)",
+      "rotting": "Застой",
+      "rottingOnly": "Только застойные"
+    }
   },
   "contacts": {
     "title": "Контакты",
@@ -661,5 +672,60 @@
     "pausedLabel": "Приостановлена",
     "steps": "{count} шагов",
     "activeOf": "{active} активных / {total} всего"
+  },
+  "leads": {
+    "title": "Лиды",
+    "new": "Новый лид",
+    "created": "Лид создан",
+    "saved": "Лид сохранён",
+    "details": "Данные лида",
+    "notFound": "Лид не найден",
+    "searchPlaceholder": "Поиск лидов...",
+    "noMatching": "Лиды не найдены",
+    "noYet": "Лидов пока нет",
+    "deleteTitle": "Удалить лиды",
+    "deleteConfirm": "Вы уверены, что хотите удалить {count} лид(ов)? Это действие необратимо.",
+    "deleted": "Удалено {count} лид(ов)",
+    "deleteFailed": "Не удалось удалить лиды",
+    "changeStatus": "Изменить статус",
+    "statusUpdated": "Обновлено {count} лид(ов)",
+    "createdAt": "Создано",
+    "fields": {
+      "name": "Имя",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "phone": "Телефон",
+      "organization": "Организация",
+      "jobTitle": "Должность",
+      "website": "Сайт",
+      "source": "Источник",
+      "status": "Статус",
+      "notes": "Заметки",
+      "converted": "Конвертирован"
+    },
+    "statuses": {
+      "new": "Новый",
+      "contacted": "Связались",
+      "qualified": "Квалифицирован",
+      "unqualified": "Не квалифицирован",
+      "junk": "Спам"
+    },
+    "sort": {
+      "created": "Дата создания",
+      "firstName": "Имя",
+      "email": "Email",
+      "organization": "Организация"
+    },
+    "convert": {
+      "button": "Конвертировать",
+      "title": "Конвертация лида",
+      "success": "Лид успешно конвертирован",
+      "createContact": "Создать контакт",
+      "createDeal": "Создать сделку",
+      "dealTitle": "Название сделки",
+      "dealValue": "Сумма сделки",
+      "dealStage": "Стадия воронки"
+    }
   }
 }

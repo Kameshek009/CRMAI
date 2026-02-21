@@ -57,6 +57,7 @@ const DEFAULT_PERMISSIONS: TeamPermissions = {
   tasks: { read: true, create: true, update: true, delete: false },
   call_logs: { read: true, create: true, update: true, delete: false },
   notes: { read: true, create: true, update: true, delete: false },
+  leads: { read: true, create: true, update: true, delete: false },
   pipeline: { read: true, manage: false },
   analytics: { read: true },
   team_settings: { read: false, manage: false },

@@ -17,6 +17,9 @@ const isPublicRoute = createRouteMatcher([
   "/api/desktop/(.*)",
   // Agent status endpoint (used by mobile/dashboard)
   "/api/agent/status",
+  // Public web forms
+  "/api/public/(.*)",
+  "/f/(.*)",
 ]);
 
 // Define API routes that need JWT validation

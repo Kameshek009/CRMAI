@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Clock, Settings2, XCircle, Mail, ScrollText, History, Eye } from "lucide-react";
+import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Clock, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
@@ -27,6 +27,7 @@ import { EmailTemplatesSection } from "./sections/email-templates-section";
 import { AuditLogSection } from "./sections/audit-log-section";
 import { LoginHistorySection } from "./sections/login-history-section";
 import { DataAccessSection } from "./sections/data-access-section";
+import { WebFormsSection } from "./sections/web-forms-section";
 
 interface AccountContentProps {
   email: string;
@@ -57,6 +58,7 @@ const TEAM_NAV = [
   { id: "integrations", icon: Plug },
   { id: "audit-log", icon: ScrollText },
   { id: "data-access", icon: Eye },
+  { id: "web-forms", icon: FileInput },
 ] as const;
 
 const BILLING_NAV = [
@@ -67,7 +69,7 @@ const VALID_TABS = [
   "profile", "appearance", "language", "notifications", "security", "login-history",
   "team", "members", "roles", "currencies", "business-hours", "custom-fields",
   "lost-reasons", "email-templates", "connections", "export", "integrations",
-  "audit-log", "data-access", "billing", "danger",
+  "audit-log", "data-access", "web-forms", "billing", "danger",
 ];
 
 export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
@@ -210,6 +212,9 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             </TabsContent>
             <TabsContent value="data-access">
               <DataAccessSection />
+            </TabsContent>
+            <TabsContent value="web-forms">
+              <WebFormsSection />
             </TabsContent>
             <TabsContent value="billing">
               <BillingSection />

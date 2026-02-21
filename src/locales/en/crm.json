@@ -69,7 +69,18 @@
     "quickAddPlaceholder": "Deal name + Enter",
     "quickAddFailed": "Failed to create deal",
     "totalDeals": "{count} deals",
-    "addDeal": "Add deal"
+    "addDeal": "Add deal",
+    "filters": {
+      "title": "Filters",
+      "clearAll": "Clear all",
+      "assignedTo": "Assigned To",
+      "winProb": "Win Probability",
+      "hot": "Hot (70%+)",
+      "warm": "Warm (30-69%)",
+      "atRisk": "At Risk (<30%)",
+      "rotting": "Rotting",
+      "rottingOnly": "Rotting only"
+    }
   },
   "contacts": {
     "title": "Contacts",
@@ -661,5 +672,60 @@
     "pausedLabel": "Paused",
     "steps": "{count} steps",
     "activeOf": "{active} active / {total} total"
+  },
+  "leads": {
+    "title": "Leads",
+    "new": "New Lead",
+    "created": "Lead created",
+    "saved": "Lead saved",
+    "details": "Lead Details",
+    "notFound": "Lead not found",
+    "searchPlaceholder": "Search leads...",
+    "noMatching": "No matching leads",
+    "noYet": "No leads yet",
+    "deleteTitle": "Delete leads",
+    "deleteConfirm": "Are you sure you want to delete {count} lead(s)? This action cannot be undone.",
+    "deleted": "Deleted {count} lead(s)",
+    "deleteFailed": "Failed to delete leads",
+    "changeStatus": "Change Status",
+    "statusUpdated": "Updated {count} lead(s)",
+    "createdAt": "Created",
+    "fields": {
+      "name": "Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "organization": "Organization",
+      "jobTitle": "Job Title",
+      "website": "Website",
+      "source": "Source",
+      "status": "Status",
+      "notes": "Notes",
+      "converted": "Converted"
+    },
+    "statuses": {
+      "new": "New",
+      "contacted": "Contacted",
+      "qualified": "Qualified",
+      "unqualified": "Unqualified",
+      "junk": "Junk"
+    },
+    "sort": {
+      "created": "Created",
+      "firstName": "First Name",
+      "email": "Email",
+      "organization": "Organization"
+    },
+    "convert": {
+      "button": "Convert Lead",
+      "title": "Convert Lead",
+      "success": "Lead converted successfully",
+      "createContact": "Create Contact",
+      "createDeal": "Create Deal",
+      "dealTitle": "Deal Title",
+      "dealValue": "Deal Value",
+      "dealStage": "Pipeline Stage"
+    }
   }
 }

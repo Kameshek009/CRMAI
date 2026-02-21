@@ -25,6 +25,7 @@
     "integrations": "Integrations",
     "audit-log": "Audit Log",
     "data-access": "Data Access",
+    "web-forms": "Web Forms",
     "danger": "Danger Zone"
   },
   "profile": {
@@ -170,6 +171,26 @@
     "noGroups": "No visibility groups defined. Create groups to control data access.",
     "saved": "Data access rules saved",
     "deleted": "Group deleted"
+  },
+  "webForms": {
+    "title": "Web Forms",
+    "description": "Create public forms that capture leads automatically",
+    "create": "New Form",
+    "edit": "Edit Form",
+    "formName": "Form Name",
+    "formDescription": "Description",
+    "successMessage": "Success Message",
+    "color": "Brand Color",
+    "fields": "Form Fields",
+    "addField": "Add Field",
+    "nameRequired": "Form name is required",
+    "saved": "Form saved",
+    "deleted": "Form deleted",
+    "copied": "Link copied to clipboard",
+    "copyLink": "Copy link",
+    "noForms": "No web forms yet. Create your first form to start capturing leads.",
+    "active": "Active",
+    "inactive": "Inactive"
   },
   "export": {
     "title": "Data Export",
