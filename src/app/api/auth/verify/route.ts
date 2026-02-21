@@ -83,28 +83,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Auto-create personal team for new accounts
-      const { error: teamError } = await supabaseAdmin.rpc("create_team_with_defaults", {
-        p_account_id: newAccount.id,
-        p_team_name: "Personal",
-      });
-
-      if (teamError) {
-        logger.error("Auth","Failed to create default team:", teamError);
-      }
-
-      // Re-fetch account with current_team_id populated
-      const { data: updatedAccount } = await supabaseAdmin
-        .from("accounts")
-        .select("*")
-        .eq("id", newAccount.id)
-        .single();
-
       return NextResponse.json({
         success: true,
         data: {
           userId,
-          account: updatedAccount || newAccount,
+          account: newAccount,
         },
       });
     }
