@@ -404,7 +404,20 @@
     "runningLow": "Токены заканчиваются",
     "upgradeToContnue": "Обновите план для продолжения.",
     "usedThisMonth": "{percent}% использовано за месяц.",
-    "upgrade": "Обновить"
+    "upgrade": "Обновить",
+    "constructor": {
+      "editMode": "Редактировать",
+      "addWidget": "Добавить виджет",
+      "saved": "Макет дашборда сохранён",
+      "reset": "Сбросить",
+      "stats": "Статистика",
+      "lists": "Списки",
+      "tables": "Таблицы",
+      "charts": "Графики",
+      "revenueChart": "Динамика выручки",
+      "taskChart": "Статус задач",
+      "pipelineMini": "Сводка воронки"
+    }
   },
   "activity": {
     "title": "Журнал активности",

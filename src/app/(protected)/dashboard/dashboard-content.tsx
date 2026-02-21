@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -31,6 +31,10 @@ import {
   BarChart3,
   Building2,
   ArrowRight,
+  Pencil,
+  Save,
+  X,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -42,7 +46,9 @@ import { JoinTeamDialog } from "@/components/team/join-team-dialog";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
 import { ListWidget } from "@/components/dashboard/widgets/list-widget";
 import { TableWidget } from "@/components/dashboard/widgets/table-widget";
+import { WidgetPicker, WIDGET_CATALOG } from "@/components/dashboard/widget-picker";
 import { useTranslation } from "@/lib/i18n";
+import { toast } from "sonner";
 import type { CrmStats, AIInsight } from "@/types/crm";
 
 const DashboardCharts = dynamic(
@@ -90,6 +96,32 @@ interface ActivityRow {
   description: string | null;
   created_at: string;
 }
+
+// ============================================================================
+// Dashboard Widget Layout
+// ============================================================================
+
+interface DashboardWidget {
+  i: string;
+  type: string;
+}
+
+const DEFAULT_WIDGETS: DashboardWidget[] = [
+  { i: "w1", type: "stat_openDeals" },
+  { i: "w2", type: "stat_wonThisMonth" },
+  { i: "w3", type: "stat_contacts" },
+  { i: "w4", type: "stat_tasksDue" },
+  { i: "w5", type: "stat_winRate" },
+  { i: "w6", type: "stat_forecast" },
+  { i: "w7", type: "stat_organizations" },
+  { i: "w8", type: "stat_avgDeal" },
+  { i: "w9", type: "list_recentActivity" },
+  { i: "w10", type: "list_aiInsights" },
+  { i: "w11", type: "list_upcomingTasks" },
+  { i: "w12", type: "table_deals" },
+  { i: "w13", type: "chart_revenue" },
+  { i: "w14", type: "chart_taskStatus" },
+];
 
 // ============================================================================
 // Constants
@@ -152,6 +184,31 @@ const INSIGHT_COLORS: Record<string, string> = {
 };
 
 // ============================================================================
+// EditWrapper for dashboard constructor
+// ============================================================================
+
+function EditWrapper({ editMode, widgetId, onRemove, children }: {
+  editMode: boolean;
+  widgetId: string;
+  onRemove: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  if (!editMode) return <>{children}</>;
+  return (
+    <div className="relative group">
+      {children}
+      <div className="absolute inset-0 rounded-xl border-2 border-dashed border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      <button
+        onClick={() => onRemove(widgetId)}
+        className="absolute top-2 right-2 p-1 rounded-md bg-background/90 border shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 text-destructive"
+      >
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+// ============================================================================
 // Component
 // ============================================================================
 
@@ -163,6 +220,13 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+
+  // Dashboard constructor state
+  const [editMode, setEditMode] = useState(false);
+  const [widgets, setWidgets] = useState<DashboardWidget[]>(DEFAULT_WIDGETS);
+  const [savedLayoutId, setSavedLayoutId] = useState<string | null>(null);
+  const [isSavingLayout, setIsSavingLayout] = useState(false);
+  const [showWidgetPicker, setShowWidgetPicker] = useState(false);
 
   const [crmStats, setCrmStats] = useState<CrmStats | null>(null);
   const [insights, setInsights] = useState<AIInsight[]>([]);
@@ -226,6 +290,77 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       if (revenueTrendRes.success) setRevenueTrend(revenueTrendRes.data);
     }).finally(() => setIsLoading(false));
   }, [currentWorkspace, can]);
+
+  // Load saved layout
+  useEffect(() => {
+    if (!currentWorkspace) return;
+    fetch("/api/crm/dashboard-layouts")
+      .then((r) => r.ok ? r.json() : { success: false })
+      .then((json) => {
+        if (json.success && json.data?.length > 0) {
+          const layout = json.data[0];
+          setSavedLayoutId(layout.id);
+          if (layout.widgets?.length > 0) {
+            setWidgets(layout.widgets.map((w: DashboardWidget) => ({ i: w.i, type: w.type })));
+          }
+        }
+      })
+      .catch(() => {});
+  }, [currentWorkspace]);
+
+  const handleSaveLayout = useCallback(async () => {
+    setIsSavingLayout(true);
+    try {
+      const payload = {
+        name: "My Dashboard",
+        widgets: widgets.map((w) => ({ i: w.i, x: 0, y: 0, w: 1, h: 1, type: w.type })),
+        is_default: true,
+      };
+
+      if (savedLayoutId) {
+        const res = await fetch(`/api/crm/dashboard-layouts/${savedLayoutId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+        if (json.success) {
+          toast.success(t("crm.dashboard.constructor.saved"));
+          setEditMode(false);
+        }
+      } else {
+        const res = await fetch("/api/crm/dashboard-layouts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+        if (json.success) {
+          setSavedLayoutId(json.data.id);
+          toast.success(t("crm.dashboard.constructor.saved"));
+          setEditMode(false);
+        }
+      }
+    } finally {
+      setIsSavingLayout(false);
+    }
+  }, [widgets, savedLayoutId, t]);
+
+  const handleAddWidget = useCallback((type: string) => {
+    const id = `w${Date.now()}`;
+    setWidgets((prev) => [...prev, { i: id, type }]);
+  }, []);
+
+  const handleRemoveWidget = useCallback((widgetId: string) => {
+    setWidgets((prev) => prev.filter((w) => w.i !== widgetId));
+  }, []);
+
+  const handleResetLayout = useCallback(() => {
+    setWidgets(DEFAULT_WIDGETS);
+  }, []);
+
+  const hasWidget = useCallback((type: string) => widgets.some(w => w.type === type), [widgets]);
+  const getWidgetId = useCallback((type: string) => widgets.find(w => w.type === type)?.i ?? type, [widgets]);
 
   const taskStatusLabels = getTaskStatusLabels();
 
@@ -341,24 +476,44 @@ export function DashboardContent({ userName }: DashboardContentProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
-              <Link href="/dashboard/contacts">
-                <Users className="w-3.5 h-3.5 mr-2" />
-                {t("crm.contacts.title")}
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/dashboard/pipeline">
-                <Kanban className="w-3.5 h-3.5 mr-2" />
-                {t("crm.pipeline.title")}
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
-              <Link href="/dashboard/chats">
-                <Sparkles className="w-3.5 h-3.5 mr-2" />
-                AI Chat
-              </Link>
-            </Button>
+            {editMode ? (
+              <>
+                <Button variant="outline" size="sm" onClick={() => setShowWidgetPicker(true)}>
+                  <Plus className="w-3.5 h-3.5 mr-1.5" />
+                  {t("crm.dashboard.constructor.addWidget")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleResetLayout}>
+                  {t("crm.dashboard.constructor.reset")}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditMode(false)}>
+                  <X className="w-3.5 h-3.5 mr-1.5" />
+                  {t("common.cancel")}
+                </Button>
+                <Button size="sm" onClick={handleSaveLayout} disabled={isSavingLayout}>
+                  <Save className="w-3.5 h-3.5 mr-1.5" />
+                  {t("common.save")}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
+                  <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                  {t("crm.dashboard.constructor.editMode")}
+                </Button>
+                <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
+                  <Link href="/dashboard/contacts">
+                    <Users className="w-3.5 h-3.5 mr-2" />
+                    {t("crm.contacts.title")}
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/dashboard/pipeline">
+                    <Kanban className="w-3.5 h-3.5 mr-2" />
+                    {t("crm.pipeline.title")}
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -367,87 +522,55 @@ export function DashboardContent({ userName }: DashboardContentProps) {
       <div className="flex-1 overflow-auto p-8">
         <div className="mx-auto max-w-5xl space-y-8">
 
-          {/* Row 1: Key Stats */}
+          {/* Stats row 1 */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatWidget
-              href="/dashboard/deals"
-              label={t("crm.dashboard.openDealsLabel")}
-              value={crmStats?.openDeals ?? 0}
-              subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} ${t("crm.dashboard.pipeline")}`}
-              icon={Handshake}
-            />
-            <StatWidget
-              href="/dashboard/analytics"
-              label={t("crm.dashboard.wonThisMonth")}
-              value={crmStats?.wonValueThisMonth ?? 0}
-              formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`}
-              subtitle={t("crm.dashboard.dealsClosed", { count: crmStats?.wonDealsThisMonth ?? 0 })}
-              icon={DollarSign}
-              trend={(crmStats?.wonDealsThisMonth ?? 0) > 0 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` } : undefined}
-            />
-            <StatWidget
-              href="/dashboard/contacts"
-              label={t("crm.dashboard.contactsLabel")}
-              value={crmStats?.totalContacts ?? 0}
-              subtitle={t("crm.dashboard.thisWeek", { count: crmStats?.newContactsThisWeek ?? 0 })}
-              icon={Users}
-              trend={(crmStats?.newContactsThisWeek ?? 0) > 0 ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` } : undefined}
-            />
-            <StatWidget
-              href="/dashboard/tasks"
-              label={t("crm.dashboard.tasksDue")}
-              value={crmStats?.tasksDueToday ?? 0}
-              subtitle={crmStats?.overdueTasksCount ? t("crm.dashboard.overdue", { count: crmStats.overdueTasksCount }) : t("crm.dashboard.allOnTrack")}
-              icon={CheckSquare}
-              trend={crmStats?.overdueTasksCount ? { direction: "down", text: `${crmStats.overdueTasksCount} late` } : undefined}
-            />
+            {widgets.filter((w) => ["stat_openDeals", "stat_wonThisMonth", "stat_contacts", "stat_tasksDue"].includes(w.type)).map((w) => (
+              <EditWrapper key={w.i} editMode={editMode} widgetId={w.i} onRemove={handleRemoveWidget}>
+                {w.type === "stat_openDeals" && (
+                  <StatWidget href="/dashboard/deals" label={t("crm.dashboard.openDealsLabel")} value={crmStats?.openDeals ?? 0} subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} ${t("crm.dashboard.pipeline")}`} icon={Handshake} />
+                )}
+                {w.type === "stat_wonThisMonth" && (
+                  <StatWidget href="/dashboard/analytics" label={t("crm.dashboard.wonThisMonth")} value={crmStats?.wonValueThisMonth ?? 0} formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`} subtitle={t("crm.dashboard.dealsClosed", { count: crmStats?.wonDealsThisMonth ?? 0 })} icon={DollarSign} trend={(crmStats?.wonDealsThisMonth ?? 0) > 0 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` } : undefined} />
+                )}
+                {w.type === "stat_contacts" && (
+                  <StatWidget href="/dashboard/contacts" label={t("crm.dashboard.contactsLabel")} value={crmStats?.totalContacts ?? 0} subtitle={t("crm.dashboard.thisWeek", { count: crmStats?.newContactsThisWeek ?? 0 })} icon={Users} trend={(crmStats?.newContactsThisWeek ?? 0) > 0 ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` } : undefined} />
+                )}
+                {w.type === "stat_tasksDue" && (
+                  <StatWidget href="/dashboard/tasks" label={t("crm.dashboard.tasksDue")} value={crmStats?.tasksDueToday ?? 0} subtitle={crmStats?.overdueTasksCount ? t("crm.dashboard.overdue", { count: crmStats.overdueTasksCount }) : t("crm.dashboard.allOnTrack")} icon={CheckSquare} trend={crmStats?.overdueTasksCount ? { direction: "down", text: `${crmStats.overdueTasksCount} late` } : undefined} />
+                )}
+              </EditWrapper>
+            ))}
           </div>
 
-          {/* Row 2: Secondary Stats */}
+          {/* Stats row 2 */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatWidget
-              href="/dashboard/analytics"
-              label={t("crm.dashboard.winRate")}
-              value={crmStats && (crmStats.wonDealsThisMonth + (crmStats.totalDeals - crmStats.openDeals - crmStats.wonDealsThisMonth)) > 0
-                ? Math.round((crmStats.wonDealsThisMonth / Math.max(crmStats.totalDeals - crmStats.openDeals, 1)) * 100)
-                : 0}
-              formattedValue={`${crmStats && (crmStats.wonDealsThisMonth + (crmStats.totalDeals - crmStats.openDeals - crmStats.wonDealsThisMonth)) > 0
-                ? Math.round((crmStats.wonDealsThisMonth / Math.max(crmStats.totalDeals - crmStats.openDeals, 1)) * 100)
-                : 0}%`}
-              subtitle={t("crm.dashboard.closedRatio")}
-              icon={Target}
-            />
-            <StatWidget
-              href="/dashboard/analytics"
-              label={t("crm.dashboard.forecast")}
-              value={crmStats?.weightedForecast ?? 0}
-              formattedValue={`$${(crmStats?.weightedForecast ?? 0).toLocaleString()}`}
-              subtitle={t("crm.dashboard.weightedPipeline")}
-              icon={Zap}
-            />
-            <StatWidget
-              href="/dashboard/companies"
-              label={t("crm.dashboard.organizations")}
-              value={crmStats?.totalDeals ?? 0}
-              subtitle={t("crm.dashboard.totalDeals")}
-              icon={Building2}
-            />
-            <StatWidget
-              href="/dashboard/analytics"
-              label={t("crm.dashboard.avgDeal")}
-              value={crmStats?.wonDealsThisMonth && crmStats?.wonValueThisMonth
-                ? Math.round(crmStats.wonValueThisMonth / crmStats.wonDealsThisMonth)
-                : 0}
-              formattedValue={`$${crmStats?.wonDealsThisMonth && crmStats?.wonValueThisMonth
-                ? Math.round(crmStats.wonValueThisMonth / crmStats.wonDealsThisMonth).toLocaleString()
-                : "0"}`}
-              subtitle={t("crm.dashboard.avgWonSize")}
-              icon={BarChart3}
-            />
+            {widgets.filter((w) => ["stat_winRate", "stat_forecast", "stat_organizations", "stat_avgDeal"].includes(w.type)).map((w) => {
+              const winRateValue = crmStats && (crmStats.wonDealsThisMonth + (crmStats.totalDeals - crmStats.openDeals - crmStats.wonDealsThisMonth)) > 0
+                ? Math.round((crmStats.wonDealsThisMonth / Math.max(crmStats.totalDeals - crmStats.openDeals, 1)) * 100) : 0;
+              const avgDealValue = crmStats?.wonDealsThisMonth && crmStats?.wonValueThisMonth ? Math.round(crmStats.wonValueThisMonth / crmStats.wonDealsThisMonth) : 0;
+              return (
+                <EditWrapper key={w.i} editMode={editMode} widgetId={w.i} onRemove={handleRemoveWidget}>
+                  {w.type === "stat_winRate" && (
+                    <StatWidget href="/dashboard/analytics" label={t("crm.dashboard.winRate")} value={winRateValue} formattedValue={`${winRateValue}%`} subtitle={t("crm.dashboard.closedRatio")} icon={Target} />
+                  )}
+                  {w.type === "stat_forecast" && (
+                    <StatWidget href="/dashboard/analytics" label={t("crm.dashboard.forecast")} value={crmStats?.weightedForecast ?? 0} formattedValue={`$${(crmStats?.weightedForecast ?? 0).toLocaleString()}`} subtitle={t("crm.dashboard.weightedPipeline")} icon={Zap} />
+                  )}
+                  {w.type === "stat_organizations" && (
+                    <StatWidget href="/dashboard/companies" label={t("crm.dashboard.organizations")} value={crmStats?.totalDeals ?? 0} subtitle={t("crm.dashboard.totalDeals")} icon={Building2} />
+                  )}
+                  {w.type === "stat_avgDeal" && (
+                    <StatWidget href="/dashboard/analytics" label={t("crm.dashboard.avgDeal")} value={avgDealValue} formattedValue={`$${avgDealValue.toLocaleString()}`} subtitle={t("crm.dashboard.avgWonSize")} icon={BarChart3} />
+                  )}
+                </EditWrapper>
+              );
+            })}
           </div>
 
-          {/* Row 3: Lists — Recent Activity, AI Insights, Upcoming Tasks */}
+          {/* Lists row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {hasWidget("list_recentActivity") && (
+            <EditWrapper editMode={editMode} widgetId={getWidgetId("list_recentActivity")} onRemove={handleRemoveWidget}>
             <ListWidget
               title={t("crm.dashboard.recent")}
               icon={Clock}
@@ -474,7 +597,11 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 })}
               </div>
             </ListWidget>
+            </EditWrapper>
+            )}
 
+            {hasWidget("list_aiInsights") && (
+            <EditWrapper editMode={editMode} widgetId={getWidgetId("list_aiInsights")} onRemove={handleRemoveWidget}>
             <ListWidget
               title={t("crm.dashboard.aiInsights")}
               icon={Sparkles}
@@ -501,7 +628,11 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 })}
               </div>
             </ListWidget>
+            </EditWrapper>
+            )}
 
+            {hasWidget("list_upcomingTasks") && (
+            <EditWrapper editMode={editMode} widgetId={getWidgetId("list_upcomingTasks")} onRemove={handleRemoveWidget}>
             <ListWidget
               title={t("crm.dashboard.upcomingTasks")}
               icon={CheckSquare}
@@ -556,9 +687,13 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                 })}
               </div>
             </ListWidget>
+            </EditWrapper>
+            )}
           </div>
 
           {/* Row 4: Deals Table */}
+          {hasWidget("table_deals") && (
+          <EditWrapper editMode={editMode} widgetId={getWidgetId("table_deals")} onRemove={handleRemoveWidget}>
           <TableWidget
             title={t("crm.dashboard.dealsLabel")}
             icon={Handshake}
@@ -651,13 +786,19 @@ export function DashboardContent({ userName }: DashboardContentProps) {
               })}
             </div>
           </TableWidget>
+          </EditWrapper>
+          )}
 
           {/* Row 5: Charts — Revenue Trend + Workload (lazy loaded) */}
+          {(hasWidget("chart_revenue") || hasWidget("chart_taskStatus")) && (
+          <EditWrapper editMode={editMode} widgetId={getWidgetId("chart_revenue")} onRemove={() => setWidgets(prev => prev.filter(w => !w.type.startsWith("chart_")))}>
           <DashboardCharts
             revenueTrend={revenueTrend}
             taskStatusData={taskStatusData}
             totalTasks={tasks.length}
           />
+          </EditWrapper>
+          )}
 
           {/* Upgrade banner for free users */}
           {!accountLoading && (account?.tier === "free" || !account?.tier) && usage && usage.percentUsed >= 80 && (
@@ -686,6 +827,12 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         </div>
       </div>
 
+      <WidgetPicker
+        open={showWidgetPicker}
+        onOpenChange={setShowWidgetPicker}
+        onAdd={handleAddWidget}
+        existingTypes={widgets.map(w => w.type)}
+      />
       <UpgradeModal isOpen={isOpen} onClose={closeUpgradeModal} {...modalProps} />
     </div>
   );

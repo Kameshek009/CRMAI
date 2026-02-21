@@ -404,7 +404,20 @@
     "runningLow": "Running low on tokens",
     "upgradeToContnue": "Upgrade to continue.",
     "usedThisMonth": "{percent}% used this month.",
-    "upgrade": "Upgrade"
+    "upgrade": "Upgrade",
+    "constructor": {
+      "editMode": "Edit Dashboard",
+      "addWidget": "Add Widget",
+      "saved": "Dashboard layout saved",
+      "reset": "Reset",
+      "stats": "Statistics",
+      "lists": "Lists",
+      "tables": "Tables",
+      "charts": "Charts",
+      "revenueChart": "Revenue Trend",
+      "taskChart": "Task Status",
+      "pipelineMini": "Pipeline Summary"
+    }
   },
   "activity": {
     "title": "Activity Log",
