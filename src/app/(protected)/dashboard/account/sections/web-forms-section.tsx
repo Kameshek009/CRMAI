@@ -312,7 +312,7 @@ export function WebFormsSection() {
                         checked={field.required || false}
                         onChange={(e) => updateField(i, { required: e.target.checked })}
                       />
-                      Req
+                      {t("settings.webForms.required")}
                     </label>
                     <Button variant="ghost" size="icon" className="size-7 shrink-0" onClick={() => removeField(i)}>
                       <Trash2 className="size-3.5 text-red-500" />

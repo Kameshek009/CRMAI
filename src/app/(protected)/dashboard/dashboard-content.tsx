@@ -327,6 +327,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
         if (json.success) {
           toast.success(t("crm.dashboard.constructor.saved"));
           setEditMode(false);
+        } else {
+          toast.error(t("common.error"));
         }
       } else {
         const res = await fetch("/api/crm/dashboard-layouts", {
@@ -339,6 +341,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
           setSavedLayoutId(json.data.id);
           toast.success(t("crm.dashboard.constructor.saved"));
           setEditMode(false);
+        } else {
+          toast.error(t("common.error"));
         }
       }
     } finally {

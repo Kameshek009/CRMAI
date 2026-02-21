@@ -190,7 +190,8 @@
     "copyLink": "Copy link",
     "noForms": "No web forms yet. Create your first form to start capturing leads.",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "required": "Req"
   },
   "export": {
     "title": "Data Export",

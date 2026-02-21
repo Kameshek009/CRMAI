@@ -91,6 +91,7 @@ export async function POST(request: NextRequest, ctx: RouteContext) {
 
     if (leadError) {
       logger.error("PublicForm", "Failed to create lead", leadError);
+      return NextResponse.json({ success: false, error: "Failed to process submission" }, { status: 500 });
     }
 
     // Save submission

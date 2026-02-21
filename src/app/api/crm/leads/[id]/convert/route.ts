@@ -79,11 +79,11 @@ export async function POST(
     if (parsed.data.create_deal) {
       let stageId = parsed.data.deal_stage_id;
       if (!stageId) {
-        await ensureDealStages(context.accountId, context.teamId);
+        await ensureDealStages(context.accountId, context.workspaceId);
         const { data: firstStage } = await supabase
           .from("deal_stages")
           .select("id")
-          .eq("team_id", context.teamId)
+          .eq("team_id", context.workspaceId)
           .order("position")
           .limit(1)
           .single();
