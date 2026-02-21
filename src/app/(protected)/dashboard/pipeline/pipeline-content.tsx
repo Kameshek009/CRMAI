@@ -73,6 +73,7 @@ export function PipelineContent() {
   const [lostDialogOpen, setLostDialogOpen] = useState(false);
   const [pendingLostMove, setPendingLostMove] = useState<{
     dealId: string;
+    currentStageId: string;
     targetStageId: string;
     targetStageName: string;
   } | null>(null);
@@ -179,7 +180,7 @@ export function PipelineContent() {
 
     // If target is a lost stage, show reason dialog first
     if (targetStage?.is_lost) {
-      setPendingLostMove({ dealId, targetStageId, targetStageName: targetStage.name });
+      setPendingLostMove({ dealId, currentStageId, targetStageId, targetStageName: targetStage.name });
       setLostDialogOpen(true);
       return;
     }
@@ -242,18 +243,9 @@ export function PipelineContent() {
     setLostDialogOpen(false);
     if (!pendingLostMove) return;
 
-    // Find current stage
-    let currentStageId = "";
-    for (const col of columns) {
-      if (col.deals.find((d) => d.id === pendingLostMove.dealId)) {
-        currentStageId = col.stage.id;
-        break;
-      }
-    }
-
     await moveDealToStage(
       pendingLostMove.dealId,
-      currentStageId,
+      pendingLostMove.currentStageId,
       pendingLostMove.targetStageId,
       pendingLostMove.targetStageName,
       reasonId,

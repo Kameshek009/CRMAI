@@ -14,8 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { InviteCodeDisplay } from "@/components/team/invite-code-display";
-import { RoleBadge } from "@/components/team/role-badge";
-import { Users, Shield, Link2, Crown } from "lucide-react";
+import { Users, Shield, Crown } from "lucide-react";
 import { toast } from "sonner";
 
 interface AiPerms {

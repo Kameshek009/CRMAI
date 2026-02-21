@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const { context, error } = await getTeamContext();
     if (error) return error;
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isOwner);
+    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
     if (permError) return permError;
 
     const body = await request.json();
