@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle } from "lucide-react";
+import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Clock, Settings2, XCircle, Mail, ScrollText, History, Eye } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
@@ -19,6 +19,14 @@ import { ConnectionsSection } from "./sections/connections-section";
 import { ExportSection } from "./sections/export-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { DangerSection } from "./sections/danger-section";
+import { CurrenciesSection } from "./sections/currencies-section";
+import { BusinessHoursSection } from "./sections/business-hours-section";
+import { CustomFieldsSection } from "./sections/custom-fields-section";
+import { LostReasonsSection } from "./sections/lost-reasons-section";
+import { EmailTemplatesSection } from "./sections/email-templates-section";
+import { AuditLogSection } from "./sections/audit-log-section";
+import { LoginHistorySection } from "./sections/login-history-section";
+import { DataAccessSection } from "./sections/data-access-section";
 
 interface AccountContentProps {
   email: string;
@@ -32,15 +40,23 @@ const PERSONAL_NAV = [
   { id: "language", icon: Globe },
   { id: "notifications", icon: Bell },
   { id: "security", icon: Lock },
+  { id: "login-history", icon: History },
 ] as const;
 
 const TEAM_NAV = [
   { id: "team", icon: Users },
   { id: "members", icon: Users },
   { id: "roles", icon: Shield },
+  { id: "currencies", icon: DollarSign },
+  { id: "business-hours", icon: Clock },
+  { id: "custom-fields", icon: Settings2 },
+  { id: "lost-reasons", icon: XCircle },
+  { id: "email-templates", icon: Mail },
   { id: "connections", icon: Link2 },
   { id: "export", icon: Download },
   { id: "integrations", icon: Plug },
+  { id: "audit-log", icon: ScrollText },
+  { id: "data-access", icon: Eye },
 ] as const;
 
 const BILLING_NAV = [
@@ -48,9 +64,10 @@ const BILLING_NAV = [
 ] as const;
 
 const VALID_TABS = [
-  "profile", "appearance", "language", "notifications", "security",
-  "team", "members", "roles", "connections", "export", "integrations",
-  "billing", "danger",
+  "profile", "appearance", "language", "notifications", "security", "login-history",
+  "team", "members", "roles", "currencies", "business-hours", "custom-fields",
+  "lost-reasons", "email-templates", "connections", "export", "integrations",
+  "audit-log", "data-access", "billing", "danger",
 ];
 
 export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
@@ -152,6 +169,9 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             <TabsContent value="security">
               <SecuritySection />
             </TabsContent>
+            <TabsContent value="login-history">
+              <LoginHistorySection />
+            </TabsContent>
             <TabsContent value="team">
               <TeamSection />
             </TabsContent>
@@ -161,6 +181,21 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             <TabsContent value="roles">
               <RolesSection />
             </TabsContent>
+            <TabsContent value="currencies">
+              <CurrenciesSection />
+            </TabsContent>
+            <TabsContent value="business-hours">
+              <BusinessHoursSection />
+            </TabsContent>
+            <TabsContent value="custom-fields">
+              <CustomFieldsSection />
+            </TabsContent>
+            <TabsContent value="lost-reasons">
+              <LostReasonsSection />
+            </TabsContent>
+            <TabsContent value="email-templates">
+              <EmailTemplatesSection />
+            </TabsContent>
             <TabsContent value="connections">
               <ConnectionsSection />
             </TabsContent>
@@ -169,6 +204,12 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             </TabsContent>
             <TabsContent value="integrations">
               <IntegrationsSection />
+            </TabsContent>
+            <TabsContent value="audit-log">
+              <AuditLogSection />
+            </TabsContent>
+            <TabsContent value="data-access">
+              <DataAccessSection />
             </TabsContent>
             <TabsContent value="billing">
               <BillingSection />

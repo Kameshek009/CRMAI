@@ -19,6 +19,7 @@ import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { EmptyState } from "@/components/crm/empty-state";
 import { PipelineToolbar } from "@/components/pipeline/pipeline-toolbar";
 import { StageColumn } from "@/components/pipeline/stage-column";
+import { LostReasonDialog } from "@/components/pipeline/lost-reason-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Kanban } from "lucide-react";
 import { toast } from "sonner";
@@ -67,6 +68,14 @@ export function PipelineContent() {
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [newDealStageId, setNewDealStageId] = useState("");
+
+  // Lost reason dialog state
+  const [lostDialogOpen, setLostDialogOpen] = useState(false);
+  const [pendingLostMove, setPendingLostMove] = useState<{
+    dealId: string;
+    targetStageId: string;
+    targetStageName: string;
+  } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -168,6 +177,24 @@ export function PipelineContent() {
 
     const targetStage = stages.find((s) => s.id === targetStageId);
 
+    // If target is a lost stage, show reason dialog first
+    if (targetStage?.is_lost) {
+      setPendingLostMove({ dealId, targetStageId, targetStageName: targetStage.name });
+      setLostDialogOpen(true);
+      return;
+    }
+
+    await moveDealToStage(dealId, currentStageId, targetStageId, targetStage?.name || "");
+  };
+
+  const moveDealToStage = async (
+    dealId: string,
+    currentStageId: string,
+    targetStageId: string,
+    targetStageName: string,
+    lostReasonId?: string | null,
+    lostReasonNote?: string
+  ) => {
     setColumns((prev) =>
       prev.map((col) => {
         if (col.stage.id === currentStageId) {
@@ -193,18 +220,51 @@ export function PipelineContent() {
       })
     );
 
+    const payload: Record<string, unknown> = { stage_id: targetStageId };
+    if (lostReasonId) payload.lost_reason_id = lostReasonId;
+    if (lostReasonNote) payload.lost_reason_note = lostReasonNote;
+
     const res = await fetch(`/api/crm/deals/${dealId}/stage`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stage_id: targetStageId }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
       toast.error(t("crm.pipeline.failedMove"));
       fetchPipeline();
     } else {
-      toast.success(t("crm.pipeline.movedTo", { stage: targetStage?.name || "" }));
+      toast.success(t("crm.pipeline.movedTo", { stage: targetStageName }));
     }
+  };
+
+  const handleLostReasonConfirm = async (reasonId: string | null, note: string) => {
+    setLostDialogOpen(false);
+    if (!pendingLostMove) return;
+
+    // Find current stage
+    let currentStageId = "";
+    for (const col of columns) {
+      if (col.deals.find((d) => d.id === pendingLostMove.dealId)) {
+        currentStageId = col.stage.id;
+        break;
+      }
+    }
+
+    await moveDealToStage(
+      pendingLostMove.dealId,
+      currentStageId,
+      pendingLostMove.targetStageId,
+      pendingLostMove.targetStageName,
+      reasonId,
+      note
+    );
+    setPendingLostMove(null);
+  };
+
+  const handleLostReasonCancel = () => {
+    setLostDialogOpen(false);
+    setPendingLostMove(null);
   };
 
   const handleCreateDeal = async (values: Record<string, string>) => {
@@ -336,6 +396,12 @@ export function PipelineContent() {
         title={t("crm.pipeline.title")}
         fields={dealFields}
         onSubmit={handleCreateDeal}
+      />
+
+      <LostReasonDialog
+        open={lostDialogOpen}
+        onConfirm={handleLostReasonConfirm}
+        onCancel={handleLostReasonCancel}
       />
     </div>
   );

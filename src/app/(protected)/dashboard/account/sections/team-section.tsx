@@ -15,8 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { InviteCodeDisplay } from "@/components/team/invite-code-display";
 import { RoleBadge } from "@/components/team/role-badge";
-import { FieldManager } from "@/components/crm/field-manager";
-import { Users, Shield, Link2, Crown, Eye, Plus, Trash2 } from "lucide-react";
+import { Users, Shield, Link2, Crown } from "lucide-react";
 import { toast } from "sonner";
 
 interface AiPerms {
@@ -25,123 +24,6 @@ interface AiPerms {
   can_create_deals: boolean;
   can_create_tasks: boolean;
   max_task_priority: number;
-}
-
-interface VGroup {
-  id: string;
-  name: string;
-  is_default: boolean;
-  visibility_group_members: { id: string; account_id: string }[];
-}
-
-function VisibilityGroupsSection() {
-  const { t } = useTranslation();
-  const [groups, setGroups] = useState<VGroup[]>([]);
-  const [newName, setNewName] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-
-  const fetchGroups = useCallback(async () => {
-    const res = await fetch("/api/crm/visibility-groups");
-    const json = await res.json();
-    if (json.success) setGroups(json.data || []);
-  }, []);
-
-  useEffect(() => { fetchGroups(); }, [fetchGroups]);
-
-  const handleCreate = async () => {
-    if (!newName.trim()) return;
-    setIsCreating(true);
-    try {
-      const res = await fetch("/api/crm/visibility-groups", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName.trim() }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success(t("team.visibilityGroups.created"));
-        setNewName("");
-        fetchGroups();
-      } else {
-        toast.error(json.error || t("team.visibilityGroups.failedCreate"));
-      }
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/crm/visibility-groups/${id}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("team.visibilityGroups.deleted"));
-      fetchGroups();
-    } else {
-      toast.error(json.error || t("team.visibilityGroups.failedDelete"));
-    }
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Eye className="size-4" />
-          {t("team.visibilityGroups.title")}
-        </CardTitle>
-        <CardDescription>{t("team.visibilityGroups.description")}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder={t("team.visibilityGroups.newGroupPlaceholder")}
-            className="flex-1"
-            maxLength={100}
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-          />
-          <Button size="sm" onClick={handleCreate} disabled={isCreating || !newName.trim()}>
-            <Plus className="size-3.5 mr-1.5" />
-            {t("common.add")}
-          </Button>
-        </div>
-        {groups.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">
-            {t("team.visibilityGroups.noGroups")}
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {groups.map((group) => (
-              <div key={group.id} className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-8 items-center justify-center rounded-md bg-secondary">
-                    <Users className="size-3.5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{group.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t("team.visibilityGroups.members", { count: group.visibility_group_members?.length || 0 })}
-                    </p>
-                  </div>
-                  {group.is_default && (
-                    <Badge variant="secondary" className="text-[10px]">{t("team.visibilityGroups.default")}</Badge>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleDelete(group.id)}
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
 }
 
 export function TeamSection() {
@@ -348,11 +230,6 @@ export function TeamSection() {
             </Card>
           )}
 
-          {/* Custom Fields */}
-          <FieldManager />
-
-          {/* Visibility Groups */}
-          <VisibilityGroupsSection />
         </>
       )}
     </div>

@@ -57,6 +57,12 @@ export async function PATCH(
     } else if (newStage.is_lost) {
       updateData.status = "lost";
       updateData.actual_close_date = new Date().toISOString().split("T")[0];
+      if (parsed.data.lost_reason_id) {
+        updateData.lost_reason_id = parsed.data.lost_reason_id;
+      }
+      if (parsed.data.lost_reason_note) {
+        updateData.lost_reason_note = parsed.data.lost_reason_note;
+      }
     } else {
       updateData.status = "open";
     }

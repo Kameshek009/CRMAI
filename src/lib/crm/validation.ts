@@ -102,6 +102,8 @@ export const updateDealSchema = z.object({
 
 export const updateDealStageSchema = z.object({
   stage_id: z.string().uuid(),
+  lost_reason_id: z.string().uuid().optional().nullable(),
+  lost_reason_note: z.string().max(1000).optional().nullable(),
 });
 
 // ============================================================================

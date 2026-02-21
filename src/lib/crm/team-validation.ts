@@ -11,6 +11,7 @@ export const updateTeamSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional().nullable(),
   settings: z.record(z.string(), z.unknown()).optional(),
+  default_currency: z.string().min(3).max(3).optional(),
 });
 
 const permissionObj = z.object({

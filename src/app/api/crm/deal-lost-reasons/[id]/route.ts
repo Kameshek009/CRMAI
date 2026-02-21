@@ -4,12 +4,10 @@ import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 
-const updateGroupSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  is_default: z.boolean().optional(),
-  description: z.string().max(500).optional().nullable(),
-  entity_types: z.array(z.string()).optional(),
-  rule_type: z.enum(["include", "exclude"]).optional(),
+const updateSchema = z.object({
+  label: z.string().min(1).max(200).optional(),
+  position: z.number().optional(),
+  is_active: z.boolean().optional(),
 });
 
 export async function PATCH(
@@ -25,28 +23,28 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const parsed = updateGroupSchema.safeParse(body);
+    const parsed = updateSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
-      .from("visibility_groups")
-      .update({ ...parsed.data, updated_at: new Date().toISOString() })
+      .from("deal_lost_reasons")
+      .update(parsed.data)
       .eq("id", id)
       .eq("team_id", context.workspaceId)
       .select()
       .single();
 
     if (dbError) {
-      logger.error("VisibilityGroups", "PATCH error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to update group" }, { status: 500 });
+      logger.error("LostReasons", "PATCH error", dbError);
+      return NextResponse.json({ success: false, error: "Failed to update reason" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("VisibilityGroups", "PATCH error", error);
+  } catch (err) {
+    logger.error("LostReasons", "PATCH error", err);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
@@ -65,19 +63,19 @@ export async function DELETE(
     const { id } = await params;
     const supabase = createSupabaseAdmin();
     const { error: dbError } = await supabase
-      .from("visibility_groups")
+      .from("deal_lost_reasons")
       .delete()
       .eq("id", id)
       .eq("team_id", context.workspaceId);
 
     if (dbError) {
-      logger.error("VisibilityGroups", "DELETE error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to delete group" }, { status: 500 });
+      logger.error("LostReasons", "DELETE error", dbError);
+      return NextResponse.json({ success: false, error: "Failed to delete reason" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("VisibilityGroups", "DELETE error", error);
+  } catch (err) {
+    logger.error("LostReasons", "DELETE error", err);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

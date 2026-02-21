@@ -9,14 +9,22 @@
     "language": "Language",
     "notifications": "Notifications",
     "security": "Security",
+    "login-history": "Login History",
     "billing": "Subscription & Billing",
     "workspace": "Workspace",
     "team": "Team",
     "members": "Members",
     "roles": "Roles",
+    "currencies": "Currencies",
+    "business-hours": "Business Hours",
+    "custom-fields": "Custom Fields",
+    "lost-reasons": "Lost Reasons",
+    "email-templates": "Email Templates",
     "connections": "Connections",
     "export": "Data Export",
     "integrations": "Integrations",
+    "audit-log": "Audit Log",
+    "data-access": "Data Access",
     "danger": "Danger Zone"
   },
   "profile": {
@@ -60,6 +68,108 @@
     "manageSecurity": "Manage Security",
     "manageSecurityDescription": "Change password, enable 2FA, and manage security settings",
     "openSecuritySettings": "Open Security Settings"
+  },
+  "currencies": {
+    "title": "Currencies",
+    "description": "Manage currencies and exchange rates for your team",
+    "baseCurrency": "Base Currency",
+    "exchangeRates": "Exchange Rates",
+    "addCurrency": "Add Currency",
+    "code": "Code",
+    "rateToUSD": "Rate to USD",
+    "symbol": "Symbol",
+    "selectCurrency": "Select currency...",
+    "add": "Add",
+    "saved": "Currency settings saved",
+    "deleted": "Currency removed",
+    "noRates": "No exchange rates configured. Add currencies to track multi-currency deals."
+  },
+  "businessHours": {
+    "title": "Business Hours",
+    "description": "Set your team's working hours for each day of the week",
+    "days": {
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday",
+      "sun": "Sunday"
+    },
+    "dayOff": "Day off",
+    "saved": "Business hours saved"
+  },
+  "customFields": {
+    "title": "Custom Fields",
+    "description": "Define custom fields for contacts, companies, deals, and leads"
+  },
+  "lostReasons": {
+    "title": "Deal Lost Reasons",
+    "description": "Define reasons why deals are lost. These will appear when a deal is moved to the Lost stage.",
+    "add": "Add Reason",
+    "placeholder": "e.g. Price too high",
+    "saved": "Reason saved",
+    "deleted": "Reason deleted",
+    "noReasons": "No lost reasons defined yet. Add reasons to track why deals are lost.",
+    "inactive": "Inactive"
+  },
+  "emailTemplates": {
+    "title": "Email Templates",
+    "description": "Create reusable email templates with dynamic variables",
+    "create": "New Template",
+    "edit": "Edit Template",
+    "name": "Template Name",
+    "subject": "Subject Line",
+    "body": "Email Body",
+    "category": "Category",
+    "variables": "Variables",
+    "required": "Name and body are required",
+    "saved": "Template saved",
+    "deleted": "Template deleted",
+    "noTemplates": "No email templates yet. Create your first template.",
+    "categories": {
+      "sales": "Sales",
+      "followup": "Follow-up",
+      "onboarding": "Onboarding",
+      "custom": "Custom"
+    }
+  },
+  "auditLog": {
+    "title": "Audit Log",
+    "description": "Track all changes made to your CRM data",
+    "allEntities": "All entities",
+    "allActions": "All actions",
+    "actions": {
+      "create": "Created",
+      "update": "Updated",
+      "delete": "Deleted"
+    },
+    "noRecords": "No audit log entries found",
+    "page": "Page",
+    "records": "records"
+  },
+  "loginHistory": {
+    "title": "Login History",
+    "description": "Review recent login activity for your account",
+    "current": "Current",
+    "noHistory": "No login history available"
+  },
+  "dataAccess": {
+    "title": "Data Access Rules",
+    "description": "Control who can see which records using visibility groups",
+    "createGroup": "Create Group",
+    "groupNamePlaceholder": "Group name...",
+    "deleteGroup": "Delete Group",
+    "ruleType": "Rule type",
+    "include": "Members only see these records",
+    "exclude": "Everyone except members sees these records",
+    "entityTypes": "Applies to",
+    "members": "Members",
+    "addMember": "Add member...",
+    "noMembers": "No members in this group",
+    "noGroups": "No visibility groups defined. Create groups to control data access.",
+    "saved": "Data access rules saved",
+    "deleted": "Group deleted"
   },
   "export": {
     "title": "Data Export",
