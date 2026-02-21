@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
@@ -56,12 +57,15 @@ import {
   Target,
   LineChart,
   UserPlus,
+  Pencil,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSidebarConfigStore, getEffectiveItems } from "@/stores/sidebar-config-store";
+import { SidebarGroupEditor } from "@/components/sidebar/sidebar-group-editor";
 
-
-interface NavItem {
+export interface NavItem {
+  key: string;
   labelKey: string;
   href: string;
   icon: LucideIcon;
@@ -70,52 +74,48 @@ interface NavItem {
 
 interface NavGroup {
   labelKey?: string;
+  groupKey?: "crm" | "tools";
   items: NavItem[];
 }
 
-const crmGroup: NavGroup = {
+export const crmGroup: NavGroup = {
   labelKey: "nav.groups.crm",
+  groupKey: "crm",
   items: [
-    { labelKey: "nav.items.contacts", href: "/dashboard/contacts", icon: Users, permission: "contacts.read" },
-    { labelKey: "nav.items.deals", href: "/dashboard/deals", icon: Handshake, permission: "deals.read" },
-    { labelKey: "nav.items.organizations", href: "/dashboard/companies", icon: Building2, permission: "companies.read" },
-    { labelKey: "nav.items.tasks", href: "/dashboard/tasks", icon: CheckSquare, permission: "tasks.read" },
-    { labelKey: "nav.items.notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
-    { labelKey: "nav.items.callLogs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
-    { labelKey: "nav.items.leads", href: "/dashboard/leads", icon: UserPlus, permission: "leads.read" },
+    { key: "contacts", labelKey: "nav.items.contacts", href: "/dashboard/contacts", icon: Users, permission: "contacts.read" },
+    { key: "deals", labelKey: "nav.items.deals", href: "/dashboard/deals", icon: Handshake, permission: "deals.read" },
+    { key: "organizations", labelKey: "nav.items.organizations", href: "/dashboard/companies", icon: Building2, permission: "companies.read" },
+    { key: "tasks", labelKey: "nav.items.tasks", href: "/dashboard/tasks", icon: CheckSquare, permission: "tasks.read" },
+    { key: "notes", labelKey: "nav.items.notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
+    { key: "call-logs", labelKey: "nav.items.callLogs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
+    { key: "leads", labelKey: "nav.items.leads", href: "/dashboard/leads", icon: UserPlus, permission: "leads.read" },
   ],
 };
 
-const toolsGroup: NavGroup = {
+export const toolsGroup: NavGroup = {
   labelKey: "nav.groups.tools",
+  groupKey: "tools",
   items: [
-    { labelKey: "nav.items.pipeline", href: "/dashboard/pipeline", icon: Kanban, permission: "pipeline.read" },
-    { labelKey: "nav.items.automations", href: "/dashboard/automations", icon: Zap },
-    { labelKey: "nav.items.sequences", href: "/dashboard/sequences", icon: Mail },
-    { labelKey: "nav.items.analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
-    { labelKey: "nav.items.aiChat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
-    { labelKey: "nav.items.dedup", href: "/dashboard/dedup", icon: GitMerge },
-    { labelKey: "nav.items.goals", href: "/dashboard/goals", icon: Target },
-    { labelKey: "nav.items.forecast", href: "/dashboard/forecast", icon: LineChart },
+    { key: "pipeline", labelKey: "nav.items.pipeline", href: "/dashboard/pipeline", icon: Kanban, permission: "pipeline.read" },
+    { key: "automations", labelKey: "nav.items.automations", href: "/dashboard/automations", icon: Zap },
+    { key: "sequences", labelKey: "nav.items.sequences", href: "/dashboard/sequences", icon: Mail },
+    { key: "analytics", labelKey: "nav.items.analytics", href: "/dashboard/analytics", icon: TrendingUp, permission: "analytics.read" },
+    { key: "chats", labelKey: "nav.items.aiChat", href: "/dashboard/chats", icon: MessageSquare, permission: "ai_chat.allowed" },
+    { key: "dedup", labelKey: "nav.items.dedup", href: "/dashboard/dedup", icon: GitMerge },
+    { key: "goals", labelKey: "nav.items.goals", href: "/dashboard/goals", icon: Target },
+    { key: "forecast", labelKey: "nav.items.forecast", href: "/dashboard/forecast", icon: LineChart },
   ],
 };
 
 const accountGroup: NavGroup = {
   items: [
-    { labelKey: "nav.items.trash", href: "/dashboard/trash", icon: Trash2 },
-    { labelKey: "nav.items.settings", href: "/dashboard/account", icon: Settings },
-    { labelKey: "nav.items.usage", href: "/dashboard/usage", icon: BarChart3 },
-    { labelKey: "nav.items.upgrade", href: "/dashboard/upgrade", icon: Sparkles },
-    { labelKey: "nav.items.billing", href: "/dashboard/account/billing", icon: CreditCard },
+    { key: "trash", labelKey: "nav.items.trash", href: "/dashboard/trash", icon: Trash2 },
+    { key: "settings", labelKey: "nav.items.settings", href: "/dashboard/account", icon: Settings },
+    { key: "usage", labelKey: "nav.items.usage", href: "/dashboard/usage", icon: BarChart3 },
+    { key: "upgrade", labelKey: "nav.items.upgrade", href: "/dashboard/upgrade", icon: Sparkles },
+    { key: "billing", labelKey: "nav.items.billing", href: "/dashboard/account/billing", icon: CreditCard },
   ],
 };
-
-const navGroups: NavGroup[] = [
-  { items: [{ labelKey: "nav.overview", href: "/dashboard", icon: LayoutGrid }] },
-  crmGroup,
-  toolsGroup,
-  accountGroup,
-];
 
 const TIER_COLORS: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
@@ -215,6 +215,47 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { can } = useWorkspace();
   const { t } = useTranslation();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+  const { config, fetch: fetchConfig, update: updateConfig } = useSidebarConfigStore();
+  const [editingGroup, setEditingGroup] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
+
+  // Get effective items for customizable groups
+  const effectiveCrmItems = getEffectiveItems("crm", crmGroup.items, config);
+  const effectiveToolsItems = getEffectiveItems("tools", toolsGroup.items, config);
+
+  const handleSaveGroup = useCallback(
+    (groupKey: string, items: { key: string; visible: boolean }[]) => {
+      const otherGroupKey = groupKey === "crm" ? "tools" : "crm";
+      const otherStaticItems = groupKey === "crm" ? toolsGroup.items : crmGroup.items;
+      const otherEffective = getEffectiveItems(otherGroupKey, otherStaticItems, config);
+
+      const newConfig = [
+        {
+          groupKey: groupKey as "crm" | "tools",
+          items: items.map((i) => ({ key: i.key, visible: i.visible })),
+        },
+        {
+          groupKey: otherGroupKey as "crm" | "tools",
+          items: otherEffective.map((i) => ({ key: i.key, visible: i.visible })),
+        },
+      ].sort((a, b) => (a.groupKey === "crm" ? -1 : 1));
+
+      updateConfig(newConfig);
+      setEditingGroup(null);
+    },
+    [config, updateConfig]
+  );
+
+  // Build the customizable groups
+  const customizableGroups: { group: NavGroup; effectiveItems: (NavItem & { visible: boolean })[] }[] = [
+    { group: crmGroup, effectiveItems: effectiveCrmItems },
+    { group: toolsGroup, effectiveItems: effectiveToolsItems },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -242,39 +283,101 @@ export function AppSidebar() {
 
       {/* Navigation Content */}
       <SidebarContent>
-        {navGroups.map((group, groupIndex) => (
-          <SidebarGroup key={groupIndex}>
+        {/* Overview group (not customizable) */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === "/dashboard"} tooltip={t("nav.overview")}>
+                  <Link href="/dashboard">
+                    <LayoutGrid className={cn(pathname === "/dashboard" && "text-[var(--accent-blue)]")} />
+                    <span className={cn(pathname === "/dashboard" && "font-semibold")}>{t("nav.overview")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+          <SidebarSeparator className="my-2 opacity-30" />
+        </SidebarGroup>
+
+        {/* CRM and Tools groups (customizable) */}
+        {customizableGroups.map(({ group, effectiveItems }) => (
+          <SidebarGroup key={group.groupKey}>
             {group.labelKey && (
-              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                {t(group.labelKey)}
+              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group/label">
+                <span>{t(group.labelKey)}</span>
+                {!isCollapsed && (
+                  <button
+                    onClick={() => setEditingGroup(editingGroup === group.groupKey ? null : group.groupKey!)}
+                    className="ml-auto opacity-0 group-hover/label:opacity-100 transition-opacity p-0.5 rounded hover:bg-muted"
+                  >
+                    <Pencil className="size-3 text-muted-foreground" />
+                  </button>
+                )}
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items
-                  .filter((item) => !item.permission || can(item.permission))
-                  .map((item) => {
-                    const Icon = item.icon;
-                    const label = t(item.labelKey);
-                    const isActive = pathname === item.href ||
-                      (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              {editingGroup === group.groupKey ? (
+                <SidebarGroupEditor
+                  groupKey={group.groupKey!}
+                  items={effectiveItems}
+                  staticItems={group.items}
+                  onSave={(items) => handleSaveGroup(group.groupKey!, items)}
+                  onCancel={() => setEditingGroup(null)}
+                />
+              ) : (
+                <SidebarMenu>
+                  {effectiveItems
+                    .filter((item) => item.visible)
+                    .filter((item) => !item.permission || can(item.permission))
+                    .map((item) => {
+                      const Icon = item.icon;
+                      const label = t(item.labelKey);
+                      const isActive = pathname === item.href ||
+                        (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
-                    return (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
-                          <Link href={item.href}>
-                            <Icon className={cn(isActive && "text-[var(--accent-blue)]")} />
-                            <span className={cn(isActive && "font-semibold")}>{label}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-              </SidebarMenu>
+                      return (
+                        <SidebarMenuItem key={item.href}>
+                          <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
+                            <Link href={item.href}>
+                              <Icon className={cn(isActive && "text-[var(--accent-blue)]")} />
+                              <span className={cn(isActive && "font-semibold")}>{label}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                </SidebarMenu>
+              )}
             </SidebarGroupContent>
-            {groupIndex < navGroups.length - 1 && <SidebarSeparator className="my-2 opacity-30" />}
+            <SidebarSeparator className="my-2 opacity-30" />
           </SidebarGroup>
         ))}
+
+        {/* Account group (not customizable) */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {accountGroup.items.map((item) => {
+                const Icon = item.icon;
+                const label = t(item.labelKey);
+                const isActive = pathname === item.href ||
+                  (item.href !== "/dashboard" && pathname.startsWith(item.href));
+
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
+                      <Link href={item.href}>
+                        <Icon className={cn(isActive && "text-[var(--accent-blue)]")} />
+                        <span className={cn(isActive && "font-semibold")}>{label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       {/* User Footer */}

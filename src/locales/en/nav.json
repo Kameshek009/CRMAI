@@ -45,6 +45,13 @@
     "billing": "Billing",
     "signOut": "Sign out"
   },
+  "sidebar": {
+    "edit": "Edit",
+    "done": "Done",
+    "reset": "Reset",
+    "hidden": "Hidden",
+    "dragHint": "Drag to reorder, toggle to show or hide"
+  },
   "tier": {
     "free": "Free",
     "pro": "Pro",

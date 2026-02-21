@@ -8,6 +8,7 @@
     "appearance": "Appearance",
     "language": "Language",
     "notifications": "Notifications",
+    "sidebar": "Sidebar",
     "security": "Security",
     "login-history": "Login History",
     "billing": "Subscription & Billing",
@@ -59,6 +60,20 @@
     "weeklyDigest": "Weekly Digest",
     "weeklyDigestDescription": "Receive a weekly summary of your CRM activity",
     "saved": "Notification preferences saved"
+  },
+  "sidebar": {
+    "title": "Sidebar",
+    "description": "Customize which items appear in your sidebar and their order",
+    "yourCustomization": "Your Customization",
+    "yourCustomizationDescription": "Override team defaults with your personal sidebar layout",
+    "teamDefaults": "Team Defaults",
+    "teamDefaultsDescription": "Set the default sidebar layout for all team members",
+    "resetToTeam": "Reset to team defaults",
+    "resetToSystem": "Reset to system defaults",
+    "setAsTeamDefault": "Set as team default",
+    "saved": "Sidebar preferences saved",
+    "teamSaved": "Team sidebar defaults saved",
+    "resetDone": "Sidebar reset to defaults"
   },
   "security": {
     "title": "Security",
