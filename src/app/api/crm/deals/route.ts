@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         title: `Deal created: ${data.title}`,
         metadata: { value: data.value },
       });
-    } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
+    } catch (e) { logger.error("Deals", "Failed to log activity", e); }
 
     logAudit({
       teamId: context.workspaceId,

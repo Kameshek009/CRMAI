@@ -103,7 +103,7 @@ export async function PATCH(
           title: `Task updated: ${data.title}`,
         });
       }
-    } catch (e) { logger.warn("Tasks", "Failed to log activity", e); }
+    } catch (e) { logger.error("Tasks", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -156,7 +156,7 @@ export async function DELETE(
         type: "task_deleted",
         title: `Task deleted: ${existing?.title || "Unknown"}`,
       });
-    } catch (e) { logger.warn("Tasks", "Failed to log activity", e); }
+    } catch (e) { logger.error("Tasks", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true });
   } catch (error) {

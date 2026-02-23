@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         title: `Email: ${parsed.data.subject || "(no subject)"}`,
         description: parsed.data.body_text?.slice(0, 200) || null,
       });
-    } catch (e) { logger.warn("Emails", "Failed to log activity", e); }
+    } catch (e) { logger.error("Emails", "Failed to log activity", e); }
 
     // Exit condition: inbound email exits active sequence enrollments
     if (parsed.data.direction === "inbound") {
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
             .eq("status", "active")
             .eq("contact_id", contactId);
         }
-      } catch (e) { logger.warn("Emails", "Failed to exit sequence enrollments", e); }
+      } catch (e) { logger.error("Emails", "Failed to exit sequence enrollments", e); }
     }
 
     return NextResponse.json({ success: true, data });

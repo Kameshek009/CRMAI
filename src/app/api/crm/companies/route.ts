@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         type: "company_created",
         title: `Company created: ${data.name}`,
       });
-    } catch (e) { logger.warn("Companies", "Failed to log activity", e); }
+    } catch (e) { logger.error("Companies", "Failed to log activity", e); }
 
     logAudit({
       teamId: context.workspaceId,

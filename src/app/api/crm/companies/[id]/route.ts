@@ -114,7 +114,7 @@ export async function PATCH(
         type: "company_updated",
         title: `Company updated: ${data.name}`,
       });
-    } catch (e) { logger.warn("Companies", "Failed to log activity", e); }
+    } catch (e) { logger.error("Companies", "Failed to log activity", e); }
 
     logAudit({
       teamId: context.workspaceId,
@@ -175,7 +175,7 @@ export async function DELETE(
         type: "company_deleted",
         title: `Company deleted: ${existing?.name || "Unknown"}`,
       });
-    } catch (e) { logger.warn("Companies", "Failed to log activity", e); }
+    } catch (e) { logger.error("Companies", "Failed to log activity", e); }
 
     logAudit({
       teamId: context.workspaceId,

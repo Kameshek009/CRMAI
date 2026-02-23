@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         type: "contact_created",
         title: `Contact created: ${data.first_name} ${data.last_name || ""}`.trim(),
       });
-    } catch (e) { logger.warn("Contacts", "Failed to log activity", e); }
+    } catch (e) { logger.error("Contacts", "Failed to log activity", e); }
 
     // Audit log
     logAudit({

@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         type: "task_created",
         title: `Task created: ${data.title}`,
       });
-    } catch (e) { logger.warn("Tasks", "Failed to log activity", e); }
+    } catch (e) { logger.error("Tasks", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

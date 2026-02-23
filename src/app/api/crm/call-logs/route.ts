@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         title: `${parsed.data.direction === "inbound" ? "Inbound" : "Outbound"} call${parsed.data.status ? ` — ${parsed.data.status}` : ""}`,
         description: parsed.data.summary?.slice(0, 200) || null,
       });
-    } catch (e) { logger.warn("CallLogs", "Failed to log activity", e); }
+    } catch (e) { logger.error("CallLogs", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

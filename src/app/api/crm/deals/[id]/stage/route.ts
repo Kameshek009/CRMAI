@@ -93,7 +93,7 @@ export async function PATCH(
           value: deal.value,
         },
       });
-    } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
+    } catch (e) { logger.error("Deals", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {

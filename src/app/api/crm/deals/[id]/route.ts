@@ -97,7 +97,7 @@ export async function PATCH(
         type: "deal_updated",
         title: `Deal updated: ${data.title}`,
       });
-    } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
+    } catch (e) { logger.error("Deals", "Failed to log activity", e); }
 
     const changes = oldRecord ? computeChanges(oldRecord, parsed.data) : undefined;
     logAudit({
@@ -198,7 +198,7 @@ export async function DELETE(
         type: "deal_deleted",
         title: `Deal deleted: ${existing?.title || "Unknown"}`,
       });
-    } catch (e) { logger.warn("Deals", "Failed to log activity", e); }
+    } catch (e) { logger.error("Deals", "Failed to log activity", e); }
 
     logAudit({
       teamId: context.workspaceId,

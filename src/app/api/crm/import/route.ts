@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         metadata: { count: imported?.length || 0, companies: companyNames.length },
       });
     } catch (e) {
-      logger.warn("Import", "Failed to log import activity", e);
+      logger.error("Import", "Failed to log import activity", e);
     }
 
     return NextResponse.json({

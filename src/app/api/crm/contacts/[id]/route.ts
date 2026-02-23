@@ -94,7 +94,7 @@ export async function PATCH(
         type: "contact_updated",
         title: `Contact updated: ${data.first_name} ${data.last_name || ""}`.trim(),
       });
-    } catch (e) { logger.warn("Contacts", "Failed to log activity", e); }
+    } catch (e) { logger.error("Contacts", "Failed to log activity", e); }
 
     // Audit log with changes
     const changes = oldRecord ? computeChanges(oldRecord, parsed.data) : undefined;
@@ -168,7 +168,7 @@ export async function DELETE(
         type: "contact_deleted",
         title: `Contact deleted: ${existing?.first_name || ""} ${existing?.last_name || ""}`.trim(),
       });
-    } catch (e) { logger.warn("Contacts", "Failed to log activity", e); }
+    } catch (e) { logger.error("Contacts", "Failed to log activity", e); }
 
     // Audit log
     logAudit({

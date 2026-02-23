@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         title: "Note added",
         description: parsed.data.content.slice(0, 200),
       });
-    } catch (e) { logger.warn("Notes", "Failed to log activity", e); }
+    } catch (e) { logger.error("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

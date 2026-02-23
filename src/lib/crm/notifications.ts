@@ -50,6 +50,6 @@ export async function createNotification(params: NotificationParams): Promise<vo
       entity_id: params.entityId || null,
     });
   } catch (err) {
-    logger.warn("Notifications", "Failed to create notification", err);
+    logger.error("Notifications", "Failed to create notification", err);
   }
 }

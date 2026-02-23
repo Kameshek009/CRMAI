@@ -27,7 +27,7 @@ export async function logAudit(params: AuditParams): Promise<void> {
       changes: params.changes || {},
     });
   } catch (err) {
-    logger.warn("Audit", "Failed to write audit log", err);
+    logger.error("Audit", "Failed to write audit log", err);
   }
 }
 

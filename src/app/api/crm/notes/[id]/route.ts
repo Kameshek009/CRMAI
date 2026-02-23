@@ -50,7 +50,7 @@ export async function PATCH(
         type: "note_updated",
         title: "Note updated",
       });
-    } catch (e) { logger.warn("Notes", "Failed to log activity", e); }
+    } catch (e) { logger.error("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -106,7 +106,7 @@ export async function DELETE(
         type: "note_deleted",
         title: "Note deleted",
       });
-    } catch (e) { logger.warn("Notes", "Failed to log activity", e); }
+    } catch (e) { logger.error("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true });
   } catch (error) {
