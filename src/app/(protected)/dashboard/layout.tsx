@@ -5,6 +5,9 @@ import { WorkspaceProvider } from "@/contexts/team-context";
 import { LanguageProvider } from "@/lib/i18n";
 import { WorkspaceGuard } from "@/components/auth/team-guard";
 import { CrmOverlays } from "@/components/crm/crm-overlays";
+import { CallTimerProvider } from "@/contexts/call-timer-context";
+import { CallTimerPopup } from "@/components/crm/call-timer-popup";
+import { PostCallDialog } from "@/components/crm/post-call-dialog";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ErrorBoundary } from "@/components/error-boundary";
 
@@ -17,6 +20,7 @@ export default async function DashboardLayout({
     <AccountProvider>
       <LanguageProvider>
       <WorkspaceProvider>
+        <CallTimerProvider>
         <SidebarProvider defaultOpen={true}>
           <AppSidebar />
           <SidebarInset>
@@ -32,7 +36,10 @@ export default async function DashboardLayout({
             </WorkspaceGuard>
           </SidebarInset>
           <CrmOverlays />
+          <CallTimerPopup />
+          <PostCallDialog />
         </SidebarProvider>
+        </CallTimerProvider>
       </WorkspaceProvider>
       </LanguageProvider>
     </AccountProvider>

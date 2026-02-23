@@ -397,13 +397,31 @@
       "noAnswer": "Нет ответа",
       "busy": "Занято",
       "voicemail": "Голосовая почта",
-      "cancelled": "Отменён"
+      "cancelled": "Отменён",
+      "initiated": "В процессе"
     },
     "sort": {
       "created": "Дата создания",
       "duration": "Длительность",
       "status": "Статус",
       "direction": "Направление"
+    },
+    "clickToCall": "Позвонить",
+    "callTimer": {
+      "title": "Звонок в процессе",
+      "endCall": "Завершить звонок",
+      "minimize": "Свернуть",
+      "elapsed": "Прошло"
+    },
+    "postCall": {
+      "title": "Итоги звонка",
+      "duration": "Длительность",
+      "status": "Результат звонка",
+      "summary": "Заметки",
+      "summaryPlaceholder": "Добавьте заметки о звонке...",
+      "save": "Сохранить",
+      "skip": "Пропустить",
+      "saved": "Звонок сохранён"
     }
   },
   "sidebar": {
@@ -1006,6 +1024,28 @@
   "kanban": {
     "noItems": "Нет элементов",
     "add": "Добавить"
+  },
+  "whatsapp": {
+    "title": "WhatsApp",
+    "notConfigured": "WhatsApp не настроен",
+    "configureHint": "Перейдите в Настройки > Интеграции для подключения WhatsApp Business",
+    "goToSettings": "Настроить",
+    "noMessages": "Сообщений пока нет",
+    "send": "Отправить",
+    "messagePlaceholder": "Введите сообщение...",
+    "sent": "Отправлено",
+    "delivered": "Доставлено",
+    "read": "Прочитано",
+    "failed": "Ошибка",
+    "pending": "Отправка...",
+    "template": "Шаблон",
+    "selectTemplate": "Выберите шаблон",
+    "noTemplates": "Нет доступных шаблонов",
+    "fillParams": "Заполните переменные шаблона",
+    "sendTemplate": "Отправить шаблон",
+    "messageSent": "Сообщение отправлено",
+    "messageFailed": "Не удалось отправить сообщение",
+    "loading": "Загрузка сообщений..."
   },
   "history": {
     "title": "История",

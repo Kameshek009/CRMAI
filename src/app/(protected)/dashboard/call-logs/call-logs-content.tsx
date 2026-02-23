@@ -9,6 +9,7 @@ import { EntityForm } from "@/components/crm/entity-form";
 import { getCallLogFields } from "@/lib/crm/field-definitions";
 import { PhoneIncoming, PhoneOutgoing } from "lucide-react";
 import { TimeAgo } from "@/components/ui/time-ago";
+import { ClickToCall } from "@/components/crm/click-to-call";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
 import type { ViewMode } from "@/types/crm";
@@ -169,8 +170,24 @@ export function CallLogsContent() {
         return "—";
       },
     },
-    { key: "from_number", label: t("crm.callLogs.fields.from") },
-    { key: "to_number", label: t("crm.callLogs.fields.to") },
+    {
+      key: "from_number", label: t("crm.callLogs.fields.from"),
+      render: (c) => c.from_number ? (
+        <div className="flex items-center gap-1">
+          <span className="text-sm">{c.from_number}</span>
+          <ClickToCall phoneNumber={c.from_number} contactId={c.contacts?.id} variant="icon" size="sm" />
+        </div>
+      ) : "—",
+    },
+    {
+      key: "to_number", label: t("crm.callLogs.fields.to"),
+      render: (c) => c.to_number ? (
+        <div className="flex items-center gap-1">
+          <span className="text-sm">{c.to_number}</span>
+          <ClickToCall phoneNumber={c.to_number} contactId={c.contacts?.id} variant="icon" size="sm" />
+        </div>
+      ) : "—",
+    },
     {
       key: "duration_seconds", label: t("crm.callLogs.sort.duration"), sortable: true, align: "center",
       render: (c) => <span className="text-sm">{formatDuration(c.duration_seconds)}</span>,

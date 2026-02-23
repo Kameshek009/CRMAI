@@ -244,7 +244,31 @@
     "copied": "Copied to clipboard",
     "webhooks": "Webhooks",
     "webhooksDescription": "Webhook URL configuration",
-    "comingSoon": "Coming soon — webhook support is under development"
+    "comingSoon": "Coming soon — webhook support is under development",
+    "whatsapp": {
+      "title": "WhatsApp Business",
+      "description": "Connect your WhatsApp Business account via Meta Cloud API",
+      "phoneNumberId": "Phone Number ID",
+      "phoneNumberIdHelp": "Found in Meta Business Settings > WhatsApp > Phone Numbers",
+      "wabaId": "WhatsApp Business Account ID",
+      "wabaIdHelp": "Found in Meta Business Settings > WhatsApp > Overview",
+      "accessToken": "Access Token",
+      "accessTokenHelp": "System user permanent token with whatsapp_business_messaging permission",
+      "webhookVerifyToken": "Webhook Verify Token",
+      "webhookUrl": "Webhook URL",
+      "webhookUrlHelp": "Configure this URL in Meta App Dashboard > WhatsApp > Configuration",
+      "testConnection": "Test Connection",
+      "testing": "Testing...",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "connectionSuccess": "Connected to WhatsApp Business: {name}",
+      "connectionFailed": "Connection failed: {error}",
+      "saved": "WhatsApp settings saved",
+      "saveFailed": "Failed to save settings",
+      "showToken": "Show",
+      "hideToken": "Hide",
+      "save": "Save"
+    }
   },
   "billing": {
     "title": "Subscription & Billing",

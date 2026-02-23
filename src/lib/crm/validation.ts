@@ -230,7 +230,7 @@ export const createCallLogSchema = z.object({
   contact_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   direction: z.enum(["inbound", "outbound"]).optional(),
-  status: z.enum(["completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
+  status: z.enum(["initiated", "completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
   duration_seconds: z.number().min(0).optional(),
   from_number: z.string().max(30).optional(),
   to_number: z.string().max(30).optional(),
@@ -242,7 +242,7 @@ export const updateCallLogSchema = z.object({
   contact_id: z.string().uuid().optional().nullable(),
   deal_id: z.string().uuid().optional().nullable(),
   direction: z.enum(["inbound", "outbound"]).optional(),
-  status: z.enum(["completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
+  status: z.enum(["initiated", "completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
   duration_seconds: z.number().min(0).optional(),
   from_number: z.string().max(30).optional().nullable(),
   to_number: z.string().max(30).optional().nullable(),
@@ -317,4 +317,25 @@ export const updateGoalSchema = z.object({
   target_value: z.number().min(0).optional(),
   is_active: z.boolean().optional(),
   end_date: z.string().max(30).optional(),
+});
+
+// ============================================================================
+// WhatsApp schemas
+// ============================================================================
+
+export const sendWhatsAppMessageSchema = z.object({
+  contact_id: z.string().uuid().optional().nullable(),
+  lead_id: z.string().uuid().optional().nullable(),
+  to_number: z.string().min(1).max(30),
+  content: z.string().max(4096).optional(),
+  message_type: z.enum(["text", "template"]).optional(),
+  template_name: z.string().max(200).optional(),
+  template_params: z.array(z.string().max(1024)).optional(),
+});
+
+export const whatsappSettingsSchema = z.object({
+  phone_number_id: z.string().min(1).max(100),
+  waba_id: z.string().min(1).max(100),
+  access_token: z.string().min(1).max(500),
+  webhook_verify_token: z.string().min(1).max(100).optional(),
 });

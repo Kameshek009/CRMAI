@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, UserPlus, Handshake, Loader2 } from "lucide-react";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
+import { ClickToCall } from "@/components/crm/click-to-call";
 import { toast } from "sonner";
 
 interface LeadDetail {
@@ -244,7 +245,12 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
             </div>
             <div>
               <Label>{t("crm.leads.fields.phone")}</Label>
-              <Input value={editData.phone || ""} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} />
+              <div className="flex items-center gap-1">
+                <Input value={editData.phone || ""} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} />
+                {editData.phone && (
+                  <ClickToCall phoneNumber={editData.phone} leadId={leadId} contactName={`${editData.first_name || ""} ${editData.last_name || ""}`.trim()} variant="icon" size="sm" />
+                )}
+              </div>
             </div>
             <div>
               <Label>{t("crm.leads.fields.organization")}</Label>

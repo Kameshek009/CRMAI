@@ -23,6 +23,8 @@ import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import { ChangeHistory } from "@/components/crm/change-history";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
+import { ClickToCall } from "@/components/crm/click-to-call";
+import { WhatsAppChat } from "@/components/crm/whatsapp-chat";
 import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
 
@@ -316,6 +318,11 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       content: <EmailList entityType="contact" entityId={contactId} />,
     },
     {
+      value: "whatsapp",
+      label: "WhatsApp",
+      content: <WhatsAppChat entityType="contact" entityId={contactId} phoneNumber={contact.phone} />,
+    },
+    {
       value: "history",
       label: t("crm.history.title"),
       content: <ChangeHistory entityType="contact" entityId={contactId} />,
@@ -357,12 +364,25 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
         type="email"
         onSave={(v) => updateField("email", v)}
       />
-      <InlineEditField
-        label={t("crm.contacts.fields.phone")}
-        value={contact.phone}
-        type="tel"
-        onSave={(v) => updateField("phone", v)}
-      />
+      <div className="flex items-center gap-1">
+        <div className="flex-1">
+          <InlineEditField
+            label={t("crm.contacts.fields.phone")}
+            value={contact.phone}
+            type="tel"
+            onSave={(v) => updateField("phone", v)}
+          />
+        </div>
+        {contact.phone && (
+          <ClickToCall
+            phoneNumber={contact.phone}
+            contactId={contactId}
+            contactName={name}
+            variant="icon"
+            size="sm"
+          />
+        )}
+      </div>
       <InlineEditField
         label={t("crm.contacts.fields.jobTitle")}
         value={contact.title}

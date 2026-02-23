@@ -397,13 +397,31 @@
       "noAnswer": "No Answer",
       "busy": "Busy",
       "voicemail": "Voicemail",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "initiated": "In Progress"
     },
     "sort": {
       "created": "Created",
       "duration": "Duration",
       "status": "Status",
       "direction": "Direction"
+    },
+    "clickToCall": "Call",
+    "callTimer": {
+      "title": "Call in progress",
+      "endCall": "End Call",
+      "minimize": "Minimize",
+      "elapsed": "Elapsed"
+    },
+    "postCall": {
+      "title": "Call Summary",
+      "duration": "Duration",
+      "status": "Call Result",
+      "summary": "Notes",
+      "summaryPlaceholder": "Add notes about the call...",
+      "save": "Save",
+      "skip": "Skip",
+      "saved": "Call log saved"
     }
   },
   "sidebar": {
@@ -1006,6 +1024,28 @@
   "kanban": {
     "noItems": "No items",
     "add": "Add"
+  },
+  "whatsapp": {
+    "title": "WhatsApp",
+    "notConfigured": "WhatsApp is not configured",
+    "configureHint": "Go to Settings > Integrations to connect WhatsApp Business",
+    "goToSettings": "Configure",
+    "noMessages": "No messages yet",
+    "send": "Send",
+    "messagePlaceholder": "Type a message...",
+    "sent": "Sent",
+    "delivered": "Delivered",
+    "read": "Read",
+    "failed": "Failed",
+    "pending": "Sending...",
+    "template": "Template",
+    "selectTemplate": "Select template",
+    "noTemplates": "No templates available",
+    "fillParams": "Fill in template variables",
+    "sendTemplate": "Send Template",
+    "messageSent": "Message sent",
+    "messageFailed": "Failed to send message",
+    "loading": "Loading messages..."
   },
   "history": {
     "title": "History",

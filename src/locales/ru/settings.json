@@ -244,7 +244,31 @@
     "copied": "Скопировано в буфер обмена",
     "webhooks": "Вебхуки",
     "webhooksDescription": "Настройка URL вебхуков",
-    "comingSoon": "Скоро — поддержка вебхуков в разработке"
+    "comingSoon": "Скоро — поддержка вебхуков в разработке",
+    "whatsapp": {
+      "title": "WhatsApp Business",
+      "description": "Подключите аккаунт WhatsApp Business через Meta Cloud API",
+      "phoneNumberId": "ID номера телефона",
+      "phoneNumberIdHelp": "Найдите в Meta Business Settings > WhatsApp > Номера телефонов",
+      "wabaId": "ID аккаунта WhatsApp Business",
+      "wabaIdHelp": "Найдите в Meta Business Settings > WhatsApp > Обзор",
+      "accessToken": "Токен доступа",
+      "accessTokenHelp": "Постоянный токен системного пользователя с разрешением whatsapp_business_messaging",
+      "webhookVerifyToken": "Токен верификации вебхука",
+      "webhookUrl": "URL вебхука",
+      "webhookUrlHelp": "Настройте этот URL в Meta App Dashboard > WhatsApp > Конфигурация",
+      "testConnection": "Проверить подключение",
+      "testing": "Проверка...",
+      "connected": "Подключён",
+      "notConnected": "Не подключён",
+      "connectionSuccess": "Подключён к WhatsApp Business: {name}",
+      "connectionFailed": "Ошибка подключения: {error}",
+      "saved": "Настройки WhatsApp сохранены",
+      "saveFailed": "Не удалось сохранить настройки",
+      "showToken": "Показать",
+      "hideToken": "Скрыть",
+      "save": "Сохранить"
+    }
   },
   "billing": {
     "title": "Подписка и оплата",
