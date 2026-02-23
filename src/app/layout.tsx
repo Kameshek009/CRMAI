@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://nexxuscrm.com"),
   title: {
     default: "Nexxus CRM",
     template: "%s | Nexxus CRM",
@@ -14,6 +15,21 @@ export const metadata: Metadata = {
   authors: [{ name: "Nexxus CRM" }],
   icons: {
     icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "Nexxus CRM",
+    description: "AI-Powered CRM for Growing Teams",
+    url: "/",
+    siteName: "Nexxus CRM",
+    locale: "en_US",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nexxus CRM",
+    description: "AI-Powered CRM for Growing Teams",
+    images: ["/og-image.png"],
   },
 };
 

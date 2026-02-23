@@ -66,7 +66,7 @@ function DroppableColumn<T extends KanbanCard>({
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-lg bg-muted/30">
+    <div className="flex w-72 shrink-0 flex-col rounded-lg bg-muted/30" role="list" aria-label={`${column.title}, ${column.count ?? cards.length} items`}>
       {/* Column header */}
       <div className="flex items-center gap-2 px-3 py-2.5">
         {column.color && (
@@ -115,6 +115,7 @@ function DroppableColumn<T extends KanbanCard>({
             size="sm"
             className="w-full h-8 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => onAddCard(column.id)}
+            aria-label={`Add card to ${column.title}`}
           >
             <Plus className="h-3.5 w-3.5 mr-1" />
             Add
@@ -156,6 +157,8 @@ function SortableCard<T extends KanbanCard>({
       style={style}
       {...attributes}
       {...listeners}
+      role="listitem"
+      aria-roledescription="draggable card"
       className={cn("transition-shadow", isDragging && "opacity-50")}
     >
       {renderCard(card)}
@@ -218,7 +221,7 @@ export function KanbanBoard<T extends KanbanCard>({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className={cn("flex gap-4 overflow-x-auto pb-4", className)}>
+      <div role="region" aria-label="Kanban board" className={cn("flex gap-4 overflow-x-auto pb-4", className)}>
         {columns.map((column) => {
           const columnCards = cards.filter((c) => c.columnId === column.id);
           return (
