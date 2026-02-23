@@ -281,7 +281,7 @@ export function AnalyticsContent() {
         <MetricCard
           label={t("crm.analytics.winRate")}
           value={`${data.winRate}%`}
-          subtitle={`${data.wonCount}W / ${data.lostCount}L`}
+          subtitle={`${data.wonCount}S / ${data.lostCount}C`}
           icon={Target}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
         />

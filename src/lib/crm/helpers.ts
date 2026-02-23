@@ -152,8 +152,8 @@ export async function ensureDealStages(accountId: string, teamId?: string | null
         { name: "Qualified", color: "#6366f1", is_won: false, is_lost: false },
         { name: "Proposal", color: "#f59e0b", is_won: false, is_lost: false },
         { name: "Negotiation", color: "#f97316", is_won: false, is_lost: false },
-        { name: "Won", color: "#22c55e", is_won: true, is_lost: false },
-        { name: "Lost", color: "#ef4444", is_won: false, is_lost: true },
+        { name: "Success", color: "#22c55e", is_won: true, is_lost: false },
+        { name: "Closed", color: "#ef4444", is_won: false, is_lost: true },
       ];
 
       await supabase.from("deal_stages").insert(

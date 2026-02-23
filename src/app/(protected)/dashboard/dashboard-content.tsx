@@ -534,7 +534,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                   <StatWidget href="/dashboard/deals" label={t("crm.dashboard.openDealsLabel")} value={crmStats?.openDeals ?? 0} subtitle={`$${(crmStats?.pipelineValue ?? 0).toLocaleString()} ${t("crm.dashboard.pipeline")}`} icon={Handshake} />
                 )}
                 {w.type === "stat_wonThisMonth" && (
-                  <StatWidget href="/dashboard/analytics" label={t("crm.dashboard.wonThisMonth")} value={crmStats?.wonValueThisMonth ?? 0} formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`} subtitle={t("crm.dashboard.dealsClosed", { count: crmStats?.wonDealsThisMonth ?? 0 })} icon={DollarSign} trend={(crmStats?.wonDealsThisMonth ?? 0) > 0 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} won` } : undefined} />
+                  <StatWidget href="/dashboard/analytics" label={t("crm.dashboard.wonThisMonth")} value={crmStats?.wonValueThisMonth ?? 0} formattedValue={`$${(crmStats?.wonValueThisMonth ?? 0).toLocaleString()}`} subtitle={t("crm.dashboard.dealsClosed", { count: crmStats?.wonDealsThisMonth ?? 0 })} icon={DollarSign} trend={(crmStats?.wonDealsThisMonth ?? 0) > 0 ? { direction: "up", text: `${crmStats?.wonDealsThisMonth} successful` } : undefined} />
                 )}
                 {w.type === "stat_contacts" && (
                   <StatWidget href="/dashboard/contacts" label={t("crm.dashboard.contactsLabel")} value={crmStats?.totalContacts ?? 0} subtitle={t("crm.dashboard.thisWeek", { count: crmStats?.newContactsThisWeek ?? 0 })} icon={Users} trend={(crmStats?.newContactsThisWeek ?? 0) > 0 ? { direction: "up", text: `+${crmStats?.newContactsThisWeek}` } : undefined} />

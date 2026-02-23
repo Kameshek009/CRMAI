@@ -260,7 +260,7 @@ function ProductPreview3D() {
             <div className="grid grid-cols-3 gap-3 mb-4">
               {[
                 { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-landing-accent to-landing-accent" },
-                { label: "Deals Won", value: "148", change: "+24%", color: "from-landing-accent to-landing-accent" },
+                { label: "Successful Deals", value: "148", change: "+24%", color: "from-landing-accent to-landing-accent" },
                 { label: "Conversion", value: "68%", change: "+7%", color: "from-landing-accent to-landing-accent" },
               ].map((stat, i) => (
                 <motion.div

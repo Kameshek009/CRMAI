@@ -42,11 +42,11 @@
     "newDealPlaceholder": "Новая сделка",
     "failedMove": "Не удалось переместить сделку",
     "movedTo": "Перемещено в {stage}",
-    "lostReasonTitle": "Почему сделка проиграна?",
+    "lostReasonTitle": "Почему сделка закрыта?",
     "selectReason": "Выберите причину",
     "lostNote": "Дополнительные заметки",
     "lostNotePlaceholder": "Дополнительный контекст...",
-    "confirmLost": "Отметить как проигрыш",
+    "confirmLost": "Отметить как закрыто",
     "dealCreated": "Сделка создана",
     "failed": "Ошибка",
     "notSetUp": "Воронка не настроена",
@@ -176,8 +176,8 @@
     },
     "statuses": {
       "open": "Открыта",
-      "won": "Выиграна",
-      "lost": "Проиграна"
+      "won": "Успешна",
+      "lost": "Закрыта"
     },
     "sort": {
       "created": "Дата создания",
@@ -221,7 +221,7 @@
       "noTasks": "Нет связанных задач",
       "noEmails": "Писем пока нет",
       "pipeline": "Воронка",
-      "winProbability": "Вероятность выигрыша",
+      "winProbability": "Вероятность успеха",
       "created": "Создано",
       "taskCreated": "Задача создана",
       "failedTask": "Не удалось создать задачу",
@@ -427,21 +427,21 @@
     "join": "Присоединиться",
     "openDealsLabel": "Открытые сделки",
     "pipeline": "воронка",
-    "wonThisMonth": "Выиграно за месяц",
+    "wonThisMonth": "Успешных за месяц",
     "dealsClosed": "{count} сделок закрыто",
     "contactsLabel": "Контакты",
     "thisWeek": "+{count} за неделю",
     "tasksDue": "Задачи на сегодня",
     "overdue": "{count} просрочено",
     "allOnTrack": "Все в срок",
-    "winRate": "Процент побед",
+    "winRate": "Процент успеха",
     "closedRatio": "Соотношение закрытых сделок",
     "forecast": "Прогноз",
     "weightedPipeline": "Взвешенная воронка",
     "organizations": "Организации",
     "totalDeals": "Всего сделок",
     "avgDeal": "Ср. сделка",
-    "avgWonSize": "Средний размер выигранной сделки",
+    "avgWonSize": "Средний размер успешной сделки",
     "recent": "Последние",
     "noActivityYet": "Нет недавней активности",
     "aiInsights": "AI Инсайты",
@@ -649,7 +649,7 @@
     "openDeals": "открытых сделок",
     "weightedPipeline": "Взвешенная воронка",
     "probabilityAdjusted": "С учётом вероятности",
-    "winRate": "Процент побед",
+    "winRate": "Процент успеха",
     "historicalAvg": "Исторический средний",
     "avgCycle": "Ср. цикл",
     "days": "дн.",
@@ -660,7 +660,7 @@
     "stage": "Стадия",
     "deals": "Сделки",
     "value": "Сумма",
-    "stageWinRate": "Win Rate",
+    "stageWinRate": "Процент успеха",
     "weighted": "Взвешенная",
     "total": "Итого"
   },
@@ -685,7 +685,7 @@
     "complete": "выполнено",
     "types": {
       "revenue": "Выручка",
-      "deals_won": "Выигранные сделки",
+      "deals_won": "Успешные сделки",
       "deals_created": "Созданные сделки",
       "contacts_created": "Созданные контакты",
       "activities_logged": "Записанные активности"
@@ -916,7 +916,7 @@
     "pageDescription": "Комплексный анализ эффективности CRM",
     "failedLoad": "Не удалось загрузить аналитику",
     "metrics": {
-      "winRate": "Процент побед",
+      "winRate": "Процент успеха",
       "pipelineValue": "Стоимость воронки",
       "openDeals": "открытых сделок",
       "thisMonth": "За этот месяц",
@@ -925,7 +925,7 @@
       "forecast": "Прогноз",
       "weightedPipeline": "Взвешенная воронка",
       "avgDealSize": "Ср. размер сделки",
-      "wonDealsAverage": "Среднее по выигранным",
+      "wonDealsAverage": "Среднее по успешным",
       "salesVelocity": "Скорость продаж",
       "perDayPotential": "Потенциал в день",
       "avgCloseTime": "Ср. время закрытия",
@@ -942,16 +942,16 @@
       "deals": "Сделки",
       "activityTrend": "Тренд активности (30 дней)",
       "total": "всего",
-      "winLossAnalysis": "Анализ побед/поражений"
+      "winLossAnalysis": "Анализ успехов / закрытий"
     },
     "winLoss": {
-      "wonDeals": "Выигранные сделки",
-      "lostDeals": "Проигранные сделки",
+      "wonDeals": "Успешные сделки",
+      "lostDeals": "Закрытые сделки",
       "total": "всего",
       "average": "Ср.:",
-      "winRate": "Процент побед",
-      "won": "Выиграно:",
-      "lost": "Проиграно:"
+      "winRate": "Процент успеха",
+      "won": "Успешно:",
+      "lost": "Закрыто:"
     },
     "contacts": {
       "title": "Распределение контактов",
@@ -977,7 +977,7 @@
     "deals": {
       "topOpenDeals": "Топ открытых сделок",
       "noOpenDeals": "Нет открытых сделок",
-      "win": "победа"
+      "win": "успех"
     },
     "sources": {
       "title": "Источники контактов",

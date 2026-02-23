@@ -42,11 +42,11 @@
     "newDealPlaceholder": "New deal",
     "failedMove": "Failed to move deal",
     "movedTo": "Moved to {stage}",
-    "lostReasonTitle": "Why was this deal lost?",
+    "lostReasonTitle": "Why was this deal closed?",
     "selectReason": "Select a reason",
     "lostNote": "Additional notes",
     "lostNotePlaceholder": "Any additional context...",
-    "confirmLost": "Mark as Lost",
+    "confirmLost": "Mark as Closed",
     "dealCreated": "Deal created",
     "failed": "Failed",
     "notSetUp": "Pipeline not set up",
@@ -75,7 +75,7 @@
       "title": "Filters",
       "clearAll": "Clear all",
       "assignedTo": "Assigned To",
-      "winProb": "Win Probability",
+      "winProb": "Success Probability",
       "hot": "Hot (70%+)",
       "warm": "Warm (30-69%)",
       "atRisk": "At Risk (<30%)",
@@ -167,7 +167,7 @@
       "dealTitle": "Deal Title",
       "value": "Value ($)",
       "expectedClose": "Expected Close",
-      "winPercent": "Win %",
+      "winPercent": "Probability %",
       "description": "Description",
       "stage": "Stage",
       "contact": "Contact",
@@ -176,15 +176,15 @@
     },
     "statuses": {
       "open": "Open",
-      "won": "Won",
-      "lost": "Lost"
+      "won": "Success",
+      "lost": "Closed"
     },
     "sort": {
       "created": "Created",
       "title": "Title",
       "value": "Value",
       "expectedClose": "Expected Close",
-      "winPercent": "Win %"
+      "winPercent": "Probability %"
     },
     "groupBy": {
       "status": "Status"
@@ -221,7 +221,7 @@
       "noTasks": "No tasks linked",
       "noEmails": "No emails yet",
       "pipeline": "Pipeline",
-      "winProbability": "Win Probability",
+      "winProbability": "Success Probability",
       "created": "Created",
       "taskCreated": "Task created",
       "failedTask": "Failed to create task",
@@ -427,21 +427,21 @@
     "join": "Join",
     "openDealsLabel": "Open Deals",
     "pipeline": "pipeline",
-    "wonThisMonth": "Won This Month",
+    "wonThisMonth": "Successful This Month",
     "dealsClosed": "{count} deals closed",
     "contactsLabel": "Contacts",
     "thisWeek": "+{count} this week",
     "tasksDue": "Tasks Due",
     "overdue": "{count} overdue",
     "allOnTrack": "All on track",
-    "winRate": "Win Rate",
+    "winRate": "Success Rate",
     "closedRatio": "Closed deals ratio",
     "forecast": "Forecast",
     "weightedPipeline": "Weighted pipeline",
     "organizations": "Organizations",
     "totalDeals": "Total deals tracked",
     "avgDeal": "Avg Deal",
-    "avgWonSize": "Average won deal size",
+    "avgWonSize": "Average successful deal size",
     "recent": "Recent",
     "noActivityYet": "No recent activity yet",
     "aiInsights": "AI Insights",
@@ -649,7 +649,7 @@
     "openDeals": "open deals",
     "weightedPipeline": "Weighted Pipeline",
     "probabilityAdjusted": "Probability adjusted",
-    "winRate": "Win Rate",
+    "winRate": "Success Rate",
     "historicalAvg": "Historical average",
     "avgCycle": "Avg Cycle",
     "days": "days",
@@ -660,7 +660,7 @@
     "stage": "Stage",
     "deals": "Deals",
     "value": "Value",
-    "stageWinRate": "Win Rate",
+    "stageWinRate": "Success Rate",
     "weighted": "Weighted",
     "total": "Total"
   },
@@ -685,7 +685,7 @@
     "complete": "complete",
     "types": {
       "revenue": "Revenue",
-      "deals_won": "Deals Won",
+      "deals_won": "Successful Deals",
       "deals_created": "Deals Created",
       "contacts_created": "Contacts Created",
       "activities_logged": "Activities Logged"
@@ -916,7 +916,7 @@
     "pageDescription": "Comprehensive CRM performance insights",
     "failedLoad": "Failed to load analytics",
     "metrics": {
-      "winRate": "Win Rate",
+      "winRate": "Success Rate",
       "pipelineValue": "Pipeline Value",
       "openDeals": "open deals",
       "thisMonth": "This Month",
@@ -925,7 +925,7 @@
       "forecast": "Forecast",
       "weightedPipeline": "Weighted pipeline",
       "avgDealSize": "Avg Deal Size",
-      "wonDealsAverage": "Won deals average",
+      "wonDealsAverage": "Successful deals average",
       "salesVelocity": "Sales Velocity",
       "perDayPotential": "Per day potential",
       "avgCloseTime": "Avg Close Time",
@@ -942,16 +942,16 @@
       "deals": "Deals",
       "activityTrend": "Activity Trend (30 Days)",
       "total": "total",
-      "winLossAnalysis": "Win/Loss Analysis"
+      "winLossAnalysis": "Success / Close Analysis"
     },
     "winLoss": {
-      "wonDeals": "Won Deals",
-      "lostDeals": "Lost Deals",
+      "wonDeals": "Successful Deals",
+      "lostDeals": "Closed Deals",
       "total": "total",
       "average": "Avg:",
-      "winRate": "Win Rate",
-      "won": "Won:",
-      "lost": "Lost:"
+      "winRate": "Success Rate",
+      "won": "Success:",
+      "lost": "Closed:"
     },
     "contacts": {
       "title": "Contact Distribution",
@@ -977,7 +977,7 @@
     "deals": {
       "topOpenDeals": "Top Open Deals",
       "noOpenDeals": "No open deals",
-      "win": "win"
+      "win": "success"
     },
     "sources": {
       "title": "Contact Sources",

@@ -28,7 +28,7 @@ export function StageSelector({ stages, value, onChange }: StageSelectorProps) {
     >
       {stages.map((stage) => (
         <option key={stage.id} value={stage.id}>
-          {stage.name} {stage.is_won ? "(Won)" : stage.is_lost ? "(Lost)" : ""}
+          {stage.name} {stage.is_won ? "(Success)" : stage.is_lost ? "(Closed)" : ""}
         </option>
       ))}
     </select>
