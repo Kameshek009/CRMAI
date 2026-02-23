@@ -27,5 +27,11 @@
   "noteAdded": "Note added",
   "restored": "Restored",
   "failedRestore": "Failed to restore",
-  "undo": "Undo"
+  "undo": "Undo",
+  "somethingWentWrong": "Something went wrong",
+  "errorLoadingPage": "An error occurred while loading this page.",
+  "tryAgain": "Try again",
+  "pageNotFound": "Page not found",
+  "dashboardPageNotExist": "This dashboard page doesn't exist.",
+  "backToDashboard": "Back to dashboard"
 }

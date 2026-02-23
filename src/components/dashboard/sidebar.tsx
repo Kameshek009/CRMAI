@@ -49,11 +49,11 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-const TIER_DISPLAY_NAMES: Record<string, string> = {
-  free: "Free",
-  pro: "Pro",
-  max: "Max",
-  enterprise: "Enterprise",
+const TIER_KEY_MAP: Record<string, string> = {
+  free: "billing.plans.free",
+  pro: "billing.plans.pro",
+  max: "billing.plans.max",
+  enterprise: "billing.plans.enterprise",
 };
 
 export function Sidebar() {
@@ -63,7 +63,7 @@ export function Sidebar() {
   const { currentWorkspace: currentTeam } = useWorkspace();
   const { t } = useTranslation();
 
-  const tierName = currentTeam?.tier ? TIER_DISPLAY_NAMES[currentTeam.tier] || "Free" : "Free";
+  const tierName = currentTeam?.tier ? t(TIER_KEY_MAP[currentTeam.tier] || "billing.plans.free") : t("billing.plans.free");
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-60 flex flex-col bg-background border-r border-border z-50">

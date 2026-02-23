@@ -20,6 +20,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useWorkspace } from "@/contexts/team-context";
+import { useTranslation } from "@/lib/i18n";
 import { TIER_LIMITS, type SubscriptionTier } from "@/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -30,10 +31,10 @@ import { cn } from "@/lib/utils";
 
 interface PlanConfig {
   tier: SubscriptionTier;
-  name: string;
-  description: string;
+  nameKey: string;
+  descriptionKey: string;
   icon: typeof Sparkles;
-  accent: string;        // card border / ring colour
+  accent: string;
   badgeVariant: "default" | "secondary" | "outline";
   popular?: boolean;
 }
@@ -41,16 +42,16 @@ interface PlanConfig {
 const plans: PlanConfig[] = [
   {
     tier: "free",
-    name: "Free",
-    description: "Get started with the essentials",
+    nameKey: "billing.plans.free",
+    descriptionKey: "billing.upgradePage.freeDesc",
     icon: Sparkles,
     accent: "",
     badgeVariant: "outline",
   },
   {
     tier: "pro",
-    name: "Pro",
-    description: "For growing teams and professionals",
+    nameKey: "billing.plans.pro",
+    descriptionKey: "billing.upgradePage.proDesc",
     icon: Zap,
     accent: "ring-2 ring-primary shadow-lg shadow-primary/10",
     badgeVariant: "default",
@@ -58,16 +59,16 @@ const plans: PlanConfig[] = [
   },
   {
     tier: "max",
-    name: "Max",
-    description: "Maximum power for power users",
+    nameKey: "billing.plans.max",
+    descriptionKey: "billing.upgradePage.maxDesc",
     icon: Crown,
     accent: "",
     badgeVariant: "secondary",
   },
   {
     tier: "enterprise",
-    name: "Enterprise",
-    description: "Custom solutions for large organisations",
+    nameKey: "billing.plans.enterprise",
+    descriptionKey: "billing.upgradePage.enterpriseDesc",
     icon: Building2,
     accent: "",
     badgeVariant: "secondary",
@@ -79,7 +80,7 @@ const plans: PlanConfig[] = [
 /* ------------------------------------------------------------------ */
 
 interface ComparisonRow {
-  label: string;
+  labelKey: string;
   free: string | boolean;
   pro: string | boolean;
   max: string | boolean;
@@ -87,49 +88,37 @@ interface ComparisonRow {
 }
 
 const comparisonRows: ComparisonRow[] = [
-  { label: "AI Tokens / month", free: "50K", pro: "500K", max: "1.5M", enterprise: "Unlimited" },
-  { label: "Contacts", free: "100", pro: "5,000", max: "25,000", enterprise: "Unlimited" },
-  { label: "Companies", free: "5", pro: "500", max: "5,000", enterprise: "Unlimited" },
-  { label: "Deals", free: "50", pro: "2,500", max: "15,000", enterprise: "Unlimited" },
-  { label: "Leads", free: "50", pro: "2,500", max: "15,000", enterprise: "Unlimited" },
-  { label: "Tasks", free: "50", pro: "Unlimited", max: "Unlimited", enterprise: "Unlimited" },
-  { label: "Pipeline stages", free: "3", pro: "Unlimited", max: "Unlimited", enterprise: "Unlimited" },
-  { label: "Custom fields", free: "5", pro: "30", max: "100", enterprise: "500" },
-  { label: "Active automations", free: false, pro: "10", max: "50", enterprise: "200" },
-  { label: "Email templates", free: "3", pro: "25", max: "100", enterprise: "Unlimited" },
-  { label: "Email sequences", free: false, pro: "5", max: "25", enterprise: "Unlimited" },
-  { label: "Visibility groups", free: false, pro: "3", max: "10", enterprise: "Unlimited" },
-  { label: "Team members", free: "3", pro: "Unlimited", max: "Unlimited", enterprise: "Unlimited" },
-  { label: "AI deal insights", free: false, pro: true, max: true, enterprise: true },
-  { label: "Import / Export CSV", free: false, pro: true, max: true, enterprise: true },
-  { label: "Advanced analytics", free: false, pro: false, max: true, enterprise: true },
-  { label: "API access", free: false, pro: true, max: true, enterprise: true },
-  { label: "SSO / SAML", free: false, pro: false, max: false, enterprise: true },
-  { label: "Dedicated support", free: false, pro: false, max: true, enterprise: true },
-  { label: "SLA guarantee", free: false, pro: false, max: true, enterprise: true },
+  { labelKey: "billing.upgradePage.compAiTokens", free: "50K", pro: "500K", max: "1.5M", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compContacts", free: "100", pro: "5,000", max: "25,000", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compCompanies", free: "5", pro: "500", max: "5,000", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compDeals", free: "50", pro: "2,500", max: "15,000", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compLeads", free: "50", pro: "2,500", max: "15,000", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compTasks", free: "50", pro: "unlimited", max: "unlimited", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compPipelineStages", free: "3", pro: "unlimited", max: "unlimited", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compCustomFields", free: "5", pro: "30", max: "100", enterprise: "500" },
+  { labelKey: "billing.upgradePage.compActiveAutomations", free: false, pro: "10", max: "50", enterprise: "200" },
+  { labelKey: "billing.upgradePage.compEmailTemplates", free: "3", pro: "25", max: "100", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compEmailSequences", free: false, pro: "5", max: "25", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compVisibilityGroups", free: false, pro: "3", max: "10", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compTeamMembers", free: "3", pro: "unlimited", max: "unlimited", enterprise: "unlimited" },
+  { labelKey: "billing.upgradePage.compAiDealInsights", free: false, pro: true, max: true, enterprise: true },
+  { labelKey: "billing.upgradePage.compImportExport", free: false, pro: true, max: true, enterprise: true },
+  { labelKey: "billing.upgradePage.compAdvancedAnalytics", free: false, pro: false, max: true, enterprise: true },
+  { labelKey: "billing.upgradePage.compApiAccess", free: false, pro: true, max: true, enterprise: true },
+  { labelKey: "billing.upgradePage.compSsoSaml", free: false, pro: false, max: false, enterprise: true },
+  { labelKey: "billing.upgradePage.compDedicatedSupport", free: false, pro: false, max: true, enterprise: true },
+  { labelKey: "billing.upgradePage.compSlaGuarantee", free: false, pro: false, max: true, enterprise: true },
 ];
 
 /* ------------------------------------------------------------------ */
 /*  FAQ                                                                */
 /* ------------------------------------------------------------------ */
 
-const faqs = [
-  {
-    q: "How does per-seat pricing work?",
-    a: "The team director pays for every active member. For example, a Pro team with 10 members costs $14.99 × 10 = $149.90/mo. When members join or leave, the subscription adjusts automatically with prorated charges.",
-  },
-  {
-    q: "Can I change my plan at any time?",
-    a: "Yes! The team director can upgrade or downgrade at any time. Upgrades are prorated for the remainder of the billing cycle. Downgrades take effect at the end of the current period.",
-  },
-  {
-    q: "What happens when the team runs out of tokens?",
-    a: "Token limits are shared across the entire team. When the monthly allocation is exhausted, AI features are limited until the next billing cycle. Upgrade your plan for more tokens.",
-  },
-  {
-    q: "How does Enterprise pricing work?",
-    a: "Enterprise plans are fully customised. Contact our sales team to discuss your requirements, and we'll create a tailored solution with volume discounts and dedicated support.",
-  },
+const faqKeys = [
+  { qKey: "billing.upgradePage.faqPricingQ", aKey: "billing.upgradePage.faqPricingA" },
+  { qKey: "billing.upgradePage.faqChangePlanQ", aKey: "billing.upgradePage.faqChangePlanA" },
+  { qKey: "billing.upgradePage.faqTokensQ", aKey: "billing.upgradePage.faqTokensA" },
+  { qKey: "billing.upgradePage.faqEnterpriseQ", aKey: "billing.upgradePage.faqEnterpriseA" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -142,24 +131,20 @@ function formatTokens(count: number) {
   return count.toLocaleString();
 }
 
-function formatPrice(tier: SubscriptionTier) {
-  const limits = TIER_LIMITS[tier];
-  if (tier === "enterprise") return "Custom";
-  if (!limits.priceMonthly) return "$0";
-  return `$${limits.priceMonthly}`;
-}
-
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-function ComparisonCell({ value }: { value: string | boolean }) {
+function ComparisonCell({ value, unlimitedLabel }: { value: string | boolean; unlimitedLabel: string }) {
   if (typeof value === "boolean") {
     return value ? (
       <Check className="size-4 text-primary mx-auto" />
     ) : (
       <X className="size-4 text-muted-foreground/40 mx-auto" />
     );
+  }
+  if (value === "unlimited") {
+    return <span className="text-sm font-medium">{unlimitedLabel}</span>;
   }
   return <span className="text-sm font-medium">{value}</span>;
 }
@@ -186,6 +171,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export function UpgradeContent() {
   const { currentWorkspace, isLoading, isOwner } = useWorkspace();
+  const { t } = useTranslation();
   const currentTier = (currentWorkspace?.tier || "free") as SubscriptionTier;
   const seatCount = currentWorkspace?.seatCount || 1;
 
@@ -196,12 +182,19 @@ export function UpgradeContent() {
 
   const isCurrent = (tier: SubscriptionTier) => tier === currentTier;
 
+  function formatPrice(tier: SubscriptionTier) {
+    const limits = TIER_LIMITS[tier];
+    if (tier === "enterprise") return t("billing.upgradePage.custom");
+    if (!limits.priceMonthly) return "$0";
+    return `$${limits.priceMonthly}`;
+  }
+
   return (
     <PageContainer>
       {/* Header */}
       <PageHeader
-        title="Upgrade Your Plan"
-        description="Choose the perfect plan for your business needs"
+        title={t("billing.upgradePage.title")}
+        description={t("billing.upgradePage.description")}
       />
 
       {/* Current Plan Summary */}
@@ -221,13 +214,17 @@ export function UpgradeContent() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold">Current Plan</p>
+                    <p className="font-semibold">{t("billing.upgradePage.currentPlan")}</p>
                     <Badge variant="outline" className="capitalize">{currentTier}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {currentWorkspace
-                      ? `${formatTokens(currentWorkspace.tokensUsed)} / ${formatTokens(currentWorkspace.tokenLimit)} tokens used · ${seatCount} seats`
-                      : "Loading..."}
+                      ? t("billing.upgradePage.tokensUsedSummary", {
+                          used: formatTokens(currentWorkspace.tokensUsed),
+                          limit: formatTokens(currentWorkspace.tokenLimit),
+                          seats: seatCount,
+                        })
+                      : t("common.loading")}
                   </p>
                 </div>
               </div>
@@ -235,7 +232,9 @@ export function UpgradeContent() {
                 <div className="w-full sm:w-48">
                   <Progress value={Math.min(100, (currentWorkspace.tokensUsed / currentWorkspace.tokenLimit) * 100)} className="h-2" />
                   <p className="text-xs text-muted-foreground mt-1 text-right">
-                    {Math.min(100, (currentWorkspace.tokensUsed / currentWorkspace.tokenLimit) * 100).toFixed(0)}% used
+                    {t("billing.upgradePage.percentUsed", {
+                      percent: Math.min(100, (currentWorkspace.tokensUsed / currentWorkspace.tokenLimit) * 100).toFixed(0),
+                    })}
                   </p>
                 </div>
               )}
@@ -251,6 +250,7 @@ export function UpgradeContent() {
           const current = isCurrent(plan.tier);
           const upgrade = isUpgrade(plan.tier);
           const Icon = plan.icon;
+          const planName = t(plan.nameKey);
 
           return (
             <Card
@@ -263,7 +263,7 @@ export function UpgradeContent() {
             >
               {plan.popular && (
                 <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
-                  Most Popular
+                  {t("billing.upgradePage.mostPopular")}
                 </Badge>
               )}
 
@@ -276,8 +276,8 @@ export function UpgradeContent() {
                     <Icon className="size-4" />
                   </div>
                 </div>
-                <CardTitle className="text-lg">{plan.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{plan.description}</p>
+                <CardTitle className="text-lg">{planName}</CardTitle>
+                <p className="text-sm text-muted-foreground">{t(plan.descriptionKey)}</p>
               </CardHeader>
 
               <CardContent className="flex-1 space-y-6">
@@ -286,18 +286,18 @@ export function UpgradeContent() {
                   <span className="text-3xl font-bold">{formatPrice(plan.tier)}</span>
                   {plan.tier !== "enterprise" && (
                     <span className="text-muted-foreground text-sm">
-                      {limits.priceMonthly ? "/user/mo" : "forever"}
+                      {limits.priceMonthly ? t("billing.upgradePage.perUserMonth") : t("billing.upgradePage.forever")}
                     </span>
                   )}
                 </div>
 
                 {/* Token highlight */}
                 <div className="rounded-xl bg-secondary p-4">
-                  <p className="text-xs text-muted-foreground">Includes</p>
+                  <p className="text-xs text-muted-foreground">{t("billing.upgradePage.includes")}</p>
                   <p className="text-base font-semibold mt-1">
                     {plan.tier === "enterprise"
-                      ? "Unlimited tokens"
-                      : `${formatTokens(limits.monthlyTokenLimit)} tokens/mo`}
+                      ? t("billing.upgradePage.unlimitedTokens")
+                      : t("billing.upgradePage.tokensPerMonth", { count: formatTokens(limits.monthlyTokenLimit) })}
                   </p>
                 </div>
 
@@ -316,29 +316,29 @@ export function UpgradeContent() {
                 {current ? (
                   <Button variant="outline" className="w-full" disabled>
                     <Check className="mr-2 size-4" />
-                    Current Plan
+                    {t("billing.upgradePage.currentPlan")}
                   </Button>
                 ) : plan.tier === "enterprise" ? (
                   <Button variant="outline" className="w-full" asChild>
                     <a href="mailto:sales@nexxuscrm.com">
-                      Contact Sales
+                      {t("billing.upgradePage.contactSales")}
                       <ArrowRight className="ml-2 size-4" />
                     </a>
                   </Button>
                 ) : upgrade && isOwner ? (
                   <Button className="w-full" asChild>
                     <Link href={`/dashboard/account/billing?upgrade=${plan.tier}`}>
-                      Upgrade to {plan.name}
+                      {t("billing.upgradePage.upgradeTo", { plan: planName })}
                       <ArrowRight className="ml-2 size-4" />
                     </Link>
                   </Button>
                 ) : upgrade && !isOwner ? (
                   <Button variant="outline" className="w-full" disabled>
-                    Ask Director to Upgrade
+                    {t("billing.upgradePage.askDirector")}
                   </Button>
                 ) : (
                   <Button variant="outline" className="w-full" disabled>
-                    Downgrade via Billing
+                    {t("billing.upgradePage.downgradeViaBilling")}
                   </Button>
                 )}
               </CardFooter>
@@ -349,33 +349,33 @@ export function UpgradeContent() {
 
       {/* Feature Comparison Table */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Compare Plans</h2>
+        <h2 className="text-xl font-semibold">{t("billing.upgradePage.comparePlans")}</h2>
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left font-medium p-4 w-[200px]">Feature</th>
-                    <th className="text-center font-medium p-4">Free</th>
+                    <th className="text-left font-medium p-4 w-[200px]">{t("billing.upgradePage.feature")}</th>
+                    <th className="text-center font-medium p-4">{t("billing.plans.free")}</th>
                     <th className="text-center font-medium p-4">
                       <span className="flex items-center justify-center gap-2">
-                        Pro
-                        <Badge variant="secondary" className="text-xs px-2 py-0">Popular</Badge>
+                        {t("billing.plans.pro")}
+                        <Badge variant="secondary" className="text-xs px-2 py-0">{t("billing.upgradePage.popular")}</Badge>
                       </span>
                     </th>
-                    <th className="text-center font-medium p-4">Max</th>
-                    <th className="text-center font-medium p-4">Enterprise</th>
+                    <th className="text-center font-medium p-4">{t("billing.plans.max")}</th>
+                    <th className="text-center font-medium p-4">{t("billing.plans.enterprise")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {comparisonRows.map((row, i) => (
                     <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                      <td className="p-4 font-medium text-muted-foreground">{row.label}</td>
-                      <td className="p-4 text-center"><ComparisonCell value={row.free} /></td>
-                      <td className="p-4 text-center bg-primary/[0.02]"><ComparisonCell value={row.pro} /></td>
-                      <td className="p-4 text-center"><ComparisonCell value={row.max} /></td>
-                      <td className="p-4 text-center"><ComparisonCell value={row.enterprise} /></td>
+                      <td className="p-4 font-medium text-muted-foreground">{t(row.labelKey)}</td>
+                      <td className="p-4 text-center"><ComparisonCell value={row.free} unlimitedLabel={t("billing.upgradePage.unlimited")} /></td>
+                      <td className="p-4 text-center bg-primary/[0.02]"><ComparisonCell value={row.pro} unlimitedLabel={t("billing.upgradePage.unlimited")} /></td>
+                      <td className="p-4 text-center"><ComparisonCell value={row.max} unlimitedLabel={t("billing.upgradePage.unlimited")} /></td>
+                      <td className="p-4 text-center"><ComparisonCell value={row.enterprise} unlimitedLabel={t("billing.upgradePage.unlimited")} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -389,12 +389,12 @@ export function UpgradeContent() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <HelpCircle className="size-5" />
-          Frequently Asked Questions
+          {t("billing.upgradePage.faq")}
         </h2>
         <Card>
           <CardContent className="p-6">
-            {faqs.map((faq, i) => (
-              <FaqItem key={i} q={faq.q} a={faq.a} />
+            {faqKeys.map((faq, i) => (
+              <FaqItem key={i} q={t(faq.qKey)} a={t(faq.aKey)} />
             ))}
           </CardContent>
         </Card>

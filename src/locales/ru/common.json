@@ -27,5 +27,11 @@
   "noteAdded": "Заметка добавлена",
   "restored": "Восстановлено",
   "failedRestore": "Не удалось восстановить",
-  "undo": "Отменить"
+  "undo": "Отменить",
+  "somethingWentWrong": "Что-то пошло не так",
+  "errorLoadingPage": "Произошла ошибка при загрузке страницы.",
+  "tryAgain": "Попробовать снова",
+  "pageNotFound": "Страница не найдена",
+  "dashboardPageNotExist": "Эта страница не существует.",
+  "backToDashboard": "Вернуться на главную"
 }
