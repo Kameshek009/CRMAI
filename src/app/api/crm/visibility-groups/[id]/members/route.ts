@@ -21,6 +21,18 @@ export async function GET(
 
     const { id } = await params;
     const supabase = createSupabaseAdmin();
+
+    // Verify group belongs to current team
+    const { data: group } = await supabase
+      .from("visibility_groups")
+      .select("id")
+      .eq("id", id)
+      .eq("team_id", context.workspaceId)
+      .single();
+    if (!group) {
+      return NextResponse.json({ success: false, error: "Group not found" }, { status: 404 });
+    }
+
     const { data, error: dbError } = await supabase
       .from("visibility_group_members")
       .select("id, account_id, created_at")
@@ -57,6 +69,18 @@ export async function POST(
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Verify group belongs to current team
+    const { data: group } = await supabase
+      .from("visibility_groups")
+      .select("id")
+      .eq("id", id)
+      .eq("team_id", context.workspaceId)
+      .single();
+    if (!group) {
+      return NextResponse.json({ success: false, error: "Group not found" }, { status: 404 });
+    }
+
     const { data, error: dbError } = await supabase
       .from("visibility_group_members")
       .insert({ group_id: id, account_id: parsed.data.account_id })
@@ -97,6 +121,18 @@ export async function DELETE(
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Verify group belongs to current team
+    const { data: group } = await supabase
+      .from("visibility_groups")
+      .select("id")
+      .eq("id", id)
+      .eq("team_id", context.workspaceId)
+      .single();
+    if (!group) {
+      return NextResponse.json({ success: false, error: "Group not found" }, { status: 404 });
+    }
+
     const { error: dbError } = await supabase
       .from("visibility_group_members")
       .delete()

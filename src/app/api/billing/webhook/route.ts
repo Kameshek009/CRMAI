@@ -41,10 +41,15 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      logger.error("Webhook", "STRIPE_WEBHOOK_SECRET not configured");
+      return NextResponse.json({ error: "Configuration error" }, { status: 500 });
+    }
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     );
   } catch (err) {
     logger.error("Webhook", "Signature verification failed", err);
@@ -112,6 +117,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    // Remove idempotency record so Stripe retry can re-process this event
+    await supabaseTop.from("stripe_webhook_events").delete().eq("event_id", event.id);
     logger.error("Webhook", "Handler error", error);
     return NextResponse.json(
       { error: "Webhook handler failed" },

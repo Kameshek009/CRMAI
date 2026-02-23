@@ -56,7 +56,7 @@ export async function POST(
 
     // Create contact
     if (parsed.data.create_contact) {
-      const { data: contact } = await supabase
+      const { data: contact, error: contactErr } = await supabase
         .from("contacts")
         .insert({
           account_id: context.accountId,
@@ -72,7 +72,11 @@ export async function POST(
         })
         .select()
         .single();
-      contactId = contact?.id || null;
+      if (contactErr || !contact) {
+        logger.error("Leads", "Failed to create contact during conversion", contactErr);
+        return NextResponse.json({ success: false, error: "Failed to create contact" }, { status: 500 });
+      }
+      contactId = contact.id;
     }
 
     // Create deal
@@ -90,7 +94,7 @@ export async function POST(
         stageId = firstStage?.id;
       }
       if (stageId) {
-        const { data: deal } = await supabase
+        const { data: deal, error: dealErr } = await supabase
           .from("deals")
           .insert({
             account_id: context.accountId,
@@ -103,7 +107,15 @@ export async function POST(
           })
           .select()
           .single();
-        dealId = deal?.id || null;
+        if (dealErr || !deal) {
+          // Rollback: delete the contact we just created
+          if (contactId) {
+            await supabase.from("contacts").delete().eq("id", contactId);
+          }
+          logger.error("Leads", "Failed to create deal during conversion", dealErr);
+          return NextResponse.json({ success: false, error: "Failed to create deal" }, { status: 500 });
+        }
+        dealId = deal.id;
       }
     }
 

@@ -299,3 +299,22 @@ export const createEmailSchema = z.object({
   direction: z.enum(["inbound", "outbound"]).optional(),
   status: z.enum(["draft", "sent", "received", "failed"]).optional(),
 });
+
+// ============================================================================
+// Goal schemas
+// ============================================================================
+
+export const createGoalSchema = z.object({
+  type: z.enum(["revenue", "deals_won", "deals_created", "contacts_created", "activities_logged"]),
+  target_value: z.number().min(0),
+  period: z.string().min(1).max(50),
+  start_date: z.string().max(30),
+  end_date: z.string().max(30),
+  account_id: z.union([z.literal("self"), z.string().uuid(), z.null()]).optional(),
+});
+
+export const updateGoalSchema = z.object({
+  target_value: z.number().min(0).optional(),
+  is_active: z.boolean().optional(),
+  end_date: z.string().max(30).optional(),
+});

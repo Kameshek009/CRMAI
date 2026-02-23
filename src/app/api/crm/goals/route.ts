@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWorkspaceContext } from "@/lib/crm/team-helpers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { createGoalSchema } from "@/lib/crm/validation";
 
 export async function GET(request: NextRequest) {
   const { context, error } = await getWorkspaceContext();
@@ -42,16 +43,12 @@ export async function POST(request: NextRequest) {
   if (error) return error;
 
   const body = await request.json();
-  const { type, target_value, period, start_date, end_date, account_id } = body;
-
-  if (!type || !target_value || !period || !start_date || !end_date) {
-    return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
+  const parsed = createGoalSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
   }
 
-  const validTypes = ["revenue", "deals_won", "deals_created", "contacts_created", "activities_logged"];
-  if (!validTypes.includes(type)) {
-    return NextResponse.json({ success: false, error: "Invalid goal type" }, { status: 400 });
-  }
+  const { type, target_value, period, start_date, end_date, account_id } = parsed.data;
 
   const supabase = createSupabaseAdmin();
 

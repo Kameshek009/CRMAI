@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWorkspaceContext } from "@/lib/crm/team-helpers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { updateGoalSchema } from "@/lib/crm/validation";
 
 export async function PATCH(
   request: NextRequest,
@@ -11,12 +12,16 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
+  const parsed = updateGoalSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
+  }
 
   const supabase = createSupabaseAdmin();
 
   const { data, error: dbError } = await supabase
     .from("goals")
-    .update({ ...body, updated_at: new Date().toISOString() })
+    .update({ ...parsed.data, updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("team_id", context.workspaceId)
     .select()
