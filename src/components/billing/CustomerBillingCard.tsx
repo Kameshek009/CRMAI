@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export interface PaymentMethodInfo {
   id: string;
@@ -63,20 +64,20 @@ interface CustomerBillingCardProps {
   className?: string;
 }
 
-function getCardBrandInfo(brand: string): { name: string } {
+function getCardBrandInfo(brand: string, t: (key: string) => string): { name: string } {
   const brands: Record<string, { name: string }> = {
-    visa: { name: "Visa" },
-    mastercard: { name: "Mastercard" },
-    amex: { name: "Amex" },
-    discover: { name: "Discover" },
-    diners: { name: "Diners" },
-    jcb: { name: "JCB" },
-    unionpay: { name: "UnionPay" },
+    visa: { name: t("billing.customer.visa") },
+    mastercard: { name: t("billing.customer.mastercard") },
+    amex: { name: t("billing.customer.amex") },
+    discover: { name: t("billing.customer.discover") },
+    diners: { name: t("billing.customer.diners") },
+    jcb: { name: t("billing.customer.jcb") },
+    unionpay: { name: t("billing.customer.unionpay") },
   };
   return brands[brand] || { name: brand.toUpperCase() };
 }
 
-function getStatusInfo(status: string): {
+function getStatusInfo(status: string, t: (key: string) => string): {
   label: string;
   variant: "default" | "secondary" | "destructive" | "outline";
   icon: React.ReactNode;
@@ -84,25 +85,25 @@ function getStatusInfo(status: string): {
   switch (status) {
     case "active":
       return {
-        label: "Active",
+        label: t("billing.customer.active"),
         variant: "default",
         icon: <CheckCircle2 className="size-3" />,
       };
     case "trialing":
       return {
-        label: "Trial",
+        label: t("billing.customer.trial"),
         variant: "secondary",
         icon: <Calendar className="size-3" />,
       };
     case "past_due":
       return {
-        label: "Past Due",
+        label: t("billing.customer.pastDue"),
         variant: "destructive",
         icon: <AlertCircle className="size-3" />,
       };
     case "canceled":
       return {
-        label: "Canceled",
+        label: t("billing.customer.canceled"),
         variant: "secondary",
         icon: <AlertCircle className="size-3" />,
       };
@@ -128,6 +129,7 @@ export function CustomerBillingCard({
   isLoading,
   className,
 }: CustomerBillingCardProps) {
+  const { t } = useTranslation();
   const [isPortalLoading, setIsPortalLoading] = React.useState(false);
 
   const handleOpenPortal = async () => {
@@ -169,10 +171,10 @@ export function CustomerBillingCard({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <CreditCard className="size-4" />
-            Payment Method
+            {t("billing.customer.paymentMethod")}
           </CardTitle>
           <CardDescription>
-            No payment method on file. Add one when you upgrade your plan.
+            {t("billing.customer.noPaymentMethod")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -183,7 +185,7 @@ export function CustomerBillingCard({
     (pm) => pm.isDefault
   );
   const subscription = billingInfo.subscription;
-  const statusInfo = subscription ? getStatusInfo(subscription.status) : null;
+  const statusInfo = subscription ? getStatusInfo(subscription.status, t) : null;
 
   return (
     <Card className={className}>
@@ -192,10 +194,10 @@ export function CustomerBillingCard({
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
               <CreditCard className="size-4" />
-              Billing Details
+              {t("billing.customer.billingDetails")}
             </CardTitle>
             <CardDescription>
-              Your payment and subscription information
+              {t("billing.customer.billingDescription")}
             </CardDescription>
           </div>
           <Button
@@ -209,7 +211,7 @@ export function CustomerBillingCard({
             ) : (
               <ExternalLink className="mr-2 size-3" />
             )}
-            Manage Billing
+            {t("billing.customer.manageBilling")}
           </Button>
         </div>
       </CardHeader>
@@ -217,7 +219,7 @@ export function CustomerBillingCard({
         {/* Payment Method */}
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Payment Method
+            {t("billing.customer.paymentMethod")}
           </p>
           {defaultPaymentMethod ? (
             <div className="flex items-center gap-3">
@@ -226,16 +228,16 @@ export function CustomerBillingCard({
               </div>
               <div>
                 <p className="font-medium">
-                  {getCardBrandInfo(defaultPaymentMethod.brand).name} ending in{" "}
+                  {getCardBrandInfo(defaultPaymentMethod.brand, t).name} {t("billing.customer.endingIn")}
                   {defaultPaymentMethod.last4}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Expires {defaultPaymentMethod.expMonth}/{defaultPaymentMethod.expYear}
+                  {t("billing.customer.expires")}{defaultPaymentMethod.expMonth}/{defaultPaymentMethod.expYear}
                 </p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No payment method on file</p>
+            <p className="text-sm text-muted-foreground">{t("billing.customer.noPaymentMethodShort")}</p>
           )}
         </div>
 
@@ -243,7 +245,7 @@ export function CustomerBillingCard({
         {subscription && statusInfo && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Subscription
+              {t("billing.customer.subscription")}
             </p>
             <div className="flex items-center gap-3">
               <Badge variant={statusInfo.variant}>
@@ -252,7 +254,7 @@ export function CustomerBillingCard({
               </Badge>
               {subscription.cancelAtPeriodEnd && (
                 <span className="text-sm text-muted-foreground">
-                  Cancels on {formatDate(subscription.currentPeriodEnd)}
+                  {t("billing.customer.cancelsOn")}{formatDate(subscription.currentPeriodEnd)}
                 </span>
               )}
             </div>
@@ -263,7 +265,7 @@ export function CustomerBillingCard({
         {subscription && subscription.status === "active" && !subscription.cancelAtPeriodEnd && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Next Billing Date
+              {t("billing.customer.nextBillingDate")}
             </p>
             <div className="flex items-center gap-2">
               <Calendar className="size-4 text-muted-foreground" />
@@ -276,7 +278,7 @@ export function CustomerBillingCard({
         {billingInfo.balance < 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Account Credit
+              {t("billing.customer.accountCredit")}
             </p>
             <p className="font-medium">
               ${(Math.abs(billingInfo.balance) / 100).toFixed(2)}
