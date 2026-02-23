@@ -110,17 +110,17 @@ const HEALTH_COLORS: Record<string, string> = {
 
 function getActivityLabels(t: (key: string) => string): Record<string, string> {
   return {
-    deal_created: t("crm.analytics.activityDealsCreated"),
-    deal_stage_changed: t("crm.analytics.activityStageChanges"),
-    deal_won: t("crm.analytics.activityDealsWon"),
-    deal_lost: t("crm.analytics.activityDealsLost"),
-    contact_created: t("crm.analytics.activityContactsAdded"),
-    task_completed: t("crm.analytics.activityTasksDone"),
-    note: t("crm.analytics.activityNotes"),
-    call: t("crm.analytics.activityCalls"),
-    email: t("crm.analytics.activityEmails"),
-    meeting: t("crm.analytics.activityMeetings"),
-    import: t("crm.analytics.activityImports"),
+    deal_created: t("crm.analytics.activity.dealsCreated"),
+    deal_stage_changed: t("crm.analytics.activity.stageChanges"),
+    deal_won: t("crm.analytics.activity.dealsWon"),
+    deal_lost: t("crm.analytics.activity.dealsLost"),
+    contact_created: t("crm.analytics.activity.contactsAdded"),
+    task_completed: t("crm.analytics.activity.tasksDone"),
+    note: t("crm.analytics.activity.notes"),
+    call: t("crm.analytics.activity.calls"),
+    email: t("crm.analytics.activity.emails"),
+    meeting: t("crm.analytics.activity.meetings"),
+    import: t("crm.analytics.activity.imports"),
   };
 }
 
@@ -183,12 +183,12 @@ export function AnalyticsContent() {
       if (analyticsRes.success) {
         setData(analyticsRes.data);
       } else {
-        setError(analyticsRes.error || t("crm.analytics.errorLoad"));
+        setError(analyticsRes.error || t("crm.analytics.failedLoad"));
       }
       if (insightsRes.success) setInsights(insightsRes.data || []);
       setIsLoading(false);
     }).catch(() => {
-      setError(t("crm.analytics.errorLoadData"));
+      setError(t("crm.analytics.failedLoad"));
       setIsLoading(false);
     });
   }, []);
@@ -196,7 +196,7 @@ export function AnalyticsContent() {
   if (isLoading) {
     return (
       <PageContainer>
-        <PageHeader title={t("crm.analytics.title")} description={t("crm.analytics.description")} />
+        <PageHeader title={t("crm.analytics.pageTitle")} description={t("crm.analytics.pageDescription")} />
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-[110px] rounded-xl" />)}
         </div>
@@ -210,11 +210,11 @@ export function AnalyticsContent() {
   if (error) {
     return (
       <PageContainer>
-        <PageHeader title={t("crm.analytics.title")} description={t("crm.analytics.description")} />
+        <PageHeader title={t("crm.analytics.pageTitle")} description={t("crm.analytics.pageDescription")} />
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <AlertCircle className="size-10 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium">{t("crm.analytics.errorLoad")}</p>
+            <p className="text-lg font-medium">{t("crm.analytics.failedLoad")}</p>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </CardContent>
         </Card>
@@ -244,10 +244,10 @@ export function AnalyticsContent() {
 
   const hb = data.healthBuckets || { excellent: 0, good: 0, fair: 0, poor: 0 };
   const healthData = [
-    { name: t("crm.analytics.healthExcellent"), value: hb.excellent, fill: HEALTH_COLORS.excellent },
-    { name: t("crm.analytics.healthGood"), value: hb.good, fill: HEALTH_COLORS.good },
-    { name: t("crm.analytics.healthFair"), value: hb.fair, fill: HEALTH_COLORS.fair },
-    { name: t("crm.analytics.healthPoor"), value: hb.poor, fill: HEALTH_COLORS.poor },
+    { name: t("crm.analytics.health.excellent"), value: hb.excellent, fill: HEALTH_COLORS.excellent },
+    { name: t("crm.analytics.health.good"), value: hb.good, fill: HEALTH_COLORS.good },
+    { name: t("crm.analytics.health.fair"), value: hb.fair, fill: HEALTH_COLORS.fair },
+    { name: t("crm.analytics.health.poor"), value: hb.poor, fill: HEALTH_COLORS.poor },
   ].filter((d) => d.value > 0);
 
   const funnelData = (data.stageConversion || []).filter((s) => !s.isWon && !s.isLost);
@@ -274,67 +274,67 @@ export function AnalyticsContent() {
 
   return (
     <PageContainer>
-      <PageHeader title={t("crm.analytics.title")} description={t("crm.analytics.description")} />
+      <PageHeader title={t("crm.analytics.pageTitle")} description={t("crm.analytics.pageDescription")} />
 
       {/* Top metrics row - 8 cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          label={t("crm.analytics.winRate")}
+          label={t("crm.analytics.metrics.winRate")}
           value={`${data.winRate}%`}
           subtitle={`${data.wonCount}S / ${data.lostCount}C`}
           icon={Target}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
         />
         <MetricCard
-          label={t("crm.analytics.pipelineValue")}
+          label={t("crm.analytics.metrics.pipelineValue")}
           value={`$${data.pipelineValue.toLocaleString()}`}
-          subtitle={t("crm.analytics.openDeals", { count: data.openCount })}
+          subtitle={t("crm.analytics.metrics.openDeals", { count: data.openCount })}
           icon={Handshake}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
         />
         <MetricCard
-          label={t("crm.analytics.thisMonth")}
+          label={t("crm.analytics.metrics.thisMonth")}
           value={`$${data.thisMonthRevenue.toLocaleString()}`}
-          subtitle={data.revenueGrowth >= 0 ? t("crm.analytics.revenue") : t("crm.analytics.revenueDeclined")}
+          subtitle={data.revenueGrowth >= 0 ? t("crm.analytics.metrics.revenue") : t("crm.analytics.metrics.revenueDeclined")}
           icon={DollarSign}
           gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
           trend={{
             direction: data.revenueGrowth >= 0 ? "up" : "down",
-            text: t("crm.analytics.vsLastMonth", { percent: Math.abs(data.revenueGrowth) }),
+            text: t("crm.analytics.metrics.vsLastMonth", { percent: Math.abs(data.revenueGrowth) }),
           }}
         />
         <MetricCard
-          label={t("crm.analytics.forecast")}
+          label={t("crm.analytics.metrics.forecast")}
           value={`$${data.weightedForecast.toLocaleString()}`}
-          subtitle={t("crm.analytics.weightedPipeline")}
+          subtitle={t("crm.analytics.metrics.weightedPipeline")}
           icon={TrendingUp}
           gradient="bg-gradient-to-br from-orange-500 to-landing-accent"
         />
         <MetricCard
-          label={t("crm.analytics.avgDealSize")}
+          label={t("crm.analytics.metrics.avgDealSize")}
           value={`$${data.avgWonValue.toLocaleString()}`}
-          subtitle={t("crm.analytics.wonDealsAverage")}
+          subtitle={t("crm.analytics.metrics.wonDealsAverage")}
           icon={BarChart3}
           gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
         />
         <MetricCard
-          label={t("crm.analytics.salesVelocity")}
+          label={t("crm.analytics.metrics.salesVelocity")}
           value={`$${data.salesVelocity.toLocaleString()}`}
-          subtitle={t("crm.analytics.perDayPotential")}
+          subtitle={t("crm.analytics.metrics.perDayPotential")}
           icon={Zap}
           gradient="bg-gradient-to-br from-orange-500 to-landing-accent"
         />
         <MetricCard
-          label={t("crm.analytics.avgCloseTime")}
+          label={t("crm.analytics.metrics.avgCloseTime")}
           value={`${data.avgDaysToClose}d`}
-          subtitle={t("crm.analytics.daysToClose")}
+          subtitle={t("crm.analytics.metrics.daysToClose")}
           icon={Timer}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
         />
         <MetricCard
-          label={t("crm.analytics.engagement")}
+          label={t("crm.analytics.metrics.engagement")}
           value={`${data.avgEngagement}/100`}
-          subtitle={t("crm.analytics.contactsCount", { count: data.totalContacts })}
+          subtitle={t("crm.analytics.metrics.contactsCount", { count: data.totalContacts })}
           icon={Users}
           gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
         />
@@ -350,7 +350,7 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <DollarSign className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.monthlyRevenue")}
+                {t("crm.analytics.charts.monthlyRevenue")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -368,7 +368,7 @@ export function AnalyticsContent() {
                     <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
                     <Tooltip
                       contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, t("crm.analytics.revenue")]}
+                      formatter={(value: number) => [`$${value.toLocaleString()}`, t("crm.analytics.charts.revenue")]}
                     />
                     <Bar dataKey="revenue" fill="url(#revenueBarGrad)" radius={[6, 6, 0, 0]} />
                   </BarChart>
@@ -386,14 +386,14 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Handshake className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.pipelineFunnel")}
+                {t("crm.analytics.charts.pipelineFunnel")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               {funnelData.length === 0 ? (
                 <div className="text-center py-12">
                   <Handshake className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
-                  <p className="text-sm text-muted-foreground">{t("crm.analytics.noPipelineStages")}</p>
+                  <p className="text-sm text-muted-foreground">{t("crm.analytics.charts.noPipelineStages")}</p>
                 </div>
               ) : (
                 <div className="h-[280px]">
@@ -405,8 +405,8 @@ export function AnalyticsContent() {
                       <Tooltip
                         contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
                         formatter={(value: number, name: string) => {
-                          if (name === "value") return [`$${value.toLocaleString()}`, t("crm.analytics.value")];
-                          return [value, t("crm.analytics.deals")];
+                          if (name === "value") return [`$${value.toLocaleString()}`, t("crm.analytics.charts.value")];
+                          return [value, t("crm.analytics.charts.deals")];
                         }}
                       />
                       <Bar dataKey="value" radius={[0, 6, 6, 0]}>
@@ -430,8 +430,8 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Activity className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.activityTrend")}
-                <Badge variant="secondary" className="text-xs ml-auto">{data.totalActivities} {t("crm.analytics.total")}</Badge>
+                {t("crm.analytics.charts.activityTrend")}
+                <Badge variant="secondary" className="text-xs ml-auto">{data.totalActivities} {t("crm.analytics.charts.total")}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -473,28 +473,28 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-500 to-landing-accent flex items-center justify-center">
                   <Target className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.winLossAnalysis")}
+                {t("crm.analytics.charts.winLossAnalysis")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <div className="text-xs text-emerald-600 font-medium mb-1">{t("crm.analytics.wonDeals")}</div>
+                  <div className="text-xs text-emerald-600 font-medium mb-1">{t("crm.analytics.winLoss.wonDeals")}</div>
                   <div className="text-xl font-bold text-emerald-600">{data.wonCount}</div>
-                  <div className="text-xs text-emerald-600/70">${data.totalWonValue.toLocaleString()} {t("crm.analytics.total")}</div>
-                  <div className="text-xs text-emerald-600/60 mt-1">{t("crm.analytics.avg")}: ${data.avgWonValue.toLocaleString()}</div>
+                  <div className="text-xs text-emerald-600/70">${data.totalWonValue.toLocaleString()} {t("crm.analytics.winLoss.total")}</div>
+                  <div className="text-xs text-emerald-600/60 mt-1">{t("crm.analytics.winLoss.average")}: ${data.avgWonValue.toLocaleString()}</div>
                 </div>
                 <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-                  <div className="text-xs text-red-500 font-medium mb-1">{t("crm.analytics.lostDeals")}</div>
+                  <div className="text-xs text-red-500 font-medium mb-1">{t("crm.analytics.winLoss.lostDeals")}</div>
                   <div className="text-xl font-bold text-red-500">{data.lostCount}</div>
-                  <div className="text-xs text-red-500/70">${data.totalLostValue.toLocaleString()} {t("crm.analytics.total")}</div>
-                  <div className="text-xs text-red-500/60 mt-1">{t("crm.analytics.avg")}: ${data.avgLostValue.toLocaleString()}</div>
+                  <div className="text-xs text-red-500/70">${data.totalLostValue.toLocaleString()} {t("crm.analytics.winLoss.total")}</div>
+                  <div className="text-xs text-red-500/60 mt-1">{t("crm.analytics.winLoss.average")}: ${data.avgLostValue.toLocaleString()}</div>
                 </div>
               </div>
               {/* Win rate bar */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">{t("crm.analytics.winRate")}</span>
+                  <span className="text-muted-foreground">{t("crm.analytics.winLoss.winRate")}</span>
                   <span className="font-bold text-lg">{data.winRate}%</span>
                 </div>
                 <div className="h-3 rounded-full bg-muted overflow-hidden flex">
@@ -508,8 +508,8 @@ export function AnalyticsContent() {
                   />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{t("crm.analytics.won")}: {data.wonCount}</span>
-                  <span>{t("crm.analytics.lost")}: {data.lostCount}</span>
+                  <span>{t("crm.analytics.winLoss.won")}: {data.wonCount}</span>
+                  <span>{t("crm.analytics.winLoss.lost")}: {data.lostCount}</span>
                 </div>
               </div>
             </CardContent>
@@ -524,15 +524,15 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
                   <Users className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.contactDistribution")}
-                <Badge variant="secondary" className="text-xs ml-auto">{data.totalContacts} {t("crm.analytics.total")}</Badge>
+                {t("crm.analytics.contacts.title")}
+                <Badge variant="secondary" className="text-xs ml-auto">{data.totalContacts} {t("crm.analytics.contacts.total")}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               {contactStatusData.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
-                  <p className="text-sm text-muted-foreground">{t("crm.analytics.noContacts")}</p>
+                  <p className="text-sm text-muted-foreground">{t("crm.analytics.contacts.noContacts")}</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
@@ -576,15 +576,15 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <CheckSquare className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.taskBreakdown")}
-                <Badge variant="secondary" className="text-xs ml-auto">{t("crm.analytics.doneThisWeek", { count: data.completedThisWeek })}</Badge>
+                {t("crm.analytics.tasks.title")}
+                <Badge variant="secondary" className="text-xs ml-auto">{t("crm.analytics.tasks.doneThisWeek", { count: data.completedThisWeek })}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="grid grid-cols-2 gap-4">
                 {/* By Status */}
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("crm.analytics.byStatus")}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("crm.analytics.tasks.byStatus")}</p>
                   <div className="space-y-2">
                     {taskStatusData.map((entry) => (
                       <div key={entry.name} className="flex items-center justify-between">
@@ -599,7 +599,7 @@ export function AnalyticsContent() {
                 </div>
                 {/* By Priority */}
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("crm.analytics.byPriority")}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("crm.analytics.tasks.byPriority")}</p>
                   <div className="space-y-2">
                     {taskPriorityData.map((entry) => (
                       <div key={entry.name} className="flex items-center justify-between">
@@ -625,14 +625,14 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-500 to-landing-accent flex items-center justify-center">
                   <Zap className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.activityBreakdown")}
+                {t("crm.analytics.activity.title")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               {activityData.length === 0 ? (
                 <div className="text-center py-12">
                   <Activity className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
-                  <p className="text-sm text-muted-foreground">{t("crm.analytics.noRecentActivity")}</p>
+                  <p className="text-sm text-muted-foreground">{t("crm.analytics.activity.noRecentActivity")}</p>
                 </div>
               ) : (
                 <div className="h-[260px]">
@@ -663,15 +663,15 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Building2 className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.companyHealth")}
-                <Badge variant="secondary" className="text-xs ml-auto">{t("crm.analytics.companiesCount", { count: data.totalCompanies })}</Badge>
+                {t("crm.analytics.health.title")}
+                <Badge variant="secondary" className="text-xs ml-auto">{t("crm.analytics.health.companiesCount", { count: data.totalCompanies })}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               {healthData.length === 0 ? (
                 <div className="text-center py-12">
                   <Building2 className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
-                  <p className="text-sm text-muted-foreground">{t("crm.analytics.noCompanies")}</p>
+                  <p className="text-sm text-muted-foreground">{t("crm.analytics.health.noCompanies")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -701,7 +701,7 @@ export function AnalyticsContent() {
                   {/* Industry breakdown */}
                   {(data.companiesByIndustry || []).length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("crm.analytics.topIndustries")}</p>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("crm.analytics.health.topIndustries")}</p>
                       <div className="flex flex-wrap gap-2">
                         {(data.companiesByIndustry || []).slice(0, 6).map((ind) => (
                           <Badge key={ind.industry} variant="secondary" className="text-xs">
@@ -725,14 +725,14 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <TrendingUp className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.topOpenDeals")}
+                {t("crm.analytics.deals.topOpenDeals")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               {(data.topDeals || []).length === 0 ? (
                 <div className="text-center py-12">
                   <Handshake className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
-                  <p className="text-sm text-muted-foreground">{t("crm.analytics.noOpenDeals")}</p>
+                  <p className="text-sm text-muted-foreground">{t("crm.analytics.deals.noOpenDeals")}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -746,7 +746,7 @@ export function AnalyticsContent() {
                             {deal.stage}
                           </Badge>
                           <span className={cn("text-xs font-medium", deal.probability >= 70 ? "text-emerald-500" : deal.probability >= 40 ? "text-amber-500" : "text-red-400")}>
-                            {deal.probability}% {t("crm.analytics.win")}
+                            {deal.probability}% {t("crm.analytics.deals.win")}
                           </span>
                         </div>
                       </div>
@@ -767,14 +767,14 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-landing-accent flex items-center justify-center">
                   <Users className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.contactSources")}
+                {t("crm.analytics.sources.title")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               {(data.contactsBySource || []).length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="w-10 h-10 mx-auto text-muted-foreground/20 mb-4" />
-                  <p className="text-sm text-muted-foreground">{t("crm.analytics.noSourceData")}</p>
+                  <p className="text-sm text-muted-foreground">{t("crm.analytics.sources.noData")}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -814,7 +814,7 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Filter className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.leadConversionFunnel")}
+                {t("crm.analytics.funnel.title")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -832,7 +832,7 @@ export function AnalyticsContent() {
                           <span className="text-muted-foreground">{step.count}</span>
                         </div>
                         {convRate !== null && (
-                          <span className="text-xs text-muted-foreground">{convRate}% {t("crm.analytics.fromPrev")}</span>
+                          <span className="text-xs text-muted-foreground">{convRate}% {t("crm.analytics.funnel.fromPrev")}</span>
                         )}
                       </div>
                       <div className="h-8 rounded-lg bg-muted overflow-hidden">
@@ -861,7 +861,7 @@ export function AnalyticsContent() {
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-landing-accent to-orange-500 flex items-center justify-center">
                   <Sparkles className="w-3 h-3 text-landing-accent-foreground" />
                 </div>
-                {t("crm.analytics.aiInsights")}
+                {t("crm.analytics.aiInsights.title")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">

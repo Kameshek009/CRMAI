@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { loadStripe, StripeEmbeddedCheckout } from "@stripe/stripe-js";
 import { AlertCircle, CheckCircle, X, RefreshCw, Loader2 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 // Load Stripe outside of component to avoid recreating on every render
 const stripePromise = loadStripe(
@@ -67,6 +68,7 @@ export function EmbeddedCheckout({
   onError,
   hideCloseButton = false,
 }: EmbeddedCheckoutProps) {
+  const { t } = useTranslation();
   const [state, setState] = useState<CheckoutState>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -297,7 +299,7 @@ export function EmbeddedCheckout({
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card rounded-lg">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            Preparing checkout...
+            {t("billing.checkout.preparing")}
           </p>
         </div>
       )}
@@ -310,10 +312,10 @@ export function EmbeddedCheckout({
           </div>
           <div className="text-center">
             <p className="font-medium text-foreground">
-              Something went wrong
+              {t("billing.checkout.error")}
             </p>
             <p className="text-sm text-muted-foreground mt-1 max-w-[300px]">
-              {errorMessage || "Please try again"}
+              {errorMessage || t("billing.checkout.errorFallback")}
             </p>
           </div>
           <div className="flex gap-3 mt-4">
@@ -322,13 +324,13 @@ export function EmbeddedCheckout({
               className="px-4 py-2 text-sm font-medium rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
-              Try Again
+              {t("billing.checkout.tryAgain")}
             </button>
             <button
               onClick={handleClose}
               className="px-4 py-2 text-sm font-medium rounded-full border border-border text-foreground hover:bg-secondary transition-colors cursor-pointer"
             >
-              Close
+              {t("billing.checkout.close")}
             </button>
           </div>
         </div>
@@ -342,19 +344,19 @@ export function EmbeddedCheckout({
           </div>
           <div className="text-center">
             <p className="font-medium text-foreground">
-              Payment complete
+              {t("billing.checkout.success")}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               {type === "subscription"
-                ? "Your subscription is now active."
-                : "Credits have been added to your account."}
+                ? t("billing.checkout.subscriptionActive")
+                : t("billing.checkout.creditsAdded")}
             </p>
           </div>
           <button
             onClick={handleClose}
             className="mt-4 px-4 py-2 text-sm font-medium rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
           >
-            Continue
+            {t("billing.checkout.continue")}
           </button>
         </div>
       )}

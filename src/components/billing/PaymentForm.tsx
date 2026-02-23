@@ -8,6 +8,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { AlertCircle, CheckCircle, X } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 // Load Stripe outside of component to avoid recreating on every render
 const stripePromise = loadStripe(
@@ -69,6 +70,7 @@ export function PaymentModal({
   type,
   itemId,
 }: PaymentModalProps) {
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "complete">("loading");
@@ -146,8 +148,9 @@ export function PaymentModal({
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-card">
           <div>
             <h2 className="text-lg font-semibold text-foreground">
-              {type === "subscription" ? "Subscribe to " : "Purchase "}
-              {planInfo?.name}
+              {type === "subscription"
+                ? t("billing.checkout.subscribeTo", { plan: planInfo?.name || itemId })
+                : t("billing.checkout.purchase", { plan: planInfo?.name || itemId })}
             </h2>
             <p className="text-sm text-muted-foreground">
               {planInfo?.price}{planInfo?.period}
@@ -170,14 +173,14 @@ export function PaymentModal({
                 <AlertCircle className="w-6 h-6 text-muted-foreground" />
               </div>
               <div className="text-center">
-                <p className="font-medium text-foreground">Something went wrong</p>
-                <p className="text-sm text-muted-foreground mt-1">{error || "Please try again"}</p>
+                <p className="font-medium text-foreground">{t("billing.checkout.error")}</p>
+                <p className="text-sm text-muted-foreground mt-1">{error || t("billing.checkout.errorFallback")}</p>
               </div>
               <button
                 onClick={onClose}
                 className="px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors cursor-pointer"
               >
-                Close
+                {t("billing.checkout.close")}
               </button>
             </div>
           )}
@@ -188,11 +191,11 @@ export function PaymentModal({
                 <CheckCircle className="w-6 h-6 text-success" />
               </div>
               <div className="text-center">
-                <p className="font-medium text-foreground">Payment complete</p>
+                <p className="font-medium text-foreground">{t("billing.checkout.success")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {type === "subscription"
-                    ? "Your subscription is now active."
-                    : "Credits have been added to your account."}
+                    ? t("billing.checkout.subscriptionActive")
+                    : t("billing.checkout.creditsAdded")}
                 </p>
               </div>
             </div>

@@ -603,9 +603,11 @@
     "entities": {
       "contact": "Контакт",
       "company": "Организация",
-      "deal": "Сделка"
+      "deal": "Сделка",
+      "lead": "Лид"
     },
     "builder": {
+      "title": "Новая автоматизация",
       "triggerDesc": {
         "recordCreated": "При создании записи",
         "recordUpdated": "При обновлении записи",
@@ -951,7 +953,9 @@
       "avgCloseTime": "Ср. время закрытия",
       "daysToClose": "Дней до закрытия",
       "engagement": "Вовлечённость",
-      "contacts": "контактов"
+      "contacts": "контактов",
+      "vsLastMonth": "{percent}% к прошлому месяцу",
+      "contactsCount": "{count} контактов"
     },
     "charts": {
       "monthlyRevenue": "Ежемесячная выручка",
@@ -986,13 +990,29 @@
     },
     "activity": {
       "title": "Разбивка активности",
-      "noRecentActivity": "Нет недавней активности"
+      "noRecentActivity": "Нет недавней активности",
+      "dealsCreated": "Сделки созданы",
+      "stageChanges": "Смены стадий",
+      "dealsWon": "Успешные сделки",
+      "dealsLost": "Закрытые сделки",
+      "contactsAdded": "Контакты добавлены",
+      "tasksDone": "Задачи выполнены",
+      "notes": "Заметки",
+      "calls": "Звонки",
+      "emails": "Письма",
+      "meetings": "Встречи",
+      "imports": "Импорт"
     },
     "health": {
       "title": "Здоровье компаний",
       "companies": "компаний",
       "noCompanies": "Компаний пока нет",
-      "topIndustries": "Топ отраслей"
+      "topIndustries": "Топ отраслей",
+      "companiesCount": "{count} компаний",
+      "excellent": "Отлично",
+      "good": "Хорошо",
+      "fair": "Средне",
+      "poor": "Плохо"
     },
     "deals": {
       "topOpenDeals": "Топ открытых сделок",

@@ -154,6 +154,37 @@
     "nextBillingDate": "Next Billing Date",
     "accountCredit": "Account Credit"
   },
+  "page": {
+    "title": "Billing",
+    "description": "Manage your team subscription and payments",
+    "teamDescription": "Team: {name}",
+    "currentPlan": "Current Plan",
+    "subscriptionAndUsage": "Your team subscription and usage",
+    "managedByDirector": "Team subscription (managed by director)",
+    "tokensUsed": "Tokens Used",
+    "monthlyLimit": "Monthly Limit",
+    "seats": "Seats",
+    "daysRemaining": "Days Remaining",
+    "monthlyCost": "Monthly Cost",
+    "seatCostBreakdown": "{count} seats × ${price}/seat = ${total}/mo",
+    "percentUsed": "{percent}% used",
+    "remaining": "{count} remaining",
+    "subscriptionPlans": "Subscription Plans",
+    "perSeatPricing": "Per-seat pricing — you pay for each member in your team",
+    "failedToLoad": "Failed to Load Billing",
+    "unexpectedError": "An unexpected error occurred",
+    "tryAgain": "Try Again"
+  },
+  "return": {
+    "confirmingPayment": "Confirming your payment...",
+    "paymentComplete": "Payment complete",
+    "redirecting": "Redirecting...",
+    "paymentNotCompleted": "Payment was not completed",
+    "pleaseTryAgain": "Please try again",
+    "backToBilling": "Back to billing",
+    "somethingWentWrong": "Something went wrong",
+    "tryAgainOrContact": "Please try again or contact support"
+  },
   "invoices": {
     "title": "Invoices",
     "emptyState": "No invoices yet. Invoices will appear here after your first payment.",

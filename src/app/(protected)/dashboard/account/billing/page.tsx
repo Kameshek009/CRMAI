@@ -14,6 +14,7 @@ import {
   BillingHistory,
   ManageSubscriptionButton,
 } from "@/components/billing";
+import { useTranslation } from "@/lib/i18n";
 import type { PaymentHistory, SubscriptionTier } from "@/types";
 import { TIER_LIMITS } from "@/types";
 
@@ -47,6 +48,7 @@ interface BillingData {
 type PageState = "loading" | "ready" | "error";
 
 function BillingPageContent() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [state, setState] = useState<PageState>("loading");
@@ -126,7 +128,7 @@ function BillingPageContent() {
   if (state === "loading") {
     return (
       <PageContainer>
-        <PageHeader title="Billing" description="Manage your team subscription and payments" />
+        <PageHeader title={t("billing.page.title")} description={t("billing.page.description")} />
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-32" />
@@ -143,15 +145,15 @@ function BillingPageContent() {
   if (state === "error" || !data) {
     return (
       <PageContainer>
-        <PageHeader title="Billing" description="Manage your team subscription and payments" />
+        <PageHeader title={t("billing.page.title")} description={t("billing.page.description")} />
         <Card>
           <CardContent className="p-8">
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <AlertCircle className="size-14 text-destructive" />
               <div className="mt-6 space-y-2">
-                <h2 className="text-xl font-semibold">Failed to Load Billing</h2>
+                <h2 className="text-xl font-semibold">{t("billing.page.failedToLoad")}</h2>
                 <p className="text-muted-foreground max-w-sm">
-                  {error || "An unexpected error occurred"}
+                  {error || t("billing.page.unexpectedError")}
                 </p>
               </div>
               <Button
@@ -159,7 +161,7 @@ function BillingPageContent() {
                 className="mt-6 h-11"
                 onClick={() => window.location.reload()}
               >
-                Try Again
+                {t("billing.page.tryAgain")}
               </Button>
             </div>
           </CardContent>
@@ -181,7 +183,7 @@ function BillingPageContent() {
 
   return (
     <PageContainer>
-      <PageHeader title="Billing" description={`Team: ${team.name}`}>
+      <PageHeader title={t("billing.page.title")} description={t("billing.page.teamDescription", { name: team.name })}>
         {team.isDirector && (
           <ManageSubscriptionButton customerId={null} />
         )}
@@ -194,12 +196,12 @@ function BillingPageContent() {
             <div className="space-y-2">
               <CardTitle className="flex items-center gap-4">
                 <CreditCard className="size-5" />
-                Current Plan
+                {t("billing.page.currentPlan")}
               </CardTitle>
               <CardDescription>
                 {team.isDirector
-                  ? "Your team subscription and usage"
-                  : "Team subscription (managed by director)"}
+                  ? t("billing.page.subscriptionAndUsage")
+                  : t("billing.page.managedByDirector")}
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-lg px-4 py-2 capitalize">
@@ -210,22 +212,22 @@ function BillingPageContent() {
         <CardContent className="space-y-6">
           <div className="grid gap-6 md:grid-cols-4">
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Tokens Used</p>
+              <p className="text-sm text-muted-foreground">{t("billing.page.tokensUsed")}</p>
               <p className="text-2xl font-bold">{formatTokens(usageStats.tokensUsed)}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Monthly Limit</p>
+              <p className="text-sm text-muted-foreground">{t("billing.page.monthlyLimit")}</p>
               <p className="text-2xl font-bold">{formatTokens(usageStats.tokenLimit)}</p>
             </div>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <Users className="size-3.5" />
-                Seats
+                {t("billing.page.seats")}
               </p>
               <p className="text-2xl font-bold">{team.seatCount}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Days Remaining</p>
+              <p className="text-sm text-muted-foreground">{t("billing.page.daysRemaining")}</p>
               <p className="text-2xl font-bold">{usageStats.daysRemaining}</p>
             </div>
           </div>
@@ -233,17 +235,17 @@ function BillingPageContent() {
           {/* Per-seat cost breakdown */}
           {team.tier !== "free" && team.isDirector && (
             <div className="rounded-xl bg-secondary p-4">
-              <p className="text-sm text-muted-foreground">Monthly Cost</p>
+              <p className="text-sm text-muted-foreground">{t("billing.page.monthlyCost")}</p>
               <p className="text-lg font-semibold mt-1">
-                {team.seatCount} seats × ${perSeatPrice}/seat = ${totalMonthly.toFixed(2)}/mo
+                {t("billing.page.seatCostBreakdown", { count: team.seatCount, price: perSeatPrice, total: totalMonthly.toFixed(2) })}
               </p>
             </div>
           )}
 
           <div className="space-y-4">
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{usageStats.percentUsed.toFixed(1)}% used</span>
-              <span>{formatTokens(usageStats.tokensRemaining)} remaining</span>
+              <span>{t("billing.page.percentUsed", { percent: usageStats.percentUsed.toFixed(1) })}</span>
+              <span>{t("billing.page.remaining", { count: formatTokens(usageStats.tokensRemaining) })}</span>
             </div>
             <Progress value={usageStats.percentUsed} className="h-2.5" />
           </div>
@@ -266,9 +268,9 @@ function BillingPageContent() {
       {team.isDirector && (
         <div className="space-y-6">
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Subscription Plans</h2>
+            <h2 className="text-xl font-semibold">{t("billing.page.subscriptionPlans")}</h2>
             <p className="text-muted-foreground">
-              Per-seat pricing — you pay for each member in your team
+              {t("billing.page.perSeatPricing")}
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -300,18 +302,21 @@ function BillingPageContent() {
   );
 }
 
+function BillingPageFallback() {
+  const { t } = useTranslation();
+  return (
+    <PageContainer>
+      <PageHeader title={t("billing.page.title")} description={t("billing.page.description")} />
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    </PageContainer>
+  );
+}
+
 export default function BillingPage() {
   return (
-    <Suspense
-      fallback={
-        <PageContainer>
-          <PageHeader title="Billing" description="Manage your team subscription and payments" />
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="size-8 animate-spin text-muted-foreground" />
-          </div>
-        </PageContainer>
-      }
-    >
+    <Suspense fallback={<BillingPageFallback />}>
       <BillingPageContent />
     </Suspense>
   );

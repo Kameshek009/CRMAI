@@ -31,25 +31,25 @@ const TRIGGER_TYPES = [
 ];
 
 const ENTITY_TYPES = [
-  { value: "contact", label: "crm.automations.builder.entity.contact" },
-  { value: "company", label: "crm.automations.builder.entity.organization" },
-  { value: "deal", label: "crm.automations.builder.entity.deal" },
-  { value: "lead", label: "crm.automations.builder.entity.lead" },
+  { value: "contact", label: "crm.automations.entities.contact" },
+  { value: "company", label: "crm.automations.entities.company" },
+  { value: "deal", label: "crm.automations.entities.deal" },
+  { value: "lead", label: "crm.automations.entities.lead" },
 ];
 
 const ACTION_TYPES = [
-  { value: "create_task", label: "crm.automations.builder.action.createTask" },
-  { value: "update_field", label: "crm.automations.builder.action.updateField" },
-  { value: "assign_to", label: "crm.automations.builder.action.assignTo" },
+  { value: "create_task", label: "crm.automations.actionTypes.createTask" },
+  { value: "update_field", label: "crm.automations.actionTypes.updateField" },
+  { value: "assign_to", label: "crm.automations.actionTypes.assignTo" },
 ];
 
 const OPERATORS = [
-  { value: "eq", label: "crm.automations.builder.operator.equals" },
-  { value: "neq", label: "crm.automations.builder.operator.notEquals" },
-  { value: "gt", label: "crm.automations.builder.operator.greaterThan" },
-  { value: "lt", label: "crm.automations.builder.operator.lessThan" },
-  { value: "contains", label: "crm.automations.builder.operator.contains" },
-  { value: "not_contains", label: "crm.automations.builder.operator.doesNotContain" },
+  { value: "eq", label: "crm.automations.builder.operators.eq" },
+  { value: "neq", label: "crm.automations.builder.operators.neq" },
+  { value: "gt", label: "crm.automations.builder.operators.gt" },
+  { value: "lt", label: "crm.automations.builder.operators.lt" },
+  { value: "contains", label: "crm.automations.builder.operators.contains" },
+  { value: "not_contains", label: "crm.automations.builder.operators.notContains" },
 ];
 
 interface ConditionForm {
@@ -180,7 +180,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
         <div className="space-y-5">
           {/* Name */}
           <div className="space-y-2">
-            <Label>{t("crm.automations.builder.nameLabel")}</Label>
+            <Label>{t("crm.automations.builder.name")}</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -194,7 +194,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
             <div className="text-xs font-semibold uppercase text-muted-foreground">{t("crm.automations.builder.when")}</div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label className="text-xs">{t("crm.automations.builder.triggerLabel")}</Label>
+                <Label className="text-xs">{t("crm.automations.builder.trigger")}</Label>
                 <select value={triggerType} onChange={(e) => setTriggerType(e.target.value)} className={selectClasses}>
                   {TRIGGER_TYPES.map((opt) => (
                     <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
@@ -202,7 +202,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                 </select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">{t("crm.automations.builder.entityLabel")}</Label>
+                <Label className="text-xs">{t("crm.automations.builder.entity")}</Label>
                 <select value={entityType} onChange={(e) => setEntityType(e.target.value)} className={selectClasses}>
                   {ENTITY_TYPES.map((opt) => (
                     <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
@@ -213,7 +213,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
             {triggerType === "field_changed" && (
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">{t("crm.automations.builder.fieldLabel")}</Label>
+                  <Label className="text-xs">{t("crm.automations.builder.field")}</Label>
                   <Input value={triggerField} onChange={(e) => setTriggerField(e.target.value)} placeholder={t("crm.automations.builder.fieldPlaceholder")} />
                 </div>
                 <div className="space-y-1">
@@ -231,10 +231,10 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
           {/* Conditions */}
           <div className="space-y-3 rounded-lg border p-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold uppercase text-muted-foreground">{t("crm.automations.builder.ifOptional")}</div>
+              <div className="text-xs font-semibold uppercase text-muted-foreground">{t("crm.automations.builder.conditions")}</div>
               <Button variant="ghost" size="sm" onClick={addCondition} className="h-6 text-xs">
                 <Plus className="size-3 mr-1" />
-                {t("crm.automations.builder.add")}
+                {t("crm.automations.builder.addCondition")}
               </Button>
             </div>
             {conditions.map((c, idx) => (
@@ -242,7 +242,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                 <Input
                   value={c.field}
                   onChange={(e) => updateCondition(idx, "field", e.target.value)}
-                  placeholder={t("crm.automations.builder.conditionFieldPlaceholder")}
+                  placeholder={t("crm.automations.builder.fieldPlaceholder")}
                   className="flex-1"
                 />
                 <select
@@ -257,7 +257,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                 <Input
                   value={c.value}
                   onChange={(e) => updateCondition(idx, "value", e.target.value)}
-                  placeholder={t("crm.automations.builder.conditionValuePlaceholder")}
+                  placeholder={t("crm.automations.builder.valuePlaceholder")}
                   className="flex-1"
                 />
                 <Button variant="ghost" size="icon" className="size-7 text-red-600 shrink-0" onClick={() => removeCondition(idx)}>
@@ -276,7 +276,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
               <div className="text-xs font-semibold uppercase text-muted-foreground">{t("crm.automations.builder.then")}</div>
               <Button variant="ghost" size="sm" onClick={addAction} className="h-6 text-xs">
                 <Plus className="size-3 mr-1" />
-                {t("crm.automations.builder.add")}
+                {t("crm.automations.builder.addAction")}
               </Button>
             </div>
             {actions.map((a, idx) => (
@@ -301,17 +301,17 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                     <Input
                       value={a.config.title || ""}
                       onChange={(e) => updateActionConfig(idx, "title", e.target.value)}
-                      placeholder={t("crm.automations.builder.taskTitlePlaceholder")}
+                      placeholder={t("crm.automations.builder.taskTitle")}
                     />
                     <select
                       value={a.config.priority || "medium"}
                       onChange={(e) => updateActionConfig(idx, "priority", e.target.value)}
                       className={selectClasses}
                     >
-                      <option value="low">{t("crm.automations.builder.priority.low")}</option>
-                      <option value="medium">{t("crm.automations.builder.priority.medium")}</option>
-                      <option value="high">{t("crm.automations.builder.priority.high")}</option>
-                      <option value="urgent">{t("crm.automations.builder.priority.urgent")}</option>
+                      <option value="low">{t("crm.automations.builder.priorities.low")}</option>
+                      <option value="medium">{t("crm.automations.builder.priorities.medium")}</option>
+                      <option value="high">{t("crm.automations.builder.priorities.high")}</option>
+                      <option value="urgent">{t("crm.automations.builder.priorities.urgent")}</option>
                     </select>
                   </div>
                 )}
@@ -320,12 +320,12 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                     <Input
                       value={a.config.field || ""}
                       onChange={(e) => updateActionConfig(idx, "field", e.target.value)}
-                      placeholder={t("crm.automations.builder.fieldNamePlaceholder")}
+                      placeholder={t("crm.automations.builder.fieldName")}
                     />
                     <Input
                       value={a.config.value || ""}
                       onChange={(e) => updateActionConfig(idx, "value", e.target.value)}
-                      placeholder={t("crm.automations.builder.newValuePlaceholder")}
+                      placeholder={t("crm.automations.builder.newValue")}
                     />
                   </div>
                 )}
@@ -333,7 +333,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                   <Input
                     value={a.config.account_id || ""}
                     onChange={(e) => updateActionConfig(idx, "account_id", e.target.value)}
-                    placeholder={t("crm.automations.builder.memberAccountIdPlaceholder")}
+                    placeholder={t("crm.automations.builder.accountId")}
                   />
                 )}
               </div>

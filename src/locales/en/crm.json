@@ -603,9 +603,11 @@
     "entities": {
       "contact": "Contact",
       "company": "Organization",
-      "deal": "Deal"
+      "deal": "Deal",
+      "lead": "Lead"
     },
     "builder": {
+      "title": "New Automation",
       "triggerDesc": {
         "recordCreated": "When a record is created",
         "recordUpdated": "When a record is updated",
@@ -951,7 +953,9 @@
       "avgCloseTime": "Avg Close Time",
       "daysToClose": "Days to close",
       "engagement": "Engagement",
-      "contacts": "contacts"
+      "contacts": "contacts",
+      "vsLastMonth": "{percent}% vs last month",
+      "contactsCount": "{count} contacts"
     },
     "charts": {
       "monthlyRevenue": "Monthly Revenue",
@@ -986,13 +990,29 @@
     },
     "activity": {
       "title": "Activity Breakdown",
-      "noRecentActivity": "No recent activity"
+      "noRecentActivity": "No recent activity",
+      "dealsCreated": "Deals Created",
+      "stageChanges": "Stage Changes",
+      "dealsWon": "Deals Won",
+      "dealsLost": "Deals Lost",
+      "contactsAdded": "Contacts Added",
+      "tasksDone": "Tasks Done",
+      "notes": "Notes",
+      "calls": "Calls",
+      "emails": "Emails",
+      "meetings": "Meetings",
+      "imports": "Imports"
     },
     "health": {
       "title": "Company Health",
       "companies": "companies",
       "noCompanies": "No companies yet",
-      "topIndustries": "Top Industries"
+      "topIndustries": "Top Industries",
+      "companiesCount": "{count} companies",
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
     },
     "deals": {
       "topOpenDeals": "Top Open Deals",

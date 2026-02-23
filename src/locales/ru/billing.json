@@ -154,6 +154,37 @@
     "nextBillingDate": "Следующее списание",
     "accountCredit": "Баланс аккаунта"
   },
+  "page": {
+    "title": "Биллинг",
+    "description": "Управление подпиской и платежами команды",
+    "teamDescription": "Команда: {name}",
+    "currentPlan": "Текущий план",
+    "subscriptionAndUsage": "Подписка и использование вашей команды",
+    "managedByDirector": "Подписка команды (управляется директором)",
+    "tokensUsed": "Использовано токенов",
+    "monthlyLimit": "Месячный лимит",
+    "seats": "Места",
+    "daysRemaining": "Дней осталось",
+    "monthlyCost": "Ежемесячная стоимость",
+    "seatCostBreakdown": "{count} мест × ${price}/место = ${total}/мес.",
+    "percentUsed": "{percent}% использовано",
+    "remaining": "{count} осталось",
+    "subscriptionPlans": "Планы подписки",
+    "perSeatPricing": "Цена за место — вы платите за каждого участника команды",
+    "failedToLoad": "Не удалось загрузить биллинг",
+    "unexpectedError": "Произошла непредвиденная ошибка",
+    "tryAgain": "Попробовать снова"
+  },
+  "return": {
+    "confirmingPayment": "Подтверждение платежа...",
+    "paymentComplete": "Оплата завершена",
+    "redirecting": "Перенаправление...",
+    "paymentNotCompleted": "Оплата не была завершена",
+    "pleaseTryAgain": "Пожалуйста, попробуйте ещё раз",
+    "backToBilling": "Вернуться к биллингу",
+    "somethingWentWrong": "Что-то пошло не так",
+    "tryAgainOrContact": "Попробуйте ещё раз или обратитесь в поддержку"
+  },
   "invoices": {
     "title": "Счета",
     "emptyState": "Счетов пока нет. Они появятся после первого платежа.",

@@ -4,10 +4,12 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageContainer, Card } from "@/components/dashboard/page-container";
 import { Check, X, Loader2 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 type ReturnStatus = "loading" | "success" | "failed" | "error";
 
 function ReturnContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -63,7 +65,7 @@ function ReturnContent() {
             <>
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
               <p className="text-sm text-muted-foreground mt-4">
-                Confirming your payment...
+                {t("billing.return.confirmingPayment")}
               </p>
             </>
           )}
@@ -73,9 +75,9 @@ function ReturnContent() {
               <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center mb-4">
                 <Check className="w-6 h-6 text-foreground" />
               </div>
-              <p className="text-sm text-foreground">Payment complete</p>
+              <p className="text-sm text-foreground">{t("billing.return.paymentComplete")}</p>
               <p className="text-xs text-muted-foreground mt-2">
-                Redirecting...
+                {t("billing.return.redirecting")}
               </p>
             </>
           )}
@@ -85,15 +87,15 @@ function ReturnContent() {
               <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center mb-4">
                 <X className="w-6 h-6 text-foreground" />
               </div>
-              <p className="text-sm text-foreground">Payment was not completed</p>
+              <p className="text-sm text-foreground">{t("billing.return.paymentNotCompleted")}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Please try again
+                {t("billing.return.pleaseTryAgain")}
               </p>
               <button
                 onClick={() => router.push("/dashboard/account/billing")}
                 className="mt-4 px-4 py-2 text-sm rounded-full border border-border hover:bg-secondary transition-colors cursor-pointer"
               >
-                Back to billing
+                {t("billing.return.backToBilling")}
               </button>
             </>
           )}
@@ -103,15 +105,15 @@ function ReturnContent() {
               <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center mb-4">
                 <X className="w-6 h-6 text-foreground" />
               </div>
-              <p className="text-sm text-foreground">Something went wrong</p>
+              <p className="text-sm text-foreground">{t("billing.return.somethingWentWrong")}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Please try again or contact support
+                {t("billing.return.tryAgainOrContact")}
               </p>
               <button
                 onClick={() => router.push("/dashboard/account/billing")}
                 className="mt-4 px-4 py-2 text-sm rounded-full border border-border hover:bg-secondary transition-colors cursor-pointer"
               >
-                Back to billing
+                {t("billing.return.backToBilling")}
               </button>
             </>
           )}
