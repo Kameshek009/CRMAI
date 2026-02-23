@@ -80,8 +80,33 @@ export async function POST(request: NextRequest) {
           const fromNumber = msg.from;
           const content = msg.text?.body || msg.caption || `[${msg.type}]`;
 
-          // Try to match contact
-          const contactId = await findContactByPhone(teamInfo.teamId, fromNumber);
+          // Try to match contact, create if not found
+          let contactId = await findContactByPhone(teamInfo.teamId, fromNumber);
+
+          if (!contactId) {
+            // Extract name from WhatsApp profile if available
+            const waContact = (value.contacts || []).find(
+              (c: { wa_id?: string; profile?: { name?: string } }) => c.wa_id === fromNumber
+            );
+            const profileName = waContact?.profile?.name || fromNumber;
+
+            const { data: newContact } = await supabase
+              .from("contacts")
+              .insert({
+                team_id: teamInfo.teamId,
+                account_id: teamInfo.accountId,
+                first_name: profileName,
+                phone: `+${fromNumber}`,
+                source: "whatsapp",
+              })
+              .select("id")
+              .single();
+
+            if (newContact) {
+              contactId = newContact.id;
+              logger.info("WhatsApp Webhook", `Auto-created contact ${contactId} for ${fromNumber}`);
+            }
+          }
 
           await supabase.from("whatsapp_messages").insert({
             team_id: teamInfo.teamId,
