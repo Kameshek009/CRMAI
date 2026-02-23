@@ -19,7 +19,8 @@ export async function GET() {
     .single();
 
   if (accountError) {
-    return NextResponse.json({ success: false, error: "Failed to fetch account" }, { status: 500 });
+    console.error("[sidebar GET] DB error:", accountError.message);
+    return NextResponse.json({ success: false, error: accountError.message }, { status: 500 });
   }
 
   if (account.sidebar_config) {
@@ -60,7 +61,8 @@ export async function PATCH(request: Request) {
     .eq("clerk_user_id", userId);
 
   if (error) {
-    return NextResponse.json({ success: false, error: "Failed to save config" }, { status: 500 });
+    console.error("[sidebar PATCH] DB error:", error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, data: parsed.data });
@@ -78,7 +80,8 @@ export async function DELETE() {
     .eq("clerk_user_id", userId);
 
   if (error) {
-    return NextResponse.json({ success: false, error: "Failed to reset config" }, { status: 500 });
+    console.error("[sidebar DELETE] DB error:", error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

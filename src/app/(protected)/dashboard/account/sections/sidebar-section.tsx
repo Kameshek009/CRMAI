@@ -175,8 +175,8 @@ export function SidebarSection() {
       try {
         await update(newConfig);
         pendingRef.current = {};
-      } catch {
-        toast.error(t("common.failedSave"));
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : t("common.failedSave"));
       }
     }, 500);
   }, [update, t]);
