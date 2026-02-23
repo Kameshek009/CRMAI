@@ -4,6 +4,7 @@ import { Calendar, Clock, Coins, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTokenCount, getTierDisplayName } from "@/lib/usage/check";
 import { SubscriptionTier } from "@/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface UsageStats {
   tokensUsed: number;
@@ -49,6 +50,7 @@ function ProgressBar({ value, label }: { value: number; label: string }) {
  * Comprehensive usage summary showing weekly and monthly stats
  */
 export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
+  const { t } = useTranslation();
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
@@ -64,10 +66,10 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Coins className="w-5 h-5 text-foreground" />
-              <h3 className="font-semibold">Enterprise Credits</h3>
+              <h3 className="font-semibold">{t("billing.usage.enterpriseCredits")}</h3>
             </div>
             <span className="text-sm text-muted-foreground">
-              No monthly limits
+              {t("billing.usage.noMonthlyLimits")}
             </span>
           </div>
 
@@ -76,13 +78,13 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
               {formatTokenCount(stats.tokenCredits)}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              credits remaining
+              {t("billing.usage.creditsRemaining")}
             </p>
           </div>
 
           <div className="p-4 rounded-lg bg-secondary">
             <p className="text-sm text-muted-foreground">
-              Credits never expire. Purchase more when you need them.
+              {t("billing.usage.creditsNeverExpire")}
             </p>
           </div>
         </div>
@@ -96,14 +98,14 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold">Usage Summary</h3>
+            <h3 className="font-semibold">{t("billing.usage.usageSummary")}</h3>
             <p className="text-sm text-muted-foreground">
-              {getTierDisplayName(tier)} Plan
+              {getTierDisplayName(tier)} {t("billing.usage.plan")}
             </p>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="w-4 h-4" />
-            <span>{stats.daysRemaining} days left</span>
+            <span>{stats.daysRemaining} {t("billing.usage.daysLeft")}</span>
           </div>
         </div>
 
@@ -112,10 +114,10 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">This Week</span>
+              <span className="text-sm font-medium">{t("billing.usage.thisWeek")}</span>
             </div>
             <span className="text-sm text-muted-foreground">
-              Day {stats.daysIntoWeek + 1} of 7
+              {t("billing.usage.dayOfWeek", { day: stats.daysIntoWeek + 1 })}
             </span>
           </div>
 
@@ -140,7 +142,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">This Month</span>
+              <span className="text-sm font-medium">{t("billing.usage.thisMonth")}</span>
             </div>
             <span className="text-sm text-muted-foreground">
               {formatDate(stats.billingCycleStart)} -{" "}
@@ -165,8 +167,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
         {stats.weeklyPercentUsed >= 80 && stats.weeklyPercentUsed < 100 && (
           <div className="p-3 rounded-lg bg-secondary border border-border">
             <p className="text-sm text-foreground">
-              You&apos;re approaching your weekly limit. Consider upgrading for more
-              capacity.
+              {t("billing.usage.weeklyLimitWarning")}
             </p>
           </div>
         )}
@@ -175,8 +176,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
         {stats.weeklyPercentUsed >= 100 && (
           <div className="p-3 rounded-lg bg-secondary border border-border">
             <p className="text-sm text-foreground">
-              Weekly limit reached. Upgrade your plan or wait for next week to
-              continue.
+              {t("billing.usage.weeklyLimitReached")}
             </p>
           </div>
         )}
