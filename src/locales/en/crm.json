@@ -767,7 +767,9 @@
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",
-    "markAllRead": "Mark all read"
+    "markAllRead": "Mark all read",
+    "newContactWhatsApp": "New contact from WhatsApp: {name}",
+    "newContactCall": "New contact from call: {phone}"
   },
   "trash": {
     "title": "Trash",

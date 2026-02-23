@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { findTeamByPhoneNumberId, findContactByPhone } from "@/lib/whatsapp/helpers";
 import { logger } from "@/lib/logger";
+import { createTeamNotification } from "@/lib/crm/notifications";
 
 /**
  * GET /api/webhooks/whatsapp
@@ -105,6 +106,16 @@ export async function POST(request: NextRequest) {
             if (newContact) {
               contactId = newContact.id;
               logger.info("WhatsApp Webhook", `Auto-created contact ${contactId} for ${fromNumber}`);
+
+              // Notify all team members
+              createTeamNotification({
+                teamId: teamInfo.teamId,
+                type: "new_contact_whatsapp",
+                title: `New contact from WhatsApp: ${profileName}`,
+                message: `+${fromNumber}`,
+                entityType: "contact",
+                entityId: newContact.id,
+              });
             }
           }
 

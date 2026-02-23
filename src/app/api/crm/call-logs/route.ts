@@ -5,6 +5,7 @@ import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createCallLogSchema } from "@/lib/crm/validation";
 import { findContactByPhone } from "@/lib/whatsapp/helpers";
 import { logger } from "@/lib/logger";
+import { createTeamNotification } from "@/lib/crm/notifications";
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,7 +75,19 @@ export async function POST(request: NextRequest) {
           })
           .select("id")
           .single();
-        if (newContact) contactId = newContact.id;
+        if (newContact) {
+          contactId = newContact.id;
+
+          // Notify all team members
+          createTeamNotification({
+            teamId: context.teamId,
+            type: "new_contact_call",
+            title: `New contact from call: ${phoneNumber}`,
+            message: phoneNumber,
+            entityType: "contact",
+            entityId: newContact.id,
+          });
+        }
       }
     }
 

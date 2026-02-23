@@ -34,6 +34,8 @@ export async function createNotification(params: NotificationParams): Promise<vo
       task_due_soon: "task_due",
       task_overdue: "task_due",
       new_team_member: "new_team_member",
+      new_contact_whatsapp: "new_team_member",
+      new_contact_call: "new_team_member",
       goal_achieved: "deal_assigned",
     };
 
@@ -51,5 +53,48 @@ export async function createNotification(params: NotificationParams): Promise<vo
     });
   } catch (err) {
     logger.error("Notifications", "Failed to create notification", err);
+  }
+}
+
+interface TeamNotificationParams {
+  teamId: string;
+  type: string;
+  title: string;
+  message?: string;
+  entityType?: string;
+  entityId?: string;
+}
+
+/**
+ * Create a notification for ALL active members of a team.
+ * Fire-and-forget — never throws.
+ */
+export async function createTeamNotification(params: TeamNotificationParams): Promise<void> {
+  try {
+    const supabase = createSupabaseAdmin();
+
+    const { data: members } = await supabase
+      .from("team_members")
+      .select("account_id")
+      .eq("team_id", params.teamId)
+      .eq("status", "active");
+
+    if (!members || members.length === 0) return;
+
+    await Promise.all(
+      members.map((m) =>
+        createNotification({
+          accountId: m.account_id,
+          teamId: params.teamId,
+          type: params.type,
+          title: params.title,
+          message: params.message,
+          entityType: params.entityType,
+          entityId: params.entityId,
+        })
+      )
+    );
+  } catch (err) {
+    logger.error("Notifications", "Failed to create team notification", err);
   }
 }

@@ -767,7 +767,9 @@
   "notifications": {
     "title": "Уведомления",
     "empty": "Уведомлений пока нет",
-    "markAllRead": "Отметить все прочитанными"
+    "markAllRead": "Отметить все прочитанными",
+    "newContactWhatsApp": "Новый контакт из WhatsApp: {name}",
+    "newContactCall": "Новый контакт из звонка: {phone}"
   },
   "trash": {
     "title": "Корзина",
