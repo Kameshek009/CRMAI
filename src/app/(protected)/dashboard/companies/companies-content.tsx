@@ -99,7 +99,9 @@ export function CompaniesContent() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
 
-  const fetchCompanies = useCallback(async (pageNum: number, append: boolean) => {
+  const abortRef = useRef<AbortController | null>(null);
+
+  const fetchCompanies = useCallback(async (pageNum: number, append: boolean, signal?: AbortSignal) => {
     if (append) {
       setIsLoadingMore(true);
     } else {
@@ -115,7 +117,7 @@ export function CompaniesContent() {
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
       }
-      const res = await fetch(`/api/crm/companies?${params}`);
+      const res = await fetch(`/api/crm/companies?${params}`, { signal });
       const json = await res.json();
       if (json.success) {
         if (append) {
@@ -125,6 +127,8 @@ export function CompaniesContent() {
         }
         setTotal(json.total || 0);
       }
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") return;
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -132,8 +136,11 @@ export function CompaniesContent() {
   }, [search, sortBy, sortOrder, activeFilters]);
 
   useEffect(() => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
     pageRef.current = 1;
-    fetchCompanies(1, false);
+    fetchCompanies(1, false, abortRef.current.signal);
+    return () => { abortRef.current?.abort(); };
   }, [fetchCompanies]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
 
@@ -293,6 +300,26 @@ export function CompaniesContent() {
         <KanbanBoard
           columns={kanbanColumns}
           cards={kanbanItems}
+          onCardMove={async (cardId, newColumnId) => {
+            setCompanies((prev) =>
+              prev.map((c) => (c.id === cardId ? { ...c, size: newColumnId } : c))
+            );
+            try {
+              const res = await fetch(`/api/crm/companies/${cardId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ size: newColumnId }),
+              });
+              const json = await res.json();
+              if (!json.success) {
+                toast.error(t("common.failedUpdate"));
+                fetchCompanies(1, false);
+              }
+            } catch {
+              toast.error(t("common.failedUpdate"));
+              fetchCompanies(1, false);
+            }
+          }}
           renderCard={(c) => (
             <div
               className="cursor-pointer"

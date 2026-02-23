@@ -116,20 +116,26 @@ export function NotesContent() {
   };
 
   const handleTogglePin = async (note: NoteData) => {
-    const res = await fetch(`/api/crm/notes/${note.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_pinned: !note.is_pinned }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      setNotes(prev => {
-        const updated = prev.map(n => n.id === note.id ? { ...n, is_pinned: !n.is_pinned } : n);
-        return updated.sort((a, b) => {
-          if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        });
+    try {
+      const res = await fetch(`/api/crm/notes/${note.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_pinned: !note.is_pinned }),
       });
+      const json = await res.json();
+      if (json.success) {
+        setNotes(prev => {
+          const updated = prev.map(n => n.id === note.id ? { ...n, is_pinned: !n.is_pinned } : n);
+          return updated.sort((a, b) => {
+            if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
+        });
+      } else {
+        toast.error(json.error || t("common.failed"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 

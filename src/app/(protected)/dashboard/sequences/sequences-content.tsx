@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/crm/empty-state";
 import { SequenceBuilder } from "@/components/crm/sequence-builder";
 import { Plus, Mail, Users, Trash2, Layers, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import { useTranslation } from "@/lib/i18n";
 
@@ -30,6 +31,8 @@ export function SequencesContent() {
   const [sequences, setSequences] = useState<Sequence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showBuilder, setShowBuilder] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const limitStore = useFeatureLimitStore();
   const atSequenceLimit = limitStore.isAtLimit("emailSequences");
 
@@ -57,30 +60,43 @@ export function SequencesContent() {
   }, [fetchSequences]);
 
   const handleToggle = async (id: string, isActive: boolean) => {
-    const res = await fetch(`/api/crm/sequences/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_active: isActive }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      setSequences((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, is_active: isActive } : s))
-      );
-      toast.success(isActive ? t("crm.sequences.activated") : t("crm.sequences.pausedMsg"));
-    } else {
-      toast.error(json.error || t("crm.sequences.failedUpdate"));
+    try {
+      const res = await fetch(`/api/crm/sequences/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: isActive }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSequences((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, is_active: isActive } : s))
+        );
+        toast.success(isActive ? t("crm.sequences.activated") : t("crm.sequences.pausedMsg"));
+      } else {
+        toast.error(json.error || t("crm.sequences.failedUpdate"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/crm/sequences/${id}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      setSequences((prev) => prev.filter((s) => s.id !== id));
-      toast.success(t("crm.sequences.deletedMsg"));
-    } else {
-      toast.error(json.error || t("crm.sequences.failedDelete"));
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/crm/sequences/${deleteId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        setSequences((prev) => prev.filter((s) => s.id !== deleteId));
+        toast.success(t("crm.sequences.deletedMsg"));
+      } else {
+        toast.error(json.error || t("crm.sequences.failedDelete"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
     }
   };
 
@@ -169,7 +185,7 @@ export function SequencesContent() {
                       variant="ghost"
                       size="icon"
                       className="size-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDelete(seq.id)}
+                      onClick={() => setDeleteId(seq.id)}
                     >
                       <Trash2 className="size-3.5" />
                     </Button>
@@ -185,6 +201,17 @@ export function SequencesContent() {
         open={showBuilder}
         onOpenChange={setShowBuilder}
         onCreated={handleCreated}
+      />
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title={t("crm.sequences.deleteTitle")}
+        description={t("crm.sequences.deleteConfirm")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        isLoading={isDeleting}
+        onConfirm={handleDelete}
       />
     </PageContainer>
   );

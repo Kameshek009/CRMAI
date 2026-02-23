@@ -230,7 +230,7 @@ export function TasksContent() {
   const handlePhotoUpload = async (file: File) => {
     if (formMode.type !== "edit") return;
     if (attachments.length >= 15) {
-      toast.error(t("crm.tasks.maxPhotos", { max: 5 }));
+      toast.error(t("crm.tasks.maxPhotos", { max: 15 }));
       return;
     }
     setIsUploading(true);

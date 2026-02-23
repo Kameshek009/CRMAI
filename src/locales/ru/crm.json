@@ -745,6 +745,8 @@
     "deletedMsg": "Рассылка удалена",
     "failedUpdate": "Не удалось обновить",
     "failedDelete": "Не удалось удалить",
+    "deleteTitle": "Удалить рассылку",
+    "deleteConfirm": "Вы уверены, что хотите удалить эту рассылку? Это действие необратимо.",
     "active": "Активна",
     "pausedLabel": "Приостановлена",
     "steps": "{count} шагов",
@@ -767,6 +769,7 @@
     "deleteFailed": "Не удалось удалить лиды",
     "changeStatus": "Изменить статус",
     "statusUpdated": "Обновлено {count} лид(ов)",
+    "statusUpdateFailed": "Не удалось обновить некоторые лиды",
     "createdAt": "Создано",
     "fields": {
       "name": "Имя",

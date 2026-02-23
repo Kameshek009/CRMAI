@@ -182,15 +182,21 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   };
 
   const handleAddNote = async (content: string) => {
-    const res = await fetch("/api/crm/notes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, deal_id: dealId }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      setNotes([json.data, ...notes]);
-      toast.success(t("crm.deals.detail.noteAdded"));
+    try {
+      const res = await fetch("/api/crm/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, deal_id: dealId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNotes([json.data, ...notes]);
+        toast.success(t("crm.deals.detail.noteAdded"));
+      } else {
+        toast.error(json.error || t("common.failed"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 

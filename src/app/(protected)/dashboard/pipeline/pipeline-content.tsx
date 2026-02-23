@@ -118,7 +118,7 @@ export function PipelineContent() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentWorkspace?.id]);
 
   useEffect(() => {
     fetchPipeline();

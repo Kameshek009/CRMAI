@@ -95,7 +95,11 @@ export function AutomationsContent() {
           prev.map((a) => (a.id === id ? { ...a, is_active: active } : a))
         );
         toast.success(active ? t("crm.automations.enabled") : t("crm.automations.paused"));
+      } else {
+        toast.error(json.error || t("common.failed"));
       }
+    } catch {
+      toast.error(t("common.failed"));
     } finally {
       setTogglingId(null);
     }

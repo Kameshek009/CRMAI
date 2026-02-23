@@ -143,15 +143,21 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
   }, [companyId, company?.metadata, t]);
 
   const handleAddNote = async (content: string) => {
-    const res = await fetch("/api/crm/notes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, company_id: companyId }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      setNotes([json.data, ...notes]);
-      toast.success(t("common.noteAdded"));
+    try {
+      const res = await fetch("/api/crm/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, company_id: companyId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNotes([json.data, ...notes]);
+        toast.success(t("common.noteAdded"));
+      } else {
+        toast.error(json.error || t("common.failed"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 

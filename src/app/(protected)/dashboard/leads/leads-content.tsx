@@ -188,7 +188,7 @@ export function LeadsContent() {
     setIsBulkLoading(true);
     try {
       const ids = Array.from(selectedIds);
-      await Promise.all(
+      const results = await Promise.all(
         ids.map((id) =>
           fetch(`/api/crm/leads/${id}`, {
             method: "PATCH",
@@ -197,7 +197,12 @@ export function LeadsContent() {
           })
         )
       );
-      toast.success(t("crm.leads.statusUpdated", { count: ids.length }));
+      const allOk = results.every((r) => r.ok);
+      if (allOk) {
+        toast.success(t("crm.leads.statusUpdated", { count: ids.length }));
+      } else {
+        toast.error(t("crm.leads.statusUpdateFailed"));
+      }
       setSelectedIds(new Set());
       pageRef.current = 1;
       fetchLeads(1, false);

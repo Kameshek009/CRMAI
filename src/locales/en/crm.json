@@ -745,6 +745,8 @@
     "deletedMsg": "Sequence deleted",
     "failedUpdate": "Failed to update",
     "failedDelete": "Failed to delete",
+    "deleteTitle": "Delete sequence",
+    "deleteConfirm": "Are you sure you want to delete this sequence? This action cannot be undone.",
     "active": "Active",
     "pausedLabel": "Paused",
     "steps": "{count} steps",
@@ -767,6 +769,7 @@
     "deleteFailed": "Failed to delete leads",
     "changeStatus": "Change Status",
     "statusUpdated": "Updated {count} lead(s)",
+    "statusUpdateFailed": "Failed to update some leads",
     "createdAt": "Created",
     "fields": {
       "name": "Name",
