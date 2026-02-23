@@ -586,6 +586,51 @@
       "contact": "Contact",
       "company": "Organization",
       "deal": "Deal"
+    },
+    "builder": {
+      "triggerDesc": {
+        "recordCreated": "When a record is created",
+        "recordUpdated": "When a record is updated",
+        "fieldChanged": "When a specific field changes",
+        "dealStageChanged": "When a deal stage changes"
+      },
+      "entityLabels": {
+        "lead": "Lead"
+      },
+      "operators": {
+        "eq": "equals",
+        "neq": "not equals",
+        "gt": "greater than",
+        "lt": "less than",
+        "contains": "contains",
+        "notContains": "does not contain"
+      },
+      "name": "Name",
+      "namePlaceholder": "e.g. Auto-create follow-up task",
+      "when": "When",
+      "trigger": "Trigger",
+      "entity": "Entity",
+      "field": "Field",
+      "from": "From",
+      "to": "To",
+      "conditions": "If (optional)",
+      "then": "Then",
+      "addCondition": "Add",
+      "addAction": "Add",
+      "fieldPlaceholder": "field",
+      "valuePlaceholder": "value",
+      "noConditionsHint": "No conditions — automation will always run",
+      "taskTitle": "Task title",
+      "fieldName": "Field name",
+      "newValue": "New value",
+      "accountId": "Member account ID",
+      "createButton": "Create Automation",
+      "priorities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      }
     }
   },
   "console": {
@@ -753,7 +798,21 @@
     "active": "Active",
     "pausedLabel": "Paused",
     "steps": "{count} steps",
-    "activeOf": "{active} active / {total} total"
+    "activeOf": "{active} active / {total} total",
+    "builder": {
+      "title": "Create Email Sequence",
+      "nameLabel": "Sequence Name",
+      "namePlaceholder": "e.g. Welcome Series",
+      "stepsLabel": "Steps",
+      "wait": "Wait",
+      "day": "day",
+      "days": "days",
+      "stepLabel": "Step {n}",
+      "subjectPlaceholder": "Email subject",
+      "bodyPlaceholder": "Email body...",
+      "addStep": "Add Step",
+      "creating": "Creating..."
+    }
   },
   "leads": {
     "title": "Leads",
@@ -851,6 +910,102 @@
     "complete": "Import Complete",
     "completeDescription": "{imported} contacts and {companies} companies imported.",
     "done": "Done"
+  },
+  "analytics": {
+    "pageTitle": "Analytics",
+    "pageDescription": "Comprehensive CRM performance insights",
+    "failedLoad": "Failed to load analytics",
+    "metrics": {
+      "winRate": "Win Rate",
+      "pipelineValue": "Pipeline Value",
+      "openDeals": "open deals",
+      "thisMonth": "This Month",
+      "revenue": "Revenue",
+      "revenueDeclined": "Revenue declined",
+      "forecast": "Forecast",
+      "weightedPipeline": "Weighted pipeline",
+      "avgDealSize": "Avg Deal Size",
+      "wonDealsAverage": "Won deals average",
+      "salesVelocity": "Sales Velocity",
+      "perDayPotential": "Per day potential",
+      "avgCloseTime": "Avg Close Time",
+      "daysToClose": "Days to close",
+      "engagement": "Engagement",
+      "contacts": "contacts"
+    },
+    "charts": {
+      "monthlyRevenue": "Monthly Revenue",
+      "revenue": "Revenue",
+      "pipelineFunnel": "Pipeline Funnel",
+      "noPipelineStages": "No pipeline stages configured",
+      "value": "Value",
+      "deals": "Deals",
+      "activityTrend": "Activity Trend (30 Days)",
+      "total": "total",
+      "winLossAnalysis": "Win/Loss Analysis"
+    },
+    "winLoss": {
+      "wonDeals": "Won Deals",
+      "lostDeals": "Lost Deals",
+      "total": "total",
+      "average": "Avg:",
+      "winRate": "Win Rate",
+      "won": "Won:",
+      "lost": "Lost:"
+    },
+    "contacts": {
+      "title": "Contact Distribution",
+      "total": "total",
+      "noContacts": "No contacts yet"
+    },
+    "tasks": {
+      "title": "Task Breakdown",
+      "doneThisWeek": "done this week",
+      "byStatus": "By Status",
+      "byPriority": "By Priority"
+    },
+    "activity": {
+      "title": "Activity Breakdown",
+      "noRecentActivity": "No recent activity"
+    },
+    "health": {
+      "title": "Company Health",
+      "companies": "companies",
+      "noCompanies": "No companies yet",
+      "topIndustries": "Top Industries"
+    },
+    "deals": {
+      "topOpenDeals": "Top Open Deals",
+      "noOpenDeals": "No open deals",
+      "win": "win"
+    },
+    "sources": {
+      "title": "Contact Sources",
+      "noData": "No source data available"
+    },
+    "funnel": {
+      "title": "Lead Conversion Funnel",
+      "fromPrev": "from prev"
+    },
+    "aiInsights": {
+      "title": "AI Insights"
+    }
+  },
+  "aiChat": {
+    "title": "CRM Assistant",
+    "emptyGreeting": "How can I help?",
+    "emptySuggestions": "Try: \"Add contact Ivan Petrov\", \"Show overdue tasks\", or \"Mark call task as done\"",
+    "inputPlaceholder": "Update contact, complete task, show deals...",
+    "retryButton": "Retry",
+    "errorGeneric": "Sorry, something went wrong. Please try again.",
+    "errorConnection": "Failed to connect to AI. Please try again.",
+    "rateLimitTitle": "Usage limit reached",
+    "rateLimitDescription": "Please try again later or upgrade your plan for higher limits.",
+    "rateLimitDefault": "You have reached your daily AI usage limit."
+  },
+  "kanban": {
+    "noItems": "No items",
+    "add": "Add"
   },
   "history": {
     "title": "History",

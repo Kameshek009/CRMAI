@@ -586,6 +586,51 @@
       "contact": "Контакт",
       "company": "Организация",
       "deal": "Сделка"
+    },
+    "builder": {
+      "triggerDesc": {
+        "recordCreated": "При создании записи",
+        "recordUpdated": "При обновлении записи",
+        "fieldChanged": "При изменении поля",
+        "dealStageChanged": "При смене стадии сделки"
+      },
+      "entityLabels": {
+        "lead": "Лид"
+      },
+      "operators": {
+        "eq": "равно",
+        "neq": "не равно",
+        "gt": "больше чем",
+        "lt": "меньше чем",
+        "contains": "содержит",
+        "notContains": "не содержит"
+      },
+      "name": "Название",
+      "namePlaceholder": "напр. Автосоздание задачи на follow-up",
+      "when": "Когда",
+      "trigger": "Триггер",
+      "entity": "Сущность",
+      "field": "Поле",
+      "from": "Из",
+      "to": "В",
+      "conditions": "Если (необязательно)",
+      "then": "Тогда",
+      "addCondition": "Добавить",
+      "addAction": "Добавить",
+      "fieldPlaceholder": "поле",
+      "valuePlaceholder": "значение",
+      "noConditionsHint": "Нет условий — автоматизация будет срабатывать всегда",
+      "taskTitle": "Название задачи",
+      "fieldName": "Название поля",
+      "newValue": "Новое значение",
+      "accountId": "ID аккаунта участника",
+      "createButton": "Создать автоматизацию",
+      "priorities": {
+        "low": "Низкий",
+        "medium": "Средний",
+        "high": "Высокий",
+        "urgent": "Срочный"
+      }
     }
   },
   "console": {
@@ -753,7 +798,21 @@
     "active": "Активна",
     "pausedLabel": "Приостановлена",
     "steps": "{count} шагов",
-    "activeOf": "{active} активных / {total} всего"
+    "activeOf": "{active} активных / {total} всего",
+    "builder": {
+      "title": "Создать рассылку",
+      "nameLabel": "Название рассылки",
+      "namePlaceholder": "напр. Приветственная серия",
+      "stepsLabel": "Шаги",
+      "wait": "Ждать",
+      "day": "день",
+      "days": "дней",
+      "stepLabel": "Шаг {n}",
+      "subjectPlaceholder": "Тема письма",
+      "bodyPlaceholder": "Текст письма...",
+      "addStep": "Добавить шаг",
+      "creating": "Создание..."
+    }
   },
   "leads": {
     "title": "Лиды",
@@ -851,6 +910,102 @@
     "complete": "Импорт завершён",
     "completeDescription": "Импортировано {imported} контактов и {companies} компаний.",
     "done": "Готово"
+  },
+  "analytics": {
+    "pageTitle": "Аналитика",
+    "pageDescription": "Комплексный анализ эффективности CRM",
+    "failedLoad": "Не удалось загрузить аналитику",
+    "metrics": {
+      "winRate": "Процент побед",
+      "pipelineValue": "Стоимость воронки",
+      "openDeals": "открытых сделок",
+      "thisMonth": "За этот месяц",
+      "revenue": "Выручка",
+      "revenueDeclined": "Выручка снизилась",
+      "forecast": "Прогноз",
+      "weightedPipeline": "Взвешенная воронка",
+      "avgDealSize": "Ср. размер сделки",
+      "wonDealsAverage": "Среднее по выигранным",
+      "salesVelocity": "Скорость продаж",
+      "perDayPotential": "Потенциал в день",
+      "avgCloseTime": "Ср. время закрытия",
+      "daysToClose": "Дней до закрытия",
+      "engagement": "Вовлечённость",
+      "contacts": "контактов"
+    },
+    "charts": {
+      "monthlyRevenue": "Ежемесячная выручка",
+      "revenue": "Выручка",
+      "pipelineFunnel": "Воронка продаж",
+      "noPipelineStages": "Стадии воронки не настроены",
+      "value": "Сумма",
+      "deals": "Сделки",
+      "activityTrend": "Тренд активности (30 дней)",
+      "total": "всего",
+      "winLossAnalysis": "Анализ побед/поражений"
+    },
+    "winLoss": {
+      "wonDeals": "Выигранные сделки",
+      "lostDeals": "Проигранные сделки",
+      "total": "всего",
+      "average": "Ср.:",
+      "winRate": "Процент побед",
+      "won": "Выиграно:",
+      "lost": "Проиграно:"
+    },
+    "contacts": {
+      "title": "Распределение контактов",
+      "total": "всего",
+      "noContacts": "Контактов пока нет"
+    },
+    "tasks": {
+      "title": "Разбивка задач",
+      "doneThisWeek": "выполнено за неделю",
+      "byStatus": "По статусу",
+      "byPriority": "По приоритету"
+    },
+    "activity": {
+      "title": "Разбивка активности",
+      "noRecentActivity": "Нет недавней активности"
+    },
+    "health": {
+      "title": "Здоровье компаний",
+      "companies": "компаний",
+      "noCompanies": "Компаний пока нет",
+      "topIndustries": "Топ отраслей"
+    },
+    "deals": {
+      "topOpenDeals": "Топ открытых сделок",
+      "noOpenDeals": "Нет открытых сделок",
+      "win": "победа"
+    },
+    "sources": {
+      "title": "Источники контактов",
+      "noData": "Нет данных по источникам"
+    },
+    "funnel": {
+      "title": "Воронка конверсии лидов",
+      "fromPrev": "от предыдущего"
+    },
+    "aiInsights": {
+      "title": "AI Инсайты"
+    }
+  },
+  "aiChat": {
+    "title": "CRM Ассистент",
+    "emptyGreeting": "Чем могу помочь?",
+    "emptySuggestions": "Попробуйте: «Добавить контакт Иван Петров», «Показать просроченные задачи» или «Отметить задачу-звонок как выполненную»",
+    "inputPlaceholder": "Обновить контакт, завершить задачу, показать сделки...",
+    "retryButton": "Повторить",
+    "errorGeneric": "Произошла ошибка. Попробуйте ещё раз.",
+    "errorConnection": "Не удалось подключиться к AI. Попробуйте ещё раз.",
+    "rateLimitTitle": "Лимит использования исчерпан",
+    "rateLimitDescription": "Попробуйте позже или обновите план для увеличения лимитов.",
+    "rateLimitDefault": "Вы достигли дневного лимита использования AI."
+  },
+  "kanban": {
+    "noItems": "Нет элементов",
+    "add": "Добавить"
   },
   "history": {
     "title": "История",
