@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { FileText, Download, ExternalLink } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 import type { InvoiceInfo } from "./CustomerBillingCard";
 
 interface InvoiceHistoryProps {
@@ -60,6 +61,7 @@ export function InvoiceHistory({
   isLoading,
   className,
 }: InvoiceHistoryProps) {
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <Card className={className}>
@@ -81,10 +83,10 @@ export function InvoiceHistory({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <FileText className="size-4" />
-            Invoices
+            {t("billing.invoices.title")}
           </CardTitle>
           <CardDescription>
-            No invoices yet. Invoices will appear here after your first payment.
+            {t("billing.invoices.emptyState")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -96,21 +98,21 @@ export function InvoiceHistory({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <FileText className="size-4" />
-          Invoices
+          {t("billing.invoices.title")}
         </CardTitle>
         <CardDescription>
-          Your recent invoices and payment history
+          {t("billing.invoices.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Invoice</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("billing.invoices.date")}</TableHead>
+              <TableHead>{t("billing.invoices.invoice")}</TableHead>
+              <TableHead className="text-right">{t("billing.invoices.amount")}</TableHead>
+              <TableHead className="text-center">{t("billing.invoices.status")}</TableHead>
+              <TableHead className="text-right">{t("billing.invoices.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -136,7 +138,7 @@ export function InvoiceHistory({
                           href={invoice.hostedInvoiceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          title="View invoice"
+                          title={t("billing.invoices.viewInvoice")}
                         >
                           <ExternalLink className="size-4" />
                         </a>
@@ -148,7 +150,7 @@ export function InvoiceHistory({
                           href={invoice.pdfUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          title="Download PDF"
+                          title={t("billing.invoices.downloadPdf")}
                         >
                           <Download className="size-4" />
                         </a>
