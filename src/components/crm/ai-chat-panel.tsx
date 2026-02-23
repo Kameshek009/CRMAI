@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Bot, Send, Loader2, X, Sparkles, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/ui/markdown";
+import { useTranslation } from "@/lib/i18n";
 
 interface ToolResult {
   name: string;
@@ -22,6 +23,7 @@ interface ChatMessage {
 }
 
 export function AiChatPanel() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -59,12 +61,12 @@ export function AiChatPanel() {
       const json = await res.json();
 
       if (res.status === 429) {
-        const reason = json.reason || "You have reached your daily AI usage limit.";
+        const reason = json.reason || t("crm.aiChat.rateLimitDefault");
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content: `**Usage limit reached**\n\n${reason}\n\nPlease try again later or upgrade your plan for higher limits.`,
+            content: `**${t("crm.aiChat.rateLimitTitle")}**\n\n${reason}\n\n${t("crm.aiChat.rateLimitDescription")}`,
             isError: true,
           },
         ]);
@@ -90,7 +92,7 @@ export function AiChatPanel() {
           ...prev,
           {
             role: "assistant",
-            content: json.error || "Sorry, something went wrong. Please try again.",
+            content: json.error || t("crm.aiChat.errorGeneric"),
             isError: true,
           },
         ]);
@@ -101,7 +103,7 @@ export function AiChatPanel() {
         ...prev,
         {
           role: "assistant",
-          content: "Failed to connect to AI. Please try again.",
+          content: t("crm.aiChat.errorConnection"),
           isError: true,
         },
       ]);
@@ -135,7 +137,7 @@ export function AiChatPanel() {
       <div className="flex items-center justify-between border-b px-4 py-4">
         <div className="flex items-center gap-2">
           <Bot className="size-5 text-primary" />
-          <span className="font-medium text-sm">CRM Assistant</span>
+          <span className="font-medium text-sm">{t("crm.aiChat.title")}</span>
         </div>
         <Button variant="ghost" size="icon" className="size-7" onClick={() => setIsOpen(false)}>
           <X className="size-4" />
@@ -147,8 +149,8 @@ export function AiChatPanel() {
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground py-8">
             <Bot className="size-8 mx-auto mb-4 text-muted-foreground/50" />
-            <p className="font-medium">How can I help?</p>
-            <p className="mt-1">Try: &quot;Add contact Ivan Petrov&quot;, &quot;Show overdue tasks&quot;, or &quot;Mark call task as done&quot;</p>
+            <p className="font-medium">{t("crm.aiChat.emptyGreeting")}</p>
+            <p className="mt-1">{t("crm.aiChat.emptySuggestions")}</p>
           </div>
         )}
         <div className="space-y-4">
@@ -205,7 +207,7 @@ export function AiChatPanel() {
                   disabled={isLoading}
                 >
                   <RotateCcw className="size-3 mr-1" />
-                  Retry
+                  {t("crm.aiChat.retryButton")}
                 </Button>
               )}
             </div>
@@ -231,7 +233,7 @@ export function AiChatPanel() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Update contact, complete task, show deals..."
+            placeholder={t("crm.aiChat.inputPlaceholder")}
             className="flex-1"
             disabled={isLoading}
           />
