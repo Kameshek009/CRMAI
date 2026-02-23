@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getWorkspaceContext } from "@/lib/crm/team-helpers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { ENTITY_CONFIG, CHUNK_SIZE, escapeCsvValue, rowToCsv } from "@/lib/crm/export-utils";
+import { ENTITY_CONFIG, CHUNK_SIZE, rowToCsv } from "@/lib/crm/export-utils";
 
 export async function GET(request: NextRequest) {
   const rlError = checkRateLimit(request, { limit: 5 });
@@ -16,39 +16,82 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid entity" }, { status: 400 });
   }
 
+  const format = request.nextUrl.searchParams.get("format") || "csv";
+  if (format !== "csv" && format !== "json") {
+    return NextResponse.json({ success: false, error: "Invalid format. Supported: csv, json" }, { status: 400 });
+  }
+
   const config = ENTITY_CONFIG[entity];
   const supabase = createSupabaseAdmin();
   const date = new Date().toISOString().split("T")[0];
 
+  const fetchChunk = async (offset: number) => {
+    const { data, error: dbError } = await supabase
+      .from(config.table)
+      .select(config.columns.join(","))
+      .eq("team_id", context.workspaceId)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + CHUNK_SIZE - 1);
+    if (dbError || !data || data.length === 0) return null;
+    return data as unknown as Record<string, unknown>[];
+  };
+
+  if (format === "json") {
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        controller.enqueue(encoder.encode(`{"entity":"${entity}","data":[`));
+
+        let offset = 0;
+        let isFirst = true;
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const rows = await fetchChunk(offset);
+          if (!rows) break;
+
+          for (const row of rows) {
+            const prefix = isFirst ? "" : ",";
+            controller.enqueue(encoder.encode(prefix + JSON.stringify(row)));
+            isFirst = false;
+          }
+
+          if (rows.length < CHUNK_SIZE) break;
+          offset += CHUNK_SIZE;
+        }
+
+        controller.enqueue(encoder.encode("]}"));
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${entity}_${date}.json"`,
+        "Transfer-Encoding": "chunked",
+      },
+    });
+  }
+
+  // CSV format
   const stream = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
-
-      // Header row
       controller.enqueue(encoder.encode(config.columns.join(",") + "\n"));
 
       let offset = 0;
-      let hasMore = true;
 
-      while (hasMore) {
-        const { data, error: dbError } = await supabase
-          .from(config.table)
-          .select(config.columns.join(","))
-          .eq("team_id", context.workspaceId)
-          .eq("is_deleted", false)
-          .order("created_at", { ascending: false })
-          .range(offset, offset + CHUNK_SIZE - 1);
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const rows = await fetchChunk(offset);
+        if (!rows) break;
 
-        if (dbError || !data || data.length === 0) {
-          hasMore = false;
-          break;
-        }
-
-        const rows = data as unknown as Record<string, unknown>[];
         const chunk = rows.map((row) => rowToCsv(row, config.columns)).join("\n") + "\n";
         controller.enqueue(encoder.encode(chunk));
 
-        hasMore = data.length === CHUNK_SIZE;
+        if (rows.length < CHUNK_SIZE) break;
         offset += CHUNK_SIZE;
       }
 
