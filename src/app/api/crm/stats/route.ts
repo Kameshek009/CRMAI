@@ -30,10 +30,10 @@ export async function GET() {
       totalContactsResult,
       newContactsResult,
       totalDealsResult,
-      openDealsResult,
+      dealStatsResult,
       tasksDueTodayResult,
       overdueTasksResult,
-      wonDealsResult,
+      wonStatsResult,
     ] = await Promise.all([
       supabase
         .from("contacts")
@@ -51,13 +51,8 @@ export async function GET() {
         .select("id", { count: "exact", head: true })
         .eq("team_id", context.teamId)
         .eq("is_deleted", false),
-      supabase
-        .from("deals")
-        .select("id, value, ai_win_probability")
-        .eq("team_id", context.teamId)
-        .eq("status", "open")
-        .eq("is_deleted", false)
-        .limit(1000),
+      // Use RPC for aggregated deal stats instead of loading 1000 rows
+      supabase.rpc("get_deal_stats", { p_team_id: context.teamId }),
       supabase
         .from("crm_tasks")
         .select("id", { count: "exact", head: true })
@@ -71,26 +66,15 @@ export async function GET() {
         .eq("team_id", context.teamId)
         .in("status", ["todo", "in_progress"])
         .lt("due_date", todayStart.toISOString()),
-      supabase
-        .from("deals")
-        .select("id, value")
-        .eq("team_id", context.teamId)
-        .eq("status", "won")
-        .gte("actual_close_date", monthStart.toISOString().split("T")[0])
-        .limit(1000),
+      // Use RPC for aggregated won deal stats
+      supabase.rpc("get_won_deals_stats", {
+        p_team_id: context.teamId,
+        p_since: monthStart.toISOString().split("T")[0],
+      }),
     ]);
 
-    const openDeals = openDealsResult.data;
-    const wonDeals = wonDealsResult.data;
-
-    const openDealCount = openDeals?.length || 0;
-    const pipelineValue = openDeals?.reduce((sum, d) => sum + Number(d.value), 0) || 0;
-    const weightedForecast = openDeals?.reduce(
-      (sum, d) => sum + Number(d.value) * (d.ai_win_probability / 100), 0
-    ) || 0;
-
-    const wonDealsThisMonth = wonDeals?.length || 0;
-    const wonValueThisMonth = wonDeals?.reduce((sum, d) => sum + Number(d.value), 0) || 0;
+    const dealStats = dealStatsResult.data?.[0];
+    const wonStats = wonStatsResult.data?.[0];
 
     return NextResponse.json({
       success: true,
@@ -98,13 +82,13 @@ export async function GET() {
         totalContacts: totalContactsResult.count || 0,
         newContactsThisWeek: newContactsResult.count || 0,
         totalDeals: totalDealsResult.count || 0,
-        openDeals: openDealCount,
-        pipelineValue,
-        weightedForecast: Math.round(weightedForecast),
+        openDeals: Number(dealStats?.open_count || 0),
+        pipelineValue: Number(dealStats?.pipeline_value || 0),
+        weightedForecast: Math.round(Number(dealStats?.weighted_forecast || 0)),
         tasksDueToday: tasksDueTodayResult.count || 0,
         overdueTasksCount: overdueTasksResult.count || 0,
-        wonDealsThisMonth,
-        wonValueThisMonth,
+        wonDealsThisMonth: Number(wonStats?.won_count || 0),
+        wonValueThisMonth: Number(wonStats?.won_value || 0),
       },
     }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },

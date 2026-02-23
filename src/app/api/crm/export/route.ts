@@ -22,6 +22,8 @@ const ENTITY_CONFIG: Record<string, { table: string; columns: string[] }> = {
   },
 };
 
+const CHUNK_SIZE = 1000;
+
 function escapeCsvValue(value: unknown): string {
   if (value == null) return "";
   const str = String(value);
@@ -31,12 +33,8 @@ function escapeCsvValue(value: unknown): string {
   return str;
 }
 
-function toCsv(rows: Record<string, unknown>[], columns: string[]): string {
-  const header = columns.join(",");
-  const lines = rows.map((row) =>
-    columns.map((col) => escapeCsvValue(row[col])).join(",")
-  );
-  return [header, ...lines].join("\n");
+function rowToCsv(row: Record<string, unknown>, columns: string[]): string {
+  return columns.map((col) => escapeCsvValue(row[col])).join(",");
 }
 
 export async function GET(request: NextRequest) {
@@ -52,30 +50,50 @@ export async function GET(request: NextRequest) {
   }
 
   const config = ENTITY_CONFIG[entity];
-
-  const { data, error: dbError } = await createSupabaseAdmin()
-    .from(config.table)
-    .select(config.columns.join(","))
-    .eq("team_id", context.workspaceId)
-    .eq("is_deleted", false)
-    .order("created_at", { ascending: false })
-    .limit(10000);
-
-  if (dbError) {
-    return NextResponse.json({ success: false, error: "Failed to export data" }, { status: 500 });
-  }
-
-  if (!data || data.length === 0) {
-    return NextResponse.json({ success: false, error: "No data to export" }, { status: 404 });
-  }
-
-  const csv = toCsv(data as unknown as Record<string, unknown>[], config.columns);
+  const supabase = createSupabaseAdmin();
   const date = new Date().toISOString().split("T")[0];
 
-  return new Response(csv, {
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+
+      // Header row
+      controller.enqueue(encoder.encode(config.columns.join(",") + "\n"));
+
+      let offset = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error: dbError } = await supabase
+          .from(config.table)
+          .select(config.columns.join(","))
+          .eq("team_id", context.workspaceId)
+          .eq("is_deleted", false)
+          .order("created_at", { ascending: false })
+          .range(offset, offset + CHUNK_SIZE - 1);
+
+        if (dbError || !data || data.length === 0) {
+          hasMore = false;
+          break;
+        }
+
+        const rows = data as unknown as Record<string, unknown>[];
+        const chunk = rows.map((row) => rowToCsv(row, config.columns)).join("\n") + "\n";
+        controller.enqueue(encoder.encode(chunk));
+
+        hasMore = data.length === CHUNK_SIZE;
+        offset += CHUNK_SIZE;
+      }
+
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="${entity}_${date}.csv"`,
+      "Transfer-Encoding": "chunked",
     },
   });
 }
