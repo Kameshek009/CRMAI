@@ -13,7 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Receipt, ExternalLink, Download, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { PaymentHistory } from "@/types";
 
 interface BillingHistoryProps {

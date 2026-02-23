@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, Loader2, Zap, Clock, Sparkles } from "lucide-react";
+import { Plus, Trash2, Zap, Clock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";

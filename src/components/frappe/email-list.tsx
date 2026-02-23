@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Mail, MailOpen, Send, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { useTranslation } from "@/lib/i18n";
 

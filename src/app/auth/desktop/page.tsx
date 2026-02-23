@@ -1,6 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { generateAuthCode } from "@/lib/desktop-auth";
 import DesktopAuthClient from "./client";
 
 /**

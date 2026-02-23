@@ -36,8 +36,6 @@ interface EmailComposerProps {
   templateContext?: Record<string, string>;
 }
 
-const selectClasses = "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
-
 function interpolateTemplate(text: string, ctx: Record<string, string>): string {
   return text.replace(/\{\{(\w+(?:\.\w+)*)\}\}/g, (match, key: string) => {
     return ctx[key] || match;

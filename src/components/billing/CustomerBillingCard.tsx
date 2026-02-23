@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export interface PaymentMethodInfo {
   id: string;

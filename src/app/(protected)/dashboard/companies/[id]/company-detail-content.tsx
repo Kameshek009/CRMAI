@@ -9,10 +9,9 @@ import { ActivityStream } from "@/components/frappe/activity-stream";
 import { NoteEditor } from "@/components/crm/note-editor";
 import { StatusBadge } from "@/components/frappe/status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, Users, Handshake, Trash2 } from "lucide-react";
+import { Building2, Handshake, Trash2 } from "lucide-react";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { CopyButton } from "@/components/ui/copy-button";
 import { toast } from "sonner";
@@ -193,8 +192,6 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
   if (!company) {
     return <PageContainer><p className="text-muted-foreground">{t("crm.companies.detail.notFound")}</p></PageContainer>;
   }
-
-  const initials = company.name.slice(0, 2).toUpperCase();
 
   const healthScoreColor = (score: number) => {
     if (score >= 80) return "text-emerald-600";
