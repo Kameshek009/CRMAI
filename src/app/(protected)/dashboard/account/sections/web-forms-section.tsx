@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, Trash2, Globe, Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 
 interface FormField {
   name: string;
@@ -51,6 +52,7 @@ export function WebFormsSection() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteFormId, setDeleteFormId] = useState<string | null>(null);
 
   // Form fields
   const [name, setName] = useState("");
@@ -141,26 +143,39 @@ export function WebFormsSection() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/crm/web-forms/${id}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("settings.webForms.deleted"));
-      fetchForms();
-    } else {
-      toast.error(json.error);
+  const handleDelete = async () => {
+    if (!deleteFormId) return;
+    try {
+      const res = await fetch(`/api/crm/web-forms/${deleteFormId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.webForms.deleted"));
+        fetchForms();
+      } else {
+        toast.error(json.error);
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    } finally {
+      setDeleteFormId(null);
     }
   };
 
   const handleToggleActive = async (form: WebForm) => {
-    const res = await fetch(`/api/crm/web-forms/${form.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_active: !form.is_active }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      fetchForms();
+    try {
+      const res = await fetch(`/api/crm/web-forms/${form.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: !form.is_active }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        fetchForms();
+      } else {
+        toast.error(json.error || t("common.failed"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 
@@ -230,7 +245,7 @@ export function WebFormsSection() {
                 <Button variant="ghost" size="icon" className="size-7" onClick={() => openEdit(form)}>
                   <Pencil className="size-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700" onClick={() => handleDelete(form.id)}>
+                <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700" onClick={() => setDeleteFormId(form.id)}>
                   <Trash2 className="size-3.5" />
                 </Button>
               </div>
@@ -331,6 +346,16 @@ export function WebFormsSection() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!deleteFormId}
+        onOpenChange={(open) => { if (!open) setDeleteFormId(null); }}
+        title={t("settings.webForms.deleteTitle")}
+        description={t("settings.webForms.deleteConfirm")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfirmDialog } from '@/components/crm/confirm-dialog';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from "@/lib/i18n";
@@ -59,6 +60,7 @@ export function ChatsContent() {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteChatId, setDeleteChatId] = useState<string | null>(null);
   const isInitialLoad = useRef(true);
 
   const fetchChats = useCallback(async (silent = false) => {
@@ -195,9 +197,10 @@ export function ChatsContent() {
     }
   };
 
-  const handleDeleteChat = async (chatId: string) => {
+  const handleDeleteChat = async () => {
+    if (!deleteChatId) return;
     try {
-      const response = await fetch(`/api/chats?chat_id=${chatId}`, {
+      const response = await fetch(`/api/chats?chat_id=${deleteChatId}`, {
         method: 'DELETE',
       });
       const result = await response.json();
@@ -206,11 +209,13 @@ export function ChatsContent() {
         throw new Error(result.error || 'Failed to delete chat');
       }
 
-      setChats((prev) => prev.filter((c) => c.id !== chatId));
+      setChats((prev) => prev.filter((c) => c.id !== deleteChatId));
       toast.success(t("crm.chats.deleted"));
     } catch (err) {
       void err;
       toast.error(t("crm.chats.failedDelete"));
+    } finally {
+      setDeleteChatId(null);
     }
   };
 
@@ -454,7 +459,7 @@ export function ChatsContent() {
                               className="text-destructive focus:text-destructive"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteChat(chat.id);
+                                setDeleteChatId(chat.id);
                               }}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -472,6 +477,16 @@ export function ChatsContent() {
         </motion.div>
       )}
       </div>
+
+      <ConfirmDialog
+        open={!!deleteChatId}
+        onOpenChange={(open) => { if (!open) setDeleteChatId(null); }}
+        title={t("crm.chats.deleteTitle")}
+        description={t("crm.chats.deleteConfirm")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        onConfirm={handleDeleteChat}
+      />
     </div>
   );
 }

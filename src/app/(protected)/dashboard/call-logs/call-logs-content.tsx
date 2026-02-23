@@ -124,7 +124,7 @@ export function CallLogsContent() {
       toast.success(t("crm.callLogs.created"));
       fetchCallLogs();
     } else {
-      toast.error(json.error || t("crm.callLogs.created"));
+      toast.error(json.error || t("common.failed"));
       throw new Error(json.error);
     }
   };

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Plus, Trash2, Users, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 
 interface VGroup {
   id: string;
@@ -40,6 +41,7 @@ export function DataAccessSection() {
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null);
 
   const fetchGroups = useCallback(async () => {
     try {
@@ -85,14 +87,21 @@ export function DataAccessSection() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/crm/visibility-groups/${id}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("settings.dataAccess.deleted"));
-      fetchGroups();
-    } else {
-      toast.error(json.error);
+  const handleDelete = async () => {
+    if (!deleteGroupId) return;
+    try {
+      const res = await fetch(`/api/crm/visibility-groups/${deleteGroupId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.dataAccess.deleted"));
+        fetchGroups();
+      } else {
+        toast.error(json.error);
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    } finally {
+      setDeleteGroupId(null);
     }
   };
 
@@ -270,7 +279,7 @@ export function DataAccessSection() {
                     </div>
 
                     {canManage && (
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(group.id)}>
+                      <Button variant="destructive" size="sm" onClick={() => setDeleteGroupId(group.id)}>
                         <Trash2 className="size-4 mr-1" />
                         {t("settings.dataAccess.deleteGroup")}
                       </Button>
@@ -301,6 +310,16 @@ export function DataAccessSection() {
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={!!deleteGroupId}
+        onOpenChange={(open) => { if (!open) setDeleteGroupId(null); }}
+        title={t("settings.dataAccess.deleteGroupTitle")}
+        description={t("settings.dataAccess.deleteGroupConfirm")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

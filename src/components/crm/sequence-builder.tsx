@@ -83,21 +83,32 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
       const sequenceId = seqJson.data.id;
 
       // Create steps
+      let failedSteps = 0;
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
-        await fetch(`/api/crm/sequences/${sequenceId}/steps`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            position: i,
-            delay_days: step.delay_days,
-            subject: step.subject.trim(),
-            body: step.body.trim(),
-          }),
-        });
+        try {
+          const stepRes = await fetch(`/api/crm/sequences/${sequenceId}/steps`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              position: i,
+              delay_days: step.delay_days,
+              subject: step.subject.trim(),
+              body: step.body.trim(),
+            }),
+          });
+          const stepJson = await stepRes.json();
+          if (!stepJson.success) failedSteps++;
+        } catch {
+          failedSteps++;
+        }
       }
 
-      toast.success(t("crm.sequences.created"));
+      if (failedSteps > 0) {
+        toast.error(t("crm.sequences.failedSteps", { count: failedSteps }));
+      } else {
+        toast.success(t("crm.sequences.created"));
+      }
       useFeatureLimitStore.getState().incrementUsage("emailSequences");
       setName("");
       setSteps([{ delay_days: 0, subject: "", body: "" }]);

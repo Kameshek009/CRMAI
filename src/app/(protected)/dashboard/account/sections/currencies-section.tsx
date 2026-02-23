@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 
 const POPULAR_CURRENCIES = [
   { code: "USD", symbol: "$" },
@@ -50,6 +51,7 @@ export function CurrenciesSection() {
   const [addRate, setAddRate] = useState("");
   const [addSymbol, setAddSymbol] = useState("");
   const [adding, setAdding] = useState(false);
+  const [deleteCurrencyCode, setDeleteCurrencyCode] = useState<string | null>(null);
 
   const fetchRates = useCallback(async () => {
     if (!teamId) return;
@@ -122,19 +124,25 @@ export function CurrenciesSection() {
     }
   };
 
-  const handleDelete = async (code: string) => {
-    if (!teamId) return;
-    const res = await fetch(`/api/teams/${teamId}/currencies`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ currency_code: code }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("settings.currencies.deleted"));
-      fetchRates();
-    } else {
-      toast.error(json.error);
+  const handleDelete = async () => {
+    if (!teamId || !deleteCurrencyCode) return;
+    try {
+      const res = await fetch(`/api/teams/${teamId}/currencies`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currency_code: deleteCurrencyCode }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.currencies.deleted"));
+        fetchRates();
+      } else {
+        toast.error(json.error);
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    } finally {
+      setDeleteCurrencyCode(null);
     }
   };
 
@@ -201,7 +209,7 @@ export function CurrenciesSection() {
                     variant="ghost"
                     size="icon"
                     className="size-8 text-red-600 hover:text-red-700"
-                    onClick={() => handleDelete(r.currency_code)}
+                    onClick={() => setDeleteCurrencyCode(r.currency_code)}
                   >
                     <Trash2 className="size-4" />
                   </Button>
@@ -267,6 +275,16 @@ export function CurrenciesSection() {
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={!!deleteCurrencyCode}
+        onOpenChange={(open) => { if (!open) setDeleteCurrencyCode(null); }}
+        title={t("settings.currencies.deleteTitle")}
+        description={t("settings.currencies.deleteConfirm", { code: deleteCurrencyCode || "" })}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

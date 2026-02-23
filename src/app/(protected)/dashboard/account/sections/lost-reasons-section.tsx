@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 
 interface LostReason {
   id: string;
@@ -25,6 +26,7 @@ export function LostReasonsSection() {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editLabel, setEditLabel] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchReasons = useCallback(async () => {
     try {
@@ -61,14 +63,18 @@ export function LostReasonsSection() {
   };
 
   const handleToggle = async (id: string, is_active: boolean) => {
-    const res = await fetch(`/api/crm/deal-lost-reasons/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_active }),
-    });
-    const json = await res.json();
-    if (json.success) fetchReasons();
-    else toast.error(json.error);
+    try {
+      const res = await fetch(`/api/crm/deal-lost-reasons/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active }),
+      });
+      const json = await res.json();
+      if (json.success) fetchReasons();
+      else toast.error(json.error);
+    } catch {
+      toast.error(t("common.failed"));
+    }
   };
 
   const handleSaveEdit = async (id: string) => {
@@ -88,14 +94,21 @@ export function LostReasonsSection() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/crm/deal-lost-reasons/${id}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("settings.lostReasons.deleted"));
-      fetchReasons();
-    } else {
-      toast.error(json.error);
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch(`/api/crm/deal-lost-reasons/${deleteId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.lostReasons.deleted"));
+        fetchReasons();
+      } else {
+        toast.error(json.error);
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    } finally {
+      setDeleteId(null);
     }
   };
 
@@ -151,7 +164,7 @@ export function LostReasonsSection() {
                     <Button variant="ghost" size="icon" className="size-7" onClick={() => { setEditingId(r.id); setEditLabel(r.label); }}>
                       <Pencil className="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700" onClick={() => handleDelete(r.id)}>
+                    <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700" onClick={() => setDeleteId(r.id)}>
                       <Trash2 className="size-3.5" />
                     </Button>
                   </div>
@@ -176,6 +189,16 @@ export function LostReasonsSection() {
           {t("settings.lostReasons.add")}
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title={t("settings.lostReasons.deleteTitle")}
+        description={t("settings.lostReasons.deleteConfirm")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

@@ -85,33 +85,41 @@ export function MembersSection() {
 
   const handleFixedRoleChange = async (memberId: string, fixedRole: FixedRole) => {
     if (!currentWorkspace) return;
-    const res = await fetch(`/api/teams/${currentWorkspace.id}/members/${memberId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fixed_role: fixedRole }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("team.members.roleUpdated"));
-      fetchMembers();
-    } else {
-      toast.error(json.error || t("team.members.failedUpdate"));
+    try {
+      const res = await fetch(`/api/teams/${currentWorkspace.id}/members/${memberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fixed_role: fixedRole }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("team.members.roleUpdated"));
+        fetchMembers();
+      } else {
+        toast.error(json.error || t("team.members.failedUpdate"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 
   const handleCustomRoleChange = async (memberId: string, roleId: string) => {
     if (!currentWorkspace) return;
-    const res = await fetch(`/api/teams/${currentWorkspace.id}/members/${memberId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role_id: roleId }),
-    });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("team.members.roleUpdated"));
-      fetchMembers();
-    } else {
-      toast.error(json.error || t("team.members.failedUpdate"));
+    try {
+      const res = await fetch(`/api/teams/${currentWorkspace.id}/members/${memberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role_id: roleId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("team.members.roleUpdated"));
+        fetchMembers();
+      } else {
+        toast.error(json.error || t("team.members.failedUpdate"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 

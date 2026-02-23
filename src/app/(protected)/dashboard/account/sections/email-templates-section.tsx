@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, Trash2, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 
 interface EmailTemplate {
   id: string;
@@ -38,6 +39,7 @@ export function EmailTemplatesSection() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
@@ -116,14 +118,21 @@ export function EmailTemplatesSection() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/crm/email-templates/${id}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("settings.emailTemplates.deleted"));
-      fetchTemplates();
-    } else {
-      toast.error(json.error);
+  const handleDelete = async () => {
+    if (!deleteTemplateId) return;
+    try {
+      const res = await fetch(`/api/crm/email-templates/${deleteTemplateId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.emailTemplates.deleted"));
+        fetchTemplates();
+      } else {
+        toast.error(json.error);
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    } finally {
+      setDeleteTemplateId(null);
     }
   };
 
@@ -171,7 +180,7 @@ export function EmailTemplatesSection() {
                 <Button variant="ghost" size="icon" className="size-7" onClick={() => openEdit(tpl)}>
                   <Pencil className="size-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700" onClick={() => handleDelete(tpl.id)}>
+                <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700" onClick={() => setDeleteTemplateId(tpl.id)}>
                   <Trash2 className="size-3.5" />
                 </Button>
               </div>
@@ -240,6 +249,16 @@ export function EmailTemplatesSection() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!deleteTemplateId}
+        onOpenChange={(open) => { if (!open) setDeleteTemplateId(null); }}
+        title={t("settings.emailTemplates.deleteTitle")}
+        description={t("settings.emailTemplates.deleteConfirm")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

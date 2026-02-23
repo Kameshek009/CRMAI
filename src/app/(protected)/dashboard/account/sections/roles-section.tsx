@@ -10,6 +10,7 @@ import { RoleBadge } from "@/components/team/role-badge";
 import { RoleEditor } from "@/components/team/role-editor";
 import { Plus, Pencil, Trash2, Shield, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import {
   FIXED_ROLE_LABELS,
   FIXED_ROLE_COLORS,
@@ -34,6 +35,7 @@ export function RolesSection() {
   const [roles, setRoles] = useState<RoleData[]>([]);
   const [editingRole, setEditingRole] = useState<RoleData | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteRoleId, setDeleteRoleId] = useState<string | null>(null);
 
   const fetchRoles = useCallback(async () => {
     if (!currentWorkspace) return;
@@ -44,15 +46,21 @@ export function RolesSection() {
 
   useEffect(() => { fetchRoles(); }, [fetchRoles]);
 
-  const handleDeleteRole = async (roleId: string) => {
-    if (!currentWorkspace) return;
-    const res = await fetch(`/api/teams/${currentWorkspace.id}/roles/${roleId}`, { method: "DELETE" });
-    const json = await res.json();
-    if (json.success) {
-      toast.success(t("team.roles.deleted"));
-      fetchRoles();
-    } else {
-      toast.error(json.error || t("team.roles.failedDelete"));
+  const handleDeleteRole = async () => {
+    if (!currentWorkspace || !deleteRoleId) return;
+    try {
+      const res = await fetch(`/api/teams/${currentWorkspace.id}/roles/${deleteRoleId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("team.roles.deleted"));
+        fetchRoles();
+      } else {
+        toast.error(json.error || t("team.roles.failedDelete"));
+      }
+    } catch {
+      toast.error(t("common.failed"));
+    } finally {
+      setDeleteRoleId(null);
     }
   };
 
@@ -134,7 +142,7 @@ export function RolesSection() {
                     <Pencil className="size-3 mr-1" /> {t("team.roles.edit")}
                   </Button>
                   {!role.is_system && (
-                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleDeleteRole(role.id)}>
+                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDeleteRoleId(role.id)}>
                       <Trash2 className="size-3 mr-1" /> {t("common.delete")}
                     </Button>
                   )}
@@ -151,6 +159,16 @@ export function RolesSection() {
           <RoleEditor open={showCreate} onOpenChange={setShowCreate} teamId={currentWorkspace.id} onSaved={fetchRoles} />
         </>
       )}
+
+      <ConfirmDialog
+        open={!!deleteRoleId}
+        onOpenChange={(open) => { if (!open) setDeleteRoleId(null); }}
+        title={t("team.roles.deleteTitle")}
+        description={t("team.roles.deleteConfirm")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        onConfirm={handleDeleteRole}
+      />
     </div>
   );
 }
