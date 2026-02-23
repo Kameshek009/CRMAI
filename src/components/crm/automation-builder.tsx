@@ -24,32 +24,32 @@ interface AutomationBuilderProps {
 }
 
 const TRIGGER_TYPES = [
-  { value: "record_created", label: "When a record is created" },
-  { value: "record_updated", label: "When a record is updated" },
-  { value: "field_changed", label: "When a specific field changes" },
-  { value: "deal_stage_changed", label: "When a deal stage changes" },
+  { value: "record_created", label: "crm.automations.builder.triggerDesc.recordCreated" },
+  { value: "record_updated", label: "crm.automations.builder.triggerDesc.recordUpdated" },
+  { value: "field_changed", label: "crm.automations.builder.triggerDesc.fieldChanged" },
+  { value: "deal_stage_changed", label: "crm.automations.builder.triggerDesc.dealStageChanged" },
 ];
 
 const ENTITY_TYPES = [
-  { value: "contact", label: "Contact" },
-  { value: "company", label: "Organization" },
-  { value: "deal", label: "Deal" },
-  { value: "lead", label: "Lead" },
+  { value: "contact", label: "crm.automations.builder.entity.contact" },
+  { value: "company", label: "crm.automations.builder.entity.organization" },
+  { value: "deal", label: "crm.automations.builder.entity.deal" },
+  { value: "lead", label: "crm.automations.builder.entity.lead" },
 ];
 
 const ACTION_TYPES = [
-  { value: "create_task", label: "Create a task" },
-  { value: "update_field", label: "Update a field" },
-  { value: "assign_to", label: "Assign to someone" },
+  { value: "create_task", label: "crm.automations.builder.action.createTask" },
+  { value: "update_field", label: "crm.automations.builder.action.updateField" },
+  { value: "assign_to", label: "crm.automations.builder.action.assignTo" },
 ];
 
 const OPERATORS = [
-  { value: "eq", label: "equals" },
-  { value: "neq", label: "not equals" },
-  { value: "gt", label: "greater than" },
-  { value: "lt", label: "less than" },
-  { value: "contains", label: "contains" },
-  { value: "not_contains", label: "does not contain" },
+  { value: "eq", label: "crm.automations.builder.operator.equals" },
+  { value: "neq", label: "crm.automations.builder.operator.notEquals" },
+  { value: "gt", label: "crm.automations.builder.operator.greaterThan" },
+  { value: "lt", label: "crm.automations.builder.operator.lessThan" },
+  { value: "contains", label: "crm.automations.builder.operator.contains" },
+  { value: "not_contains", label: "crm.automations.builder.operator.doesNotContain" },
 ];
 
 interface ConditionForm {
@@ -175,37 +175,37 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>New Automation</DialogTitle>
+          <DialogTitle>{t("crm.automations.builder.title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-5">
           {/* Name */}
           <div className="space-y-2">
-            <Label>Name</Label>
+            <Label>{t("crm.automations.builder.nameLabel")}</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Auto-create follow-up task"
+              placeholder={t("crm.automations.builder.namePlaceholder")}
               maxLength={200}
             />
           </div>
 
           {/* Trigger */}
           <div className="space-y-3 rounded-lg border p-3">
-            <div className="text-xs font-semibold uppercase text-muted-foreground">When</div>
+            <div className="text-xs font-semibold uppercase text-muted-foreground">{t("crm.automations.builder.when")}</div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label className="text-xs">Trigger</Label>
+                <Label className="text-xs">{t("crm.automations.builder.triggerLabel")}</Label>
                 <select value={triggerType} onChange={(e) => setTriggerType(e.target.value)} className={selectClasses}>
-                  {TRIGGER_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                  {TRIGGER_TYPES.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
                   ))}
                 </select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Entity</Label>
+                <Label className="text-xs">{t("crm.automations.builder.entityLabel")}</Label>
                 <select value={entityType} onChange={(e) => setEntityType(e.target.value)} className={selectClasses}>
-                  {ENTITY_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                  {ENTITY_TYPES.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
                   ))}
                 </select>
               </div>
@@ -213,15 +213,15 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
             {triggerType === "field_changed" && (
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">Field</Label>
-                  <Input value={triggerField} onChange={(e) => setTriggerField(e.target.value)} placeholder="status" />
+                  <Label className="text-xs">{t("crm.automations.builder.fieldLabel")}</Label>
+                  <Input value={triggerField} onChange={(e) => setTriggerField(e.target.value)} placeholder={t("crm.automations.builder.fieldPlaceholder")} />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">From</Label>
+                  <Label className="text-xs">{t("crm.automations.builder.from")}</Label>
                   <Input value={triggerFrom} onChange={(e) => setTriggerFrom(e.target.value)} placeholder="any" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">To</Label>
+                  <Label className="text-xs">{t("crm.automations.builder.to")}</Label>
                   <Input value={triggerTo} onChange={(e) => setTriggerTo(e.target.value)} placeholder="any" />
                 </div>
               </div>
@@ -231,10 +231,10 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
           {/* Conditions */}
           <div className="space-y-3 rounded-lg border p-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold uppercase text-muted-foreground">If (optional)</div>
+              <div className="text-xs font-semibold uppercase text-muted-foreground">{t("crm.automations.builder.ifOptional")}</div>
               <Button variant="ghost" size="sm" onClick={addCondition} className="h-6 text-xs">
                 <Plus className="size-3 mr-1" />
-                Add
+                {t("crm.automations.builder.add")}
               </Button>
             </div>
             {conditions.map((c, idx) => (
@@ -242,7 +242,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                 <Input
                   value={c.field}
                   onChange={(e) => updateCondition(idx, "field", e.target.value)}
-                  placeholder="field"
+                  placeholder={t("crm.automations.builder.conditionFieldPlaceholder")}
                   className="flex-1"
                 />
                 <select
@@ -251,13 +251,13 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                   className={selectClasses + " w-32"}
                 >
                   {OPERATORS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>{t(o.label)}</option>
                   ))}
                 </select>
                 <Input
                   value={c.value}
                   onChange={(e) => updateCondition(idx, "value", e.target.value)}
-                  placeholder="value"
+                  placeholder={t("crm.automations.builder.conditionValuePlaceholder")}
                   className="flex-1"
                 />
                 <Button variant="ghost" size="icon" className="size-7 text-red-600 shrink-0" onClick={() => removeCondition(idx)}>
@@ -266,17 +266,17 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
               </div>
             ))}
             {conditions.length === 0 && (
-              <p className="text-xs text-muted-foreground">No conditions — automation will always run</p>
+              <p className="text-xs text-muted-foreground">{t("crm.automations.builder.noConditionsHint")}</p>
             )}
           </div>
 
           {/* Actions */}
           <div className="space-y-3 rounded-lg border p-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold uppercase text-muted-foreground">Then</div>
+              <div className="text-xs font-semibold uppercase text-muted-foreground">{t("crm.automations.builder.then")}</div>
               <Button variant="ghost" size="sm" onClick={addAction} className="h-6 text-xs">
                 <Plus className="size-3 mr-1" />
-                Add
+                {t("crm.automations.builder.add")}
               </Button>
             </div>
             {actions.map((a, idx) => (
@@ -287,8 +287,8 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                     onChange={(e) => updateAction(idx, e.target.value)}
                     className={selectClasses + " flex-1"}
                   >
-                    {ACTION_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
+                    {ACTION_TYPES.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
                     ))}
                   </select>
                   <Button variant="ghost" size="icon" className="size-7 text-red-600 shrink-0" onClick={() => removeAction(idx)}>
@@ -301,17 +301,17 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                     <Input
                       value={a.config.title || ""}
                       onChange={(e) => updateActionConfig(idx, "title", e.target.value)}
-                      placeholder="Task title"
+                      placeholder={t("crm.automations.builder.taskTitlePlaceholder")}
                     />
                     <select
                       value={a.config.priority || "medium"}
                       onChange={(e) => updateActionConfig(idx, "priority", e.target.value)}
                       className={selectClasses}
                     >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
+                      <option value="low">{t("crm.automations.builder.priority.low")}</option>
+                      <option value="medium">{t("crm.automations.builder.priority.medium")}</option>
+                      <option value="high">{t("crm.automations.builder.priority.high")}</option>
+                      <option value="urgent">{t("crm.automations.builder.priority.urgent")}</option>
                     </select>
                   </div>
                 )}
@@ -320,12 +320,12 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                     <Input
                       value={a.config.field || ""}
                       onChange={(e) => updateActionConfig(idx, "field", e.target.value)}
-                      placeholder="Field name"
+                      placeholder={t("crm.automations.builder.fieldNamePlaceholder")}
                     />
                     <Input
                       value={a.config.value || ""}
                       onChange={(e) => updateActionConfig(idx, "value", e.target.value)}
-                      placeholder="New value"
+                      placeholder={t("crm.automations.builder.newValuePlaceholder")}
                     />
                   </div>
                 )}
@@ -333,7 +333,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                   <Input
                     value={a.config.account_id || ""}
                     onChange={(e) => updateActionConfig(idx, "account_id", e.target.value)}
-                    placeholder="Member account ID"
+                    placeholder={t("crm.automations.builder.memberAccountIdPlaceholder")}
                   />
                 )}
               </div>
@@ -343,11 +343,11 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
-            Create Automation
+            {t("crm.automations.builder.createButton")}
           </Button>
         </DialogFooter>
       </DialogContent>

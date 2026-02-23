@@ -122,24 +122,24 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-base">Create Email Sequence</DialogTitle>
+          <DialogTitle className="text-base">{t("crm.sequences.builder.title")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-2">
           {/* Sequence name */}
           <div className="space-y-2">
-            <Label className="text-sm">Sequence Name</Label>
+            <Label className="text-sm">{t("crm.sequences.builder.nameLabel")}</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Welcome Series"
+              placeholder={t("crm.sequences.builder.namePlaceholder")}
               maxLength={200}
             />
           </div>
 
           {/* Steps */}
           <div className="space-y-1">
-            <Label className="text-sm">Steps</Label>
+            <Label className="text-sm">{t("crm.sequences.builder.stepsLabel")}</Label>
             <div className="space-y-3">
               {steps.map((step, index) => (
                 <div key={index}>
@@ -148,7 +148,7 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
                       <ArrowDown className="size-3 text-muted-foreground" />
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Clock className="size-3" />
-                        <span>Wait</span>
+                        <span>{t("crm.sequences.builder.wait")}</span>
                         <Input
                           type="number"
                           min={0}
@@ -157,7 +157,7 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
                           onChange={(e) => updateStep(index, "delay_days", parseInt(e.target.value) || 0)}
                           className="w-16 h-6 text-xs text-center"
                         />
-                        <span>day{step.delay_days !== 1 ? "s" : ""}</span>
+                        <span>{step.delay_days !== 1 ? t("crm.sequences.builder.days") : t("crm.sequences.builder.day")}</span>
                       </div>
                     </div>
                   )}
@@ -165,7 +165,7 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                         <Mail className="size-3" />
-                        Step {index + 1}
+                        {t("crm.sequences.builder.stepLabel", { n: index + 1 })}
                       </span>
                       {steps.length > 1 && (
                         <Button
@@ -181,14 +181,14 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
                     <Input
                       value={step.subject}
                       onChange={(e) => updateStep(index, "subject", e.target.value)}
-                      placeholder="Email subject"
+                      placeholder={t("crm.sequences.builder.subjectPlaceholder")}
                       className="text-sm"
                       maxLength={500}
                     />
                     <Textarea
                       value={step.body}
                       onChange={(e) => updateStep(index, "body", e.target.value)}
-                      placeholder="Email body..."
+                      placeholder={t("crm.sequences.builder.bodyPlaceholder")}
                       rows={3}
                       className="text-sm"
                       maxLength={10000}
@@ -204,17 +204,17 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
               onClick={addStep}
             >
               <Plus className="size-3.5 mr-1.5" />
-              Add Step
+              {t("crm.sequences.builder.addStep")}
             </Button>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button size="sm" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Sequence"}
+            {isSubmitting ? t("crm.sequences.builder.creating") : t("crm.sequences.builder.title")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -21,6 +21,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useState, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 // ============================================================================
 // Types
@@ -63,6 +64,7 @@ function DroppableColumn<T extends KanbanCard>({
   renderCard: (card: T) => React.ReactNode;
   onAddCard?: (columnId: string) => void;
 }) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
 
   return (
@@ -105,7 +107,7 @@ function DroppableColumn<T extends KanbanCard>({
 
         {cards.length === 0 && (
           <div className="flex items-center justify-center py-8 text-xs text-muted-foreground">
-            No items
+            {t("crm.kanban.noItems")}
           </div>
         )}
 
@@ -118,7 +120,7 @@ function DroppableColumn<T extends KanbanCard>({
             aria-label={`Add card to ${column.title}`}
           >
             <Plus className="h-3.5 w-3.5 mr-1" />
-            Add
+            {t("crm.kanban.add")}
           </Button>
         )}
       </div>
