@@ -246,7 +246,6 @@ export function AppSidebar() {
       ].sort((a, b) => (a.groupKey === "crm" ? -1 : 1));
 
       updateConfig(newConfig);
-      setEditingGroup(null);
     },
     [config, updateConfig]
   );
@@ -323,7 +322,7 @@ export function AppSidebar() {
                   items={effectiveItems}
                   staticItems={group.items}
                   onSave={(items) => handleSaveGroup(group.groupKey!, items)}
-                  onCancel={() => setEditingGroup(null)}
+                  onClose={() => setEditingGroup(null)}
                 />
               ) : (
                 <SidebarMenu>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/i18n";
@@ -137,22 +137,29 @@ export function SidebarSection() {
   const { t } = useTranslation();
   const { currentWorkspace, isOwner } = useWorkspace();
   const { config, source, isLoading, fetch: fetchConfig, update, reset } = useSidebarConfigStore();
-  const [pendingChanges, setPendingChanges] = useState<Record<string, EditorItem[]>>({});
   const [saving, setSaving] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRef = useRef<Record<string, EditorItem[]>>({});
 
   useEffect(() => {
     fetchConfig();
   }, [fetchConfig]);
 
-  const handleGroupChange = useCallback((groupKey: string, items: EditorItem[]) => {
-    setPendingChanges((prev) => ({ ...prev, [groupKey]: items }));
+  // Clean up debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
   }, []);
 
-  const handleSave = useCallback(async () => {
-    setSaving(true);
-    try {
-      const crmItems = pendingChanges["crm"] || getEffectiveItems("crm", crmGroup.items, config);
-      const toolsItems = pendingChanges["tools"] || getEffectiveItems("tools", toolsGroup.items, config);
+  const handleGroupChange = useCallback((groupKey: string, items: EditorItem[]) => {
+    pendingRef.current[groupKey] = items;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const currentConfig = useSidebarConfigStore.getState().config;
+      const crmItems = pendingRef.current["crm"] || getEffectiveItems("crm", crmGroup.items, currentConfig);
+      const toolsItems = pendingRef.current["tools"] || getEffectiveItems("tools", toolsGroup.items, currentConfig);
 
       const newConfig: SidebarConfig = [
         {
@@ -165,19 +172,19 @@ export function SidebarSection() {
         },
       ];
 
-      await update(newConfig);
-      setPendingChanges({});
-      toast.success(t("settings.sidebar.saved"));
-    } catch {
-      toast.error(t("common.failedSave"));
-    } finally {
-      setSaving(false);
-    }
-  }, [pendingChanges, config, update, t]);
+      try {
+        await update(newConfig);
+        pendingRef.current = {};
+      } catch {
+        toast.error(t("common.failedSave"));
+      }
+    }, 500);
+  }, [update, t]);
 
   const handleReset = useCallback(async () => {
+    pendingRef.current = {};
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     await reset();
-    setPendingChanges({});
     toast.success(t("settings.sidebar.resetDone"));
   }, [reset, t]);
 
@@ -185,8 +192,9 @@ export function SidebarSection() {
     if (!currentWorkspace?.id) return;
     setSaving(true);
     try {
-      const crmItems = pendingChanges["crm"] || getEffectiveItems("crm", crmGroup.items, config);
-      const toolsItems = pendingChanges["tools"] || getEffectiveItems("tools", toolsGroup.items, config);
+      const currentConfig = useSidebarConfigStore.getState().config;
+      const crmItems = getEffectiveItems("crm", crmGroup.items, currentConfig);
+      const toolsItems = getEffectiveItems("tools", toolsGroup.items, currentConfig);
 
       const teamConfig: SidebarConfig = [
         {
@@ -215,7 +223,7 @@ export function SidebarSection() {
     } finally {
       setSaving(false);
     }
-  }, [currentWorkspace, pendingChanges, config, t]);
+  }, [currentWorkspace, t]);
 
   if (isLoading) {
     return (
@@ -224,8 +232,6 @@ export function SidebarSection() {
       </div>
     );
   }
-
-  const hasPending = Object.keys(pendingChanges).length > 0;
 
   return (
     <div className="space-y-6">
@@ -257,16 +263,13 @@ export function SidebarSection() {
       />
 
       <div className="flex items-center gap-2 pt-2">
-        <Button onClick={handleSave} disabled={!hasPending || saving} size="sm">
-          {saving && <Loader2 className="size-4 animate-spin mr-1" />}
-          {t("nav.sidebar.done")}
-        </Button>
         <Button onClick={handleReset} variant="outline" size="sm">
           <RotateCcw className="size-3.5 mr-1" />
           {t("settings.sidebar.resetToSystem")}
         </Button>
         {isOwner && (
           <Button onClick={handleSetTeamDefault} variant="outline" size="sm" disabled={saving}>
+            {saving && <Loader2 className="size-4 animate-spin mr-1" />}
             {t("settings.sidebar.setAsTeamDefault")}
           </Button>
         )}

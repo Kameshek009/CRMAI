@@ -50,10 +50,11 @@ export const useSidebarConfigStore = create<SidebarConfigStore>((set, get) => ({
         body: JSON.stringify(config),
       });
       if (!res.ok) {
-        set({ config: prev.config, source: prev.source });
+        throw new Error("Failed to save sidebar config");
       }
-    } catch {
+    } catch (e) {
       set({ config: prev.config, source: prev.source });
+      throw e;
     }
   },
 

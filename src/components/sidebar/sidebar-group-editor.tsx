@@ -17,8 +17,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 
-import { Check, X } from "lucide-react";
-import { useTranslation } from "@/lib/i18n";
+import { X } from "lucide-react";
 import { SortableNavItem } from "@/components/sidebar/sortable-nav-item";
 import type { NavItem } from "@/components/app-sidebar";
 
@@ -34,11 +33,10 @@ interface SidebarGroupEditorProps {
   items: (NavItem & { visible: boolean })[];
   staticItems: NavItem[];
   onSave: (items: { key: string; visible: boolean }[]) => void;
-  onCancel: () => void;
+  onClose: () => void;
 }
 
-export function SidebarGroupEditor({ items, onSave, onCancel }: SidebarGroupEditorProps) {
-  const { t } = useTranslation();
+export function SidebarGroupEditor({ items, onSave, onClose }: SidebarGroupEditorProps) {
   const [editorItems, setEditorItems] = useState<EditorItem[]>(
     items.map((item) => ({
       key: item.key,
@@ -60,21 +58,21 @@ export function SidebarGroupEditor({ items, onSave, onCancel }: SidebarGroupEdit
     setEditorItems((prev) => {
       const oldIndex = prev.findIndex((item) => item.key === active.id);
       const newIndex = prev.findIndex((item) => item.key === over.id);
-      return arrayMove(prev, oldIndex, newIndex);
+      const newItems = arrayMove(prev, oldIndex, newIndex);
+      onSave(newItems.map((item) => ({ key: item.key, visible: item.visible })));
+      return newItems;
     });
-  }, []);
+  }, [onSave]);
 
   const toggleVisibility = useCallback((key: string) => {
-    setEditorItems((prev) =>
-      prev.map((item) =>
+    setEditorItems((prev) => {
+      const newItems = prev.map((item) =>
         item.key === key ? { ...item, visible: !item.visible } : item
-      )
-    );
-  }, []);
-
-  const handleSave = () => {
-    onSave(editorItems.map((item) => ({ key: item.key, visible: item.visible })));
-  };
+      );
+      onSave(newItems.map((item) => ({ key: item.key, visible: item.visible })));
+      return newItems;
+    });
+  }, [onSave]);
 
   return (
     <div className="space-y-1">
@@ -103,15 +101,7 @@ export function SidebarGroupEditor({ items, onSave, onCancel }: SidebarGroupEdit
 
       <div className="flex items-center gap-1 pt-1 px-2">
         <button
-          onClick={handleSave}
-          className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
-        >
-          <Check className="size-3" />
-          {t("nav.sidebar.done")}
-        </button>
-        <span className="text-muted-foreground/30">|</span>
-        <button
-          onClick={onCancel}
+          onClick={onClose}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="size-3" />
