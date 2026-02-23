@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Clock, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft } from "lucide-react";
+import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
@@ -20,7 +20,6 @@ import { ExportSection } from "./sections/export-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { DangerSection } from "./sections/danger-section";
 import { CurrenciesSection } from "./sections/currencies-section";
-import { BusinessHoursSection } from "./sections/business-hours-section";
 import { CustomFieldsSection } from "./sections/custom-fields-section";
 import { LostReasonsSection } from "./sections/lost-reasons-section";
 import { EmailTemplatesSection } from "./sections/email-templates-section";
@@ -51,7 +50,6 @@ const TEAM_NAV = [
   { id: "members", icon: Users },
   { id: "roles", icon: Shield },
   { id: "currencies", icon: DollarSign },
-  { id: "business-hours", icon: Clock },
   { id: "custom-fields", icon: Settings2 },
   { id: "lost-reasons", icon: XCircle },
   { id: "email-templates", icon: Mail },
@@ -69,7 +67,7 @@ const BILLING_NAV = [
 
 const VALID_TABS = [
   "profile", "appearance", "language", "notifications", "sidebar", "security", "login-history",
-  "team", "members", "roles", "currencies", "business-hours", "custom-fields",
+  "team", "members", "roles", "currencies", "custom-fields",
   "lost-reasons", "email-templates", "connections", "export", "integrations",
   "audit-log", "data-access", "web-forms", "billing", "danger",
 ];
@@ -190,9 +188,6 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             </TabsContent>
             <TabsContent value="currencies">
               <CurrenciesSection />
-            </TabsContent>
-            <TabsContent value="business-hours">
-              <BusinessHoursSection />
             </TabsContent>
             <TabsContent value="custom-fields">
               <CustomFieldsSection />

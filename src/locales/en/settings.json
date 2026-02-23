@@ -17,7 +17,6 @@
     "members": "Members",
     "roles": "Roles",
     "currencies": "Currencies",
-    "business-hours": "Business Hours",
     "custom-fields": "Custom Fields",
     "lost-reasons": "Close Reasons",
     "email-templates": "Email Templates",
@@ -101,21 +100,6 @@
     "deleteTitle": "Delete currency",
     "deleteConfirm": "Delete exchange rate for {code}?",
     "noRates": "No exchange rates configured. Add currencies to track multi-currency deals."
-  },
-  "businessHours": {
-    "title": "Business Hours",
-    "description": "Set your team's working hours for each day of the week",
-    "days": {
-      "mon": "Monday",
-      "tue": "Tuesday",
-      "wed": "Wednesday",
-      "thu": "Thursday",
-      "fri": "Friday",
-      "sat": "Saturday",
-      "sun": "Sunday"
-    },
-    "dayOff": "Day off",
-    "saved": "Business hours saved"
   },
   "customFields": {
     "title": "Custom Fields",
