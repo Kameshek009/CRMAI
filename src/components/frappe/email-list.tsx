@@ -32,13 +32,16 @@ export function EmailList({ entityType, entityId, onCompose }: EmailListProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/crm/emails?${entityType}_id=${entityId}&limit=50`)
+    const controller = new AbortController();
+    setIsLoading(true);
+    fetch(`/api/crm/emails?${entityType}_id=${entityId}&limit=50`, { signal: controller.signal })
       .then(r => r.json())
       .then(json => {
         if (json.success) setEmails(json.data);
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
+    return () => controller.abort();
   }, [entityType, entityId]);
 
   if (isLoading) {

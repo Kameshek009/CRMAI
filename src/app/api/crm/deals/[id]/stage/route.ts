@@ -71,6 +71,7 @@ export async function PATCH(
       .from("deals")
       .update(updateData)
       .eq("id", id)
+      .eq("team_id", context.teamId)
       .select("*, deal_stages(id, name, color)")
       .single();
 

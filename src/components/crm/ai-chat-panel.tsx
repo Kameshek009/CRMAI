@@ -51,6 +51,11 @@ export function AiChatPanel() {
           history: messages.slice(-10).map((m) => ({ role: m.role, content: m.content })),
         }),
       });
+
+      if (!res.ok && res.status !== 429) {
+        throw new Error(`API error: ${res.status}`);
+      }
+
       const json = await res.json();
 
       if (res.status === 429) {

@@ -29,13 +29,15 @@ export async function GET() {
       return NextResponse.json({ success: false, error: "Failed to fetch stages" }, { status: 500 });
     }
 
-    // Get all open deals for pipeline view
+    // Get open deals for pipeline view (limit to prevent memory issues)
     const { data: deals } = await supabase
       .from("deals")
       .select("*, contacts(id, first_name, last_name), companies(id, name), accounts!deals_assigned_to_fkey(id, first_name, last_name)")
       .eq("team_id", context.teamId)
       .eq("is_deleted", false)
-      .order("created_at", { ascending: false });
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(2000);
 
     // Build pipeline columns (with deal rotting detection)
     const now = Date.now();

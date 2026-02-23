@@ -24,9 +24,11 @@ interface EntityHoverCardProps {
 export function EntityHoverCard({ entityType, entityId, children }: EntityHoverCardProps) {
   const [data, setData] = useState<EntityPreview | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   const handleOpen = (open: boolean) => {
-    if (open && !loaded) {
+    if (open && (!loaded || fetchError)) {
+      setFetchError(false);
       const endpoint = entityType === "contact"
         ? `/api/crm/contacts/${entityId}`
         : `/api/crm/companies/${entityId}`;
@@ -59,7 +61,7 @@ export function EntityHoverCard({ entityType, entityId, children }: EntityHoverC
           }
           setLoaded(true);
         })
-        .catch(() => setLoaded(true));
+        .catch(() => setFetchError(true));
     }
   };
 
