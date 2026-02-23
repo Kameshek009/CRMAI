@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createCallLogSchema } from "@/lib/crm/validation";
+import { findContactByPhone } from "@/lib/whatsapp/helpers";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -55,6 +56,28 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Auto-find or create contact by phone number if contact_id not provided
+    let contactId = parsed.data.contact_id || null;
+    const phoneNumber = parsed.data.to_number || parsed.data.from_number;
+    if (!contactId && phoneNumber) {
+      contactId = await findContactByPhone(context.teamId, phoneNumber);
+      if (!contactId) {
+        const { data: newContact } = await supabase
+          .from("contacts")
+          .insert({
+            team_id: context.teamId,
+            account_id: context.accountId,
+            first_name: phoneNumber,
+            phone: phoneNumber,
+            source: "call",
+          })
+          .select("id")
+          .single();
+        if (newContact) contactId = newContact.id;
+      }
+    }
+
     const { data, error: dbError } = await supabase
       .from("call_logs")
       .insert({
@@ -62,6 +85,7 @@ export async function POST(request: NextRequest) {
         team_id: context.teamId,
         caller_account_id: context.accountId,
         ...parsed.data,
+        contact_id: contactId,
       })
       .select("*, contacts(id, first_name, last_name)")
       .single();
@@ -76,7 +100,7 @@ export async function POST(request: NextRequest) {
       await supabase.from("crm_activities").insert({
         account_id: context.accountId,
         team_id: context.teamId,
-        contact_id: parsed.data.contact_id || null,
+        contact_id: contactId,
         deal_id: parsed.data.deal_id || null,
         type: "call",
         title: `${parsed.data.direction === "inbound" ? "Inbound" : "Outbound"} call${parsed.data.status ? ` — ${parsed.data.status}` : ""}`,
