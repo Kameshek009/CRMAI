@@ -84,7 +84,9 @@ export function LeadsContent() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
 
-  const fetchLeads = useCallback(async (pageNum: number, append: boolean) => {
+  const abortRef = useRef<AbortController | null>(null);
+
+  const fetchLeads = useCallback(async (pageNum: number, append: boolean, signal?: AbortSignal) => {
     if (append) setIsLoadingMore(true);
     else setIsLoading(true);
     try {
@@ -97,20 +99,28 @@ export function LeadsContent() {
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
       }
-      const res = await fetch(`/api/crm/leads?${params}`);
+      const res = await fetch(`/api/crm/leads?${params}`, { signal });
       const json = await res.json();
       if (json.success) {
         if (append) setLeads((prev) => [...prev, ...json.data]);
         else setLeads(json.data);
         setTotal(json.total || 0);
       }
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") return;
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
   }, [search, sortBy, sortOrder, activeFilters]);
 
-  useEffect(() => { pageRef.current = 1; fetchLeads(1, false); }, [fetchLeads]);
+  useEffect(() => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    pageRef.current = 1;
+    fetchLeads(1, false, abortRef.current.signal);
+    return () => { abortRef.current?.abort(); };
+  }, [fetchLeads]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
 
   const handleLoadMore = useCallback(() => {

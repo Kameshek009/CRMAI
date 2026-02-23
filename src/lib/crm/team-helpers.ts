@@ -13,6 +13,7 @@ type WorkspaceContextResult =
 // When 6 API calls fire simultaneously, only the first one runs DB queries;
 // the other 5 await the same promise.
 const CACHE_TTL = 30_000;
+const MAX_CACHE_SIZE = 500;
 const contextCache = new Map<string, { result: WorkspaceContextResult; ts: number }>();
 const inflight = new Map<string, Promise<WorkspaceContextResult>>();
 
@@ -49,6 +50,10 @@ export async function getWorkspaceContext(): Promise<WorkspaceContextResult> {
   try {
     const result = await promise;
     if (result.context) {
+      if (contextCache.size >= MAX_CACHE_SIZE) {
+        const oldestKey = contextCache.keys().next().value;
+        if (oldestKey) contextCache.delete(oldestKey);
+      }
       contextCache.set(userId, { result, ts: Date.now() });
     }
     return result;

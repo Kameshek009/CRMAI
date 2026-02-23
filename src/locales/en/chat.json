@@ -20,5 +20,9 @@
   "aiError": "Sorry, something went wrong. Please try again.",
   "aiTimeout": "AI request timed out. Please try again.",
   "renamed": "Chat renamed",
-  "failedRename": "Failed to rename chat"
+  "failedRename": "Failed to rename chat",
+  "newChat": "New Chat",
+  "modeChat": "AI Chat",
+  "modeAgent": "Agent",
+  "modeAuto": "Auto"
 }

@@ -30,11 +30,21 @@ export async function POST(request: NextRequest) {
   const supabase = createSupabaseAdmin();
   const table = entity_type === "contacts" ? "contacts" : "companies";
 
-  // Apply field overrides to master
+  // Apply field overrides to master (whitelist safe fields only)
+  const BLOCKED_FIELDS = new Set([
+    "id", "team_id", "account_id", "is_deleted", "deleted_at", "deleted_by", "created_at", "created_by",
+  ]);
   if (field_overrides && Object.keys(field_overrides).length > 0) {
+    const safeOverrides: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(field_overrides)) {
+      if (!BLOCKED_FIELDS.has(key)) safeOverrides[key] = val;
+    }
+    if (Object.keys(safeOverrides).length === 0) {
+      return NextResponse.json({ success: false, error: "No valid field overrides" }, { status: 400 });
+    }
     const { error: updateErr } = await supabase
       .from(table)
-      .update(field_overrides)
+      .update(safeOverrides)
       .eq("id", master_id)
       .eq("team_id", context.workspaceId);
 

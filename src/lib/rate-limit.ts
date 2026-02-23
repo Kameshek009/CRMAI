@@ -64,6 +64,7 @@ export function checkRateLimit(
 
   // Remove expired timestamps
   entry.timestamps = entry.timestamps.filter((t) => t > cutoff);
+  if (entry.timestamps.length === 0) store.delete(key);
 
   if (entry.timestamps.length >= limit) {
     return NextResponse.json(

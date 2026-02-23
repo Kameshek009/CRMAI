@@ -44,6 +44,21 @@ export async function POST(
     const nextSendAt = new Date();
     nextSendAt.setDate(nextSendAt.getDate() + firstStep.delay_days);
 
+    const contactIds = parsed.data.contact_ids || [];
+
+    // Verify all contact_ids belong to the team
+    if (contactIds.length > 0) {
+      const { count } = await supabase
+        .from("contacts")
+        .select("id", { count: "exact", head: true })
+        .in("id", contactIds)
+        .eq("team_id", context.teamId)
+        .eq("is_deleted", false);
+      if (count !== contactIds.length) {
+        return NextResponse.json({ success: false, error: "Some contacts not found or not accessible" }, { status: 400 });
+      }
+    }
+
     const enrollments: {
       sequence_id: string;
       contact_id?: string;
@@ -52,7 +67,7 @@ export async function POST(
       next_send_at: string;
     }[] = [];
 
-    for (const contactId of parsed.data.contact_ids || []) {
+    for (const contactId of contactIds) {
       enrollments.push({
         sequence_id: sequenceId,
         contact_id: contactId,

@@ -115,7 +115,9 @@ export function ContactsContent() {
   const [isBulkLoading, setIsBulkLoading] = useState(false);
 
   // Fetch
-  const fetchContacts = useCallback(async (pageNum: number, append: boolean) => {
+  const abortRef = useRef<AbortController | null>(null);
+
+  const fetchContacts = useCallback(async (pageNum: number, append: boolean, signal?: AbortSignal) => {
     if (append) {
       setIsLoadingMore(true);
     } else {
@@ -131,7 +133,7 @@ export function ContactsContent() {
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
       }
-      const res = await fetch(`/api/crm/contacts?${params}`);
+      const res = await fetch(`/api/crm/contacts?${params}`, { signal });
       const json = await res.json();
       if (json.success) {
         if (append) {
@@ -141,6 +143,8 @@ export function ContactsContent() {
         }
         setTotal(json.total || 0);
       }
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") return;
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -148,8 +152,11 @@ export function ContactsContent() {
   }, [search, sortBy, sortOrder, activeFilters]);
 
   useEffect(() => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
     pageRef.current = 1;
-    fetchContacts(1, false);
+    fetchContacts(1, false, abortRef.current.signal);
+    return () => { abortRef.current?.abort(); };
   }, [fetchContacts]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
 

@@ -118,11 +118,11 @@ export function ChatHeader({ chat, onChatUpdate, onDelete, onSearchToggle }: Cha
           ) : (
             <>
               <h1 className="font-semibold text-foreground text-sm sm:text-base truncate">
-                {chat.title || 'New Chat'}
+                {chat.title || t('chat.newChat')}
               </h1>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                  {chat.mode === 'chat' ? 'AI Chat' : chat.mode === 'agent' ? 'Agent' : 'Auto'}
+                  {chat.mode === 'chat' ? t('chat.modeChat') : chat.mode === 'agent' ? t('chat.modeAgent') : t('chat.modeAuto')}
                 </span>
               </div>
             </>

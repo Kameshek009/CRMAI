@@ -109,7 +109,9 @@ export function DealsContent() {
     { name: "description", label: t("crm.deals.fields.description"), type: "textarea" as const },
   ], [t]);
 
-  const fetchDeals = useCallback(async (pageNum: number, append: boolean) => {
+  const abortRef = useRef<AbortController | null>(null);
+
+  const fetchDeals = useCallback(async (pageNum: number, append: boolean, signal?: AbortSignal) => {
     if (append) {
       setIsLoadingMore(true);
     } else {
@@ -125,7 +127,7 @@ export function DealsContent() {
       for (const f of activeFilters) {
         params.set(`filter_${f.field}`, f.value);
       }
-      const res = await fetch(`/api/crm/deals?${params}`);
+      const res = await fetch(`/api/crm/deals?${params}`, { signal });
       const json = await res.json();
       if (json.success) {
         if (append) {
@@ -144,6 +146,8 @@ export function DealsContent() {
         const sorted = Array.from(stageMap.values()).sort((a, b) => a.position - b.position);
         if (sorted.length > 0) setStages(sorted);
       }
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") return;
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -151,8 +155,11 @@ export function DealsContent() {
   }, [search, sortBy, sortOrder, activeFilters]);
 
   useEffect(() => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
     pageRef.current = 1;
-    fetchDeals(1, false);
+    fetchDeals(1, false, abortRef.current.signal);
+    return () => { abortRef.current?.abort(); };
   }, [fetchDeals]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
 
@@ -165,7 +172,8 @@ export function DealsContent() {
 
   // Also fetch stages separately on mount for kanban + create form
   useEffect(() => {
-    fetch("/api/crm/pipeline")
+    const controller = new AbortController();
+    fetch("/api/crm/pipeline", { signal: controller.signal })
       .then(r => r.json())
       .then(json => {
         if (json.success && json.data?.columns) {
@@ -174,6 +182,7 @@ export function DealsContent() {
         }
       })
       .catch(() => {});
+    return () => controller.abort();
   }, []);
 
   const handleFilterAdd = useCallback((field: string, value: string) => {

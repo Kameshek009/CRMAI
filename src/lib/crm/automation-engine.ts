@@ -21,6 +21,7 @@ interface Automation {
   team_id: string;
   name: string;
   is_active: boolean;
+  run_count: number;
   trigger_type: string;
   trigger_config: {
     entity_type?: string;
@@ -210,12 +211,13 @@ export async function runAutomations(params: TriggerParams): Promise<void> {
       // Evaluate conditions
       if (!evaluateConditions(automation.conditions, params.record)) {
         // Log as skipped
-        await supabase.from("automation_logs").insert({
+        const { error: skipErr } = await supabase.from("automation_logs").insert({
           automation_id: automation.id,
           trigger_data: { entityType: params.entityType, entityId: params.entityId },
           actions_executed: [],
           status: "skipped",
-        }).then(() => {});
+        });
+        if (skipErr) logger.error("Automations", "Failed to log skipped automation", skipErr);
         continue;
       }
 
@@ -232,7 +234,7 @@ export async function runAutomations(params: TriggerParams): Promise<void> {
       // Update run count
       await supabase
         .from("automations")
-        .update({ run_count: (automation as unknown as { run_count: number }).run_count + 1, last_run_at: new Date().toISOString() })
+        .update({ run_count: (automation.run_count || 0) + 1, last_run_at: new Date().toISOString() })
         .eq("id", automation.id);
 
       // Log execution
