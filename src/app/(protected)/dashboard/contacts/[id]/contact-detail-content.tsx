@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
+import { ChangeHistory } from "@/components/crm/change-history";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
@@ -307,6 +308,11 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       value: "emails",
       label: t("crm.contacts.detail.emails"),
       content: <EmailList entityType="contact" entityId={contactId} />,
+    },
+    {
+      value: "history",
+      label: t("crm.history.title"),
+      content: <ChangeHistory entityType="contact" entityId={contactId} />,
     },
   ];
 

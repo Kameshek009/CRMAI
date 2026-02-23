@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const entityType = url.searchParams.get("entity_type");
+    const entityId = url.searchParams.get("entity_id");
     const action = url.searchParams.get("action");
     const from = url.searchParams.get("from");
     const to = url.searchParams.get("to");
@@ -31,6 +32,9 @@ export async function GET(request: NextRequest) {
 
     if (entityType) {
       query = query.eq("entity_type", entityType);
+    }
+    if (entityId) {
+      query = query.eq("entity_id", entityId);
     }
     if (action) {
       query = query.eq("action", action);

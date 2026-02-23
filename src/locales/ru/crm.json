@@ -845,5 +845,15 @@
     "complete": "Импорт завершён",
     "completeDescription": "Импортировано {imported} контактов и {companies} компаний.",
     "done": "Готово"
+  },
+  "history": {
+    "title": "История",
+    "noHistory": "Изменений пока нет",
+    "created": "Создано",
+    "updated": "Обновлено",
+    "deleted": "Удалено",
+    "changedFields": "Изменено: {fields}",
+    "from": "с",
+    "to": "на"
   }
 }

@@ -845,5 +845,15 @@
     "complete": "Import Complete",
     "completeDescription": "{imported} contacts and {companies} companies imported.",
     "done": "Done"
+  },
+  "history": {
+    "title": "History",
+    "noHistory": "No changes recorded yet",
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "changedFields": "Changed: {fields}",
+    "from": "from",
+    "to": "to"
   }
 }
