@@ -32,4 +32,4 @@ CREATE POLICY "Users can update own notifications"
   USING (account_id = (current_setting('app.current_account_id', true))::uuid);
 
 -- Enable realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE notifications; EXCEPTION WHEN duplicate_object THEN NULL; END $$;

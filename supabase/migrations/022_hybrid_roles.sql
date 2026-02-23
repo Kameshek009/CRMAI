@@ -5,13 +5,13 @@
 -- ============================================================================
 
 -- Add fixed_role column: 'owner', 'admin', 'member', 'viewer'
-ALTER TABLE team_members ADD COLUMN fixed_role TEXT NOT NULL DEFAULT 'member';
+ALTER TABLE team_members ADD COLUMN IF NOT EXISTS fixed_role TEXT NOT NULL DEFAULT 'member';
 
 -- Set directors to 'owner'
 UPDATE team_members SET fixed_role = 'owner' WHERE is_director = true;
 
 -- Index for fast lookups
-CREATE INDEX idx_team_members_fixed_role ON team_members(team_id, fixed_role);
+CREATE INDEX IF NOT EXISTS idx_team_members_fixed_role ON team_members(team_id, fixed_role);
 
 -- ============================================================================
 -- Update create_team_with_defaults to set fixed_role on director

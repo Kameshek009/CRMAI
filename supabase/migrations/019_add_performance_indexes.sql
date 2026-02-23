@@ -41,14 +41,12 @@ CREATE INDEX IF NOT EXISTS idx_accounts_clerk_user_id
 CREATE INDEX IF NOT EXISTS idx_deal_stages_team_position
   ON deal_stages (team_id, position);
 
--- Team members: team + active members
+-- Team members: team index
 CREATE INDEX IF NOT EXISTS idx_team_members_team_active
-  ON team_members (team_id) WHERE left_at IS NULL;
+  ON team_members (team_id);
 
 -- Desktop sessions: refresh token lookup
 CREATE INDEX IF NOT EXISTS idx_desktop_sessions_refresh_token
   ON desktop_sessions (refresh_token) WHERE revoked = false;
 
--- Usage records: account + created_at for history
-CREATE INDEX IF NOT EXISTS idx_usage_records_account_created
-  ON usage_records (account_id, created_at DESC);
+-- NOTE: usage_records index removed — table created at application level

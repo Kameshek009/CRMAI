@@ -23,9 +23,9 @@ CREATE INDEX IF NOT EXISTS idx_crm_activities_contact_id
 CREATE INDEX IF NOT EXISTS idx_crm_activities_deal_id
   ON crm_activities(deal_id) WHERE deal_id IS NOT NULL;
 
--- Composite index for entity-scoped audit log queries
-CREATE INDEX IF NOT EXISTS idx_audit_log_entity
-  ON audit_log(team_id, entity_type, entity_id);
+-- Composite index for entity-scoped audit log queries (replaces simpler index from 023)
+DROP INDEX IF EXISTS idx_audit_log_entity;
+CREATE INDEX idx_audit_log_entity ON audit_log(team_id, entity_type, entity_id);
 
 -- ============================================================================
 -- RPC functions for aggregated stats (avoids loading 1000+ rows client-side)

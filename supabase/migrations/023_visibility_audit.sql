@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_audit_log_entity ON audit_log(entity_type, entity_id);
-CREATE INDEX idx_audit_log_team ON audit_log(team_id, created_at DESC);
-CREATE INDEX idx_audit_log_account ON audit_log(account_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON audit_log(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_team ON audit_log(team_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_account ON audit_log(account_id, created_at DESC);
 
 -- Enable RLS
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;

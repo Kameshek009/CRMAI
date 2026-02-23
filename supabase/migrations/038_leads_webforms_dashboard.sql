@@ -91,5 +91,5 @@ CREATE POLICY "Service role full access" ON dashboard_layouts FOR ALL USING (tru
 -- REALTIME
 -- ============================================================================
 
-ALTER PUBLICATION supabase_realtime ADD TABLE web_forms;
-ALTER PUBLICATION supabase_realtime ADD TABLE web_form_submissions;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE web_forms; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE web_form_submissions; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
