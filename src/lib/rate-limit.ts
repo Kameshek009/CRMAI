@@ -5,6 +5,8 @@ interface RateLimitOptions {
   limit?: number;
   /** Time window in ms (default: 60000 = 1 minute) */
   windowMs?: number;
+  /** Key prefix — if set, uses `prefix:ip` instead of `ip:path` */
+  keyPrefix?: string;
 }
 
 interface RateLimitEntry {
@@ -48,8 +50,9 @@ export function checkRateLimit(
   const windowMs = options?.windowMs ?? 60_000;
 
   const ip = getClientIp(request);
-  const path = new URL(request.url).pathname;
-  const key = `${ip}:${path}`;
+  const key = options?.keyPrefix
+    ? `${options.keyPrefix}:${ip}`
+    : `${ip}:${new URL(request.url).pathname}`;
 
   cleanup(windowMs);
 

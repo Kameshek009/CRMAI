@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
@@ -29,6 +30,12 @@ const isApiRoute = createRouteMatcher(["/api/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   try {
+    // Global API rate limit (120 req/min per IP)
+    if (isApiRoute(request) && !isPublicRoute(request)) {
+      const rateLimited = checkRateLimit(request, { limit: 120, keyPrefix: "global" });
+      if (rateLimited) return rateLimited;
+    }
+
     // Allow public routes
     if (isPublicRoute(request)) {
       return;
