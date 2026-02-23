@@ -267,7 +267,8 @@
       "saveFailed": "Failed to save settings",
       "showToken": "Show",
       "hideToken": "Hide",
-      "save": "Save"
+      "save": "Save",
+      "accessTokenRequired": "Access token is required"
     }
   },
   "billing": {

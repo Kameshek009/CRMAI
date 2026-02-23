@@ -131,7 +131,9 @@ export async function POST(request: NextRequest) {
             direction: "inbound",
             status: "delivered",
             metadata: { raw_type: msg.type, timestamp: msg.timestamp },
-            created_at: new Date(parseInt(msg.timestamp) * 1000).toISOString(),
+            created_at: msg.timestamp
+              ? new Date(parseInt(msg.timestamp) * 1000).toISOString()
+              : new Date().toISOString(),
           });
 
           // Mark as read

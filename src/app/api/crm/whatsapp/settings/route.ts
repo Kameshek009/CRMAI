@@ -72,12 +72,20 @@ export async function POST(request: NextRequest) {
     // Auto-generate verify token if not provided
     const webhookVerifyToken = parsed.data.webhook_verify_token || randomBytes(16).toString("hex");
 
+    // Keep existing access_token if not provided
+    const existingWa = existingSettings.whatsapp as Record<string, unknown> | undefined;
+    const accessToken = parsed.data.access_token || (existingWa?.access_token as string) || "";
+
+    if (!accessToken) {
+      return NextResponse.json({ success: false, error: "Access token is required" }, { status: 400 });
+    }
+
     const newSettings = {
       ...existingSettings,
       whatsapp: {
         phone_number_id: parsed.data.phone_number_id,
         waba_id: parsed.data.waba_id,
-        access_token: parsed.data.access_token,
+        access_token: accessToken,
         webhook_verify_token: webhookVerifyToken,
         is_connected: false,
       },

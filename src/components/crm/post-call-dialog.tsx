@@ -44,13 +44,13 @@ export function PostCallDialog() {
       } else {
         toast.error(json.error || t("common.failed"));
       }
+      dismissPostCall();
+      setStatus("completed");
+      setSummary("");
     } catch {
       toast.error(t("common.failed"));
     } finally {
       setIsSaving(false);
-      setStatus("completed");
-      setSummary("");
-      dismissPostCall();
     }
   };
 

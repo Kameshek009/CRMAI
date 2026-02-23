@@ -74,15 +74,36 @@ export async function findContactByPhone(teamId: string, phone: string): Promise
   const digits = phone.replace(/\D/g, "");
   if (digits.length < 7) return null;
 
-  // Try exact match first
-  const { data } = await supabase
+  // Try exact match with common formats
+  const variants = [
+    phone,              // original
+    `+${digits}`,       // +7999...
+    digits,             // 7999...
+  ];
+
+  for (const variant of variants) {
+    const { data } = await supabase
+      .from("contacts")
+      .select("id")
+      .eq("team_id", teamId)
+      .eq("is_deleted", false)
+      .eq("phone", variant)
+      .limit(1)
+      .maybeSingle();
+
+    if (data?.id) return data.id;
+  }
+
+  // Fallback: suffix match on last 10 digits (parameterized)
+  const suffix = digits.slice(-10);
+  const { data: fallback } = await supabase
     .from("contacts")
     .select("id")
     .eq("team_id", teamId)
     .eq("is_deleted", false)
-    .or(`phone.ilike.%${digits.slice(-10)}%`)
+    .ilike("phone", `%${suffix}`)
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  return data?.id || null;
+  return fallback?.id || null;
 }

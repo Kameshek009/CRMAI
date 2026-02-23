@@ -48,6 +48,7 @@ export function ClickToCall({
           status: "initiated",
           to_number: phoneNumber,
           contact_id: contactId || null,
+          lead_id: leadId || null,
           deal_id: dealId || null,
         }),
       });

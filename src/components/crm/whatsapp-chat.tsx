@@ -56,7 +56,7 @@ export function WhatsAppChat({ entityType, entityId, phoneNumber }: WhatsAppChat
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchMessages = useCallback(() => {
-    fetch(`/api/crm/whatsapp/messages?${entityType}_id=${entityId}&limit=100`)
+    return fetch(`/api/crm/whatsapp/messages?${entityType}_id=${entityId}&limit=100`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success) setMessages(json.data);
@@ -83,8 +83,7 @@ export function WhatsAppChat({ entityType, entityId, phoneNumber }: WhatsAppChat
     if (isConfigured === null) return;
 
     setIsLoading(true);
-    fetchMessages();
-    setIsLoading(false);
+    fetchMessages().finally(() => setIsLoading(false));
 
     // Poll every 15s
     const interval = setInterval(fetchMessages, 15000);

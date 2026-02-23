@@ -82,7 +82,7 @@ export function IntegrationsSection() {
       }
       // If no existing token and no new token → require it
       if (!waForm.access_token && !waSettings?.access_token_masked) {
-        toast.error("Access token is required");
+        toast.error(t("settings.integrations.whatsapp.accessTokenRequired"));
         setIsSaving(false);
         return;
       }

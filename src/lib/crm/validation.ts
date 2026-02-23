@@ -336,6 +336,6 @@ export const sendWhatsAppMessageSchema = z.object({
 export const whatsappSettingsSchema = z.object({
   phone_number_id: z.string().min(1).max(100),
   waba_id: z.string().min(1).max(100),
-  access_token: z.string().min(1).max(500),
+  access_token: z.string().min(1).max(500).optional(),
   webhook_verify_token: z.string().min(1).max(100).optional(),
 });
