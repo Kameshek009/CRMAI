@@ -19,14 +19,6 @@ import {
   Cell,
   AreaChart,
   Area,
-  LineChart,
-  Line,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Legend,
 } from "recharts";
 import {
   DollarSign,
@@ -34,7 +26,6 @@ import {
   Handshake,
   CheckSquare,
   TrendingUp,
-  TrendingDown,
   Sparkles,
   AlertCircle,
   Info,
@@ -137,7 +128,6 @@ function MetricCard({
   icon: Icon,
   gradient,
   trend,
-  delay = 0,
 }: {
   label: string;
   value: string;
@@ -145,7 +135,6 @@ function MetricCard({
   icon: LucideIcon;
   gradient: string;
   trend?: { direction: "up" | "down"; text: string };
-  delay?: number;
 }) {
   return (
     <div>
@@ -290,7 +279,6 @@ export function AnalyticsContent() {
           subtitle={`${data.wonCount}W / ${data.lostCount}L`}
           icon={Target}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
-          delay={0.05}
         />
         <MetricCard
           label="Pipeline Value"
@@ -298,7 +286,6 @@ export function AnalyticsContent() {
           subtitle={`${data.openCount} open deals`}
           icon={Handshake}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
-          delay={0.1}
         />
         <MetricCard
           label="This Month"
@@ -310,7 +297,6 @@ export function AnalyticsContent() {
             direction: data.revenueGrowth >= 0 ? "up" : "down",
             text: `${Math.abs(data.revenueGrowth)}% vs last month`,
           }}
-          delay={0.15}
         />
         <MetricCard
           label="Forecast"
@@ -318,7 +304,6 @@ export function AnalyticsContent() {
           subtitle="Weighted pipeline"
           icon={TrendingUp}
           gradient="bg-gradient-to-br from-orange-500 to-landing-accent"
-          delay={0.2}
         />
         <MetricCard
           label="Avg Deal Size"
@@ -326,7 +311,6 @@ export function AnalyticsContent() {
           subtitle="Won deals average"
           icon={BarChart3}
           gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
-          delay={0.25}
         />
         <MetricCard
           label="Sales Velocity"
@@ -334,7 +318,6 @@ export function AnalyticsContent() {
           subtitle="Per day potential"
           icon={Zap}
           gradient="bg-gradient-to-br from-orange-500 to-landing-accent"
-          delay={0.3}
         />
         <MetricCard
           label="Avg Close Time"
@@ -342,7 +325,6 @@ export function AnalyticsContent() {
           subtitle="Days to close"
           icon={Timer}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
-          delay={0.35}
         />
         <MetricCard
           label="Engagement"
@@ -350,7 +332,6 @@ export function AnalyticsContent() {
           subtitle={`${data.totalContacts} contacts`}
           icon={Users}
           gradient="bg-gradient-to-br from-landing-accent to-landing-accent"
-          delay={0.4}
         />
       </div>
 

@@ -46,7 +46,7 @@ import { JoinTeamDialog } from "@/components/team/join-team-dialog";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
 import { ListWidget } from "@/components/dashboard/widgets/list-widget";
 import { TableWidget } from "@/components/dashboard/widgets/table-widget";
-import { WidgetPicker, WIDGET_CATALOG } from "@/components/dashboard/widget-picker";
+import { WidgetPicker } from "@/components/dashboard/widget-picker";
 import { useTranslation } from "@/lib/i18n";
 import { toast } from "sonner";
 import type { CrmStats, AIInsight } from "@/types/crm";
