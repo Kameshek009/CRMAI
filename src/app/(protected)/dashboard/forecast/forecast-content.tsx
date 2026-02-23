@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { useTranslation } from "@/lib/i18n";
 import { Loader2, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
 import { ForecastSummaryCard } from "@/components/forecast/forecast-summary-card";
 import { ForecastChart } from "@/components/forecast/forecast-chart";
 import { StageBreakdownTable } from "@/components/forecast/stage-breakdown-table";
@@ -41,7 +42,7 @@ export function ForecastContent() {
         const json = await res.json();
         if (json.success) setData(json.data);
       } catch {
-        // silent — no data state will show
+        toast.error(t("common.failed"));
       } finally {
         setLoading(false);
       }

@@ -80,7 +80,7 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
     } finally {
       setIsLoading(false);
     }
-  }, [leadId]);
+  }, [leadId, t]);
 
   useEffect(() => { fetchLead(); }, [fetchLead]);
 
@@ -122,12 +122,16 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
       setDealTitle(`${lead.first_name} ${lead.last_name || ""}`.trim());
     }
     // Load stages
-    const res = await fetch("/api/crm/pipeline");
-    const json = await res.json();
-    if (json.success) {
-      const stageList = json.data.columns.map((c: { stage: DealStage }) => c.stage);
-      setStages(stageList);
-      if (stageList.length > 0) setDealStageId(stageList[0].id);
+    try {
+      const res = await fetch("/api/crm/pipeline");
+      const json = await res.json();
+      if (json.success) {
+        const stageList = json.data.columns.map((c: { stage: DealStage }) => c.stage);
+        setStages(stageList);
+        if (stageList.length > 0) setDealStageId(stageList[0].id);
+      }
+    } catch {
+      toast.error(t("common.failed"));
     }
   };
 

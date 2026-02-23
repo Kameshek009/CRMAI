@@ -141,7 +141,7 @@ interface WorkspaceProviderProps {
 }
 
 export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
-  const { account } = useAccount();
+  const { account, isLoading: accountLoading } = useAccount();
   const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceData | null>(null);
   const [workspaces, setWorkspaces] = useState<WorkspaceMembership[]>([]);
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<DeletedWorkspaceInfo[]>([]);
@@ -257,8 +257,11 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
   useEffect(() => {
     if (account?.id) {
       fetchWorkspaces();
+    } else if (!accountLoading) {
+      // Account finished loading but no ID (error or no account)
+      setIsLoading(false);
     }
-  }, [account?.id, fetchWorkspaces]);
+  }, [account?.id, accountLoading, fetchWorkspaces]);
 
   // Subscribe to team_members changes for realtime updates
   useEffect(() => {
