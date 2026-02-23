@@ -18,5 +18,14 @@
   "back": "Back",
   "next": "Next",
   "search": "Search",
-  "noResults": "No results"
+  "noResults": "No results",
+  "updated": "Updated",
+  "failedUpdate": "Failed to update",
+  "failedSave": "Failed to save",
+  "failedDelete": "Failed to delete",
+  "failedLoad": "Failed to load",
+  "noteAdded": "Note added",
+  "restored": "Restored",
+  "failedRestore": "Failed to restore",
+  "undo": "Undo"
 }

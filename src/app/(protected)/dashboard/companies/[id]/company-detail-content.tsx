@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
+import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -71,6 +72,7 @@ interface NoteData {
 
 export function CompanyDetailContent({ companyId }: { companyId: string }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [company, setCompany] = useState<Company | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [notes, setNotes] = useState<NoteData[]>([]);
@@ -117,11 +119,11 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
     const json = await res.json();
     if (json.success) {
       setCompany(json.data);
-      toast.success("Updated");
+      toast.success(t("common.updated"));
     } else {
-      toast.error("Failed to update");
+      toast.error(t("common.failedUpdate"));
     }
-  }, [companyId]);
+  }, [companyId, t]);
 
   const handleUpdateMetadata = useCallback(async (key: string, value: string) => {
     const currentMeta = company?.metadata || {};
@@ -134,11 +136,11 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
     const json = await res.json();
     if (json.success) {
       setCompany(json.data);
-      toast.success("Updated");
+      toast.success(t("common.updated"));
     } else {
-      toast.error("Failed to update");
+      toast.error(t("common.failedUpdate"));
     }
-  }, [companyId, company?.metadata]);
+  }, [companyId, company?.metadata, t]);
 
   const handleAddNote = async (content: string) => {
     const res = await fetch("/api/crm/notes", {
@@ -149,7 +151,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
     const json = await res.json();
     if (json.success) {
       setNotes([json.data, ...notes]);
-      toast.success("Note added");
+      toast.success(t("common.noteAdded"));
     }
   };
 
@@ -159,12 +161,12 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       const res = await fetch(`/api/crm/companies/${companyId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        toastWithUndo("Organization deleted", "companies", companyId, () => {
+        toastWithUndo(t("crm.companies.detail.deleted"), "companies", companyId, () => {
           router.push(`/dashboard/companies/${companyId}`);
-        });
+        }, { undo: t("common.undo"), restored: t("common.restored"), failedRestore: t("common.failedRestore") });
         router.push("/dashboard/companies");
       } else {
-        toast.error("Failed to delete");
+        toast.error(t("common.failedDelete"));
       }
     } finally {
       setIsDeleting(false);
@@ -188,7 +190,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
   }
 
   if (!company) {
-    return <PageContainer><p className="text-muted-foreground">Organization not found</p></PageContainer>;
+    return <PageContainer><p className="text-muted-foreground">{t("crm.companies.detail.notFound")}</p></PageContainer>;
   }
 
   const initials = company.name.slice(0, 2).toUpperCase();
@@ -203,18 +205,18 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
   const tabs = [
     {
       value: "activity",
-      label: "Activity",
+      label: t("crm.companies.detail.activity"),
       count: activities.length,
       content: (
         <ActivityStream
           activities={activities}
-          emptyMessage="No activity yet"
+          emptyMessage={t("crm.companies.detail.noActivity")}
         />
       ),
     },
     {
       value: "contacts",
-      label: "Contacts",
+      label: t("crm.companies.detail.contacts"),
       count: contacts.length,
       content: contacts.length > 0 ? (
         <div className="space-y-2">
@@ -245,12 +247,12 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground py-8 text-center">No contacts linked</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.companies.detail.noContacts")}</p>
       ),
     },
     {
       value: "deals",
-      label: "Deals",
+      label: t("crm.companies.detail.deals"),
       count: deals.length,
       content: deals.length > 0 ? (
         <div className="space-y-2">
@@ -272,12 +274,12 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground py-8 text-center">No deals linked</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.companies.detail.noDeals")}</p>
       ),
     },
     {
       value: "notes",
-      label: "Notes",
+      label: t("crm.companies.detail.notes"),
       count: notes.length,
       content: (
         <div className="space-y-4">
@@ -288,7 +290,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
               <TimeAgo date={note.created_at} className="text-xs text-muted-foreground mt-1" />
             </div>
           ))}
-          {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No notes yet</p>}
+          {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.companies.detail.noNotes")}</p>}
         </div>
       ),
     },
@@ -312,25 +314,25 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       </div>
 
       <InlineEditField
-        label="Name"
+        label={t("crm.companies.fields.name")}
         value={company.name}
         type="text"
         onSave={(v) => updateField("name", v)}
       />
       <InlineEditField
-        label="Domain"
+        label={t("crm.companies.fields.domain")}
         value={company.domain}
         type="url"
         onSave={(v) => updateField("domain", v)}
       />
       <InlineEditField
-        label="Industry"
+        label={t("crm.companies.fields.industry")}
         value={company.industry}
         type="text"
         onSave={(v) => updateField("industry", v)}
       />
       <InlineEditField
-        label="Size"
+        label={t("crm.companies.fields.size")}
         value={company.size}
         type="select"
         options={[
@@ -343,19 +345,19 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
         onSave={(v) => updateField("size", v)}
       />
       <InlineEditField
-        label="Website"
+        label={t("crm.companies.fields.website")}
         value={company.website}
         type="url"
         onSave={(v) => updateField("website", v)}
       />
       <InlineEditField
-        label="Phone"
+        label={t("crm.companies.fields.phone")}
         value={company.phone}
         type="tel"
         onSave={(v) => updateField("phone", v)}
       />
       <InlineEditField
-        label="Email"
+        label={t("crm.companies.detail.email")}
         value={company.email}
         type="email"
         onSave={(v) => updateField("email", v)}
@@ -368,7 +370,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       />
 
       <div className="pt-2 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-1">Health Score</div>
+        <div className="text-xs text-muted-foreground mb-1">{t("crm.companies.detail.healthScore")}</div>
         <div className={`text-sm font-semibold ${healthScoreColor(company.ai_health_score || 0)}`}>
           {company.ai_health_score || 0}
         </div>
@@ -377,18 +379,18 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       <div className="pt-2 border-t border-border">
         <div className="flex items-center gap-4">
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Contacts</div>
+            <div className="text-xs text-muted-foreground mb-1">{t("crm.companies.detail.contacts")}</div>
             <div className="text-sm font-semibold">{company.contact_count}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Deals</div>
+            <div className="text-xs text-muted-foreground mb-1">{t("crm.companies.detail.deals")}</div>
             <div className="text-sm font-semibold">{company.deal_count}</div>
           </div>
         </div>
       </div>
 
       <div className="pt-2 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-1">Created</div>
+        <div className="text-xs text-muted-foreground mb-1">{t("crm.companies.detail.created")}</div>
         <div className="text-sm">
           {company.created_at ? <TimeAgo date={company.created_at} /> : "—"}
         </div>
@@ -400,14 +402,14 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
     <PageContainer>
       <DetailLayout
         breadcrumbs={[
-          { label: "Organizations", href: "/dashboard/companies" },
+          { label: t("crm.companies.detail.breadcrumb"), href: "/dashboard/companies" },
           { label: company.name },
         ]}
         title={company.name}
         subtitle={[company.industry, company.size ? `${company.size} employees` : null].filter(Boolean).join(" · ") || undefined}
         status={
           <span className={`text-xs font-semibold ${healthScoreColor(company.ai_health_score || 0)}`}>
-            Health: {company.ai_health_score || 0}
+            {t("crm.companies.detail.healthScore")}: {company.ai_health_score || 0}
           </span>
         }
         actions={
@@ -415,7 +417,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
             <PrevNextNav entityType="companies" currentId={companyId} />
             <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
               <Trash2 className="size-3.5 mr-1.5" />
-              Delete
+              {t("crm.companies.detail.delete")}
             </Button>
           </div>
         }
@@ -427,9 +429,9 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete organization"
-        description={`Are you sure you want to delete ${company.name}? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("crm.companies.detail.deleteTitle")}
+        description={t("crm.companies.detail.deleteConfirm", { name: company.name })}
+        confirmLabel={t("crm.companies.detail.delete")}
         variant="destructive"
         isLoading={isDeleting}
         onConfirm={handleDelete}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, MailOpen, Send, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TimeAgo } from "@/components/ui/time-ago";
+import { useTranslation } from "@/lib/i18n";
 
 interface Email {
   id: string;
@@ -25,6 +26,7 @@ interface EmailListProps {
 }
 
 export function EmailList({ entityType, entityId, onCompose }: EmailListProps) {
+  const { t } = useTranslation();
   const [emails, setEmails] = useState<Email[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function EmailList({ entityType, entityId, onCompose }: EmailListProps) {
   }, [entityType, entityId]);
 
   if (isLoading) {
-    return <div className="py-8 text-center text-xs text-muted-foreground">Loading emails...</div>;
+    return <div className="py-8 text-center text-xs text-muted-foreground">{t("crm.emails.loading")}</div>;
   }
 
   return (
@@ -48,12 +50,12 @@ export function EmailList({ entityType, entityId, onCompose }: EmailListProps) {
       {onCompose && (
         <Button variant="outline" size="sm" onClick={onCompose}>
           <Plus className="h-3.5 w-3.5 mr-1.5" />
-          Compose
+          {t("crm.emails.compose")}
         </Button>
       )}
 
       {emails.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8 text-center">No emails yet</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.emails.noEmails")}</p>
       ) : (
         <div className="space-y-2">
           {emails.map(email => {

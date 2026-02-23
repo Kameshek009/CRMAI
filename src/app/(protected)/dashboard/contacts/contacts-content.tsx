@@ -207,11 +207,11 @@ export function ContactsContent() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Deleted ${ids.length} contact${ids.length !== 1 ? "s" : ""}`);
+        toast.success(t("crm.contacts.bulkDeleted", { count: ids.length }));
         setSelectedIds(new Set());
         pageRef.current = 1; fetchContacts(1, false);
       } else {
-        toast.error(json.error || "Failed to delete contacts");
+        toast.error(json.error || t("crm.contacts.bulkDeleteFailed"));
       }
     } finally {
       setIsBulkLoading(false);
@@ -230,11 +230,11 @@ export function ContactsContent() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Updated ${ids.length} contact${ids.length !== 1 ? "s" : ""}`);
+        toast.success(t("crm.contacts.bulkUpdated", { count: ids.length }));
         setSelectedIds(new Set());
         pageRef.current = 1; fetchContacts(1, false);
       } else {
-        toast.error(json.error || "Failed to update contacts");
+        toast.error(json.error || t("crm.contacts.bulkUpdateFailed"));
       }
     } finally {
       setIsBulkLoading(false);
@@ -249,7 +249,7 @@ export function ContactsContent() {
       body: JSON.stringify({ status: toColumn }),
     });
     if (!res.ok) {
-      toast.error("Failed to update status");
+      toast.error(t("crm.contacts.failedStatusUpdate"));
       pageRef.current = 1; fetchContacts(1, false);
     }
   };

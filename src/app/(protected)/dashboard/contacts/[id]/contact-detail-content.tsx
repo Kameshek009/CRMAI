@@ -22,6 +22,7 @@ import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
+import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -71,6 +72,7 @@ interface NoteData {
 
 export function ContactDetailContent({ contactId }: { contactId: string }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [contact, setContact] = useState<Contact | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [notes, setNotes] = useState<NoteData[]>([]);
@@ -118,11 +120,11 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
     const json = await res.json();
     if (json.success) {
       setContact(json.data);
-      toast.success("Updated");
+      toast.success(t("common.updated"));
     } else {
-      toast.error("Failed to update");
+      toast.error(t("common.failedUpdate"));
     }
-  }, [contactId]);
+  }, [contactId, t]);
 
   const handleUpdateMetadata = useCallback(async (key: string, value: string) => {
     const currentMeta = contact?.metadata || {};
@@ -135,11 +137,11 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
     const json = await res.json();
     if (json.success) {
       setContact(json.data);
-      toast.success("Updated");
+      toast.success(t("common.updated"));
     } else {
-      toast.error("Failed to update");
+      toast.error(t("common.failedUpdate"));
     }
-  }, [contactId, contact?.metadata]);
+  }, [contactId, contact?.metadata, t]);
 
   const handleAddNote = async (content: string) => {
     const res = await fetch("/api/crm/notes", {
@@ -150,7 +152,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
     const json = await res.json();
     if (json.success) {
       setNotes([json.data, ...notes]);
-      toast.success("Note added");
+      toast.success(t("common.noteAdded"));
     }
   };
 
@@ -167,12 +169,12 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
         const { enrichment, applied, contact: updatedContact } = json.data;
         if (applied > 0) {
           setContact(updatedContact);
-          toast.success(`Enriched ${applied} field${applied !== 1 ? "s" : ""}`);
+          toast.success(t("crm.contacts.detail.enriched", { count: applied }));
         } else {
-          toast.info(enrichment.notes || "No new data to apply");
+          toast.info(enrichment.notes || t("crm.contacts.detail.noEnrichData"));
         }
       } else {
-        toast.error(json.error || "Enrichment failed");
+        toast.error(json.error || t("crm.contacts.detail.enrichFailed"));
       }
     } finally {
       setIsEnriching(false);
@@ -185,12 +187,12 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       const res = await fetch(`/api/crm/contacts/${contactId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        toastWithUndo("Contact deleted", "contacts", contactId, () => {
+        toastWithUndo(t("crm.contacts.detail.deleted"), "contacts", contactId, () => {
           router.push(`/dashboard/contacts/${contactId}`);
-        });
+        }, { undo: t("common.undo"), restored: t("common.restored"), failedRestore: t("common.failedRestore") });
         router.push("/dashboard/contacts");
       } else {
-        toast.error("Failed to delete");
+        toast.error(t("common.failedDelete"));
       }
     } finally {
       setIsDeleting(false);
@@ -214,7 +216,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
   }
 
   if (!contact) {
-    return <PageContainer><p className="text-muted-foreground">Contact not found</p></PageContainer>;
+    return <PageContainer><p className="text-muted-foreground">{t("crm.contacts.detail.notFound")}</p></PageContainer>;
   }
 
   const name = `${contact.first_name} ${contact.last_name || ""}`.trim();
@@ -223,18 +225,18 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
   const tabs = [
     {
       value: "activity",
-      label: "Activity",
+      label: t("crm.contacts.detail.activity"),
       count: activities.length,
       content: (
         <ActivityStream
           activities={activities}
-          emptyMessage="No activity yet"
+          emptyMessage={t("crm.contacts.detail.noActivity")}
         />
       ),
     },
     {
       value: "notes",
-      label: "Notes",
+      label: t("crm.contacts.detail.notes"),
       count: notes.length,
       content: (
         <div className="space-y-4">
@@ -245,13 +247,13 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
               <TimeAgo date={note.created_at} className="text-xs text-muted-foreground mt-1" />
             </div>
           ))}
-          {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No notes yet</p>}
+          {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.contacts.detail.noNotes")}</p>}
         </div>
       ),
     },
     {
       value: "deals",
-      label: "Deals",
+      label: t("crm.contacts.detail.deals"),
       count: deals.length,
       content: deals.length > 0 ? (
         <div className="space-y-2">
@@ -273,12 +275,12 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground py-8 text-center">No deals linked</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.contacts.detail.noDeals")}</p>
       ),
     },
     {
       value: "tasks",
-      label: "Tasks",
+      label: t("crm.contacts.detail.tasks"),
       count: tasks.length,
       content: tasks.length > 0 ? (
         <div className="space-y-2">
@@ -298,12 +300,12 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground py-8 text-center">No tasks linked</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.contacts.detail.noTasks")}</p>
       ),
     },
     {
       value: "emails",
-      label: "Emails",
+      label: t("crm.contacts.detail.emails"),
       content: <EmailList entityType="contact" entityId={contactId} />,
     },
   ];
@@ -326,56 +328,56 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       </div>
 
       <InlineEditField
-        label="First Name"
+        label={t("crm.contacts.fields.firstName")}
         value={contact.first_name}
         type="text"
         onSave={(v) => updateField("first_name", v)}
       />
       <InlineEditField
-        label="Last Name"
+        label={t("crm.contacts.fields.lastName")}
         value={contact.last_name}
         type="text"
         onSave={(v) => updateField("last_name", v)}
       />
       <InlineEditField
-        label="Email"
+        label={t("crm.contacts.fields.email")}
         value={contact.email}
         type="email"
         onSave={(v) => updateField("email", v)}
       />
       <InlineEditField
-        label="Phone"
+        label={t("crm.contacts.fields.phone")}
         value={contact.phone}
         type="tel"
         onSave={(v) => updateField("phone", v)}
       />
       <InlineEditField
-        label="Job Title"
+        label={t("crm.contacts.fields.jobTitle")}
         value={contact.title}
         type="text"
         onSave={(v) => updateField("title", v)}
       />
       <InlineEditField
-        label="Status"
+        label={t("crm.contacts.fields.status")}
         value={contact.status}
         type="select"
         options={[
-          { value: "lead", label: "Lead" },
-          { value: "active", label: "Active" },
-          { value: "inactive", label: "Inactive" },
-          { value: "churned", label: "Churned" },
+          { value: "lead", label: t("crm.contacts.statuses.lead") },
+          { value: "active", label: t("crm.contacts.statuses.active") },
+          { value: "inactive", label: t("crm.contacts.statuses.inactive") },
+          { value: "churned", label: t("crm.contacts.statuses.churned") },
         ]}
         onSave={(v) => updateField("status", v)}
       />
       <InlineEditField
-        label="Source"
+        label={t("crm.contacts.detail.source")}
         value={contact.source}
         type="text"
         onSave={(v) => updateField("source", v)}
       />
 
       <div className="pt-2 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-1">Engagement Score</div>
+        <div className="text-xs text-muted-foreground mb-1">{t("crm.contacts.detail.engagementScore")}</div>
         <div className="text-sm font-semibold">{contact.engagement_score || 0}</div>
       </div>
 
@@ -387,7 +389,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
 
       {contact.companies && (
         <div className="pt-2 border-t border-border">
-          <div className="text-xs text-muted-foreground mb-1">Organization</div>
+          <div className="text-xs text-muted-foreground mb-1">{t("crm.contacts.detail.organization")}</div>
           <Link href={`/dashboard/companies/${contact.companies.id}`} className="text-sm font-medium hover:underline">
             {contact.companies.name}
           </Link>
@@ -395,7 +397,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       )}
 
       <div className="pt-2 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-1">Created</div>
+        <div className="text-xs text-muted-foreground mb-1">{t("crm.contacts.detail.created")}</div>
         <div className="text-sm">
           {contact.created_at ? <TimeAgo date={contact.created_at} /> : "—"}
         </div>
@@ -407,7 +409,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
     <PageContainer>
       <DetailLayout
         breadcrumbs={[
-          { label: "Contacts", href: "/dashboard/contacts" },
+          { label: t("crm.contacts.detail.breadcrumb"), href: "/dashboard/contacts" },
           { label: name },
         ]}
         title={name}
@@ -418,11 +420,11 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
             <PrevNextNav entityType="contacts" currentId={contactId} />
             <Button variant="outline" size="sm" onClick={handleEnrich} disabled={isEnriching}>
               {isEnriching ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Sparkles className="size-3.5 mr-1.5" />}
-              Enrich
+              {t("crm.contacts.detail.enrich")}
             </Button>
             <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
               <Trash2 className="size-3.5 mr-1.5" />
-              Delete
+              {t("crm.contacts.detail.delete")}
             </Button>
           </div>
         }
@@ -434,9 +436,9 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete contact"
-        description={`Are you sure you want to delete ${name}? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("crm.contacts.detail.deleteTitle")}
+        description={t("crm.contacts.detail.deleteConfirm", { name })}
+        confirmLabel={t("crm.contacts.detail.delete")}
         variant="destructive"
         isLoading={isDeleting}
         onConfirm={handleDelete}

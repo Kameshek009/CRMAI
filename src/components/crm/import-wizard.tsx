@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 interface ImportWizardProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface ImportWizardProps {
 }
 
 export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<"paste" | "preview" | "done">("paste");
   const [csv, setCsv] = useState("");
   const [parsed, setParsed] = useState<Record<string, string>[]>([]);
@@ -29,12 +31,12 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
   const parseCsv = () => {
     const lines = csv.trim().split("\n");
     if (lines.length < 2) {
-      toast.error("CSV must have a header row and at least one data row");
+      toast.error(t("crm.import.headerRequired"));
       return;
     }
 
     if (lines.length > 1001) {
-      toast.error("Maximum 1,000 contacts per import");
+      toast.error(t("crm.import.maxRows"));
       return;
     }
 
@@ -42,7 +44,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
 
     const hasNameColumn = headers.some((h) => ["first_name", "name", "email"].includes(h));
     if (!hasNameColumn) {
-      toast.error("CSV must contain at least a 'first_name', 'name', or 'email' column");
+      toast.error(t("crm.import.columnRequired"));
       return;
     }
 
@@ -58,7 +60,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
       });
 
     if (rows.length === 0) {
-      toast.error("No valid data rows found");
+      toast.error(t("crm.import.noValidRows"));
       return;
     }
 
@@ -89,13 +91,13 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
       if (json.success) {
         setImportResult(json.data);
         setStep("done");
-        toast.success(`Imported ${json.data.imported} contacts`);
+        toast.success(t("crm.import.imported", { count: json.data.imported }));
         onComplete?.();
       } else {
-        toast.error(json.error || "Import failed");
+        toast.error(json.error || t("crm.import.failed"));
       }
     } catch {
-      toast.error("Import failed");
+      toast.error(t("crm.import.failed"));
     } finally {
       setIsImporting(false);
     }
@@ -117,7 +119,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Upload className="size-5" />
-            Import Contacts
+            {t("crm.import.title")}
           </DialogTitle>
         </DialogHeader>
 
@@ -125,7 +127,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
           <>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Paste CSV data with columns: first_name, last_name, email, phone, title, company
+                {t("crm.import.csvHint")}
               </p>
               <Textarea
                 value={csv}
@@ -136,8 +138,8 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              <Button onClick={parseCsv} disabled={!csv.trim()}>Preview</Button>
+              <Button variant="outline" onClick={handleClose}>{t("common.cancel")}</Button>
+              <Button onClick={parseCsv} disabled={!csv.trim()}>{t("crm.import.preview")}</Button>
             </DialogFooter>
           </>
         )}
@@ -146,15 +148,15 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
           <>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Found {parsed.length} contact{parsed.length !== 1 ? "s" : ""} to import:
+                {t("crm.import.foundContacts", { count: parsed.length })}
               </p>
               <div className="max-h-60 overflow-auto rounded border">
                 <table className="w-full text-xs">
                   <thead className="bg-muted sticky top-0">
                     <tr>
-                      <th className="text-left p-2">Name</th>
-                      <th className="text-left p-2">Email</th>
-                      <th className="text-left p-2">Company</th>
+                      <th className="text-left p-2">{t("crm.import.name")}</th>
+                      <th className="text-left p-2">{t("crm.import.email")}</th>
+                      <th className="text-left p-2">{t("crm.import.company")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -169,16 +171,16 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
                 </table>
                 {parsed.length > 20 && (
                   <p className="text-xs text-muted-foreground p-2 text-center">
-                    ...and {parsed.length - 20} more
+                    {t("crm.import.andMore", { count: parsed.length - 20 })}
                   </p>
                 )}
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep("paste")}>Back</Button>
+              <Button variant="outline" onClick={() => setStep("paste")}>{t("crm.import.back")}</Button>
               <Button onClick={handleImport} disabled={isImporting}>
                 {isImporting && <Loader2 className="size-4 mr-2 animate-spin" />}
-                Import {parsed.length} Contact{parsed.length !== 1 ? "s" : ""}
+                {t("crm.import.importCount", { count: parsed.length })}
               </Button>
             </DialogFooter>
           </>
@@ -188,13 +190,13 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
           <>
             <div className="text-center py-6 space-y-4">
               <CheckCircle2 className="size-12 text-emerald-500 mx-auto" />
-              <p className="text-lg font-medium">Import Complete</p>
+              <p className="text-lg font-medium">{t("crm.import.complete")}</p>
               <p className="text-sm text-muted-foreground">
-                {importResult.imported} contacts and {importResult.companies} companies imported.
+                {t("crm.import.completeDescription", { imported: importResult.imported, companies: importResult.companies })}
               </p>
             </div>
             <DialogFooter>
-              <Button onClick={handleClose}>Done</Button>
+              <Button onClick={handleClose}>{t("crm.import.done")}</Button>
             </DialogFooter>
           </>
         )}

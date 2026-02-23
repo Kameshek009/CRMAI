@@ -190,11 +190,11 @@ export function CompaniesContent() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Deleted ${ids.length} organization${ids.length !== 1 ? "s" : ""}`);
+        toast.success(t("crm.companies.bulkDeleted", { count: ids.length }));
         setSelectedIds(new Set());
         pageRef.current = 1; fetchCompanies(1, false);
       } else {
-        toast.error(json.error || "Failed to delete");
+        toast.error(json.error || t("crm.companies.bulkDeleteFailed"));
       }
     } finally {
       setIsBulkLoading(false);

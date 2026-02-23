@@ -94,6 +94,11 @@
     "deleteTitle": "Удалить контакты",
     "deleteConfirm": "Вы уверены, что хотите удалить {count} контакт(ов)? Это действие необратимо.",
     "changeStatus": "Изменить статус",
+    "bulkDeleted": "Удалено {count} контакт(ов)",
+    "bulkUpdated": "Обновлено {count} контакт(ов)",
+    "bulkDeleteFailed": "Не удалось удалить контакты",
+    "bulkUpdateFailed": "Не удалось обновить контакты",
+    "failedStatusUpdate": "Не удалось обновить статус",
     "fields": {
       "firstName": "Имя",
       "lastName": "Фамилия",
@@ -121,6 +126,31 @@
     "groupBy": {
       "status": "Статус",
       "source": "Источник"
+    },
+    "detail": {
+      "notFound": "Контакт не найден",
+      "activity": "Активность",
+      "notes": "Заметки",
+      "deals": "Сделки",
+      "tasks": "Задачи",
+      "emails": "Письма",
+      "noActivity": "Нет активности",
+      "noNotes": "Заметок пока нет",
+      "noDeals": "Нет связанных сделок",
+      "noTasks": "Нет связанных задач",
+      "source": "Источник",
+      "engagementScore": "Вовлечённость",
+      "organization": "Организация",
+      "created": "Создан",
+      "enrich": "Обогатить",
+      "delete": "Удалить",
+      "deleteTitle": "Удалить контакт",
+      "deleteConfirm": "Вы уверены, что хотите удалить {name}? Это действие необратимо.",
+      "deleted": "Контакт удалён",
+      "breadcrumb": "Контакты",
+      "enriched": "Обогащено {count} поле(й)",
+      "noEnrichData": "Нет новых данных для применения",
+      "enrichFailed": "Не удалось обогатить"
     }
   },
   "deals": {
@@ -162,6 +192,11 @@
     "deleteTitle": "Удалить сделки",
     "deleteConfirm": "Вы уверены, что хотите удалить {count} сделок? Это действие необратимо.",
     "changeStatus": "Изменить статус",
+    "bulkDeleted": "Удалено {count} сделок",
+    "bulkUpdated": "Обновлено {count} сделок",
+    "bulkDeleteFailed": "Не удалось удалить сделки",
+    "bulkUpdateFailed": "Не удалось обновить сделки",
+    "failedStageUpdate": "Не удалось обновить стадию сделки",
     "detail": {
       "breadcrumb": "Сделки",
       "notFound": "Сделка не найдена",
@@ -217,6 +252,8 @@
     "noGroup": "Нет организаций для группировки",
     "deleteTitle": "Удалить организации",
     "deleteConfirm": "Вы уверены, что хотите удалить {count} организацию(й)?",
+    "bulkDeleted": "Удалено {count} организаций",
+    "bulkDeleteFailed": "Не удалось удалить организации",
     "fields": {
       "name": "Название",
       "companyName": "Название компании",
@@ -237,6 +274,25 @@
     "groupBy": {
       "industry": "Отрасль",
       "size": "Размер"
+    },
+    "detail": {
+      "notFound": "Организация не найдена",
+      "activity": "Активность",
+      "contacts": "Контакты",
+      "deals": "Сделки",
+      "notes": "Заметки",
+      "noActivity": "Нет активности",
+      "noContacts": "Нет связанных контактов",
+      "noDeals": "Нет связанных сделок",
+      "noNotes": "Заметок пока нет",
+      "email": "Email",
+      "created": "Создано",
+      "healthScore": "Рейтинг здоровья",
+      "delete": "Удалить",
+      "deleteTitle": "Удалить организацию",
+      "deleteConfirm": "Вы уверены, что хотите удалить {name}? Это действие необратимо.",
+      "deleted": "Организация удалена",
+      "breadcrumb": "Организации"
     }
   },
   "tasks": {
@@ -504,6 +560,9 @@
     "deleteTitle": "Удалить автоматизацию",
     "deleteConfirm": "Вы уверены, что хотите удалить эту автоматизацию? Это действие необратимо.",
     "deleteLabel": "Удалить",
+    "nameRequired": "Название обязательно",
+    "actionRequired": "Необходимо хотя бы одно действие",
+    "created": "Автоматизация создана",
     "loading": "Загрузка...",
     "actions": "{count} действий",
     "action": "{count} действие",
@@ -676,6 +735,10 @@
     "upgradeToAdd": "Обновить для добавления",
     "noYet": "Рассылок пока нет",
     "noYetDesc": "Создайте первую рассылку для автоматизации.",
+    "nameRequired": "Название рассылки обязательно",
+    "stepRequired": "Добавьте хотя бы один шаг",
+    "subjectRequired": "У всех шагов должна быть тема",
+    "created": "Рассылка создана",
     "create": "Создать рассылку",
     "activated": "Рассылка активирована",
     "pausedMsg": "Рассылка приостановлена",
@@ -697,6 +760,7 @@
     "searchPlaceholder": "Поиск лидов...",
     "noMatching": "Лиды не найдены",
     "noYet": "Лидов пока нет",
+    "failedLoad": "Не удалось загрузить лид",
     "deleteTitle": "Удалить лиды",
     "deleteConfirm": "Вы уверены, что хотите удалить {count} лид(ов)? Это действие необратимо.",
     "deleted": "Удалено {count} лид(ов)",
@@ -739,7 +803,47 @@
       "createDeal": "Создать сделку",
       "dealTitle": "Название сделки",
       "dealValue": "Сумма сделки",
-      "dealStage": "Стадия воронки"
+      "dealStage": "Стадия воронки",
+      "failed": "Не удалось конвертировать"
     }
+  },
+  "emails": {
+    "loading": "Загрузка писем...",
+    "noEmails": "Писем пока нет",
+    "compose": "Написать",
+    "toAndFromRequired": "Поля «Кому» и «От кого» обязательны",
+    "logged": "Письмо записано",
+    "failedSend": "Не удалось отправить письмо",
+    "composeTitle": "Написать письмо",
+    "selectTemplate": "Выберите шаблон",
+    "useTemplate": "Использовать шаблон",
+    "from": "От кого",
+    "to": "Кому",
+    "subject": "Тема",
+    "body": "Текст",
+    "bodyPlaceholder": "Напишите ваше письмо...",
+    "sending": "Отправка...",
+    "send": "Отправить"
+  },
+  "import": {
+    "headerRequired": "CSV должен содержать заголовок и хотя бы одну строку данных",
+    "maxRows": "Максимум 1 000 контактов за импорт",
+    "columnRequired": "CSV должен содержать столбец 'first_name', 'name' или 'email'",
+    "noValidRows": "Допустимых строк данных не найдено",
+    "imported": "Импортировано {count} контактов",
+    "failed": "Ошибка импорта",
+    "title": "Импорт контактов",
+    "csvHint": "Вставьте CSV данные со столбцами: first_name, last_name, email, phone, title, company",
+    "preview": "Предпросмотр",
+    "foundContacts": "Найдено {count} контакт(ов) для импорта:",
+    "name": "Имя",
+    "email": "Email",
+    "company": "Компания",
+    "andMore": "...и ещё {count}",
+    "back": "Назад",
+    "importCount": "Импортировать {count} контакт(ов)",
+    "complete": "Импорт завершён",
+    "completeDescription": "Импортировано {imported} контактов и {companies} компаний.",
+    "done": "Готово"
   }
 }

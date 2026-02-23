@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 import type { TeamPermissions } from "@/types/team";
 
 interface RoleEditorProps {
@@ -65,6 +66,7 @@ const DEFAULT_PERMISSIONS: TeamPermissions = {
 };
 
 export function RoleEditor({ open, onOpenChange, teamId, role, onSaved }: RoleEditorProps) {
+  const { t } = useTranslation();
   const isNew = !role;
   const [name, setName] = useState(role?.name || "");
   const [color, setColor] = useState(role?.color || "#6b7280");
@@ -101,14 +103,14 @@ export function RoleEditor({ open, onOpenChange, teamId, role, onSaved }: RoleEd
 
       const json = await res.json();
       if (json.success) {
-        toast.success(isNew ? "Role created" : "Role updated");
+        toast.success(isNew ? t("team.roles.created") : t("team.roles.updated"));
         onSaved();
         onOpenChange(false);
       } else {
-        toast.error(json.error || "Failed to save");
+        toast.error(json.error || t("common.failedSave"));
       }
     } catch {
-      toast.error("Failed to save role");
+      toast.error(t("team.roles.failedSave"));
     } finally {
       setSaving(false);
     }

@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { FileText } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface EmailTemplate {
   id: string;
@@ -53,6 +54,7 @@ export function EmailComposer({
   onSent,
   templateContext,
 }: EmailComposerProps) {
+  const { t } = useTranslation();
   const [to, setTo] = useState(defaultTo || "");
   const [from, setFrom] = useState(defaultFrom || "");
   const [subject, setSubject] = useState("");
@@ -81,7 +83,7 @@ export function EmailComposer({
 
   const handleSend = async () => {
     if (!to.trim() || !from.trim()) {
-      toast.error("To and From are required");
+      toast.error(t("crm.emails.toAndFromRequired"));
       return;
     }
 
@@ -106,14 +108,14 @@ export function EmailComposer({
       });
       const json = await res.json();
       if (json.success) {
-        toast.success("Email logged");
+        toast.success(t("crm.emails.logged"));
         setTo(defaultTo || "");
         setSubject("");
         setBody("");
         onOpenChange(false);
         onSent?.();
       } else {
-        toast.error(json.error || "Failed to send email");
+        toast.error(json.error || t("crm.emails.failedSend"));
       }
     } finally {
       setIsSending(false);
@@ -124,7 +126,7 @@ export function EmailComposer({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle className="text-base">Compose Email</DialogTitle>
+          <DialogTitle className="text-base">{t("crm.emails.composeTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           {/* Template selector */}
@@ -133,7 +135,7 @@ export function EmailComposer({
               {showTemplates ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs text-muted-foreground">Select a template</Label>
+                    <Label className="text-xs text-muted-foreground">{t("crm.emails.selectTemplate")}</Label>
                     <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setShowTemplates(false)}>
                       Cancel
                     </Button>
@@ -154,38 +156,38 @@ export function EmailComposer({
               ) : (
                 <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" onClick={() => setShowTemplates(true)}>
                   <FileText className="size-3" />
-                  Use Template
+                  {t("crm.emails.useTemplate")}
                 </Button>
               )}
             </div>
           )}
 
           <div className="space-y-2">
-            <Label className="text-sm">From</Label>
+            <Label className="text-sm">{t("crm.emails.from")}</Label>
             <Input value={from} onChange={(e) => setFrom(e.target.value)} placeholder="you@company.com" />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm">To</Label>
+            <Label className="text-sm">{t("crm.emails.to")}</Label>
             <Input value={to} onChange={(e) => setTo(e.target.value)} placeholder="recipient@example.com" />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm">Subject</Label>
+            <Label className="text-sm">{t("crm.emails.subject")}</Label>
             <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm">Body</Label>
+            <Label className="text-sm">{t("crm.emails.body")}</Label>
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Write your email..."
+              placeholder={t("crm.emails.bodyPlaceholder")}
               rows={8}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
           <Button size="sm" onClick={handleSend} disabled={isSending}>
-            {isSending ? "Sending..." : "Send"}
+            {isSending ? t("crm.emails.sending") : t("crm.emails.send")}
           </Button>
         </DialogFooter>
       </DialogContent>

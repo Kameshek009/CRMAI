@@ -266,7 +266,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       if (json.success) {
         toastWithUndo(t("crm.deals.detail.dealDeleted"), "deals", dealId, () => {
           router.push(`/dashboard/deals/${dealId}`);
-        });
+        }, { undo: t("common.undo"), restored: t("common.restored"), failedRestore: t("common.failedRestore") });
         router.push("/dashboard/deals");
       } else {
         toast.error(t("crm.deals.detail.failedDelete"));

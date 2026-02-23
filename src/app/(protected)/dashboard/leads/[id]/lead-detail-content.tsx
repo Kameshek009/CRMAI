@@ -75,7 +75,7 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
         setLead(json.data);
         setEditData(json.data);
       } else {
-        toast.error(json.error || "Failed to load lead");
+        toast.error(json.error || t("crm.leads.failedLoad"));
       }
     } finally {
       setIsLoading(false);
@@ -109,7 +109,7 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
         toast.success(t("crm.leads.saved"));
         setLead(json.data);
       } else {
-        toast.error(json.error || "Failed to save");
+        toast.error(json.error || t("common.failedSave"));
       }
     } finally {
       setIsSaving(false);
@@ -157,7 +157,7 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
           fetchLead();
         }
       } else {
-        toast.error(json.error || "Conversion failed");
+        toast.error(json.error || t("crm.leads.convert.failed"));
       }
     } finally {
       setIsConverting(false);

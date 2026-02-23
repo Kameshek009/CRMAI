@@ -28,7 +28,7 @@ export function ExportSection() {
         if (json?.error === "No data to export") {
           toast.error(t("settings.export.noData"));
         } else {
-          toast.error(json?.error || "Export failed");
+          toast.error(json?.error || t("settings.export.failed"));
         }
         return;
       }
@@ -45,7 +45,7 @@ export function ExportSection() {
 
       toast.success(t("settings.export.exported", { entity }));
     } catch {
-      toast.error("Export failed");
+      toast.error(t("settings.export.failed"));
     } finally {
       setLoadingEntity(null);
     }

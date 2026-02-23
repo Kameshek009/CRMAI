@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 import type { Chat } from '@/lib/supabase/types';
 
 interface ChatHeaderProps {
@@ -31,6 +32,7 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ chat, onChatUpdate, onDelete, onSearchToggle }: ChatHeaderProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(chat.title || '');
 
@@ -55,12 +57,12 @@ export function ChatHeader({ chat, onChatUpdate, onDelete, onSearchToggle }: Cha
       const result = await res.json();
       if (result.success) {
         onChatUpdate({ ...chat, title: trimmed });
-        toast.success('Chat renamed');
+        toast.success(t('chat.renamed'));
       } else {
-        toast.error('Failed to rename chat');
+        toast.error(t('chat.failedRename'));
       }
     } catch {
-      toast.error('Failed to rename chat');
+      toast.error(t('chat.failedRename'));
     }
     setIsEditing(false);
   };
@@ -144,11 +146,11 @@ export function ChatHeader({ chat, onChatUpdate, onDelete, onSearchToggle }: Cha
               setIsEditing(true);
             }}>
               <Edit2 className="mr-2 h-4 w-4" />
-              Rename
+              {t("common.edit")}
             </DropdownMenuItem>
             <DropdownMenuItem className="text-destructive" onClick={onDelete}>
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              {t("common.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

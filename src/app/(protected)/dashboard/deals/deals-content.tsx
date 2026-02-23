@@ -202,7 +202,7 @@ export function DealsContent() {
       body: JSON.stringify({ stage_id: toStageId }),
     });
     if (!res.ok) {
-      toast.error("Failed to update deal stage");
+      toast.error(t("crm.deals.failedStageUpdate"));
       pageRef.current = 1; fetchDeals(1, false);
     }
   };
@@ -248,11 +248,11 @@ export function DealsContent() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Deleted ${ids.length} deal${ids.length !== 1 ? "s" : ""}`);
+        toast.success(t("crm.deals.bulkDeleted", { count: ids.length }));
         setSelectedIds(new Set());
         pageRef.current = 1; fetchDeals(1, false);
       } else {
-        toast.error(json.error || "Failed to delete deals");
+        toast.error(json.error || t("crm.deals.bulkDeleteFailed"));
       }
     } finally {
       setIsBulkLoading(false);
@@ -271,11 +271,11 @@ export function DealsContent() {
       });
       const json = await res.json();
       if (json.success) {
-        toast.success(`Updated ${ids.length} deal${ids.length !== 1 ? "s" : ""}`);
+        toast.success(t("crm.deals.bulkUpdated", { count: ids.length }));
         setSelectedIds(new Set());
         pageRef.current = 1; fetchDeals(1, false);
       } else {
-        toast.error(json.error || "Failed to update deals");
+        toast.error(json.error || t("crm.deals.bulkUpdateFailed"));
       }
     } finally {
       setIsBulkLoading(false);

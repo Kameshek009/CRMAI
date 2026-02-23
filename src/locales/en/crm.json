@@ -94,6 +94,11 @@
     "deleteTitle": "Delete contacts",
     "deleteConfirm": "Are you sure you want to delete {count} contact(s)? This action cannot be undone.",
     "changeStatus": "Change Status",
+    "bulkDeleted": "Deleted {count} contact(s)",
+    "bulkUpdated": "Updated {count} contact(s)",
+    "bulkDeleteFailed": "Failed to delete contacts",
+    "bulkUpdateFailed": "Failed to update contacts",
+    "failedStatusUpdate": "Failed to update status",
     "fields": {
       "firstName": "First Name",
       "lastName": "Last Name",
@@ -121,6 +126,31 @@
     "groupBy": {
       "status": "Status",
       "source": "Source"
+    },
+    "detail": {
+      "notFound": "Contact not found",
+      "activity": "Activity",
+      "notes": "Notes",
+      "deals": "Deals",
+      "tasks": "Tasks",
+      "emails": "Emails",
+      "noActivity": "No activity yet",
+      "noNotes": "No notes yet",
+      "noDeals": "No deals linked",
+      "noTasks": "No tasks linked",
+      "source": "Source",
+      "engagementScore": "Engagement Score",
+      "organization": "Organization",
+      "created": "Created",
+      "enrich": "Enrich",
+      "delete": "Delete",
+      "deleteTitle": "Delete contact",
+      "deleteConfirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "deleted": "Contact deleted",
+      "breadcrumb": "Contacts",
+      "enriched": "Enriched {count} field(s)",
+      "noEnrichData": "No new data to apply",
+      "enrichFailed": "Enrichment failed"
     }
   },
   "deals": {
@@ -162,6 +192,11 @@
     "deleteTitle": "Delete deals",
     "deleteConfirm": "Are you sure you want to delete {count} deal(s)? This action cannot be undone.",
     "changeStatus": "Change Status",
+    "bulkDeleted": "Deleted {count} deal(s)",
+    "bulkUpdated": "Updated {count} deal(s)",
+    "bulkDeleteFailed": "Failed to delete deals",
+    "bulkUpdateFailed": "Failed to update deals",
+    "failedStageUpdate": "Failed to update deal stage",
     "detail": {
       "breadcrumb": "Deals",
       "notFound": "Deal not found",
@@ -217,6 +252,8 @@
     "noGroup": "No organizations to group",
     "deleteTitle": "Delete organizations",
     "deleteConfirm": "Are you sure you want to delete {count} organization(s)?",
+    "bulkDeleted": "Deleted {count} organization(s)",
+    "bulkDeleteFailed": "Failed to delete organizations",
     "fields": {
       "name": "Name",
       "companyName": "Company Name",
@@ -237,6 +274,25 @@
     "groupBy": {
       "industry": "Industry",
       "size": "Size"
+    },
+    "detail": {
+      "notFound": "Organization not found",
+      "activity": "Activity",
+      "contacts": "Contacts",
+      "deals": "Deals",
+      "notes": "Notes",
+      "noActivity": "No activity yet",
+      "noContacts": "No contacts linked",
+      "noDeals": "No deals linked",
+      "noNotes": "No notes yet",
+      "email": "Email",
+      "created": "Created",
+      "healthScore": "Health Score",
+      "delete": "Delete",
+      "deleteTitle": "Delete organization",
+      "deleteConfirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "deleted": "Organization deleted",
+      "breadcrumb": "Organizations"
     }
   },
   "tasks": {
@@ -504,6 +560,9 @@
     "deleteTitle": "Delete automation",
     "deleteConfirm": "Are you sure you want to delete this automation? This action cannot be undone.",
     "deleteLabel": "Delete",
+    "nameRequired": "Name is required",
+    "actionRequired": "At least one action is required",
+    "created": "Automation created",
     "loading": "Loading...",
     "actions": "{count} actions",
     "action": "{count} action",
@@ -676,6 +735,10 @@
     "upgradeToAdd": "Upgrade to Add",
     "noYet": "No sequences yet",
     "noYetDesc": "Create your first email sequence to automate follow-ups.",
+    "nameRequired": "Sequence name is required",
+    "stepRequired": "Add at least one step",
+    "subjectRequired": "All steps need a subject",
+    "created": "Sequence created",
     "create": "Create Sequence",
     "activated": "Sequence activated",
     "pausedMsg": "Sequence paused",
@@ -697,6 +760,7 @@
     "searchPlaceholder": "Search leads...",
     "noMatching": "No matching leads",
     "noYet": "No leads yet",
+    "failedLoad": "Failed to load lead",
     "deleteTitle": "Delete leads",
     "deleteConfirm": "Are you sure you want to delete {count} lead(s)? This action cannot be undone.",
     "deleted": "Deleted {count} lead(s)",
@@ -739,7 +803,47 @@
       "createDeal": "Create Deal",
       "dealTitle": "Deal Title",
       "dealValue": "Deal Value",
-      "dealStage": "Pipeline Stage"
+      "dealStage": "Pipeline Stage",
+      "failed": "Conversion failed"
     }
+  },
+  "emails": {
+    "loading": "Loading emails...",
+    "noEmails": "No emails yet",
+    "compose": "Compose",
+    "toAndFromRequired": "To and From are required",
+    "logged": "Email logged",
+    "failedSend": "Failed to send email",
+    "composeTitle": "Compose Email",
+    "selectTemplate": "Select a template",
+    "useTemplate": "Use Template",
+    "from": "From",
+    "to": "To",
+    "subject": "Subject",
+    "body": "Body",
+    "bodyPlaceholder": "Write your email...",
+    "sending": "Sending...",
+    "send": "Send"
+  },
+  "import": {
+    "headerRequired": "CSV must have a header row and at least one data row",
+    "maxRows": "Maximum 1,000 contacts per import",
+    "columnRequired": "CSV must contain at least a 'first_name', 'name', or 'email' column",
+    "noValidRows": "No valid data rows found",
+    "imported": "Imported {count} contacts",
+    "failed": "Import failed",
+    "title": "Import Contacts",
+    "csvHint": "Paste CSV data with columns: first_name, last_name, email, phone, title, company",
+    "preview": "Preview",
+    "foundContacts": "Found {count} contact(s) to import:",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "andMore": "...and {count} more",
+    "back": "Back",
+    "importCount": "Import {count} Contact(s)",
+    "complete": "Import Complete",
+    "completeDescription": "{imported} contacts and {companies} companies imported.",
+    "done": "Done"
   }
 }

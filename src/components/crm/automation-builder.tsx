@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 
@@ -65,6 +66,7 @@ interface ActionForm {
 const selectClasses = "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationBuilderProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [triggerType, setTriggerType] = useState("record_created");
   const [entityType, setEntityType] = useState("contact");
@@ -90,11 +92,11 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error("Name is required");
+      toast.error(t("crm.automations.nameRequired"));
       return;
     }
     if (actions.length === 0) {
-      toast.error("At least one action is required");
+      toast.error(t("crm.automations.actionRequired"));
       return;
     }
 
@@ -123,7 +125,7 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
       });
       const json = await res.json();
       if (json.success) {
-        toast.success("Automation created");
+        toast.success(t("crm.automations.created"));
         useFeatureLimitStore.getState().incrementUsage("activeAutomations");
         reset();
         onCreated();

@@ -169,7 +169,7 @@ export function SidebarSection() {
       setPendingChanges({});
       toast.success(t("settings.sidebar.saved"));
     } catch {
-      toast.error("Failed to save");
+      toast.error(t("common.failedSave"));
     } finally {
       setSaving(false);
     }
@@ -211,7 +211,7 @@ export function SidebarSection() {
         toast.error(json.error || "Failed to save");
       }
     } catch {
-      toast.error("Failed to save");
+      toast.error(t("common.failedSave"));
     } finally {
       setSaving(false);
     }

@@ -10,8 +10,10 @@ import { Progress } from "@/components/ui/progress";
 import { Users, Shield, Link2, Crown, Undo2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 export function TeamContent() {
+  const { t } = useTranslation();
   const { currentWorkspace, workspaces, deletedWorkspaces, myRole, isOwner, can, refetch, switchWorkspace } = useWorkspace();
   const [inviteCode, setInviteCode] = useState(currentWorkspace?.inviteCode || "");
   const [memberCount, setMemberCount] = useState<number | null>(null);
@@ -35,10 +37,10 @@ export function TeamContent() {
       const res = await fetch(`/api/teams/${wsId}/restore`, { method: "POST" });
       const json = await res.json();
       if (json.success) {
-        toast.success("Workspace restored!");
+        toast.success(t("team.overview.restored"));
         await refetch();
       } else {
-        toast.error(json.error || "Failed to restore");
+        toast.error(json.error || t("team.overview.failedRestore"));
       }
     } finally {
       setRestoring(null);
@@ -49,7 +51,7 @@ export function TeamContent() {
   if (!currentWorkspace) {
     return (
       <PageContainer>
-        <PageHeader title="Workspace" description={deletedWorkspaces.length > 0 ? "Your workspace was deleted" : "No workspace selected"} />
+        <PageHeader title={t("team.overview.title")} description={deletedWorkspaces.length > 0 ? t("team.overview.deleted") : t("team.overview.noWorkspace")} />
         <div className="space-y-4 max-w-lg">
           {/* Deleted workspaces — restore option */}
           {deletedWorkspaces.map((dw) => {
@@ -62,7 +64,7 @@ export function TeamContent() {
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{dw.workspace.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Deleted — restore available for {hoursLeft}h
+                      {t("team.overview.deletedRestore", { hours: hoursLeft })}
                     </p>
                   </div>
                   <Button
@@ -72,7 +74,7 @@ export function TeamContent() {
                     disabled={restoring === dw.workspace.id}
                   >
                     <Undo2 className="size-3.5 mr-2" />
-                    {restoring === dw.workspace.id ? "Restoring..." : "Restore"}
+                    {restoring === dw.workspace.id ? t("team.overview.restoring") : t("team.overview.restore")}
                   </Button>
                 </CardContent>
               </Card>
@@ -82,7 +84,7 @@ export function TeamContent() {
           {workspaces.length > 0 && (
             <>
               {deletedWorkspaces.length > 0 && (
-                <p className="text-sm text-muted-foreground pt-2">Or switch to an active workspace:</p>
+                <p className="text-sm text-muted-foreground pt-2">{t("team.overview.switchPrompt")}</p>
               )}
               {workspaces.map((wm) => (
                 <Card key={wm.workspace.id}>
@@ -95,7 +97,7 @@ export function TeamContent() {
                       size="sm"
                       onClick={() => { switchWorkspace(wm.workspace.id).then(() => refetch()); }}
                     >
-                      Switch
+                      {t("team.overview.switch")}
                     </Button>
                   </CardContent>
                 </Card>
@@ -111,14 +113,14 @@ export function TeamContent() {
 
   return (
     <PageContainer>
-      <PageHeader title={currentWorkspace.name} description={currentWorkspace.description || "Workspace overview"}>
+      <PageHeader title={currentWorkspace.name} description={currentWorkspace.description || t("team.overview.workspaceOverview")}>
         {myRole && <RoleBadge name={myRole.name} color={myRole.color} />}
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Members</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("team.overview.members")}</CardTitle>
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -127,17 +129,17 @@ export function TeamContent() {
               {memberCount !== null && currentWorkspace.maxMembers <= 1000 ? (
                 <>
                   <Progress value={Math.round((memberCount / currentWorkspace.maxMembers) * 100)} className="h-1.5" />
-                  <p className="text-xs text-muted-foreground">{memberCount} / {currentWorkspace.maxMembers} slots</p>
+                  <p className="text-xs text-muted-foreground">{t("team.overview.slots", { count: memberCount, max: currentWorkspace.maxMembers })}</p>
                 </>
               ) : (
-                <p className="text-xs text-muted-foreground">Unlimited</p>
+                <p className="text-xs text-muted-foreground">{t("team.overview.unlimited")}</p>
               )}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Your Role</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("team.overview.yourRole")}</CardTitle>
             <Shield className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -146,30 +148,30 @@ export function TeamContent() {
               {currentMembership?.isOwner && <Crown className="size-4 text-amber-500" />}
             </div>
             <p className="text-xs text-muted-foreground">
-              {currentMembership?.isOwner ? "Owner" : `Priority ${myRole?.priority || 0}`}
+              {currentMembership?.isOwner ? t("team.overview.owner") : t("team.overview.priority", { value: myRole?.priority || 0 })}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Workspaces</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("team.overview.workspaces")}</CardTitle>
             <Link2 className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{workspaces.length}</div>
-            <p className="text-xs text-muted-foreground">Joined workspaces</p>
+            <p className="text-xs text-muted-foreground">{t("team.overview.joinedWorkspaces")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Joined</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("team.overview.joined")}</CardTitle>
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {currentMembership?.joinedAt ? new Date(currentMembership.joinedAt).toLocaleDateString() : "—"}
             </div>
-            <p className="text-xs text-muted-foreground">Member since</p>
+            <p className="text-xs text-muted-foreground">{t("team.overview.memberSince")}</p>
           </CardContent>
         </Card>
       </div>
@@ -177,11 +179,11 @@ export function TeamContent() {
       {can("team_settings.manage") && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle className="text-base">Invite Code</CardTitle>
+            <CardTitle className="text-base">{t("team.overview.inviteCode")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Share this code with people you want to invite to your workspace.
+              {t("team.overview.inviteCodeDescription")}
             </p>
             <InviteCodeDisplay
               code={inviteCode || currentWorkspace.inviteCode}

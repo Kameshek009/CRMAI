@@ -18,5 +18,7 @@
   "attachedFile": "Attached file:",
   "dailyLimitMessage": "Daily token limit reached. The limit will reset automatically — see the timer below.",
   "aiError": "Sorry, something went wrong. Please try again.",
-  "aiTimeout": "AI request timed out. Please try again."
+  "aiTimeout": "AI request timed out. Please try again.",
+  "renamed": "Chat renamed",
+  "failedRename": "Failed to rename chat"
 }

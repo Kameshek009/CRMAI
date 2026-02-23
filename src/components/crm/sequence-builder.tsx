@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, ArrowDown, Clock, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 
@@ -30,6 +31,7 @@ interface SequenceBuilderProps {
 }
 
 export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuilderProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [steps, setSteps] = useState<Step[]>([
     { delay_days: 0, subject: "", body: "" },
@@ -52,15 +54,15 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast.error("Sequence name is required");
+      toast.error(t("crm.sequences.nameRequired"));
       return;
     }
     if (steps.length === 0) {
-      toast.error("Add at least one step");
+      toast.error(t("crm.sequences.stepRequired"));
       return;
     }
     if (steps.some((s) => !s.subject.trim())) {
-      toast.error("All steps need a subject");
+      toast.error(t("crm.sequences.subjectRequired"));
       return;
     }
 
@@ -95,7 +97,7 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
         });
       }
 
-      toast.success("Sequence created");
+      toast.success(t("crm.sequences.created"));
       useFeatureLimitStore.getState().incrementUsage("emailSequences");
       setName("");
       setSteps([{ delay_days: 0, subject: "", body: "" }]);

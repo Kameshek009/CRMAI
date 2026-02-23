@@ -221,7 +221,8 @@
     "tasksDescription": "Download all tasks for your current team",
     "exporting": "Exporting...",
     "exported": "{entity} exported successfully",
-    "noData": "No data to export"
+    "noData": "No data to export",
+    "failed": "Export failed"
   },
   "integrations": {
     "title": "Integrations",

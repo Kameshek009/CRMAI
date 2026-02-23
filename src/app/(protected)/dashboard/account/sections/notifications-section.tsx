@@ -64,11 +64,11 @@ export function NotificationsSection() {
         toast.success(t("settings.notifications.saved"));
       } else {
         setPrefs((prev) => ({ ...prev, [key]: !value }));
-        toast.error(json.error || "Failed to save");
+        toast.error(json.error || t("common.failedSave"));
       }
     } catch {
       setPrefs((prev) => ({ ...prev, [key]: !value }));
-      toast.error("Failed to save");
+      toast.error(t("common.failedSave"));
     }
   }, [t]);
 
