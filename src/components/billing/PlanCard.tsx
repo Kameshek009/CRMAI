@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { SubscriptionTier, TIER_LIMITS } from "@/types";
 
 interface PlanCardProps {
@@ -15,7 +16,7 @@ interface PlanCardProps {
   className?: string;
 }
 
-const tierConfig: Record<
+function getTierConfig(t: (key: string, params?: Record<string, string | number>) => string): Record<
   Exclude<SubscriptionTier, "enterprise">,
   {
     name: string;
@@ -23,41 +24,43 @@ const tierConfig: Record<
     features: string[];
     popular?: boolean;
   }
-> = {
-  free: {
-    name: "Free",
-    description: "Perfect for trying out NexusCRM",
-    features: [
-      "50K tokens per month",
-      "10K tokens/day limit",
-      "Basic AI assistance",
-      "Email support",
-    ],
-  },
-  pro: {
-    name: "Pro",
-    description: "For professionals who need more power",
-    features: [
-      "500K tokens per month",
-      "100K tokens/day limit",
-      "Priority AI processing",
-      "Priority support",
-      "Advanced features",
-    ],
-    popular: true,
-  },
-  max: {
-    name: "Max",
-    description: "Maximum power for power users",
-    features: [
-      "1.5M tokens per month",
-      "300K tokens/day limit",
-      "Fastest AI processing",
-      "Dedicated support",
-      "All Pro features",
-    ],
-  },
-};
+> {
+  return {
+    free: {
+      name: t("billing.plans.free"),
+      description: t("billing.plans.freeDescription"),
+      features: [
+        t("billing.features.tokensPerMonth", { count: "50K" }),
+        t("billing.features.tokensDayLimit", { count: "10K" }),
+        t("billing.features.basicAi"),
+        t("billing.features.emailSupport"),
+      ],
+    },
+    pro: {
+      name: t("billing.plans.pro"),
+      description: t("billing.plans.proDescription"),
+      features: [
+        t("billing.features.tokensPerMonth", { count: "500K" }),
+        t("billing.features.tokensDayLimit", { count: "100K" }),
+        t("billing.features.priorityAi"),
+        t("billing.features.prioritySupport"),
+        t("billing.features.advancedFeatures"),
+      ],
+      popular: true,
+    },
+    max: {
+      name: t("billing.plans.max"),
+      description: t("billing.plans.maxDescription"),
+      features: [
+        t("billing.features.tokensPerMonth", { count: "1.5M" }),
+        t("billing.features.tokensDayLimit", { count: "300K" }),
+        t("billing.features.fastestAi"),
+        t("billing.features.dedicatedSupport"),
+        t("billing.features.allProFeatures"),
+      ],
+    },
+  };
+}
 
 export function PlanCard({
   tier,
@@ -66,6 +69,8 @@ export function PlanCard({
   isLoading,
   className,
 }: PlanCardProps) {
+  const { t } = useTranslation();
+  const tierConfig = getTierConfig(t);
   const config = tierConfig[tier];
   const limits = TIER_LIMITS[tier];
 
@@ -105,7 +110,7 @@ export function PlanCard({
           className="absolute -top-2.5 left-1/2 -translate-x-1/2"
           variant="default"
         >
-          Most Popular
+          {t("billing.planCard.mostPopular")}
         </Badge>
       )}
 
@@ -119,14 +124,14 @@ export function PlanCard({
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-bold">{formatPrice()}</span>
           <span className="text-muted-foreground">
-            {limits.priceMonthly ? "/user/mo" : "forever"}
+            {limits.priceMonthly ? t("billing.planCard.perSeatMonth") : t("billing.planCard.forever")}
           </span>
         </div>
 
         {/* Token limit highlight */}
         <div className="rounded-xl bg-secondary p-4">
-          <p className="text-sm text-muted-foreground">Includes</p>
-          <p className="text-lg font-semibold mt-1">{formatTokens()} tokens/month</p>
+          <p className="text-sm text-muted-foreground">{t("billing.planCard.includes")}</p>
+          <p className="text-lg font-semibold mt-1">{formatTokens()} {t("billing.planCard.tokensMonth")}</p>
         </div>
 
         {/* Features */}
@@ -144,11 +149,11 @@ export function PlanCard({
         {isCurrent ? (
           <Button variant="outline" className="w-full" disabled>
             <Check className="mr-2 size-4" />
-            Current Plan
+            {t("billing.planCard.currentPlan")}
           </Button>
         ) : isDowngrade ? (
           <Button variant="outline" className="w-full" disabled>
-            Downgrade via Portal
+            {t("billing.planCard.downgradeViaPortal")}
           </Button>
         ) : (
           <Button
@@ -159,7 +164,7 @@ export function PlanCard({
             {isLoading ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : null}
-            {isUpgrade ? `Upgrade to ${config.name}` : `Choose ${config.name}`}
+            {isUpgrade ? t("billing.planCard.upgradeTo", { plan: config.name }) : t("billing.planCard.choose", { plan: config.name })}
           </Button>
         )}
       </CardFooter>
