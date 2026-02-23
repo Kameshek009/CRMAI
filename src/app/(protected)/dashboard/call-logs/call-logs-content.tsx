@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/frappe/status-badge";
 import { EntityForm } from "@/components/crm/entity-form";
 import { getCallLogFields } from "@/lib/crm/field-definitions";
 import { PhoneIncoming, PhoneOutgoing } from "lucide-react";
+import { TimeAgo } from "@/components/ui/time-ago";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
 import type { ViewMode } from "@/types/crm";
@@ -186,7 +187,7 @@ export function CallLogsContent() {
     },
     {
       key: "created_at", label: t("crm.callLogs.fields.date"), sortable: true,
-      render: (c) => new Date(c.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
+      render: (c) => <TimeAgo date={c.created_at} className="text-sm" />,
     },
   ], [t]);
 

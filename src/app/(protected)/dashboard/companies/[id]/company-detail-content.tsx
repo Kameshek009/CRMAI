@@ -13,10 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, Users, Handshake, Trash2 } from "lucide-react";
+import { TimeAgo } from "@/components/ui/time-ago";
+import { CopyButton } from "@/components/ui/copy-button";
 import { toast } from "sonner";
+import { toastWithUndo } from "@/lib/crm/toast-undo";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
+import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -155,7 +159,9 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       const res = await fetch(`/api/crm/companies/${companyId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        toast.success("Organization deleted");
+        toastWithUndo("Organization deleted", "companies", companyId, () => {
+          router.push(`/dashboard/companies/${companyId}`);
+        });
         router.push("/dashboard/companies");
       } else {
         toast.error("Failed to delete");
@@ -229,7 +235,12 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
                   {c.title && <p className="text-xs text-muted-foreground">{c.title}</p>}
                 </div>
               </div>
-              {c.email && <span className="text-xs text-muted-foreground">{c.email}</span>}
+              {c.email && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  {c.email}
+                  <CopyButton value={c.email} />
+                </span>
+              )}
             </Link>
           ))}
         </div>
@@ -274,9 +285,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
           {notes.map(note => (
             <div key={note.id} className="border-l-2 border-muted-foreground/20 pl-4 py-2">
               <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date(note.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-              </p>
+              <TimeAgo date={note.created_at} className="text-xs text-muted-foreground mt-1" />
             </div>
           ))}
           {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No notes yet</p>}
@@ -293,7 +302,12 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
         </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold truncate">{company.name}</p>
-          {company.domain && <p className="text-xs text-muted-foreground truncate">{company.domain}</p>}
+          {company.domain && (
+            <div className="flex items-center gap-1 min-w-0">
+              <p className="text-xs text-muted-foreground truncate">{company.domain}</p>
+              <CopyButton value={company.domain} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -376,9 +390,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       <div className="pt-2 border-t border-border">
         <div className="text-xs text-muted-foreground mb-1">Created</div>
         <div className="text-sm">
-          {company.created_at
-            ? new Date(company.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-            : "—"}
+          {company.created_at ? <TimeAgo date={company.created_at} /> : "—"}
         </div>
       </div>
     </>
@@ -399,10 +411,13 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
           </span>
         }
         actions={
-          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
-            <Trash2 className="size-3.5 mr-1.5" />
-            Delete
-          </Button>
+          <div className="flex items-center gap-2">
+            <PrevNextNav entityType="companies" currentId={companyId} />
+            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="size-3.5 mr-1.5" />
+              Delete
+            </Button>
+          </div>
         }
         tabs={tabs}
         defaultTab="activity"

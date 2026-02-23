@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { ArrowUp, ArrowDown, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
 
 // ============================================================================
@@ -75,6 +75,7 @@ export function DataTable<T extends { id: string }>({
   const { t } = useTranslation();
   const resolvedEmptyMessage = emptyMessage || t("crm.dataTable.noData");
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   const allSelected = useMemo(
     () => data.length > 0 && data.every((item) => selectedIds.has(item.id)),
@@ -91,17 +92,28 @@ export function DataTable<T extends { id: string }>({
   }, [allSelected, data, onSelectionChange]);
 
   const handleSelectRow = useCallback(
-    (id: string) => {
+    (id: string, index: number, shiftKey: boolean) => {
       if (!onSelectionChange) return;
       const next = new Set(selectedIds);
-      if (next.has(id)) {
-        next.delete(id);
+
+      if (shiftKey && lastSelectedIndex !== null) {
+        const start = Math.min(lastSelectedIndex, index);
+        const end = Math.max(lastSelectedIndex, index);
+        for (let i = start; i <= end; i++) {
+          next.add(data[i].id);
+        }
       } else {
-        next.add(id);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
       }
+
+      setLastSelectedIndex(index);
       onSelectionChange(next);
     },
-    [selectedIds, onSelectionChange]
+    [selectedIds, onSelectionChange, lastSelectedIndex, data]
   );
 
   const handleSort = useCallback(
@@ -145,7 +157,7 @@ export function DataTable<T extends { id: string }>({
       <div className="overflow-x-auto">
         <table className="w-full">
           {/* Header */}
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr className="border-b border-border bg-muted/50">
               {selectable && (
                 <th className="w-10 px-3 py-2">
@@ -211,7 +223,7 @@ export function DataTable<T extends { id: string }>({
                 </td>
               </tr>
             ) : (
-              data.map((item) => (
+              data.map((item, rowIndex) => (
                 <tr
                   key={item.id}
                   className={cn(
@@ -222,10 +234,13 @@ export function DataTable<T extends { id: string }>({
                   onClick={() => onRowClick?.(item)}
                 >
                   {selectable && (
-                    <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-3 py-2.5" onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectRow(item.id, rowIndex, e.shiftKey);
+                    }}>
                       <Checkbox
                         checked={selectedIds.has(item.id)}
-                        onCheckedChange={() => handleSelectRow(item.id)}
+                        onCheckedChange={() => handleSelectRow(item.id, rowIndex, false)}
                       />
                     </td>
                   )}

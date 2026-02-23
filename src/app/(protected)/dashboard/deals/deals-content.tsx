@@ -12,6 +12,8 @@ import { EntityForm, type FormField } from "@/components/crm/entity-form";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { Handshake } from "lucide-react";
+import { EntityHoverCard } from "@/components/crm/entity-hover-card";
+import { QuickFilters } from "@/components/frappe/quick-filters";
 import { toast } from "sonner";
 import type { ViewMode } from "@/types/crm";
 import { useTranslation } from "@/lib/i18n";
@@ -297,15 +299,28 @@ export function DealsContent() {
     },
     {
       key: "deal_stages", label: t("crm.deals.fields.stage"),
-      render: (d) => d.deal_stages ? (
-        <span
-          className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-md"
-          style={{ backgroundColor: `${d.deal_stages.color}15`, color: d.deal_stages.color }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.deal_stages.color }} />
-          {d.deal_stages.name}
-        </span>
-      ) : "—",
+      render: (d) => {
+        if (!d.deal_stages) return "—";
+        const stageIdx = stages.findIndex(s => s.id === d.stage_id);
+        const progress = stages.length > 1 ? Math.round(((stageIdx + 1) / stages.length) * 100) : 0;
+        return (
+          <div className="space-y-1">
+            <span
+              className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-md"
+              style={{ backgroundColor: `${d.deal_stages.color}15`, color: d.deal_stages.color }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.deal_stages.color }} />
+              {d.deal_stages.name}
+            </span>
+            <div className="h-1 w-16 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${progress}%`, backgroundColor: d.deal_stages.color }}
+              />
+            </div>
+          </div>
+        );
+      },
     },
     {
       key: "value", label: t("crm.deals.fields.value"), sortable: true, align: "right",
@@ -313,11 +328,19 @@ export function DealsContent() {
     },
     {
       key: "contacts", label: t("crm.deals.fields.contact"),
-      render: (d) => d.contacts ? `${d.contacts.first_name} ${d.contacts.last_name || ""}`.trim() : "—",
+      render: (d) => d.contacts ? (
+        <EntityHoverCard entityType="contact" entityId={d.contacts.id}>
+          <span className="hover:underline cursor-pointer">{d.contacts.first_name} {d.contacts.last_name || ""}</span>
+        </EntityHoverCard>
+      ) : "—",
     },
     {
       key: "companies", label: t("crm.deals.fields.organization"),
-      render: (d) => d.companies?.name || "—",
+      render: (d) => d.companies ? (
+        <EntityHoverCard entityType="company" entityId={d.companies.id}>
+          <span className="hover:underline cursor-pointer">{d.companies.name}</span>
+        </EntityHoverCard>
+      ) : "—",
     },
     {
       key: "ai_win_probability", label: t("crm.deals.fields.winPercent"), sortable: true, align: "center",
@@ -393,6 +416,22 @@ export function DealsContent() {
         onAdd={() => setShowForm(true)}
         addLabel={t("crm.deals.new")}
         featureLimitKey="deals"
+      />
+
+      <QuickFilters
+        options={FILTER_OPTIONS[0].options?.map(o => ({
+          value: o.value,
+          label: o.label,
+          count: deals.filter(d => d.status === o.value).length,
+        })) || []}
+        activeValue={activeFilters.find(f => f.field === "status")?.value || null}
+        onChange={(value) => {
+          if (value) {
+            handleFilterAdd("status", value);
+          } else {
+            handleFilterRemove("status");
+          }
+        }}
       />
 
       {viewMode === "table" && (

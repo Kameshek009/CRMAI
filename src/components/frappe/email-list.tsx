@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Mail, MailOpen, Send, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TimeAgo } from "@/components/ui/time-ago";
 
 interface Email {
   id: string;
@@ -75,9 +76,7 @@ export function EmailList({ entityType, entityId, onCompose }: EmailListProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium truncate">{email.subject || "(no subject)"}</p>
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        {new Date(email.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </span>
+                      <TimeAgo date={email.created_at} className="text-xs text-muted-foreground shrink-0" />
                     </div>
                     <p className="text-xs text-muted-foreground truncate">
                       {email.direction === "outbound" ? `To: ${email.to_emails.join(", ")}` : `From: ${email.from_email}`}

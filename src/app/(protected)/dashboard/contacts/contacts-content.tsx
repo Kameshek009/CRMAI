@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import { useTranslation } from "@/lib/i18n";
+import { QuickFilters } from "@/components/frappe/quick-filters";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -347,6 +348,22 @@ export function ContactsContent() {
         onAdd={() => setShowForm(true)}
         addLabel={t("crm.contacts.new")}
         featureLimitKey="contacts"
+      />
+
+      <QuickFilters
+        options={FILTER_OPTIONS[0].options?.map(o => ({
+          value: o.value,
+          label: o.label,
+          count: contacts.filter(c => c.status === o.value).length,
+        })) || []}
+        activeValue={activeFilters.find(f => f.field === "status")?.value || null}
+        onChange={(value) => {
+          if (value) {
+            handleFilterAdd("status", value);
+          } else {
+            handleFilterRemove("status");
+          }
+        }}
       />
 
       {/* Table View */}

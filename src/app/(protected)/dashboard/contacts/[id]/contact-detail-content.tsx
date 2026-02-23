@@ -13,11 +13,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Handshake, CheckSquare, Trash2, Sparkles, Loader2 } from "lucide-react";
+import { TimeAgo } from "@/components/ui/time-ago";
+import { CopyButton } from "@/components/ui/copy-button";
 import { toast } from "sonner";
+import { toastWithUndo } from "@/lib/crm/toast-undo";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
+import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -181,7 +185,9 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       const res = await fetch(`/api/crm/contacts/${contactId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        toast.success("Contact deleted");
+        toastWithUndo("Contact deleted", "contacts", contactId, () => {
+          router.push(`/dashboard/contacts/${contactId}`);
+        });
         router.push("/dashboard/contacts");
       } else {
         toast.error("Failed to delete");
@@ -236,9 +242,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
           {notes.map(note => (
             <div key={note.id} className="border-l-2 border-muted-foreground/20 pl-4 py-2">
               <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date(note.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-              </p>
+              <TimeAgo date={note.created_at} className="text-xs text-muted-foreground mt-1" />
             </div>
           ))}
           {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No notes yet</p>}
@@ -312,7 +316,12 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
         </Avatar>
         <div className="min-w-0">
           <p className="text-sm font-semibold truncate">{name}</p>
-          {contact.email && <p className="text-xs text-muted-foreground truncate">{contact.email}</p>}
+          {contact.email && (
+            <div className="flex items-center gap-1 min-w-0">
+              <p className="text-xs text-muted-foreground truncate">{contact.email}</p>
+              <CopyButton value={contact.email} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -388,9 +397,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       <div className="pt-2 border-t border-border">
         <div className="text-xs text-muted-foreground mb-1">Created</div>
         <div className="text-sm">
-          {contact.created_at
-            ? new Date(contact.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-            : "—"}
+          {contact.created_at ? <TimeAgo date={contact.created_at} /> : "—"}
         </div>
       </div>
     </>
@@ -408,6 +415,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
         status={<StatusBadge status={contact.status || "lead"} />}
         actions={
           <div className="flex items-center gap-2">
+            <PrevNextNav entityType="contacts" currentId={contactId} />
             <Button variant="outline" size="sm" onClick={handleEnrich} disabled={isEnriching}>
               {isEnriching ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Sparkles className="size-3.5 mr-1.5" />}
               Enrich

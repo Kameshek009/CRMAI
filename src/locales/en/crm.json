@@ -23,7 +23,8 @@
     "export": "Export",
     "import": "Import",
     "upgradeToAdd": "Upgrade to Add",
-    "clearAll": "Clear all"
+    "clearAll": "Clear all",
+    "all": "All"
   },
   "dataTable": {
     "noData": "No data found",

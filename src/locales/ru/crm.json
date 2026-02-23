@@ -23,7 +23,8 @@
     "export": "Экспорт",
     "import": "Импорт",
     "upgradeToAdd": "Улучшить план",
-    "clearAll": "Сбросить все"
+    "clearAll": "Сбросить все",
+    "all": "Все"
   },
   "dataTable": {
     "noData": "Данные не найдены",

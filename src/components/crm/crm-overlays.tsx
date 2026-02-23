@@ -5,6 +5,7 @@ import { SearchDialog } from "@/components/crm/search-dialog";
 import { UpgradeModal } from "@/components/billing/UpgradeModal";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import { useWorkspace } from "@/contexts/team-context";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 function FeatureLimitLoader() {
   const fetchLimits = useFeatureLimitStore((s) => s.fetch);
@@ -34,6 +35,8 @@ function FeatureLimitUpgradeModal() {
 }
 
 export function CrmOverlays() {
+  useKeyboardShortcuts();
+
   return (
     <>
       <SearchDialog />

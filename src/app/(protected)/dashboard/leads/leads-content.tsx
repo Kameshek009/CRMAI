@@ -13,6 +13,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useTranslation } from "@/lib/i18n";
+import { TimeAgo } from "@/components/ui/time-ago";
+import { QuickFilters } from "@/components/frappe/quick-filters";
 import type { ViewMode } from "@/types/crm";
 
 interface LeadData {
@@ -237,7 +239,7 @@ export function LeadsContent() {
       label: t("crm.leads.fields.converted"),
       render: (l) =>
         l.converted_at
-          ? new Date(l.converted_at).toLocaleDateString()
+          ? <TimeAgo date={l.converted_at} className="text-sm" />
           : "\u2014",
     },
   ], [t]);
@@ -264,6 +266,22 @@ export function LeadsContent() {
         totalCount={total}
         onAdd={() => setShowForm(true)}
         addLabel={t("crm.leads.new")}
+      />
+
+      <QuickFilters
+        options={FILTER_OPTIONS[0].options?.map(o => ({
+          value: o.value,
+          label: o.label,
+          count: leads.filter(l => l.status === o.value).length,
+        })) || []}
+        activeValue={activeFilters.find(f => f.field === "status")?.value || null}
+        onChange={(value) => {
+          if (value) {
+            handleFilterAdd("status", value);
+          } else {
+            handleFilterRemove("status");
+          }
+        }}
       />
 
       {viewMode === "table" && (

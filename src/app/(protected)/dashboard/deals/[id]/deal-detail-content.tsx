@@ -15,11 +15,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Handshake, CheckSquare, Trash2, Plus, Loader2, Send } from "lucide-react";
+import { TimeAgo } from "@/components/ui/time-ago";
 import { toast } from "sonner";
+import { toastWithUndo } from "@/lib/crm/toast-undo";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
+import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
 
@@ -261,7 +264,9 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       const res = await fetch(`/api/crm/deals/${dealId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        toast.success(t("crm.deals.detail.dealDeleted"));
+        toastWithUndo(t("crm.deals.detail.dealDeleted"), "deals", dealId, () => {
+          router.push(`/dashboard/deals/${dealId}`);
+        });
         router.push("/dashboard/deals");
       } else {
         toast.error(t("crm.deals.detail.failedDelete"));
@@ -375,9 +380,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
           {notes.map(note => (
             <div key={note.id} className="border-l-2 border-muted-foreground/20 pl-4 py-2">
               <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date(note.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-              </p>
+              <TimeAgo date={note.created_at} className="text-xs text-muted-foreground mt-1" />
             </div>
           ))}
           {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.deals.detail.noNotes")}</p>}
@@ -570,9 +573,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       <div className="pt-2 border-t border-border">
         <div className="text-xs text-muted-foreground mb-1">{t("crm.deals.detail.created")}</div>
         <div className="text-sm">
-          {deal.created_at
-            ? new Date(deal.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
-            : "—"}
+          {deal.created_at ? <TimeAgo date={deal.created_at} /> : "—"}
         </div>
       </div>
     </>
@@ -602,10 +603,13 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
           </div>
         }
         actions={
-          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
-            <Trash2 className="size-3.5 mr-1.5" />
-            {t("crm.deals.detail.delete")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <PrevNextNav entityType="deals" currentId={dealId} />
+            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="size-3.5 mr-1.5" />
+              {t("crm.deals.detail.delete")}
+            </Button>
+          </div>
         }
         tabs={tabs}
         defaultTab="activity"

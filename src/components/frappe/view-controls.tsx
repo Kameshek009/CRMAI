@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Search, SlidersHorizontal, ArrowUpDown, Download, Plus, X, Sparkles } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ViewModeSwitcher } from "./view-mode-switcher";
 import { Button } from "@/components/ui/button";
 import {
@@ -120,6 +120,30 @@ export function ViewControls({
 }: ViewControlsProps) {
   const { t } = useTranslation();
   const [searchFocused, setSearchFocused] = useState(false);
+  const [localSearch, setLocalSearch] = useState(search);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Sync external search value → local (e.g. when cleared externally)
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
+  // Debounce search callback (300ms)
+  const handleSearchInput = useCallback(
+    (value: string) => {
+      setLocalSearch(value);
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onSearchChange(value);
+      }, 300);
+    },
+    [onSearchChange]
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => clearTimeout(debounceRef.current);
+  }, []);
 
   // Feature limit pre-check
   const limitStore = useFeatureLimitStore();
@@ -153,17 +177,17 @@ export function ViewControls({
           <Search className="ml-2.5 h-4 w-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
           <input
             type="text"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={localSearch}
+            onChange={(e) => handleSearchInput(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
             placeholder={searchPlaceholder}
             className="h-8 w-48 bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
           />
-          {search && (
+          {localSearch && (
             <button
               type="button"
-              onClick={() => onSearchChange("")}
+              onClick={() => { setLocalSearch(""); clearTimeout(debounceRef.current); onSearchChange(""); }}
               className="mr-1.5 rounded p-0.5 hover:bg-muted"
             >
               <X className="h-3.5 w-3.5 text-muted-foreground" />

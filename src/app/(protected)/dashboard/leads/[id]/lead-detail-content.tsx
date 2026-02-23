@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, UserPlus, Handshake, Loader2 } from "lucide-react";
+import { TimeAgo } from "@/components/ui/time-ago";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { toast } from "sonner";
 
 interface LeadDetail {
@@ -61,6 +63,9 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
   const [dealStageId, setDealStageId] = useState("");
   const [stages, setStages] = useState<DealStage[]>([]);
   const [isConverting, setIsConverting] = useState(false);
+
+  const hasUnsavedChanges = lead != null && JSON.stringify(editData) !== JSON.stringify(lead);
+  useUnsavedChanges(hasUnsavedChanges);
 
   const fetchLead = useCallback(async () => {
     try {
@@ -280,9 +285,9 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
             </Select>
 
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>{t("crm.leads.createdAt")}: {new Date(lead.created_at).toLocaleDateString()}</p>
+              <p>{t("crm.leads.createdAt")}: <TimeAgo date={lead.created_at} /></p>
               {lead.converted_at && (
-                <p>{t("crm.leads.fields.converted")}: {new Date(lead.converted_at).toLocaleDateString()}</p>
+                <p>{t("crm.leads.fields.converted")}: <TimeAgo date={lead.converted_at} /></p>
               )}
             </div>
           </CardContent>
