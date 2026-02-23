@@ -4,6 +4,8 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { buildSystemPrompt, CRM_TOOLS } from "@/lib/crm/ai-prompts";
 import { executeCrmToolCall } from "@/lib/crm/ai-executor";
 import { checkTeamUsageAllowed } from "@/lib/usage/check";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { sanitizeLLMResponse } from "@/lib/sanitize";
 import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 import Groq from "groq-sdk";
@@ -56,6 +58,9 @@ function calculateBillableTokens(
 // ─────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  const rlError = checkRateLimit(request, { limit: 20 });
+  if (rlError) return rlError;
+
   try {
     const { context, error } = await getTeamContext();
     if (error) return error;
@@ -206,9 +211,9 @@ export async function POST(request: NextRequest) {
       });
 
       realTokensUsed += finalCompletion.usage?.total_tokens || 0;
-      responseContent = finalCompletion.choices[0]?.message?.content || "";
+      responseContent = sanitizeLLMResponse(finalCompletion.choices[0]?.message?.content || "");
     } else {
-      responseContent = choice?.message?.content || "";
+      responseContent = sanitizeLLMResponse(choice?.message?.content || "");
     }
 
     // Calculate fair billable tokens based on actions performed

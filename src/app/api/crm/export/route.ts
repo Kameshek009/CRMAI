@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWorkspaceContext } from "@/lib/crm/team-helpers";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const ENTITY_CONFIG: Record<string, { table: string; columns: string[] }> = {
   contacts: {
@@ -39,6 +40,9 @@ function toCsv(rows: Record<string, unknown>[], columns: string[]): string {
 }
 
 export async function GET(request: NextRequest) {
+  const rlError = checkRateLimit(request, { limit: 5 });
+  if (rlError) return rlError;
+
   const { context, error } = await getWorkspaceContext();
   if (error) return error;
 

@@ -17,6 +17,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/desktop/(.*)",
   // Agent status endpoint (used by mobile/dashboard)
   "/api/agent/status",
+  // Health check
+  "/api/health",
   // Public web forms
   "/api/public/(.*)",
   "/f/(.*)",
