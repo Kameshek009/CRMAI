@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,8 @@ interface BillingHistoryProps {
 }
 
 export function BillingHistory({ payments, className }: BillingHistoryProps) {
+  const { t } = useTranslation();
+
   const formatDate = (date: Date | string) => {
     const d = date instanceof Date ? date : new Date(date);
     return d.toLocaleDateString("en-US", {
@@ -41,11 +44,11 @@ export function BillingHistory({ payments, className }: BillingHistoryProps) {
   const getPaymentTypeLabel = (type: string) => {
     switch (type) {
       case "subscription":
-        return "Subscription";
+        return t("billing.history.subscription");
       case "credit_package":
-        return "Credits";
+        return t("billing.history.credits");
       case "renewal":
-        return "Renewal";
+        return t("billing.history.renewal");
       default:
         return type;
     }
@@ -57,10 +60,10 @@ export function BillingHistory({ payments, className }: BillingHistoryProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Receipt className="size-5" />
-            Billing History
+            {t("billing.history.title")}
           </CardTitle>
           <CardDescription>
-            No payments yet. Your billing history will appear here.
+            {t("billing.history.emptyState")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -72,22 +75,22 @@ export function BillingHistory({ payments, className }: BillingHistoryProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Receipt className="size-5" />
-          Billing History
+          {t("billing.history.title")}
         </CardTitle>
         <CardDescription>
-          Your recent transactions and invoices
+          {t("billing.history.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-right">Invoice</TableHead>
+              <TableHead>{t("billing.history.date")}</TableHead>
+              <TableHead>{t("billing.history.type")}</TableHead>
+              <TableHead>{t("billing.history.descriptionCol")}</TableHead>
+              <TableHead className="text-right">{t("billing.history.amount")}</TableHead>
+              <TableHead className="text-center">{t("billing.history.status")}</TableHead>
+              <TableHead className="text-right">{t("billing.history.invoice")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -147,6 +150,7 @@ export function ManageSubscriptionButton({
   customerId,
   className,
 }: ManageSubscriptionButtonProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
@@ -186,7 +190,7 @@ export function ManageSubscriptionButton({
       ) : (
         <ExternalLink className="mr-2 size-4" />
       )}
-      Manage Subscription
+      {t("billing.history.manageSubscription")}
     </Button>
   );
 }
