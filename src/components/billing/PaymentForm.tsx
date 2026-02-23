@@ -15,45 +15,21 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
 
-// Plan info for display
-const PLAN_INFO: Record<string, { name: string; price: string; period: string; description: string }> = {
-  pro: {
-    name: "Pro",
-    price: "$14.99",
-    period: "/user/mo",
-    description: "For professionals who need more power",
-  },
-  max: {
-    name: "Max",
-    price: "$34.99",
-    period: "/user/mo",
-    description: "Maximum capabilities for power users",
-  },
-  credits_100k: {
-    name: "100K Tokens",
-    price: "$19.99",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
-  credits_250k: {
-    name: "250K Tokens",
-    price: "$49.99",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
-  credits_600k: {
-    name: "600K Tokens",
-    price: "$99.99",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
-  credits_1500k: {
-    name: "1.5M Tokens",
-    price: "$199.98",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
+// Static price info (not translated - monetary values)
+const PLAN_PRICES: Record<string, { price: string; period: string }> = {
+  pro: { price: "$14.99", period: "/user/mo" },
+  max: { price: "$34.99", period: "/user/mo" },
+  credits_100k: { price: "$19.99", period: "" },
+  credits_250k: { price: "$49.99", period: "" },
+  credits_600k: { price: "$99.99", period: "" },
+  credits_1500k: { price: "$199.98", period: "" },
 };
+
+function getPlanName(itemId: string, t: (key: string) => string): string {
+  if (itemId === "pro") return t("billing.plans.pro");
+  if (itemId === "max") return t("billing.plans.max");
+  return t(`billing.creditPackages.${itemId}`) || itemId;
+}
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -74,7 +50,8 @@ export function PaymentModal({
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "complete">("loading");
-  const planInfo = PLAN_INFO[itemId];
+  const priceInfo = PLAN_PRICES[itemId];
+  const planName = getPlanName(itemId, t);
 
   // Ensure we only render portal on client side
   useEffect(() => {
@@ -149,11 +126,11 @@ export function PaymentModal({
           <div>
             <h2 className="text-lg font-semibold text-foreground">
               {type === "subscription"
-                ? t("billing.checkout.subscribeTo", { plan: planInfo?.name || itemId })
-                : t("billing.checkout.purchase", { plan: planInfo?.name || itemId })}
+                ? t("billing.checkout.subscribeTo", { plan: planName })
+                : t("billing.checkout.purchase", { plan: planName })}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {planInfo?.price}{planInfo?.period}
+              {priceInfo?.price}{priceInfo?.period}
             </p>
           </div>
           <button

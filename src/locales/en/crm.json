@@ -955,7 +955,9 @@
       "engagement": "Engagement",
       "contacts": "contacts",
       "vsLastMonth": "{percent}% vs last month",
-      "contactsCount": "{count} contacts"
+      "contactsCount": "{count} contacts",
+      "wonLostCount": "{won}W / {lost}L",
+      "daysShort": "{count}d"
     },
     "charts": {
       "monthlyRevenue": "Monthly Revenue",
@@ -984,7 +986,7 @@
     },
     "tasks": {
       "title": "Task Breakdown",
-      "doneThisWeek": "done this week",
+      "doneThisWeek": "{count} done this week",
       "byStatus": "By Status",
       "byPriority": "By Priority"
     },

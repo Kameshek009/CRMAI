@@ -955,7 +955,9 @@
       "engagement": "Вовлечённость",
       "contacts": "контактов",
       "vsLastMonth": "{percent}% к прошлому месяцу",
-      "contactsCount": "{count} контактов"
+      "contactsCount": "{count} контактов",
+      "wonLostCount": "{won}У / {lost}З",
+      "daysShort": "{count}д"
     },
     "charts": {
       "monthlyRevenue": "Ежемесячная выручка",
@@ -984,7 +986,7 @@
     },
     "tasks": {
       "title": "Разбивка задач",
-      "doneThisWeek": "выполнено за неделю",
+      "doneThisWeek": "{count} выполнено за неделю",
       "byStatus": "По статусу",
       "byPriority": "По приоритету"
     },

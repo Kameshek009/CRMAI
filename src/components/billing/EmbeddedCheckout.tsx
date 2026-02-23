@@ -372,45 +372,21 @@ interface CheckoutModalProps extends EmbeddedCheckoutProps {
   isOpen: boolean;
 }
 
-// Plan info for header display
-const PLAN_INFO: Record<string, { name: string; price: string; period: string; description: string }> = {
-  pro: {
-    name: "Pro",
-    price: "$14.99",
-    period: "/month",
-    description: "For professionals who need more power",
-  },
-  max: {
-    name: "Max",
-    price: "$34.99",
-    period: "/month",
-    description: "Maximum capabilities for power users",
-  },
-  credits_100k: {
-    name: "100K Tokens",
-    price: "$19.99",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
-  credits_250k: {
-    name: "250K Tokens",
-    price: "$49.99",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
-  credits_600k: {
-    name: "600K Tokens",
-    price: "$99.99",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
-  credits_1500k: {
-    name: "1.5M Tokens",
-    price: "$199.98",
-    period: "",
-    description: "Additional tokens added to your plan",
-  },
+// Static price info (not translated - monetary values)
+const PLAN_PRICES: Record<string, { price: string; period: string }> = {
+  pro: { price: "$14.99", period: "/month" },
+  max: { price: "$34.99", period: "/month" },
+  credits_100k: { price: "$19.99", period: "" },
+  credits_250k: { price: "$49.99", period: "" },
+  credits_600k: { price: "$99.99", period: "" },
+  credits_1500k: { price: "$199.98", period: "" },
 };
+
+function getPlanName(itemId: string, t: (key: string) => string): string {
+  if (itemId === "pro") return t("billing.plans.pro");
+  if (itemId === "max") return t("billing.plans.max");
+  return t(`billing.creditPackages.${itemId}`) || itemId;
+}
 
 export function CheckoutModal({
   isOpen,
@@ -420,13 +396,6 @@ export function CheckoutModal({
   ...checkoutProps
 }: CheckoutModalProps) {
   const [mounted, setMounted] = useState(false);
-
-  const planInfo = PLAN_INFO[itemId] || {
-    name: itemId,
-    price: "",
-    period: "",
-    description: "",
-  };
 
   // Ensure we only render portal on client side
   useEffect(() => {

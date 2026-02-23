@@ -154,6 +154,13 @@
     "nextBillingDate": "Next Billing Date",
     "accountCredit": "Account Credit"
   },
+  "creditPackages": {
+    "credits_100k": "100K Tokens",
+    "credits_250k": "250K Tokens",
+    "credits_600k": "600K Tokens",
+    "credits_1500k": "1.5M Tokens",
+    "description": "Additional tokens added to your plan"
+  },
   "page": {
     "title": "Billing",
     "description": "Manage your team subscription and payments",

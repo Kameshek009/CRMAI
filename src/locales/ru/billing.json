@@ -154,6 +154,13 @@
     "nextBillingDate": "Следующее списание",
     "accountCredit": "Баланс аккаунта"
   },
+  "creditPackages": {
+    "credits_100k": "100K токенов",
+    "credits_250k": "250K токенов",
+    "credits_600k": "600K токенов",
+    "credits_1500k": "1.5M токенов",
+    "description": "Дополнительные токены к вашему плану"
+  },
   "page": {
     "title": "Биллинг",
     "description": "Управление подпиской и платежами команды",

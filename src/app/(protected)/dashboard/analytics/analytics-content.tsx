@@ -224,22 +224,43 @@ export function AnalyticsContent() {
 
   if (!data) return null;
 
+  const contactStatusLabels: Record<string, string> = {
+    lead: t("crm.contacts.statuses.lead"),
+    active: t("crm.contacts.statuses.active"),
+    inactive: t("crm.contacts.statuses.inactive"),
+    churned: t("crm.contacts.statuses.churned"),
+  };
+
+  const taskStatusLabels: Record<string, string> = {
+    todo: t("crm.tasks.statuses.todo"),
+    in_progress: t("crm.tasks.statuses.inProgress"),
+    done: t("crm.tasks.statuses.done"),
+    cancelled: t("crm.tasks.statuses.cancelled"),
+  };
+
+  const taskPriorityLabels: Record<string, string> = {
+    low: t("crm.tasks.priorities.low"),
+    medium: t("crm.tasks.priorities.medium"),
+    high: t("crm.tasks.priorities.high"),
+    urgent: t("crm.tasks.priorities.urgent"),
+  };
+
   const contactStatusData = (data.contactsByStatus || []).map((c) => ({
-    name: c.status.charAt(0).toUpperCase() + c.status.slice(1),
+    name: contactStatusLabels[c.status] || c.status,
     value: c.count,
     fill: STATUS_COLORS[c.status] || "#a1a1aa",
   }));
 
-  const taskStatusData = (data.tasksByStatus || []).map((t) => ({
-    name: t.status === "in_progress" ? "In Progress" : t.status.charAt(0).toUpperCase() + t.status.slice(1),
-    value: t.count,
-    fill: TASK_STATUS_COLORS[t.status] || "#a1a1aa",
+  const taskStatusData = (data.tasksByStatus || []).map((ts) => ({
+    name: taskStatusLabels[ts.status] || ts.status,
+    value: ts.count,
+    fill: TASK_STATUS_COLORS[ts.status] || "#a1a1aa",
   }));
 
-  const taskPriorityData = (data.tasksByPriority || []).map((t) => ({
-    name: t.priority.charAt(0).toUpperCase() + t.priority.slice(1),
-    value: t.count,
-    fill: PRIORITY_COLORS[t.priority] || "#a1a1aa",
+  const taskPriorityData = (data.tasksByPriority || []).map((tp) => ({
+    name: taskPriorityLabels[tp.priority] || tp.priority,
+    value: tp.count,
+    fill: PRIORITY_COLORS[tp.priority] || "#a1a1aa",
   }));
 
   const hb = data.healthBuckets || { excellent: 0, good: 0, fair: 0, poor: 0 };
@@ -281,7 +302,7 @@ export function AnalyticsContent() {
         <MetricCard
           label={t("crm.analytics.metrics.winRate")}
           value={`${data.winRate}%`}
-          subtitle={`${data.wonCount}S / ${data.lostCount}C`}
+          subtitle={t("crm.analytics.metrics.wonLostCount", { won: data.wonCount, lost: data.lostCount })}
           icon={Target}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
         />
@@ -326,7 +347,7 @@ export function AnalyticsContent() {
         />
         <MetricCard
           label={t("crm.analytics.metrics.avgCloseTime")}
-          value={`${data.avgDaysToClose}d`}
+          value={t("crm.analytics.metrics.daysShort", { count: data.avgDaysToClose })}
           subtitle={t("crm.analytics.metrics.daysToClose")}
           icon={Timer}
           gradient="bg-gradient-to-br from-landing-accent to-orange-500"
