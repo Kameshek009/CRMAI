@@ -61,9 +61,17 @@ export async function POST(request: NextRequest) {
     .from("stripe_webhook_events")
     .insert({ event_id: event.id, event_type: event.type });
 
-  if (dupError?.code === "23505") {
-    logger.info("Webhook", `Duplicate event ${event.id}, skipping`);
-    return NextResponse.json({ received: true });
+  if (dupError) {
+    if (dupError.code === "23505") {
+      logger.info("Webhook", `Duplicate event ${event.id}, skipping`);
+      return NextResponse.json({ received: true });
+    }
+    // Non-duplicate DB error — log but continue (better to process twice than miss)
+    logger.error("Webhook", "Failed to record event for idempotency", {
+      eventId: event.id,
+      error: dupError.message,
+      code: dupError.code,
+    });
   }
 
   logger.info("Webhook", `Processing event: ${event.type}`);

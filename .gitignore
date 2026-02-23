@@ -9,3 +9,4 @@
 # Clerk configuration (can include secrets)
 /.clerk/
 node_modules
+.vercel
