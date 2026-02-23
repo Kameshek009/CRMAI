@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
+import { ChangeHistory } from "@/components/crm/change-history";
 import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
 
@@ -293,6 +294,11 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
           {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.companies.detail.noNotes")}</p>}
         </div>
       ),
+    },
+    {
+      value: "history",
+      label: t("crm.history.title"),
+      content: <ChangeHistory entityType="company" entityId={companyId} />,
     },
   ];
 

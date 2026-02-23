@@ -23,6 +23,7 @@ import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
+import { ChangeHistory } from "@/components/crm/change-history";
 import { useTranslation } from "@/lib/i18n";
 import type { Activity } from "@/types/crm";
 
@@ -449,6 +450,11 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       value: "emails",
       label: t("crm.deals.detail.tabs.emails"),
       content: <EmailList entityType="deal" entityId={dealId} />,
+    },
+    {
+      value: "history",
+      label: t("crm.history.title"),
+      content: <ChangeHistory entityType="deal" entityId={dealId} />,
     },
   ];
 
