@@ -121,7 +121,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
             </span>
           </div>
 
-          <ProgressBar value={stats.weeklyPercentUsed} label="Weekly usage" />
+          <ProgressBar value={stats.weeklyPercentUsed} label={t("billing.usage.weeklyUsageLabel")} />
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
@@ -129,7 +129,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
               {formatTokenCount(stats.weeklyTokenLimit)}
             </span>
             <span className="font-medium text-foreground">
-              {Math.round(stats.weeklyPercentUsed)}% used
+              {t("billing.usage.used", { percent: Math.round(stats.weeklyPercentUsed) })}
             </span>
           </div>
         </div>
@@ -150,7 +150,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
             </span>
           </div>
 
-          <ProgressBar value={stats.percentUsed} label="Monthly usage" />
+          <ProgressBar value={stats.percentUsed} label={t("billing.usage.monthlyUsageLabel")} />
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
@@ -158,7 +158,7 @@ export function UsageSummary({ stats, tier, className }: UsageSummaryProps) {
               {formatTokenCount(stats.tokenLimit)}
             </span>
             <span className="font-medium text-foreground">
-              {Math.round(stats.percentUsed)}% used
+              {t("billing.usage.used", { percent: Math.round(stats.percentUsed) })}
             </span>
           </div>
         </div>

@@ -87,6 +87,33 @@
       "managePipeline": "Управление воронкой",
       "manageWorkspace": "Управление пространством",
       "readOnly": "Только чтение"
+    },
+    "editor": {
+      "createTitle": "Создать роль",
+      "editTitle": "Редактирование {name}",
+      "roleName": "Название роли",
+      "roleNamePlaceholder": "напр. Менеджер продаж",
+      "color": "Цвет",
+      "priority": "Приоритет (1-899)",
+      "permissions": "Разрешения",
+      "resources": {
+        "contacts": "Контакты",
+        "companies": "Компании",
+        "deals": "Сделки",
+        "tasks": "Задачи",
+        "pipeline": "Воронка",
+        "analytics": "Аналитика",
+        "team_settings": "Настройки команды",
+        "ai_chat": "AI чат"
+      },
+      "actions": {
+        "read": "Просмотр",
+        "create": "Создание",
+        "update": "Редактирование",
+        "delete": "Удаление",
+        "manage": "Управление",
+        "allowed": "Разрешено"
+      }
     }
   },
   "connections": {

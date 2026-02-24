@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { TrendingUp, DollarSign, Kanban, CheckSquare } from "lucide-react";
 import { ChartWidget } from "@/components/dashboard/widgets/chart-widget";
+import { useTranslation } from "@/lib/i18n";
 
 interface TaskStatusEntry {
   name: string;
@@ -34,14 +35,15 @@ interface DashboardChartsProps {
 }
 
 export function DashboardCharts({ revenueTrend, taskStatusData, totalTasks }: DashboardChartsProps) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <ChartWidget
-        title="Revenue Trend (30 Days)"
+        title={t("crm.dashboard.charts.revenueTrend")}
         icon={TrendingUp}
         isEmpty={revenueTrend.length === 0 || revenueTrend.every((d) => d.revenue === 0)}
         emptyIcon={DollarSign}
-        emptyMessage="No revenue data yet. Close deals to see trends."
+        emptyMessage={t("crm.dashboard.charts.noRevenueData")}
       >
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -80,7 +82,7 @@ export function DashboardCharts({ revenueTrend, taskStatusData, totalTasks }: Da
                   fontSize: "12px",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                 }}
-                formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+                formatter={(value: number) => [`$${value.toLocaleString()}`, t("crm.dashboard.charts.revenueLabel")]}
                 labelFormatter={(label) => new Date(String(label)).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
               />
               <Area
@@ -97,11 +99,11 @@ export function DashboardCharts({ revenueTrend, taskStatusData, totalTasks }: Da
       </ChartWidget>
 
       <ChartWidget
-        title="Workload by Status"
+        title={t("crm.dashboard.charts.workloadByStatus")}
         icon={Kanban}
         isEmpty={taskStatusData.length === 0}
         emptyIcon={CheckSquare}
-        emptyMessage="No tasks yet. Create tasks to see workload."
+        emptyMessage={t("crm.dashboard.charts.noTasksData")}
       >
         <div className="flex items-center gap-6">
           <div className="w-[170px] h-[170px] shrink-0">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { InlineEditField } from "@/components/frappe/inline-edit-field";
+import { useTranslation } from "@/lib/i18n";
 import type { CustomFieldDefinition } from "@/lib/crm/field-definitions";
 
 interface CustomFieldsPanelProps {
@@ -32,6 +33,7 @@ export function CustomFieldsPanel({
   onUpdateMetadata,
   disabled = false,
 }: CustomFieldsPanelProps) {
+  const { t } = useTranslation();
   const [fields, setFields] = useState<CustomFieldDefinition[]>([]);
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export function CustomFieldsPanel({
 
   return (
     <div className="pt-2 border-t border-border">
-      <div className="text-xs text-muted-foreground mb-2 font-medium">Custom Fields</div>
+      <div className="text-xs text-muted-foreground mb-2 font-medium">{t("common.customFields")}</div>
       {fields.map((field) => {
         const inlineType = FIELD_TYPE_TO_INLINE[field.field_type] || "text";
         const currentValue = metadata?.[field.field_key] as string | number | null ?? null;

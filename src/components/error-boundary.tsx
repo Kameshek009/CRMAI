@@ -3,6 +3,28 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+
+function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[300px] p-8 text-center">
+      <AlertTriangle className="size-12 text-destructive mb-4" />
+      <h2 className="text-lg font-semibold mb-2">{t("common.somethingWentWrong")}</h2>
+      <p className="text-sm text-muted-foreground mb-4 max-w-md">
+        {t("common.errorUnexpected")}
+      </p>
+      {error && (
+        <p className="text-xs text-muted-foreground mb-4 font-mono bg-muted p-2 rounded max-w-md truncate">
+          {error.message}
+        </p>
+      )}
+      <Button onClick={onReset} variant="outline">
+        {t("common.tryAgain")}
+      </Button>
+    </div>
+  );
+}
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -38,23 +60,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         return this.props.fallback;
       }
 
-      return (
-        <div className="flex flex-col items-center justify-center min-h-[300px] p-8 text-center">
-          <AlertTriangle className="size-12 text-destructive mb-4" />
-          <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
-          <p className="text-sm text-muted-foreground mb-4 max-w-md">
-            An unexpected error occurred. Please try again or contact support if the problem persists.
-          </p>
-          {this.state.error && (
-            <p className="text-xs text-muted-foreground mb-4 font-mono bg-muted p-2 rounded max-w-md truncate">
-              {this.state.error.message}
-            </p>
-          )}
-          <Button onClick={this.handleReset} variant="outline">
-            Try Again
-          </Button>
-        </div>
-      );
+      return <ErrorFallback error={this.state.error} onReset={this.handleReset} />;
     }
 
     return this.props.children;

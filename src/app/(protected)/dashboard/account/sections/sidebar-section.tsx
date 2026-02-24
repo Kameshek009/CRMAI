@@ -216,7 +216,7 @@ export function SidebarSection() {
       if (json.success) {
         toast.success(t("settings.sidebar.teamSaved"));
       } else {
-        toast.error(json.error || "Failed to save");
+        toast.error(json.error || t("common.failedSave"));
       }
     } catch {
       toast.error(t("common.failedSave"));
@@ -247,7 +247,7 @@ export function SidebarSection() {
       <Separator />
 
       <GroupEditor
-        title="CRM"
+        title={t("settings.sidebarGroups.crm")}
         groupKey="crm"
         staticItems={crmGroup.items}
         config={config}
@@ -255,7 +255,7 @@ export function SidebarSection() {
       />
 
       <GroupEditor
-        title="Tools"
+        title={t("settings.sidebarGroups.tools")}
         groupKey="tools"
         staticItems={toolsGroup.items}
         config={config}

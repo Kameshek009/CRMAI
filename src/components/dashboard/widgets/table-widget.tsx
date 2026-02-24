@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 interface TableWidgetProps {
   title: string;
@@ -23,13 +24,15 @@ export function TableWidget({
   title,
   icon: Icon,
   href,
-  hrefLabel = "View All",
+  hrefLabel,
   totalCount,
   children,
   emptyIcon: EmptyIcon,
   emptyMessage,
   isEmpty,
 }: TableWidgetProps) {
+  const { t } = useTranslation();
+  const resolvedHrefLabel = hrefLabel || t("common.viewAll");
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -42,12 +45,12 @@ export function TableWidget({
           </CardTitle>
           <div className="flex items-center gap-2">
             {totalCount != null && (
-              <Badge variant="secondary" className="text-xs">{totalCount} total</Badge>
+              <Badge variant="secondary" className="text-xs">{totalCount} {t("common.total")}</Badge>
             )}
             {href && (
               <Button variant="outline" size="sm" className="h-7 text-xs group/btn" asChild>
                 <Link href={href}>
-                  {hrefLabel}
+                  {resolvedHrefLabel}
                   <ArrowRight className="w-3 h-3 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
                 </Link>
               </Button>

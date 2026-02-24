@@ -124,7 +124,7 @@ export function IntegrationsSection() {
         toast.error(t("settings.integrations.whatsapp.connectionFailed", { error: json.error }));
       }
     } catch {
-      toast.error(t("settings.integrations.whatsapp.connectionFailed", { error: "Network error" }));
+      toast.error(t("settings.integrations.whatsapp.connectionFailed", { error: t("settings.integrations.networkError") }));
     } finally {
       setIsTesting(false);
     }
@@ -273,7 +273,7 @@ export function IntegrationsSection() {
           <CardTitle className="text-base flex items-center gap-2">
             <Webhook className="size-4" />
             {t("settings.integrations.webhooks")}
-            <Badge variant="secondary" className="text-xs">Soon</Badge>
+            <Badge variant="secondary" className="text-xs">{t("settings.integrations.comingSoonBadge")}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>

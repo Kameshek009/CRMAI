@@ -31,24 +31,24 @@ interface RoleEditorProps {
   onSaved: () => void;
 }
 
-const RESOURCE_LABELS: Record<string, string> = {
-  contacts: "Contacts",
-  companies: "Companies",
-  deals: "Deals",
-  tasks: "Tasks",
-  pipeline: "Pipeline",
-  analytics: "Analytics",
-  team_settings: "Team Settings",
-  ai_chat: "AI Chat",
+const RESOURCE_KEYS: Record<string, string> = {
+  contacts: "team.roles.editor.resources.contacts",
+  companies: "team.roles.editor.resources.companies",
+  deals: "team.roles.editor.resources.deals",
+  tasks: "team.roles.editor.resources.tasks",
+  pipeline: "team.roles.editor.resources.pipeline",
+  analytics: "team.roles.editor.resources.analytics",
+  team_settings: "team.roles.editor.resources.team_settings",
+  ai_chat: "team.roles.editor.resources.ai_chat",
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  read: "View",
-  create: "Create",
-  update: "Edit",
-  delete: "Delete",
-  manage: "Manage",
-  allowed: "Allowed",
+const ACTION_KEYS: Record<string, string> = {
+  read: "team.roles.editor.actions.read",
+  create: "team.roles.editor.actions.create",
+  update: "team.roles.editor.actions.update",
+  delete: "team.roles.editor.actions.delete",
+  manage: "team.roles.editor.actions.manage",
+  allowed: "team.roles.editor.actions.allowed",
 };
 
 const DEFAULT_PERMISSIONS: TeamPermissions = {
@@ -120,20 +120,20 @@ export function RoleEditor({ open, onOpenChange, teamId, role, onSaved }: RoleEd
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isNew ? "Create Role" : `Edit ${role?.name}`}</DialogTitle>
+          <DialogTitle>{isNew ? t("team.roles.editor.createTitle") : t("team.roles.editor.editTitle", { name: role?.name || "" })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {(!role?.isSystem || isNew) && (
             <div className="space-y-2">
-              <Label>Role Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sales Rep" />
+              <Label>{t("team.roles.editor.roleName")}</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("team.roles.editor.roleNamePlaceholder")} />
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Color</Label>
+              <Label>{t("team.roles.editor.color")}</Label>
               <div className="flex gap-2 items-center">
                 <input
                   type="color"
@@ -146,7 +146,7 @@ export function RoleEditor({ open, onOpenChange, teamId, role, onSaved }: RoleEd
             </div>
             {isNew && (
               <div className="space-y-2">
-                <Label>Priority (1-899)</Label>
+                <Label>{t("team.roles.editor.priority")}</Label>
                 <Input
                   type="number"
                   value={priority}
@@ -159,11 +159,11 @@ export function RoleEditor({ open, onOpenChange, teamId, role, onSaved }: RoleEd
           </div>
 
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Permissions</Label>
+            <Label className="text-sm font-semibold">{t("team.roles.editor.permissions")}</Label>
             {Object.entries(permissions).map(([resource, actions]) => (
               <div key={resource} className="border rounded-lg p-3">
                 <h4 className="text-sm font-medium mb-2">
-                  {RESOURCE_LABELS[resource] || resource}
+                  {RESOURCE_KEYS[resource] ? t(RESOURCE_KEYS[resource]) : resource}
                 </h4>
                 <div className="flex flex-wrap gap-x-4 gap-y-2">
                   {Object.entries(actions as Record<string, boolean>).map(([action, value]) => (
@@ -172,7 +172,7 @@ export function RoleEditor({ open, onOpenChange, teamId, role, onSaved }: RoleEd
                         checked={value}
                         onCheckedChange={() => togglePermission(resource, action)}
                       />
-                      {ACTION_LABELS[action] || action}
+                      {ACTION_KEYS[action] ? t(ACTION_KEYS[action]) : action}
                     </label>
                   ))}
                 </div>
@@ -182,9 +182,9 @@ export function RoleEditor({ open, onOpenChange, teamId, role, onSaved }: RoleEd
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
           <Button onClick={handleSave} disabled={saving || (!isNew && !name)}>
-            {saving ? "Saving..." : isNew ? "Create" : "Save"}
+            {saving ? t("common.saving") : isNew ? t("common.create") : t("common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

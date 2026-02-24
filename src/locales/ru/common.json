@@ -33,5 +33,15 @@
   "tryAgain": "Попробовать снова",
   "pageNotFound": "Страница не найдена",
   "dashboardPageNotExist": "Эта страница не существует.",
-  "backToDashboard": "Вернуться на главную"
+  "backToDashboard": "Вернуться на главную",
+  "customFields": "Кастомные поля",
+  "viewAll": "Показать все",
+  "saveView": "Сохранить вид",
+  "name": "Название",
+  "viewNamePlaceholder": "Мой вид",
+  "publicVisible": "Публичный (виден команде)",
+  "pinToSidebar": "Закрепить в боковой панели",
+  "errorUnexpected": "Произошла непредвиденная ошибка. Попробуйте ещё раз или свяжитесь с поддержкой.",
+  "total": "всего",
+  "noActivityYet": "Нет активности"
 }

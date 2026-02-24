@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { Search, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/lib/i18n';
 
 interface ChatSearchProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export function ChatSearch({
   onNext,
   onPrev,
 }: ChatSearchProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -58,12 +60,12 @@ export function ChatSearch({
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Search messages..."
+        placeholder={t("crm.chats.searchMessagesPlaceholder")}
         className="h-8 text-sm flex-1 bg-transparent border-none shadow-none focus-visible:ring-0"
       />
       {query && (
         <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
-          {matchCount > 0 ? `${currentMatch + 1} / ${matchCount}` : 'No results'}
+          {matchCount > 0 ? `${currentMatch + 1} / ${matchCount}` : t("common.noResults")}
         </span>
       )}
       <div className="flex items-center gap-1 shrink-0">

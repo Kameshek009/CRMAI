@@ -67,6 +67,10 @@
     "hot": "Горячий",
     "warm": "Тёплый",
     "atRisk": "Под угрозой",
+    "zoomFitToScreen": "Вместить на экран",
+    "zoomOut": "Уменьшить",
+    "zoomIn": "Увеличить",
+    "zoomReset": "Сбросить к 100%",
     "quickAddPlaceholder": "Название + Enter",
     "quickAddFailed": "Не удалось создать сделку",
     "totalDeals": "{count} сделок",
@@ -480,6 +484,13 @@
     "upgradeToContnue": "Обновите план для продолжения.",
     "usedThisMonth": "{percent}% использовано за месяц.",
     "upgrade": "Обновить",
+    "charts": {
+      "revenueTrend": "Динамика выручки (30 дней)",
+      "noRevenueData": "Данных о выручке пока нет. Закрывайте сделки.",
+      "workloadByStatus": "Нагрузка по статусу",
+      "noTasksData": "Задач пока нет. Создайте задачи.",
+      "revenueLabel": "Выручка"
+    },
     "constructor": {
       "editMode": "Редактировать",
       "addWidget": "Добавить виджет",
@@ -558,6 +569,7 @@
     "deleteTitle": "Удалить чат",
     "deleteConfirm": "Вы уверены, что хотите удалить этот чат? Это действие необратимо.",
     "noMessages": "Нет сообщений",
+    "searchMessagesPlaceholder": "Поиск сообщений...",
     "msgs": "{count} сообщ.",
     "msg": "{count} сообщ.",
     "modeChat": "Чат",

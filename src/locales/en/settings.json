@@ -229,6 +229,8 @@
     "webhooks": "Webhooks",
     "webhooksDescription": "Webhook URL configuration",
     "comingSoon": "Coming soon — webhook support is under development",
+    "comingSoonBadge": "Soon",
+    "networkError": "Network error",
     "whatsapp": {
       "title": "WhatsApp Business",
       "description": "Connect your WhatsApp Business account via Meta Cloud API",
@@ -254,6 +256,10 @@
       "save": "Save",
       "accessTokenRequired": "Access token is required"
     }
+  },
+  "sidebarGroups": {
+    "crm": "CRM",
+    "tools": "Tools"
   },
   "billing": {
     "title": "Subscription & Billing",

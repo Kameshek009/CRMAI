@@ -84,6 +84,8 @@
     "thisWeek": "This Week",
     "dayOfWeek": "Day {day} of 7",
     "thisMonth": "This Month",
+    "weeklyUsageLabel": "Weekly usage",
+    "monthlyUsageLabel": "Monthly usage",
     "weeklyLimitWarning": "You're approaching your weekly limit. Consider upgrading for more capacity.",
     "weeklyLimitReached": "Weekly limit reached. Upgrade your plan or wait for next week to continue."
   },
@@ -178,6 +180,8 @@
     "remaining": "{count} remaining",
     "subscriptionPlans": "Subscription Plans",
     "perSeatPricing": "Per-seat pricing — you pay for each member in your team",
+    "checkoutFailed": "Checkout failed",
+    "failedLoadData": "Failed to load billing data",
     "failedToLoad": "Failed to Load Billing",
     "unexpectedError": "An unexpected error occurred",
     "tryAgain": "Try Again"

@@ -48,10 +48,10 @@ interface ActivityTimelineProps {
   emptyMessage?: string;
 }
 
-export function ActivityTimeline({ activities, emptyMessage = "No activity yet" }: ActivityTimelineProps) {
+export function ActivityTimeline({ activities, emptyMessage }: ActivityTimelineProps) {
   if (activities.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center">{emptyMessage}</p>
+      <p className="text-sm text-muted-foreground py-8 text-center">{emptyMessage || "No activity yet"}</p>
     );
   }
 

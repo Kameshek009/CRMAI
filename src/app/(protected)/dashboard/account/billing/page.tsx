@@ -79,7 +79,7 @@ function BillingPageContent() {
       }
     } catch (err) {
       console.error("Checkout error:", err);
-      setError(err instanceof Error ? err.message : "Checkout failed");
+      setError(err instanceof Error ? err.message : t("billing.page.checkoutFailed"));
       setLoadingTier(null);
     }
   };
@@ -112,7 +112,7 @@ function BillingPageContent() {
           setState("error");
         }
       } catch {
-        setError("Failed to load billing data");
+        setError(t("billing.page.failedLoadData"));
         setState("error");
       }
     }

@@ -33,5 +33,15 @@
   "tryAgain": "Try again",
   "pageNotFound": "Page not found",
   "dashboardPageNotExist": "This dashboard page doesn't exist.",
-  "backToDashboard": "Back to dashboard"
+  "backToDashboard": "Back to dashboard",
+  "customFields": "Custom Fields",
+  "viewAll": "View All",
+  "saveView": "Save View",
+  "name": "Name",
+  "viewNamePlaceholder": "My View",
+  "publicVisible": "Public (visible to team)",
+  "pinToSidebar": "Pin to sidebar",
+  "errorUnexpected": "An unexpected error occurred. Please try again or contact support if the problem persists.",
+  "total": "total",
+  "noActivityYet": "No activity yet"
 }

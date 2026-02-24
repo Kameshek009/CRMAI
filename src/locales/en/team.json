@@ -87,6 +87,33 @@
       "managePipeline": "Manage pipeline",
       "manageWorkspace": "Manage workspace",
       "readOnly": "Read only"
+    },
+    "editor": {
+      "createTitle": "Create Role",
+      "editTitle": "Edit {name}",
+      "roleName": "Role Name",
+      "roleNamePlaceholder": "e.g. Sales Rep",
+      "color": "Color",
+      "priority": "Priority (1-899)",
+      "permissions": "Permissions",
+      "resources": {
+        "contacts": "Contacts",
+        "companies": "Companies",
+        "deals": "Deals",
+        "tasks": "Tasks",
+        "pipeline": "Pipeline",
+        "analytics": "Analytics",
+        "team_settings": "Team Settings",
+        "ai_chat": "AI Chat"
+      },
+      "actions": {
+        "read": "View",
+        "create": "Create",
+        "update": "Edit",
+        "delete": "Delete",
+        "manage": "Manage",
+        "allowed": "Allowed"
+      }
     }
   },
   "connections": {

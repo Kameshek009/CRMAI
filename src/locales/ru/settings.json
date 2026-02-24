@@ -229,6 +229,8 @@
     "webhooks": "Вебхуки",
     "webhooksDescription": "Настройка URL вебхуков",
     "comingSoon": "Скоро — поддержка вебхуков в разработке",
+    "comingSoonBadge": "Скоро",
+    "networkError": "Ошибка сети",
     "whatsapp": {
       "title": "WhatsApp Business",
       "description": "Подключите аккаунт WhatsApp Business через Meta Cloud API",
@@ -254,6 +256,10 @@
       "save": "Сохранить",
       "accessTokenRequired": "Необходимо указать токен доступа"
     }
+  },
+  "sidebarGroups": {
+    "crm": "CRM",
+    "tools": "Инструменты"
   },
   "billing": {
     "title": "Подписка и оплата",
