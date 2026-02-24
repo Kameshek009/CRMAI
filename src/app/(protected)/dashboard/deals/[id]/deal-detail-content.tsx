@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Handshake, CheckSquare, Trash2, Plus, Loader2, Send } from "lucide-react";
+import { Handshake, CheckSquare, Trash2, Plus, Loader2, Send, CalendarDays } from "lucide-react";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { toast } from "sonner";
 import { toastWithUndo } from "@/lib/crm/toast-undo";
@@ -26,6 +26,7 @@ import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { ChangeHistory } from "@/components/crm/change-history";
 import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { useTranslation } from "@/lib/i18n";
+import { format } from "date-fns";
 import type { Attachment } from "@/lib/supabase/storage";
 import type { Activity } from "@/types/crm";
 
@@ -74,6 +75,14 @@ interface NoteData {
   is_pinned: boolean;
 }
 
+interface DealShowing {
+  id: string;
+  title: string;
+  address: string;
+  showing_date: string;
+  status: string;
+}
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -86,6 +95,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [tasks, setTasks] = useState<DealTask[]>([]);
   const [stages, setStages] = useState<DealStage[]>([]);
+  const [showings, setShowings] = useState<DealShowing[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -111,7 +121,8 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       safeFetch(`/api/crm/notes?deal_id=${dealId}&limit=20`),
       safeFetch(`/api/crm/tasks?deal_id=${dealId}&limit=10`),
       safeFetch(`/api/crm/pipeline`),
-    ]).then(([dealRes, actRes, notesRes, tasksRes, stagesRes]) => {
+      safeFetch(`/api/crm/showings?filter_deal_id=${dealId}&limit=20&sort_by=showing_date&sort_order=desc`),
+    ]).then(([dealRes, actRes, notesRes, tasksRes, stagesRes, showingsRes]) => {
       if (dealRes.success) {
         setDeal(dealRes.data);
         setAttachments((dealRes.data?.metadata?.attachments as Attachment[]) || []);
@@ -136,6 +147,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
         const parsed = stagesRes.data.columns.map((c: { stage: DealStage }) => c.stage);
         setStages(parsed.sort((a: DealStage, b: DealStage) => a.position - b.position));
       }
+      if (showingsRes.success) setShowings(showingsRes.data);
       setIsLoading(false);
     });
   }, [dealId]);
@@ -462,6 +474,38 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       value: "emails",
       label: t("crm.deals.detail.tabs.emails"),
       content: <EmailList entityType="deal" entityId={dealId} />,
+    },
+    {
+      value: "showings",
+      label: t("crm.deals.detail.tabs.showings"),
+      count: showings.length,
+      content: showings.length > 0 ? (
+        <div className="space-y-2">
+          {showings.map(s => (
+            <Link
+              key={s.id}
+              href="/dashboard/showings"
+              className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <span className="text-sm font-medium">{s.title}</span>
+                  <span className="text-xs text-muted-foreground ml-2">{s.address}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {format(new Date(s.showing_date), "dd.MM.yyyy HH:mm")}
+                </span>
+                <StatusBadge status={s.status} label={t(`crm.showings.statuses.${s.status}`)} />
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.deals.detail.noShowings")}</p>
+      ),
     },
     {
       value: "attachments",

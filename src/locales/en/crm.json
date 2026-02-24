@@ -142,6 +142,8 @@
       "noNotes": "No notes yet",
       "noDeals": "No deals linked",
       "noTasks": "No tasks linked",
+      "showings": "Showings",
+      "noShowings": "No showings linked",
       "source": "Source",
       "engagementScore": "Engagement Score",
       "organization": "Organization",
@@ -218,11 +220,13 @@
         "activity": "Activity",
         "notes": "Notes",
         "tasks": "Tasks",
-        "emails": "Emails"
+        "emails": "Emails",
+        "showings": "Showings"
       },
       "noActivity": "No activity yet",
       "noNotes": "No notes yet",
       "noTasks": "No tasks linked",
+      "noShowings": "No showings linked",
       "noEmails": "No emails yet",
       "pipeline": "Pipeline",
       "winProbability": "Success Probability",

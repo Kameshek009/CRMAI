@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Handshake, CheckSquare, Trash2, Sparkles, Loader2 } from "lucide-react";
+import { Handshake, CheckSquare, Trash2, Sparkles, Loader2, CalendarDays } from "lucide-react";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { CopyButton } from "@/components/ui/copy-button";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ import { ClickToCall } from "@/components/crm/click-to-call";
 import { WhatsAppChat } from "@/components/crm/whatsapp-chat";
 import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { useTranslation } from "@/lib/i18n";
+import { format } from "date-fns";
 import type { Attachment } from "@/lib/supabase/storage";
 import type { Activity } from "@/types/crm";
 
@@ -71,6 +72,14 @@ interface NoteData {
   is_pinned: boolean;
 }
 
+interface ContactShowing {
+  id: string;
+  title: string;
+  address: string;
+  showing_date: string;
+  status: string;
+}
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -83,6 +92,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [deals, setDeals] = useState<ContactDeal[]>([]);
   const [tasks, setTasks] = useState<ContactTask[]>([]);
+  const [showings, setShowings] = useState<ContactShowing[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -99,7 +109,8 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       safeFetch(`/api/crm/notes?contact_id=${contactId}&limit=20`),
       safeFetch(`/api/crm/deals?contact_id=${contactId}&limit=10`),
       safeFetch(`/api/crm/tasks?contact_id=${contactId}&limit=10`),
-    ]).then(([contactRes, actRes, notesRes, dealsRes, tasksRes]) => {
+      safeFetch(`/api/crm/showings?filter_contact_id=${contactId}&limit=20&sort_by=showing_date&sort_order=desc`),
+    ]).then(([contactRes, actRes, notesRes, dealsRes, tasksRes, showingsRes]) => {
       if (contactRes.success) {
         setContact(contactRes.data);
         setAttachments((contactRes.data?.metadata?.attachments as Attachment[]) || []);
@@ -116,6 +127,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       if (notesRes.success) setNotes(notesRes.data);
       if (dealsRes.success) setDeals(dealsRes.data);
       if (tasksRes.success) setTasks(tasksRes.data);
+      if (showingsRes.success) setShowings(showingsRes.data);
       setIsLoading(false);
     });
   }, [contactId]);
@@ -327,6 +339,38 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       value: "whatsapp",
       label: "WhatsApp",
       content: <WhatsAppChat entityType="contact" entityId={contactId} phoneNumber={contact.phone} />,
+    },
+    {
+      value: "showings",
+      label: t("crm.contacts.detail.showings"),
+      count: showings.length,
+      content: showings.length > 0 ? (
+        <div className="space-y-2">
+          {showings.map(s => (
+            <Link
+              key={s.id}
+              href="/dashboard/showings"
+              className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <span className="text-sm font-medium">{s.title}</span>
+                  <span className="text-xs text-muted-foreground ml-2">{s.address}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {format(new Date(s.showing_date), "dd.MM.yyyy HH:mm")}
+                </span>
+                <StatusBadge status={s.status} label={t(`crm.showings.statuses.${s.status}`)} />
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.contacts.detail.noShowings")}</p>
+      ),
     },
     {
       value: "attachments",
