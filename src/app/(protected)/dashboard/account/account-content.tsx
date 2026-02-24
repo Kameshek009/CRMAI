@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
@@ -73,17 +71,6 @@ const VALID_TABS = [
   "audit-log", "data-access", "web-forms", "billing", "danger",
 ];
 
-const PERSONAL_IDS = new Set<string>(PERSONAL_NAV.map((n) => n.id));
-const TEAM_IDS = new Set<string>(TEAM_NAV.map((n) => n.id));
-const BILLING_IDS = new Set<string>(BILLING_NAV.map((n) => n.id));
-
-function getGroupForTab(tabId: string): string {
-  if (PERSONAL_IDS.has(tabId)) return "personal";
-  if (TEAM_IDS.has(tabId)) return "team";
-  if (BILLING_IDS.has(tabId)) return "billing";
-  return "personal";
-}
-
 export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
   const { t } = useTranslation();
   const searchParams = useSearchParams();
@@ -91,7 +78,6 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
   const [activeTab, setActiveTab] = useState(() =>
     tabParam && VALID_TABS.includes(tabParam) ? tabParam : "profile"
   );
-  const [openGroups, setOpenGroups] = useState<Set<string>>(() => new Set([getGroupForTab(activeTab)]));
 
   useEffect(() => {
     if (tabParam && VALID_TABS.includes(tabParam)) {
@@ -99,100 +85,71 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
     }
   }, [tabParam]);
 
-  useEffect(() => {
-    const group = getGroupForTab(activeTab);
-    setOpenGroups((prev) => {
-      if (prev.has(group)) return prev;
-      return new Set([...prev, group]);
-    });
-  }, [activeTab]);
-
-  const toggleGroup = useCallback((group: string) => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(group)) {
-        next.delete(group);
-      } else {
-        next.add(group);
-      }
-      return next;
-    });
-  }, []);
-
-  const activeGroup = getGroupForTab(activeTab);
-
-  const renderNavGroup = (
-    groupId: string,
-    labelKey: string,
+  const renderNavItems = (
     items: ReadonlyArray<{ readonly id: string; readonly icon: typeof User }>,
-    isFirst?: boolean,
-  ) => (
-    <div className={cn(!isFirst && "mt-2 pt-2 border-t border-border/30")}>
-      <Collapsible open={openGroups.has(groupId)} onOpenChange={() => toggleGroup(groupId)}>
-        <CollapsibleTrigger className={cn(
-          "flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] font-semibold tracking-wide transition-colors cursor-pointer select-none",
-          activeGroup === groupId
-            ? "text-foreground/70"
-            : "text-muted-foreground/60 hover:text-muted-foreground"
-        )}>
-          <ChevronRight className={cn(
-            "size-3 shrink-0 transition-transform duration-200",
-            openGroups.has(groupId) && "rotate-90"
-          )} />
-          {t(labelKey)}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="overflow-hidden">
-          <div className="mt-0.5">
-            {items.map(({ id, icon: Icon }) => (
-              <TabsTrigger
-                key={id}
-                value={id}
-                className="justify-start gap-2 px-3 py-1.5 text-sm"
-              >
-                <Icon className="size-4" />
-                {t(`settings.nav.${id}`)}
-              </TabsTrigger>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
-  );
+  ) =>
+    items.map(({ id, icon: Icon }) => (
+      <TabsTrigger
+        key={id}
+        value={id}
+        className="justify-start gap-2 px-3 py-1.5 text-sm"
+      >
+        <Icon className="size-4" />
+        {t(`settings.nav.${id}`)}
+      </TabsTrigger>
+    ));
 
   return (
-    <div className="p-8 min-h-full">
-      <div className="mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="space-y-2 mb-8">
+    <div className="flex flex-col min-h-full">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/50 px-8 py-5">
+        <div className="mx-auto max-w-4xl">
           <h1 className="text-2xl font-bold tracking-tight">{t("settings.page.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("settings.page.description")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("settings.page.description")}</p>
         </div>
+      </div>
 
-        {/* Tabs layout */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="md:flex md:gap-8">
-          {/* Sidebar navigation */}
-          <TabsList
-            variant="line"
-            className="mb-6 flex overflow-x-auto md:mb-0 md:w-52 md:shrink-0 md:flex-col md:overflow-x-visible md:bg-transparent"
-          >
-            {renderNavGroup("personal", "settings.groups.personal", PERSONAL_NAV, true)}
-            {renderNavGroup("team", "settings.groups.team", TEAM_NAV)}
-            {renderNavGroup("billing", "settings.groups.billing", BILLING_NAV)}
+      {/* Body */}
+      <div className="flex-1 px-8 py-6">
+        <div className="mx-auto max-w-4xl">
+          <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="md:flex md:gap-8">
+            {/* Sidebar navigation — sticky, independently scrollable */}
+            <TabsList
+              variant="line"
+              className="mb-6 flex overflow-x-auto md:mb-0 md:w-52 md:shrink-0 md:flex-col md:overflow-x-visible md:bg-transparent md:sticky md:top-24 md:self-start md:max-h-[calc(100vh-10rem)] md:overflow-y-auto"
+            >
+              {/* Personal */}
+              <div className="px-2 pb-1 text-[11px] font-semibold text-muted-foreground/50 tracking-wide select-none">
+                {t("settings.groups.personal")}
+              </div>
+              {renderNavItems(PERSONAL_NAV)}
 
-            {/* Danger — always visible, no group */}
-            <div className="mt-2 pt-2 border-t border-border/30">
-              <TabsTrigger
-                value="danger"
-                className="justify-start gap-2 px-3 py-1.5 text-sm text-destructive data-[state=active]:text-destructive"
-              >
-                <AlertTriangle className="size-4" />
-                {t("settings.nav.danger")}
-              </TabsTrigger>
-            </div>
-          </TabsList>
+              {/* Team */}
+              <div className="mt-3 pt-3 border-t border-border/30 px-2 pb-1 text-[11px] font-semibold text-muted-foreground/50 tracking-wide select-none">
+                {t("settings.groups.team")}
+              </div>
+              {renderNavItems(TEAM_NAV)}
 
-          {/* Content area */}
-          <div className="flex-1 min-w-0">
+              {/* Billing */}
+              <div className="mt-3 pt-3 border-t border-border/30 px-2 pb-1 text-[11px] font-semibold text-muted-foreground/50 tracking-wide select-none">
+                {t("settings.groups.billing")}
+              </div>
+              {renderNavItems(BILLING_NAV)}
+
+              {/* Danger */}
+              <div className="mt-3 pt-3 border-t border-border/30">
+                <TabsTrigger
+                  value="danger"
+                  className="justify-start gap-2 px-3 py-1.5 text-sm text-destructive data-[state=active]:text-destructive"
+                >
+                  <AlertTriangle className="size-4" />
+                  {t("settings.nav.danger")}
+                </TabsTrigger>
+              </div>
+            </TabsList>
+
+            {/* Content area */}
+            <div className="flex-1 min-w-0">
             <TabsContent value="profile">
               <ProfileSection email={email} name={name} imageUrl={imageUrl} />
             </TabsContent>
@@ -259,8 +216,9 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             <TabsContent value="danger">
               <DangerSection />
             </TabsContent>
-          </div>
-        </Tabs>
+            </div>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
