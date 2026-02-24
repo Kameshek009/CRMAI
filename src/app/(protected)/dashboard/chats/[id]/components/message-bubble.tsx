@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Markdown } from '@/components/ui/markdown';
+import { useTranslation } from '@/lib/i18n';
 import type { Message } from '@/lib/supabase/types';
 
 interface MessageBubbleProps {
@@ -48,6 +49,7 @@ interface AttachmentInfo {
 }
 
 export function MessageBubble({ message, isNew, isHighlighted, onDelete, userImageUrl }: MessageBubbleProps) {
+  const { t } = useTranslation();
   const isUser = message.role === 'user';
   const messageType = message.message_type;
   const metadata = message.metadata as Record<string, unknown> | null;
@@ -57,12 +59,12 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
   if (messageType === 'notification' && metadata?.link) {
     const count = Number(metadata.count) || 1;
     const entityLabels: Record<string, [string, string]> = {
-      task: ['Task created', 'Open Tasks'],
-      contact: ['Contact created', 'Open Contacts'],
-      deal: ['Deal created', 'Open Deals'],
+      task: [t('crm.chats.notification.taskCreated'), t('crm.chats.notification.openTasks')],
+      contact: [t('crm.chats.notification.contactCreated'), t('crm.chats.notification.openContacts')],
+      deal: [t('crm.chats.notification.dealCreated'), t('crm.chats.notification.openDeals')],
     };
     const eType = String(metadata.entity_type || 'task');
-    const [singleLabel, viewLabel] = entityLabels[eType] || ['Created', 'Open'];
+    const [singleLabel, viewLabel] = entityLabels[eType] || [t('crm.chats.notification.created'), t('crm.chats.notification.open')];
 
     return (
       <div className="py-1 px-1">
@@ -112,7 +114,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
                 <User className="h-3.5 w-3.5 text-foreground" />
               </div>
             )}
-            <span className="text-sm font-semibold text-foreground">You</span>
+            <span className="text-sm font-semibold text-foreground">{t('crm.chats.you')}</span>
           </>
         ) : (
           <>
@@ -130,7 +132,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
                 <Sparkles className="h-3.5 w-3.5 text-chart-1" />
               )}
             </div>
-            <span className="text-sm font-semibold text-foreground">AI Assistant</span>
+            <span className="text-sm font-semibold text-foreground">{t('crm.chats.aiAssistant')}</span>
           </>
         )}
       </div>
@@ -195,7 +197,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
         </span>
         {(message.tokens_used ?? 0) > 0 && (
           <span className="text-xs text-muted-foreground/60">
-            {message.tokens_used} tokens
+            {message.tokens_used} {t('crm.chats.tokens')}
           </span>
         )}
         {onDelete && !message.id.startsWith('temp-') && (
@@ -204,7 +206,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
             onClick={() => onDelete(message.id)}
           >
             <Trash2 className="h-3 w-3" />
-            Delete
+            {t('common.delete')}
           </button>
         )}
       </div>
@@ -213,6 +215,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
 }
 
 export function TypingIndicator() {
+  const { t } = useTranslation();
   return (
     <div className="py-6 px-1">
       {/* Role header */}
@@ -220,13 +223,13 @@ export function TypingIndicator() {
         <div className="h-6 w-6 rounded-full bg-chart-1/15 flex items-center justify-center">
           <Sparkles className="h-3.5 w-3.5 text-chart-1 animate-pulse" />
         </div>
-        <span className="text-sm font-semibold text-foreground">AI Assistant</span>
+        <span className="text-sm font-semibold text-foreground">{t('crm.chats.aiAssistant')}</span>
       </div>
 
       {/* Shimmer + thinking text */}
       <div className="pl-8 flex items-center gap-4">
         <div className="thinking-shimmer h-4 w-16 rounded-full" />
-        <span className="text-sm text-muted-foreground/70 animate-pulse">Thinking...</span>
+        <span className="text-sm text-muted-foreground/70 animate-pulse">{t('crm.chats.thinking')}</span>
       </div>
     </div>
   );

@@ -575,7 +575,21 @@
     "modeChat": "Чат",
     "modeAgent": "Агент",
     "modeAuto": "Авто",
-    "now": "сейчас"
+    "now": "сейчас",
+    "you": "Вы",
+    "aiAssistant": "AI Ассистент",
+    "thinking": "Думаю...",
+    "tokens": "токенов",
+    "notification": {
+      "taskCreated": "Задача создана",
+      "openTasks": "Открыть задачи",
+      "contactCreated": "Контакт создан",
+      "openContacts": "Открыть контакты",
+      "dealCreated": "Сделка создана",
+      "openDeals": "Открыть сделки",
+      "created": "Создано",
+      "open": "Открыть"
+    }
   },
   "automations": {
     "title": "Автоматизации",

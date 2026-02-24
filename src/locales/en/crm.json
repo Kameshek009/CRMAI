@@ -575,7 +575,21 @@
     "modeChat": "Chat",
     "modeAgent": "Agent",
     "modeAuto": "Auto",
-    "now": "now"
+    "now": "now",
+    "you": "You",
+    "aiAssistant": "AI Assistant",
+    "thinking": "Thinking...",
+    "tokens": "tokens",
+    "notification": {
+      "taskCreated": "Task created",
+      "openTasks": "Open Tasks",
+      "contactCreated": "Contact created",
+      "openContacts": "Open Contacts",
+      "dealCreated": "Deal created",
+      "openDeals": "Open Deals",
+      "created": "Created",
+      "open": "Open"
+    }
   },
   "automations": {
     "title": "Automations",
