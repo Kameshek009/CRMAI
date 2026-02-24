@@ -371,6 +371,27 @@ body {
   50% { box-shadow: 0 0 20px rgba(var(--landing-accent-rgb), 0.5), 0 0 40px rgba(var(--landing-accent-rgb), 0.15); }
 }
 
+/* --- Collapsible Animation --- */
+
+@keyframes collapsibleDown {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-collapsible-content-height); opacity: 1; }
+}
+
+@keyframes collapsibleUp {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}
+
+[data-slot="collapsible-content"][data-state="open"] {
+  animation: collapsibleDown 200ms ease-out;
+}
+
+[data-slot="collapsible-content"][data-state="closed"] {
+  animation: collapsibleUp 150ms ease-out;
+  overflow: hidden;
+}
+
 /* --- Premium Animation Utilities --- */
 
 .animate-shimmer {

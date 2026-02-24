@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
@@ -118,29 +119,44 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
     });
   }, []);
 
+  const activeGroup = getGroupForTab(activeTab);
+
   const renderNavGroup = (
     groupId: string,
     labelKey: string,
     items: ReadonlyArray<{ readonly id: string; readonly icon: typeof User }>,
+    isFirst?: boolean,
   ) => (
-    <Collapsible open={openGroups.has(groupId)} onOpenChange={() => toggleGroup(groupId)}>
-      <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-        <ChevronRight className={`size-3.5 transition-transform duration-200 ${openGroups.has(groupId) ? "rotate-90" : ""}`} />
-        {t(labelKey)}
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        {items.map(({ id, icon: Icon }) => (
-          <TabsTrigger
-            key={id}
-            value={id}
-            className="justify-start gap-2 px-3 py-1.5 text-sm"
-          >
-            <Icon className="size-4" />
-            {t(`settings.nav.${id}`)}
-          </TabsTrigger>
-        ))}
-      </CollapsibleContent>
-    </Collapsible>
+    <div className={cn(!isFirst && "mt-2 pt-2 border-t border-border/30")}>
+      <Collapsible open={openGroups.has(groupId)} onOpenChange={() => toggleGroup(groupId)}>
+        <CollapsibleTrigger className={cn(
+          "flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] font-semibold tracking-wide transition-colors cursor-pointer select-none",
+          activeGroup === groupId
+            ? "text-foreground/70"
+            : "text-muted-foreground/60 hover:text-muted-foreground"
+        )}>
+          <ChevronRight className={cn(
+            "size-3 shrink-0 transition-transform duration-200",
+            openGroups.has(groupId) && "rotate-90"
+          )} />
+          {t(labelKey)}
+        </CollapsibleTrigger>
+        <CollapsibleContent className="overflow-hidden">
+          <div className="mt-0.5">
+            {items.map(({ id, icon: Icon }) => (
+              <TabsTrigger
+                key={id}
+                value={id}
+                className="justify-start gap-2 px-3 py-1.5 text-sm"
+              >
+                <Icon className="size-4" />
+                {t(`settings.nav.${id}`)}
+              </TabsTrigger>
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
 
   return (
@@ -159,18 +175,20 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             variant="line"
             className="mb-6 flex overflow-x-auto md:mb-0 md:w-52 md:shrink-0 md:flex-col md:overflow-x-visible md:bg-transparent"
           >
-            {renderNavGroup("personal", "settings.groups.personal", PERSONAL_NAV)}
+            {renderNavGroup("personal", "settings.groups.personal", PERSONAL_NAV, true)}
             {renderNavGroup("team", "settings.groups.team", TEAM_NAV)}
             {renderNavGroup("billing", "settings.groups.billing", BILLING_NAV)}
 
             {/* Danger — always visible, no group */}
-            <TabsTrigger
-              value="danger"
-              className="justify-start gap-2 px-3 py-1.5 text-sm text-destructive data-[state=active]:text-destructive mt-1"
-            >
-              <AlertTriangle className="size-4" />
-              {t("settings.nav.danger")}
-            </TabsTrigger>
+            <div className="mt-2 pt-2 border-t border-border/30">
+              <TabsTrigger
+                value="danger"
+                className="justify-start gap-2 px-3 py-1.5 text-sm text-destructive data-[state=active]:text-destructive"
+              >
+                <AlertTriangle className="size-4" />
+                {t("settings.nav.danger")}
+              </TabsTrigger>
+            </div>
           </TabsList>
 
           {/* Content area */}
