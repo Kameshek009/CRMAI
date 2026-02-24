@@ -276,6 +276,11 @@
       "accessTokenRequired": "Access token is required"
     }
   },
+  "groups": {
+    "personal": "Personal",
+    "team": "Team",
+    "billing": "Billing"
+  },
   "sidebarGroups": {
     "crm": "CRM",
     "tools": "Tools"

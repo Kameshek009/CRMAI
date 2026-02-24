@@ -276,6 +276,11 @@
       "accessTokenRequired": "Необходимо указать токен доступа"
     }
   },
+  "groups": {
+    "personal": "Личное",
+    "team": "Команда",
+    "billing": "Биллинг"
+  },
   "sidebarGroups": {
     "crm": "CRM",
     "tools": "Инструменты"
