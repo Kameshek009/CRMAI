@@ -1117,5 +1117,34 @@
     "maxReached": "Maximum {max} attachments",
     "noAttachments": "No attachments yet",
     "counter": "{count} / {max}"
+  },
+  "showings": {
+    "title": "Showings",
+    "newShowing": "New Showing",
+    "editShowing": "Edit Showing",
+    "fields": {
+      "title": "Title",
+      "address": "Address",
+      "showingDate": "Date & Time",
+      "duration": "Duration (min)",
+      "contact": "Contact",
+      "deal": "Deal",
+      "agent": "Agent",
+      "status": "Status",
+      "resultNotes": "Result Notes"
+    },
+    "statuses": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No Show"
+    },
+    "saved": "Showing saved",
+    "deleted": "Showing deleted",
+    "failedLoad": "Failed to load showings",
+    "calendar": "Calendar",
+    "table": "Table",
+    "today": "Today",
+    "noShowings": "No showings"
   }
 }

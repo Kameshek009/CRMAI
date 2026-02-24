@@ -29,6 +29,7 @@ const ALLOWED_SORT_FIELDS: Record<string, string[]> = {
   call_logs: ["created_at", "direction", "status", "duration_seconds"],
   notes: ["created_at", "updated_at", "is_pinned"],
   leads: ["created_at", "first_name", "last_name", "email", "status", "source", "organization"],
+  showings: ["created_at", "title", "showing_date", "status", "address"],
 };
 
 // Allowed filter fields per entity
@@ -40,6 +41,7 @@ const ALLOWED_FILTER_FIELDS: Record<string, string[]> = {
   call_logs: ["status", "direction"],
   notes: ["is_pinned"],
   leads: ["status", "source", "lead_owner_account_id"],
+  showings: ["status", "contact_id", "deal_id"],
 };
 
 // ============================================================================

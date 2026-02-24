@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { ContactStatus, DealStatus, CrmTaskStatus, CallLogStatus } from "@/types/crm";
+import type { ContactStatus, DealStatus, CrmTaskStatus, CallLogStatus, ShowingStatus } from "@/types/crm";
 
-type StatusType = ContactStatus | DealStatus | CrmTaskStatus | CallLogStatus | string;
+type StatusType = ContactStatus | DealStatus | CrmTaskStatus | CallLogStatus | ShowingStatus | string;
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   // Contact statuses
@@ -29,6 +29,10 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> =
   no_answer: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" },
   busy: { bg: "bg-orange-500/10", text: "text-orange-600 dark:text-orange-400", dot: "bg-orange-500" },
   voicemail: { bg: "bg-purple-500/10", text: "text-purple-600 dark:text-purple-400", dot: "bg-purple-500" },
+
+  // Showing statuses
+  scheduled: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", dot: "bg-blue-500" },
+  no_show: { bg: "bg-orange-500/10", text: "text-orange-600 dark:text-orange-400", dot: "bg-orange-500" },
 
   // Email statuses
   draft: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", dot: "bg-gray-500" },

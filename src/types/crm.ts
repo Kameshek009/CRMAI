@@ -700,3 +700,77 @@ export function transformEmailCommunicationRow(row: EmailCommunicationRow): Emai
     createdAt: row.created_at,
   };
 }
+
+// ============================================================================
+// Property Showing
+// ============================================================================
+
+export type ShowingStatus = "scheduled" | "completed" | "cancelled" | "no_show";
+
+export interface Showing {
+  id: string;
+  teamId: string;
+  accountId: string;
+  title: string;
+  address: string;
+  showingDate: string;
+  durationMinutes: number;
+  contactId: string | null;
+  dealId: string | null;
+  agentAccountId: string | null;
+  status: ShowingStatus;
+  resultNotes: string | null;
+  metadata: Record<string, unknown>;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // Joined
+  contact?: { first_name: string; last_name: string | null } | null;
+  deal?: { title: string } | null;
+}
+
+export interface ShowingRow {
+  id: string;
+  team_id: string;
+  account_id: string;
+  title: string;
+  address: string;
+  showing_date: string;
+  duration_minutes: number;
+  contact_id: string | null;
+  deal_id: string | null;
+  agent_account_id: string | null;
+  status: ShowingStatus;
+  result_notes: string | null;
+  metadata: Record<string, unknown>;
+  is_deleted: boolean;
+  deleted_at: string | null;
+  deleted_by: string | null;
+  created_at: string;
+  updated_at: string;
+  contacts?: { first_name: string; last_name: string | null } | null;
+  deals?: { title: string } | null;
+}
+
+export function transformShowingRow(row: ShowingRow): Showing {
+  return {
+    id: row.id,
+    teamId: row.team_id,
+    accountId: row.account_id,
+    title: row.title,
+    address: row.address,
+    showingDate: row.showing_date,
+    durationMinutes: row.duration_minutes,
+    contactId: row.contact_id,
+    dealId: row.deal_id,
+    agentAccountId: row.agent_account_id,
+    status: row.status,
+    resultNotes: row.result_notes,
+    metadata: row.metadata || {},
+    isDeleted: row.is_deleted,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    contact: row.contacts || null,
+    deal: row.deals || null,
+  };
+}

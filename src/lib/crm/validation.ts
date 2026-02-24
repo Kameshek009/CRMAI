@@ -339,3 +339,36 @@ export const whatsappSettingsSchema = z.object({
   access_token: z.string().min(1).max(500).optional(),
   webhook_verify_token: z.string().min(1).max(100).optional(),
 });
+
+// ============================================================================
+// Showing schemas
+// ============================================================================
+
+export const createShowingSchema = z.object({
+  title: z.string().min(1, "Title is required").max(300),
+  address: z.string().min(1, "Address is required").max(500),
+  showing_date: z.string().min(1, "Date is required"),
+  duration_minutes: z.number().min(15).max(480).optional(),
+  contact_id: z.string().uuid().optional().nullable(),
+  deal_id: z.string().uuid().optional().nullable(),
+  agent_account_id: z.string().uuid().optional().nullable(),
+  status: z.enum(["scheduled", "completed", "cancelled", "no_show"]).optional(),
+  result_notes: z.string().max(5000).optional(),
+});
+
+export const updateShowingSchema = z.object({
+  title: z.string().min(1).max(300).optional(),
+  address: z.string().min(1).max(500).optional(),
+  showing_date: z.string().min(1).optional(),
+  duration_minutes: z.number().min(15).max(480).optional(),
+  contact_id: z.string().uuid().optional().nullable(),
+  deal_id: z.string().uuid().optional().nullable(),
+  agent_account_id: z.string().uuid().optional().nullable(),
+  status: z.enum(["scheduled", "completed", "cancelled", "no_show"]).optional(),
+  result_notes: z.string().max(5000).optional().nullable(),
+});
+
+export const bulkShowingsSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("delete"), ids: bulkIds }),
+  z.object({ action: z.literal("update_status"), ids: bulkIds, status: z.enum(["scheduled", "completed", "cancelled", "no_show"]) }),
+]);

@@ -34,7 +34,8 @@
     "dedup": "Deduplication",
     "goals": "Goals",
     "forecast": "Forecast",
-    "leads": "Leads"
+    "leads": "Leads",
+    "showings": "Showings"
   },
   "breadcrumb": {
     "home": "Home",

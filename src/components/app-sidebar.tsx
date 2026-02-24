@@ -58,6 +58,7 @@ import {
   LineChart,
   UserPlus,
   Pencil,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -89,6 +90,7 @@ export const crmGroup: NavGroup = {
     { key: "notes", labelKey: "nav.items.notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
     { key: "call-logs", labelKey: "nav.items.callLogs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
     { key: "leads", labelKey: "nav.items.leads", href: "/dashboard/leads", icon: UserPlus, permission: "leads.read" },
+    { key: "showings", labelKey: "nav.items.showings", href: "/dashboard/showings", icon: CalendarDays, permission: "deals.read" },
   ],
 };
 

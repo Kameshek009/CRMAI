@@ -1117,5 +1117,34 @@
     "maxReached": "Максимум {max} вложений",
     "noAttachments": "Нет вложений",
     "counter": "{count} / {max}"
+  },
+  "showings": {
+    "title": "Показы",
+    "newShowing": "Новый показ",
+    "editShowing": "Редактировать показ",
+    "fields": {
+      "title": "Название",
+      "address": "Адрес",
+      "showingDate": "Дата и время",
+      "duration": "Длительность (мин)",
+      "contact": "Контакт",
+      "deal": "Сделка",
+      "agent": "Агент",
+      "status": "Статус",
+      "resultNotes": "Заметки по результату"
+    },
+    "statuses": {
+      "scheduled": "Запланирован",
+      "completed": "Завершён",
+      "cancelled": "Отменён",
+      "no_show": "Не пришёл"
+    },
+    "saved": "Показ сохранён",
+    "deleted": "Показ удалён",
+    "failedLoad": "Не удалось загрузить показы",
+    "calendar": "Календарь",
+    "table": "Таблица",
+    "today": "Сегодня",
+    "noShowings": "Нет показов"
   }
 }
