@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
     const toolCalls = choice?.message?.tool_calls;
 
     let responseContent: string;
-    let toolResults: { name: string; result: string; data?: unknown }[] = [];
+    let toolResults: { name: string; success: boolean; result: string; data?: unknown }[] = [];
     const executedTools: { name: string; args?: Record<string, unknown> }[] = [];
 
     if (toolCalls && toolCalls.length > 0) {
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
           args = JSON.parse(tc.function.arguments);
         } catch {
           logger.error("CrmAI", "Failed to parse tool arguments", tc.function);
-          toolResults.push({ name: tc.function.name, result: "Error: invalid tool call format" });
+          toolResults.push({ name: tc.function.name, success: false, result: "Error: invalid tool call format" });
           continue;
         }
         executedTools.push({ name: tc.function.name, args });

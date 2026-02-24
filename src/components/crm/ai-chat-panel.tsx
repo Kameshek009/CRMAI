@@ -23,7 +23,7 @@ interface ChatMessage {
 }
 
 export function AiChatPanel() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -51,6 +51,7 @@ export function AiChatPanel() {
         body: JSON.stringify({
           message: userMessage,
           history: messages.slice(-10).map((m) => ({ role: m.role, content: m.content })),
+          locale,
         }),
       });
 
@@ -110,7 +111,7 @@ export function AiChatPanel() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages]);
+  }, [input, isLoading, messages, locale, t]);
 
   const handleRetry = () => {
     if (!lastFailedMessage) return;
