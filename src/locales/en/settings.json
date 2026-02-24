@@ -138,6 +138,11 @@
       "followup": "Follow-up",
       "onboarding": "Onboarding",
       "custom": "Custom"
+    },
+    "placeholders": {
+      "name": "Welcome Email",
+      "subject": "Welcome to {company}!",
+      "body": "Hi {first_name},\n\nThank you for your interest..."
     }
   },
   "auditLog": {
@@ -200,7 +205,21 @@
     "noForms": "No web forms yet. Create your first form to start capturing leads.",
     "active": "Active",
     "inactive": "Inactive",
-    "required": "Req"
+    "required": "Req",
+    "placeholders": {
+      "formName": "Contact Us",
+      "formDescription": "Fill out this form and we'll get back to you",
+      "successMessage": "Thank you!",
+      "fieldLabel": "Label"
+    },
+    "defaultFields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "company": "Company",
+      "message": "Message"
+    }
   },
   "export": {
     "title": "Data Export",

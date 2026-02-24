@@ -273,7 +273,7 @@ export function EmbeddedCheckout({
         <button
           onClick={handleClose}
           className="absolute top-2 right-2 z-20 p-2 rounded-full hover:bg-secondary transition-colors"
-          aria-label="Close checkout"
+          aria-label={t("billing.checkout.closeAriaLabel")}
         >
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
@@ -395,6 +395,7 @@ export function CheckoutModal({
   itemId,
   ...checkoutProps
 }: CheckoutModalProps) {
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   // Ensure we only render portal on client side
@@ -419,7 +420,7 @@ export function CheckoutModal({
         <button
           onClick={onClose}
           className="absolute -top-2 -right-2 z-20 p-2 rounded-full bg-secondary hover:bg-accent transition-colors cursor-pointer shadow-lg border border-border"
-          aria-label="Close checkout"
+          aria-label={t("billing.checkout.closeAriaLabel")}
         >
           <X className="w-5 h-5 text-foreground" />
         </button>

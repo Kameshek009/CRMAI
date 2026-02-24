@@ -10,7 +10,8 @@
     "creditsAdded": "Кредиты добавлены на ваш аккаунт.",
     "continue": "Продолжить",
     "subscribeTo": "Подписаться на {plan}",
-    "purchase": "Купить {plan}"
+    "purchase": "Купить {plan}",
+    "closeAriaLabel": "Закрыть оплату"
   },
   "planCard": {
     "mostPopular": "Самый популярный",

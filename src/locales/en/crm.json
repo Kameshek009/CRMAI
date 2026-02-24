@@ -653,6 +653,7 @@
       "valuePlaceholder": "value",
       "noConditionsHint": "No conditions — automation will always run",
       "taskTitle": "Task title",
+      "anyPlaceholder": "any",
       "fieldName": "Field name",
       "newValue": "New value",
       "accountId": "Member account ID",

@@ -653,6 +653,7 @@
       "valuePlaceholder": "значение",
       "noConditionsHint": "Нет условий — автоматизация будет срабатывать всегда",
       "taskTitle": "Название задачи",
+      "anyPlaceholder": "любое",
       "fieldName": "Название поля",
       "newValue": "Новое значение",
       "accountId": "ID аккаунта участника",

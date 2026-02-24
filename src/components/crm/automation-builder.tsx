@@ -218,11 +218,11 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">{t("crm.automations.builder.from")}</Label>
-                  <Input value={triggerFrom} onChange={(e) => setTriggerFrom(e.target.value)} placeholder="any" />
+                  <Input value={triggerFrom} onChange={(e) => setTriggerFrom(e.target.value)} placeholder={t("crm.automations.builder.anyPlaceholder")} />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">{t("crm.automations.builder.to")}</Label>
-                  <Input value={triggerTo} onChange={(e) => setTriggerTo(e.target.value)} placeholder="any" />
+                  <Input value={triggerTo} onChange={(e) => setTriggerTo(e.target.value)} placeholder={t("crm.automations.builder.anyPlaceholder")} />
                 </div>
               </div>
             )}

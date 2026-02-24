@@ -199,11 +199,11 @@ export function EmailTemplatesSection() {
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("settings.emailTemplates.name")}</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Welcome Email" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("settings.emailTemplates.placeholders.name")} />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("settings.emailTemplates.subject")}</label>
-              <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Welcome to {company}!" />
+              <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={t("settings.emailTemplates.placeholders.subject")} />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("settings.emailTemplates.category")}</label>
@@ -222,7 +222,7 @@ export function EmailTemplatesSection() {
               <Textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder={`Hi {first_name},\n\nThank you for your interest...`}
+                placeholder={t("settings.emailTemplates.placeholders.body")}
                 rows={6}
               />
               <div className="flex flex-wrap gap-1">

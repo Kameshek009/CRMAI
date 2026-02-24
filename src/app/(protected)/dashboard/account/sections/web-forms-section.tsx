@@ -34,14 +34,16 @@ interface WebForm {
   created_at: string;
 }
 
-const DEFAULT_FIELDS: FormField[] = [
-  { name: "first_name", label: "First Name", type: "text", required: true },
-  { name: "last_name", label: "Last Name", type: "text" },
-  { name: "email", label: "Email", type: "email", required: true },
-  { name: "phone", label: "Phone", type: "phone" },
-  { name: "organization", label: "Company", type: "text" },
-  { name: "message", label: "Message", type: "textarea" },
-];
+function getDefaultFields(t: (key: string) => string): FormField[] {
+  return [
+    { name: "first_name", label: t("settings.webForms.defaultFields.firstName"), type: "text", required: true },
+    { name: "last_name", label: t("settings.webForms.defaultFields.lastName"), type: "text" },
+    { name: "email", label: t("settings.webForms.defaultFields.email"), type: "email", required: true },
+    { name: "phone", label: t("settings.webForms.defaultFields.phone"), type: "phone" },
+    { name: "organization", label: t("settings.webForms.defaultFields.company"), type: "text" },
+    { name: "message", label: t("settings.webForms.defaultFields.message"), type: "textarea" },
+  ];
+}
 
 const FIELD_TYPES = ["text", "email", "phone", "textarea", "select"] as const;
 
@@ -57,9 +59,10 @@ export function WebFormsSection() {
   // Form fields
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [successMessage, setSuccessMessage] = useState("Thank you!");
+  const defaultFields = getDefaultFields(t);
+  const [successMessage, setSuccessMessage] = useState(t("settings.webForms.placeholders.successMessage"));
   const [primaryColor, setPrimaryColor] = useState("#3b82f6");
-  const [fields, setFields] = useState<FormField[]>(DEFAULT_FIELDS);
+  const [fields, setFields] = useState<FormField[]>(defaultFields);
 
   const fetchForms = useCallback(async () => {
     try {
@@ -77,9 +80,9 @@ export function WebFormsSection() {
     setEditingId(null);
     setName("");
     setDescription("");
-    setSuccessMessage("Thank you!");
+    setSuccessMessage(t("settings.webForms.placeholders.successMessage"));
     setPrimaryColor("#3b82f6");
-    setFields(DEFAULT_FIELDS);
+    setFields(defaultFields);
     setDialogOpen(true);
   };
 
@@ -89,7 +92,7 @@ export function WebFormsSection() {
     setDescription(form.description || "");
     setSuccessMessage(form.success_message);
     setPrimaryColor(form.primary_color);
-    setFields(form.fields.length > 0 ? form.fields : DEFAULT_FIELDS);
+    setFields(form.fields.length > 0 ? form.fields : defaultFields);
     setDialogOpen(true);
   };
 
@@ -266,16 +269,16 @@ export function WebFormsSection() {
             {/* Basic info */}
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("settings.webForms.formName")}</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Contact Us" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("settings.webForms.placeholders.formName")} />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("settings.webForms.formDescription")}</label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Fill out this form and we'll get back to you" rows={2} />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("settings.webForms.placeholders.formDescription")} rows={2} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t("settings.webForms.successMessage")}</label>
-                <Input value={successMessage} onChange={(e) => setSuccessMessage(e.target.value)} placeholder="Thank you!" />
+                <Input value={successMessage} onChange={(e) => setSuccessMessage(e.target.value)} placeholder={t("settings.webForms.placeholders.successMessage")} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t("settings.webForms.color")}</label>
@@ -309,7 +312,7 @@ export function WebFormsSection() {
                     <Input
                       value={field.label}
                       onChange={(e) => updateField(i, { label: e.target.value })}
-                      placeholder="Label"
+                      placeholder={t("settings.webForms.placeholders.fieldLabel")}
                       className="flex-1 text-xs"
                     />
                     <select

@@ -10,7 +10,8 @@
     "creditsAdded": "Credits have been added to your account.",
     "continue": "Continue",
     "subscribeTo": "Subscribe to {plan}",
-    "purchase": "Purchase {plan}"
+    "purchase": "Purchase {plan}",
+    "closeAriaLabel": "Close checkout"
   },
   "planCard": {
     "mostPopular": "Most Popular",

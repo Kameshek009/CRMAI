@@ -138,6 +138,11 @@
       "followup": "Последующие действия",
       "onboarding": "Онбординг",
       "custom": "Другое"
+    },
+    "placeholders": {
+      "name": "Приветственное письмо",
+      "subject": "Добро пожаловать в {company}!",
+      "body": "Здравствуйте, {first_name},\n\nСпасибо за ваш интерес..."
     }
   },
   "auditLog": {
@@ -200,7 +205,21 @@
     "noForms": "Веб-форм пока нет. Создайте первую форму для сбора лидов.",
     "active": "Активна",
     "inactive": "Неактивна",
-    "required": "Обяз."
+    "required": "Обяз.",
+    "placeholders": {
+      "formName": "Свяжитесь с нами",
+      "formDescription": "Заполните форму и мы свяжемся с вами",
+      "successMessage": "Спасибо!",
+      "fieldLabel": "Подпись"
+    },
+    "defaultFields": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "phone": "Телефон",
+      "company": "Компания",
+      "message": "Сообщение"
+    }
   },
   "export": {
     "title": "Экспорт данных",
