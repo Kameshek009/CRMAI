@@ -1107,5 +1107,15 @@
     "changedFields": "Changed: {fields}",
     "from": "from",
     "to": "to"
+  },
+  "attachments": {
+    "title": "Attachments",
+    "uploaded": "Attachment uploaded",
+    "deleted": "Attachment deleted",
+    "uploadFailed": "Upload failed",
+    "deleteFailed": "Delete failed",
+    "maxReached": "Maximum {max} attachments",
+    "noAttachments": "No attachments yet",
+    "counter": "{count} / {max}"
   }
 }

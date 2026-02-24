@@ -21,7 +21,9 @@ import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { ChangeHistory } from "@/components/crm/change-history";
+import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { useTranslation } from "@/lib/i18n";
+import type { Attachment } from "@/lib/supabase/storage";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -78,6 +80,7 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [contacts, setContacts] = useState<CompanyContact[]>([]);
   const [deals, setDeals] = useState<CompanyDeal[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -93,7 +96,10 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
       safeFetch(`/api/crm/contacts?company_id=${companyId}&limit=20`),
       safeFetch(`/api/crm/deals?company_id=${companyId}&limit=10`),
     ]).then(([companyRes, actRes, notesRes, contactsRes, dealsRes]) => {
-      if (companyRes.success) setCompany(companyRes.data);
+      if (companyRes.success) {
+        setCompany(companyRes.data);
+        setAttachments((companyRes.data?.metadata?.attachments as Attachment[]) || []);
+      }
       if (actRes.success) {
         setActivities(actRes.data.map((a: Record<string, unknown>) => ({
           id: a.id as string,
@@ -296,6 +302,19 @@ export function CompanyDetailContent({ companyId }: { companyId: string }) {
           ))}
           {notes.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">{t("crm.companies.detail.noNotes")}</p>}
         </div>
+      ),
+    },
+    {
+      value: "attachments",
+      label: t("crm.attachments.title"),
+      count: attachments.length,
+      content: (
+        <AttachmentGallery
+          entityType="companies"
+          entityId={companyId}
+          attachments={attachments}
+          onAttachmentsChange={setAttachments}
+        />
       ),
     },
     {

@@ -24,7 +24,9 @@ import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { ChangeHistory } from "@/components/crm/change-history";
+import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { useTranslation } from "@/lib/i18n";
+import type { Attachment } from "@/lib/supabase/storage";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -84,6 +86,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [tasks, setTasks] = useState<DealTask[]>([]);
   const [stages, setStages] = useState<DealStage[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -109,7 +112,10 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       safeFetch(`/api/crm/tasks?deal_id=${dealId}&limit=10`),
       safeFetch(`/api/crm/pipeline`),
     ]).then(([dealRes, actRes, notesRes, tasksRes, stagesRes]) => {
-      if (dealRes.success) setDeal(dealRes.data);
+      if (dealRes.success) {
+        setDeal(dealRes.data);
+        setAttachments((dealRes.data?.metadata?.attachments as Attachment[]) || []);
+      }
       if (actRes.success) {
         setActivities(actRes.data.map((a: Record<string, unknown>) => ({
           id: a.id as string,
@@ -456,6 +462,19 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       value: "emails",
       label: t("crm.deals.detail.tabs.emails"),
       content: <EmailList entityType="deal" entityId={dealId} />,
+    },
+    {
+      value: "attachments",
+      label: t("crm.attachments.title"),
+      count: attachments.length,
+      content: (
+        <AttachmentGallery
+          entityType="deals"
+          entityId={dealId}
+          attachments={attachments}
+          onAttachmentsChange={setAttachments}
+        />
+      ),
     },
     {
       value: "history",

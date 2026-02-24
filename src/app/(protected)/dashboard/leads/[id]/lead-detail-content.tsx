@@ -18,7 +18,9 @@ import { ArrowLeft, Save, UserPlus, Handshake, Loader2 } from "lucide-react";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { ClickToCall } from "@/components/crm/click-to-call";
+import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { toast } from "sonner";
+import type { Attachment } from "@/lib/supabase/storage";
 
 interface LeadDetail {
   id: string;
@@ -38,6 +40,7 @@ interface LeadDetail {
   converted_contact_id: string | null;
   converted_deal_id: string | null;
   created_at: string;
+  metadata: Record<string, unknown> | null;
 }
 
 interface DealStage {
@@ -51,6 +54,7 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
   const { t } = useTranslation();
 
   const [lead, setLead] = useState<LeadDetail | null>(null);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editData, setEditData] = useState<Partial<LeadDetail>>({});
@@ -75,6 +79,7 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
       if (json.success) {
         setLead(json.data);
         setEditData(json.data);
+        setAttachments((json.data?.metadata?.attachments as Attachment[]) || []);
       } else {
         toast.error(json.error || t("crm.leads.failedLoad"));
       }
@@ -303,6 +308,21 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Attachments */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-base">{t("crm.attachments.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AttachmentGallery
+            entityType="leads"
+            entityId={leadId}
+            attachments={attachments}
+            onAttachmentsChange={setAttachments}
+          />
+        </CardContent>
+      </Card>
 
       {/* Convert dialog */}
       <Dialog open={showConvert} onOpenChange={setShowConvert}>

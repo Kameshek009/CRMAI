@@ -150,3 +150,68 @@ export async function deleteTaskImage(storagePath: string) {
   const supabase = createSupabaseAdmin();
   await supabase.storage.from(TASK_BUCKET).remove([storagePath]);
 }
+
+// ─── CRM entity attachments ──────────────────────────────────
+
+const CRM_BUCKET = "crm-attachments";
+const CRM_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const CRM_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+export type CrmEntityType = "contacts" | "companies" | "deals" | "leads";
+
+export function validateCrmAttachment(file: File): string | null {
+  if (file.size > CRM_MAX_SIZE) return "File too large. Maximum size is 5MB";
+  if (!CRM_ALLOWED_TYPES.includes(file.type)) return "Only images allowed (JPEG, PNG, GIF, WebP)";
+  return null;
+}
+
+async function ensureCrmBucket() {
+  const supabase = createSupabaseAdmin();
+  const { data: buckets } = await supabase.storage.listBuckets();
+  if (!buckets?.some((b) => b.name === CRM_BUCKET)) {
+    await supabase.storage.createBucket(CRM_BUCKET, {
+      public: true,
+      fileSizeLimit: CRM_MAX_SIZE,
+      allowedMimeTypes: CRM_ALLOWED_TYPES,
+    });
+  }
+}
+
+export async function uploadCrmAttachment(
+  fileBuffer: Buffer,
+  filename: string,
+  mimeType: string,
+  teamId: string,
+  entityType: CrmEntityType,
+  entityId: string
+): Promise<Attachment> {
+  const supabase = createSupabaseAdmin();
+  await ensureCrmBucket();
+
+  const fileId = crypto.randomUUID();
+  const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storagePath = `${teamId}/${entityType}/${entityId}/${fileId}_${safeName}`;
+
+  const { error } = await supabase.storage
+    .from(CRM_BUCKET)
+    .upload(storagePath, fileBuffer, { contentType: mimeType, upsert: false });
+
+  if (error) throw new Error(`Upload failed: ${error.message}`);
+
+  const { data: urlData } = supabase.storage.from(CRM_BUCKET).getPublicUrl(storagePath);
+
+  return {
+    id: fileId,
+    url: urlData.publicUrl,
+    filename,
+    mime_type: mimeType,
+    size: fileBuffer.byteLength,
+  };
+}
+
+export async function deleteCrmAttachment(storagePath: string) {
+  const supabase = createSupabaseAdmin();
+  await supabase.storage.from(CRM_BUCKET).remove([storagePath]);
+}
+
+export const CRM_ATTACHMENT_BUCKET = CRM_BUCKET;

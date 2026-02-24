@@ -1107,5 +1107,15 @@
     "changedFields": "Изменено: {fields}",
     "from": "с",
     "to": "на"
+  },
+  "attachments": {
+    "title": "Вложения",
+    "uploaded": "Вложение загружено",
+    "deleted": "Вложение удалено",
+    "uploadFailed": "Ошибка загрузки",
+    "deleteFailed": "Ошибка удаления",
+    "maxReached": "Максимум {max} вложений",
+    "noAttachments": "Нет вложений",
+    "counter": "{count} / {max}"
   }
 }

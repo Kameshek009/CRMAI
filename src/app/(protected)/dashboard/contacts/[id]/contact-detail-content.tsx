@@ -25,7 +25,9 @@ import { ChangeHistory } from "@/components/crm/change-history";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { ClickToCall } from "@/components/crm/click-to-call";
 import { WhatsAppChat } from "@/components/crm/whatsapp-chat";
+import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { useTranslation } from "@/lib/i18n";
+import type { Attachment } from "@/lib/supabase/storage";
 import type { Activity } from "@/types/crm";
 
 // ============================================================================
@@ -81,6 +83,7 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [deals, setDeals] = useState<ContactDeal[]>([]);
   const [tasks, setTasks] = useState<ContactTask[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -97,7 +100,10 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       safeFetch(`/api/crm/deals?contact_id=${contactId}&limit=10`),
       safeFetch(`/api/crm/tasks?contact_id=${contactId}&limit=10`),
     ]).then(([contactRes, actRes, notesRes, dealsRes, tasksRes]) => {
-      if (contactRes.success) setContact(contactRes.data);
+      if (contactRes.success) {
+        setContact(contactRes.data);
+        setAttachments((contactRes.data?.metadata?.attachments as Attachment[]) || []);
+      }
       if (actRes.success) {
         setActivities(actRes.data.map((a: Record<string, unknown>) => ({
           id: a.id as string,
@@ -321,6 +327,19 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
       value: "whatsapp",
       label: "WhatsApp",
       content: <WhatsAppChat entityType="contact" entityId={contactId} phoneNumber={contact.phone} />,
+    },
+    {
+      value: "attachments",
+      label: t("crm.attachments.title"),
+      count: attachments.length,
+      content: (
+        <AttachmentGallery
+          entityType="contacts"
+          entityId={contactId}
+          attachments={attachments}
+          onAttachmentsChange={setAttachments}
+        />
+      ),
     },
     {
       value: "history",
