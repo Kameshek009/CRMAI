@@ -1,7 +1,9 @@
+// FILE: stats-section.tsx
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useMotionValue, useTransform, animate, useInView, useSpring } from "framer-motion";
+import { useTranslation } from "@/lib/i18n";
 
 interface StatItem {
   value: number;
@@ -12,45 +14,6 @@ interface StatItem {
   gradientColors: [string, string];
   progress: number; // 0-100 for the ring
 }
-
-const stats: StatItem[] = [
-  {
-    value: 3,
-    suffix: "x",
-    label: "More Deals Closed",
-    description: "Teams using Nexxus CRM close 3x more deals on average",
-    gradient: "from-landing-accent to-landing-accent",
-    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
-    progress: 95,
-  },
-  {
-    value: 85,
-    suffix: "%",
-    label: "Less Manual Work",
-    description: "AI automations eliminate repetitive data entry and follow-ups",
-    gradient: "from-landing-accent to-landing-accent",
-    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
-    progress: 85,
-  },
-  {
-    value: 40,
-    suffix: "%",
-    label: "Faster Sales Cycle",
-    description: "Shorten your pipeline with AI-powered insights and scoring",
-    gradient: "from-landing-accent to-landing-accent",
-    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
-    progress: 72,
-  },
-  {
-    value: 10,
-    suffix: "K+",
-    label: "Teams Trust Us",
-    description: "Growing businesses worldwide choose Nexxus CRM",
-    gradient: "from-landing-accent to-landing-accent",
-    gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
-    progress: 88,
-  },
-];
 
 function AnimatedStatNumber({
   value,
@@ -228,6 +191,46 @@ function StatCard({ stat, index, inView }: { stat: StatItem; index: number; inVi
 export function StatsSection() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useTranslation();
+
+  const stats: StatItem[] = [
+    {
+      value: 3,
+      suffix: "x",
+      label: t("landing.stats.items.moreDeals.label"),
+      description: t("landing.stats.items.moreDeals.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
+      progress: 95,
+    },
+    {
+      value: 85,
+      suffix: "%",
+      label: t("landing.stats.items.lessWork.label"),
+      description: t("landing.stats.items.lessWork.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
+      progress: 85,
+    },
+    {
+      value: 40,
+      suffix: "%",
+      label: t("landing.stats.items.fasterCycle.label"),
+      description: t("landing.stats.items.fasterCycle.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
+      progress: 72,
+    },
+    {
+      value: 10,
+      suffix: "K+",
+      label: t("landing.stats.items.teamsTrust.label"),
+      description: t("landing.stats.items.teamsTrust.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      gradientColors: ["var(--landing-accent)", "var(--landing-accent)"],
+      progress: 88,
+    },
+  ];
 
   return (
     <section
@@ -268,10 +271,10 @@ export function StatsSection() {
           className="text-center mb-16 sm:mb-24"
         >
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
-            The numbers speak
+            {t("landing.stats.title")}
             <br />
             <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
-              for themselves
+              {t("landing.stats.titleHighlight")}
             </span>
           </h2>
         </motion.div>

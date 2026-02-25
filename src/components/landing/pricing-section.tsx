@@ -1,3 +1,4 @@
+// FILE: pricing-section.tsx
 "use client";
 
 import Link from "next/link";
@@ -5,6 +6,7 @@ import { useRef, useCallback } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { Check, Sparkles, Zap, Crown, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface PlanCard {
   name: string;
@@ -20,104 +22,6 @@ interface PlanCard {
   icon: typeof Sparkles;
   gradient: string;
 }
-
-const plans: PlanCard[] = [
-  {
-    name: "Free",
-    price: "$0",
-    priceSuffix: "/ user / month",
-    cta: "Get Started",
-    ctaHref: "/sign-up",
-    icon: Sparkles,
-    gradient: "from-landing-accent to-landing-accent",
-    features: [
-      "50K AI tokens / month",
-      "Up to 100 contacts",
-      "Up to 5 companies",
-      "Up to 50 deals",
-      "Up to 50 tasks",
-      "Basic pipeline (3 stages)",
-      "3 email templates",
-      "5 custom fields",
-      "Up to 3 team members",
-      "Community support",
-    ],
-    tokenHighlight: "50K tokens/mo",
-  },
-  {
-    name: "Pro",
-    price: "$14.99",
-    priceSuffix: "/ user / month",
-    badge: "Most Popular",
-    popular: true,
-    cta: "Upgrade to Pro",
-    ctaHref: "/sign-up",
-    icon: Zap,
-    gradient: "from-landing-accent to-landing-accent",
-    inheritLabel: "Everything from Free, plus:",
-    features: [
-      "500K AI tokens / month",
-      "Up to 5,000 contacts",
-      "Up to 500 companies",
-      "Up to 2,500 deals",
-      "Unlimited tasks & pipeline stages",
-      "10 active automations",
-      "25 email templates · 5 sequences",
-      "30 custom fields · 3 visibility groups",
-      "AI deal insights & contact scoring",
-      "Import / Export (CSV)",
-      "Priority support",
-      "Unlimited team members",
-    ],
-    tokenHighlight: "500K tokens/mo",
-  },
-  {
-    name: "Max",
-    price: "$34.99",
-    priceSuffix: "/ user / month",
-    cta: "Upgrade to Max",
-    ctaHref: "/sign-up",
-    icon: Crown,
-    gradient: "from-landing-accent to-landing-accent",
-    inheritLabel: "Everything from Pro, plus:",
-    features: [
-      "1.5M AI tokens / month",
-      "Up to 25,000 contacts",
-      "Up to 5,000 companies",
-      "Up to 15,000 deals",
-      "50 active automations",
-      "100 email templates · 25 sequences",
-      "100 custom fields · 10 visibility groups",
-      "Advanced analytics & reports",
-      "Dedicated support",
-      "SLA guarantee",
-      "Unlimited team members",
-    ],
-    tokenHighlight: "1.5M tokens/mo",
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    cta: "Contact Sales",
-    ctaHref: "mailto:sales@nexxuscrm.com",
-    icon: Building2,
-    gradient: "from-landing-accent to-landing-accent",
-    inheritLabel: "Everything from Max, plus:",
-    features: [
-      "Unlimited AI tokens",
-      "Unlimited contacts & companies",
-      "Unlimited deals",
-      "200 active automations",
-      "Unlimited email templates & sequences",
-      "500 custom fields",
-      "White labeling · SSO (SAML / OAuth)",
-      "Audit logs · Dedicated infrastructure",
-      "24/7 priority support",
-      "Custom SLA & onboarding",
-    ],
-    tokenHighlight: "Unlimited",
-  },
-];
 
 const container = {
   hidden: { opacity: 0 },
@@ -267,6 +171,114 @@ function PricingCard({ plan }: { plan: PlanCard }) {
 }
 
 export function PricingSection() {
+  const { t } = useTranslation();
+
+  const freeFeatures = [
+    t("landing.pricing.plans.free.features.0"),
+    t("landing.pricing.plans.free.features.1"),
+    t("landing.pricing.plans.free.features.2"),
+    t("landing.pricing.plans.free.features.3"),
+    t("landing.pricing.plans.free.features.4"),
+    t("landing.pricing.plans.free.features.5"),
+    t("landing.pricing.plans.free.features.6"),
+    t("landing.pricing.plans.free.features.7"),
+    t("landing.pricing.plans.free.features.8"),
+    t("landing.pricing.plans.free.features.9"),
+  ];
+
+  const proFeatures = [
+    t("landing.pricing.plans.pro.features.0"),
+    t("landing.pricing.plans.pro.features.1"),
+    t("landing.pricing.plans.pro.features.2"),
+    t("landing.pricing.plans.pro.features.3"),
+    t("landing.pricing.plans.pro.features.4"),
+    t("landing.pricing.plans.pro.features.5"),
+    t("landing.pricing.plans.pro.features.6"),
+    t("landing.pricing.plans.pro.features.7"),
+    t("landing.pricing.plans.pro.features.8"),
+    t("landing.pricing.plans.pro.features.9"),
+    t("landing.pricing.plans.pro.features.10"),
+    t("landing.pricing.plans.pro.features.11"),
+  ];
+
+  const maxFeatures = [
+    t("landing.pricing.plans.max.features.0"),
+    t("landing.pricing.plans.max.features.1"),
+    t("landing.pricing.plans.max.features.2"),
+    t("landing.pricing.plans.max.features.3"),
+    t("landing.pricing.plans.max.features.4"),
+    t("landing.pricing.plans.max.features.5"),
+    t("landing.pricing.plans.max.features.6"),
+    t("landing.pricing.plans.max.features.7"),
+    t("landing.pricing.plans.max.features.8"),
+    t("landing.pricing.plans.max.features.9"),
+    t("landing.pricing.plans.max.features.10"),
+  ];
+
+  const enterpriseFeatures = [
+    t("landing.pricing.plans.enterprise.features.0"),
+    t("landing.pricing.plans.enterprise.features.1"),
+    t("landing.pricing.plans.enterprise.features.2"),
+    t("landing.pricing.plans.enterprise.features.3"),
+    t("landing.pricing.plans.enterprise.features.4"),
+    t("landing.pricing.plans.enterprise.features.5"),
+    t("landing.pricing.plans.enterprise.features.6"),
+    t("landing.pricing.plans.enterprise.features.7"),
+    t("landing.pricing.plans.enterprise.features.8"),
+    t("landing.pricing.plans.enterprise.features.9"),
+  ];
+
+  const plans: PlanCard[] = [
+    {
+      name: "Free",
+      price: "$0",
+      priceSuffix: t("landing.pricing.perUserMonth"),
+      cta: t("landing.pricing.plans.free.cta"),
+      ctaHref: "/sign-up",
+      icon: Sparkles,
+      gradient: "from-landing-accent to-landing-accent",
+      features: freeFeatures,
+      tokenHighlight: t("landing.pricing.plans.free.tokenHighlight"),
+    },
+    {
+      name: "Pro",
+      price: "$14.99",
+      priceSuffix: t("landing.pricing.perUserMonth"),
+      badge: t("landing.pricing.mostPopular"),
+      popular: true,
+      cta: t("landing.pricing.plans.pro.cta"),
+      ctaHref: "/sign-up",
+      icon: Zap,
+      gradient: "from-landing-accent to-landing-accent",
+      inheritLabel: t("landing.pricing.plans.pro.inheritLabel"),
+      features: proFeatures,
+      tokenHighlight: t("landing.pricing.plans.pro.tokenHighlight"),
+    },
+    {
+      name: "Max",
+      price: "$34.99",
+      priceSuffix: t("landing.pricing.perUserMonth"),
+      cta: t("landing.pricing.plans.max.cta"),
+      ctaHref: "/sign-up",
+      icon: Crown,
+      gradient: "from-landing-accent to-landing-accent",
+      inheritLabel: t("landing.pricing.plans.max.inheritLabel"),
+      features: maxFeatures,
+      tokenHighlight: t("landing.pricing.plans.max.tokenHighlight"),
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      cta: t("landing.pricing.plans.enterprise.cta"),
+      ctaHref: "mailto:sales@nexxuscrm.com",
+      icon: Building2,
+      gradient: "from-landing-accent to-landing-accent",
+      inheritLabel: t("landing.pricing.plans.enterprise.inheritLabel"),
+      features: enterpriseFeatures,
+      tokenHighlight: t("landing.pricing.plans.enterprise.tokenHighlight"),
+    },
+  ];
+
   return (
     <section id="pricing" className="relative overflow-hidden px-4 sm:px-6 pt-10 sm:pt-16 pb-16 sm:pb-24">
       <div className="mx-auto max-w-7xl">
@@ -279,17 +291,17 @@ export function PricingSection() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-xs font-semibold tracking-wide text-muted-foreground backdrop-blur-xl mb-6">
             <Sparkles className="size-3 text-amber-400" />
-            Simple Pricing
+            {t("landing.pricing.badge")}
           </span>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
-            Choose your
+            {t("landing.pricing.title")}
             <br />
             <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
-              perfect plan
+              {t("landing.pricing.titleHighlight")}
             </span>
           </h1>
           <p className="mt-4 text-sm sm:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Start free, scale as you grow. All plans include core CRM features and AI-powered insights.
+            {t("landing.pricing.subtitle")}
           </p>
         </motion.div>
 
@@ -312,7 +324,7 @@ export function PricingSection() {
           transition={{ delay: 0.6 }}
           className="text-center text-xs text-muted-foreground mt-8 sm:mt-12"
         >
-          All plans include SSL, 99.9% uptime SLA, and GDPR compliance. Cancel anytime.
+          {t("landing.pricing.footer")}
         </motion.p>
       </div>
 

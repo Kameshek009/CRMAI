@@ -1,47 +1,11 @@
+// FILE: footer-section.tsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-
-const footerLinks = [
-  {
-    title: "Product",
-    links: [
-      { label: "Features", href: "/#features" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "AI Assistant", href: "/#ai" },
-      { label: "Integrations", href: "/#features" },
-      { label: "Testimonials", href: "/#testimonials" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "/#about" },
-      { label: "Get Started", href: "/sign-up" },
-      { label: "Sign In", href: "/sign-in" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "AI Chat", href: "/#ai" },
-      { label: "Pipeline", href: "/#features" },
-      { label: "Analytics", href: "/#features" },
-      { label: "Contacts", href: "/#features" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Security", href: "/security" },
-    ],
-  },
-];
+import { useTranslation } from "@/lib/i18n";
 
 function WaveDivider() {
   return (
@@ -63,13 +27,52 @@ function WaveDivider() {
 
 export function FooterSection() {
   const [email, setEmail] = useState("");
+  const { t } = useTranslation();
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    toast.success("Thanks for subscribing!");
+    toast.success(t("landing.footer.newsletter.success"));
     setEmail("");
   };
+
+  const footerLinks = [
+    {
+      title: t("landing.footer.columns.product.title"),
+      links: [
+        { label: t("landing.footer.columns.product.features"), href: "/#features" },
+        { label: t("landing.footer.columns.product.pricing"), href: "/pricing" },
+        { label: t("landing.footer.columns.product.aiAssistant"), href: "/#ai" },
+        { label: t("landing.footer.columns.product.howItWorks"), href: "/#how-it-works" },
+        { label: t("landing.footer.columns.product.testimonials"), href: "/#testimonials" },
+      ],
+    },
+    {
+      title: t("landing.footer.columns.company.title"),
+      links: [
+        { label: t("landing.footer.columns.company.about"), href: "/#how-it-works" },
+        { label: t("landing.footer.columns.company.getStarted"), href: "/sign-up" },
+        { label: t("landing.footer.columns.company.signIn"), href: "/sign-in" },
+      ],
+    },
+    {
+      title: t("landing.footer.columns.resources.title"),
+      links: [
+        { label: t("landing.footer.columns.resources.aiChat"), href: "/#ai" },
+        { label: t("landing.footer.columns.resources.faq"), href: "/#faq" },
+        { label: t("landing.footer.columns.resources.pipeline"), href: "/#features" },
+        { label: t("landing.footer.columns.resources.analytics"), href: "/#features" },
+      ],
+    },
+    {
+      title: t("landing.footer.columns.legal.title"),
+      links: [
+        { label: t("landing.footer.columns.legal.privacy"), href: "/privacy" },
+        { label: t("landing.footer.columns.legal.terms"), href: "/terms" },
+        { label: t("landing.footer.columns.legal.security"), href: "/security" },
+      ],
+    },
+  ];
 
   return (
     <footer className="relative border-t border-white/10 dark:border-white/10">
@@ -89,13 +92,13 @@ export function FooterSection() {
               <span className="text-lg font-bold text-foreground">Nexxus CRM</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              The AI-powered CRM that helps modern sales teams close more deals, faster. Built for the future of selling.
+              {t("landing.footer.description")}
             </p>
           </div>
 
           {/* Newsletter */}
           <div className="w-full lg:w-auto">
-            <p className="text-sm font-semibold text-foreground mb-3" id="newsletter-label">Stay in the loop</p>
+            <p className="text-sm font-semibold text-foreground mb-3" id="newsletter-label">{t("landing.footer.newsletter.title")}</p>
             <form onSubmit={handleSubscribe} className="flex gap-2" aria-labelledby="newsletter-label">
               <label htmlFor="newsletter-email" className="sr-only">Email address</label>
               <input
@@ -103,12 +106,12 @@ export function FooterSection() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={t("landing.footer.newsletter.placeholder")}
                 required
                 className="h-11 px-4 rounded-xl border border-white/10 bg-white/5 text-sm text-foreground placeholder:text-muted-foreground/50 backdrop-blur-xl focus:outline-none focus:border-landing-accent/50 transition-colors w-full lg:w-64"
               />
               <button type="submit" className="h-11 px-6 rounded-xl bg-landing-accent text-landing-accent-foreground text-sm font-semibold shrink-0 hover:shadow-lg hover:shadow-landing-accent/20 transition-shadow">
-                Subscribe
+                {t("landing.footer.newsletter.subscribe")}
               </button>
             </form>
           </div>
@@ -139,12 +142,12 @@ export function FooterSection() {
 
         {/* Contact */}
         <div className="mt-12 pt-8 border-t border-white/10 dark:border-white/10 flex flex-col items-center gap-2 text-center">
-          <p className="text-sm text-muted-foreground">Need help? Contact us at</p>
+          <p className="text-sm text-muted-foreground">{t("landing.footer.contact.text")}</p>
           <a
-            href="mailto:support@nexxuscrm.com"
+            href={`mailto:${t("landing.footer.contact.email")}`}
             className="text-sm font-medium text-foreground hover:underline transition-colors"
           >
-            support@nexxuscrm.com
+            {t("landing.footer.contact.email")}
           </a>
         </div>
 
@@ -165,17 +168,17 @@ export function FooterSection() {
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Nexxus CRM. All rights reserved.
+            &copy; {new Date().getFullYear()} {t("landing.footer.copyright")}
           </p>
           <div className="flex items-center gap-5">
             <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Privacy
+              {t("landing.footer.privacy")}
             </Link>
             <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Terms
+              {t("landing.footer.terms")}
             </Link>
             <Link href="/security" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Security
+              {t("landing.footer.security")}
             </Link>
           </div>
         </motion.div>

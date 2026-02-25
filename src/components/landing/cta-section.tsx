@@ -1,9 +1,11 @@
+// FILE: cta-section.tsx
 "use client";
 
 import Link from "next/link";
 import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 /* ---------- aurora background ---------- */
 function AuroraBackground() {
@@ -138,6 +140,14 @@ export function CTASection() {
   });
   const scale = useTransform(scrollYProgress, [0, 0.5], [0.92, 1]);
   const opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+  const { t } = useTranslation();
+
+  const badges = [
+    { text: t("landing.cta.badges.noCreditCard") },
+    { text: t("landing.cta.badges.freeForever") },
+    { text: t("landing.cta.badges.setupIn2Min") },
+    { text: t("landing.cta.badges.cancelAnytime") },
+  ];
 
   return (
     <section
@@ -185,21 +195,21 @@ export function CTASection() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 rounded-full border border-landing-accent/30 bg-landing-accent/10 px-5 py-2 text-xs font-semibold text-landing-accent mb-8">
                 <Sparkles className="w-3.5 h-3.5" />
-                Start for free today
+                {t("landing.cta.badge")}
               </div>
 
               {/* Heading */}
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground mb-6">
-                Ready to supercharge
+                {t("landing.cta.title")}
                 <br className="hidden sm:block" />
                 <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
-                  {" "}your sales?
+                  {" "}{t("landing.cta.titleHighlight")}
                 </span>
               </h2>
 
               {/* Subtitle */}
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed">
-                Join 10,000+ teams already using Nexxus CRM to close more deals, faster. Free forever — no credit card required.
+                {t("landing.cta.subtitle")}
               </p>
 
               {/* CTA buttons */}
@@ -213,7 +223,7 @@ export function CTASection() {
                     href="/sign-up"
                     className="landing-pulse-button group relative inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent text-landing-accent-foreground shadow-2xl shadow-landing-accent/25 transition-shadow hover:shadow-landing-accent/40"
                   >
-                    Get Started Free
+                    {t("landing.cta.ctaPrimary")}
                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </motion.div>
@@ -226,7 +236,7 @@ export function CTASection() {
                     href="#pricing"
                     className="inline-flex items-center gap-2.5 h-14 sm:h-16 px-10 sm:px-12 rounded-2xl text-base sm:text-lg font-semibold border border-white/15 dark:border-white/15 bg-white/5 dark:bg-white/5 text-foreground backdrop-blur-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all"
                   >
-                    View Pricing
+                    {t("landing.cta.ctaSecondary")}
                   </Link>
                 </motion.div>
               </div>
@@ -238,12 +248,7 @@ export function CTASection() {
                 transition={{ delay: 0.5 }}
                 className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground/60"
               >
-                {[
-                  { text: "No credit card" },
-                  { text: "Free forever" },
-                  { text: "Setup in 2 min" },
-                  { text: "Cancel anytime" },
-                ].map((item) => (
+                {badges.map((item) => (
                   <motion.span
                     key={item.text}
                     whileHover={{ scale: 1.05, y: -2 }}

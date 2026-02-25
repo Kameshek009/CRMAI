@@ -1,85 +1,22 @@
+// FILE: testimonials-section.tsx
 "use client";
 
 import { useRef, useCallback } from "react";
 import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
-const testimonials = [
-  {
-    name: "Sarah Mitchell",
-    role: "VP of Sales",
-    company: "TechFlow",
-    avatar: "SM",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "Nexxus CRM transformed how our team sells. The AI insights alone helped us identify $200K in pipeline we were about to lose. We closed 40% more deals in Q1.",
-    stars: 5,
-  },
-  {
-    name: "James Rodriguez",
-    role: "Head of Growth",
-    company: "ScaleUp Inc",
-    avatar: "JR",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "We tried Salesforce, HubSpot, and Pipedrive. Nexxus CRM is the first CRM our sales team actually enjoys using. The AI assistant is like having an extra team member.",
-    stars: 5,
-  },
-  {
-    name: "Lena Park",
-    role: "CEO",
-    company: "Sparkline",
-    avatar: "LP",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "The pipeline view and AI scoring are game-changers. We went from spreadsheets to a real sales machine. Our conversion rate jumped 35% in two months.",
-    stars: 5,
-  },
-  {
-    name: "Marcus Chen",
-    role: "Sales Director",
-    company: "CloudBase",
-    avatar: "MC",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "Finally a CRM that doesn't feel like it was built in 2005. Clean, fast, and the AI actually delivers on its promises. My reps save 2 hours daily.",
-    stars: 5,
-  },
-  {
-    name: "Anna Williams",
-    role: "Founder",
-    company: "GrowthLab",
-    avatar: "AW",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "As a startup, we needed something powerful but simple. Nexxus CRM gave us enterprise features without the enterprise complexity. Best investment this year.",
-    stars: 5,
-  },
-  {
-    name: "David Kim",
-    role: "CRO",
-    company: "FinBridge",
-    avatar: "DK",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "The revenue forecasting is scary accurate. We planned our entire hiring roadmap based on Nexxus CRM predictions and hit targets within 5% variance.",
-    stars: 5,
-  },
-  {
-    name: "Elena Vasquez",
-    role: "Sales Manager",
-    company: "NovaTech",
-    avatar: "EV",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "Onboarding new sales reps used to take weeks. With Nexxus CRM's AI assistant, new team members are productive from day one. Absolute game changer.",
-    stars: 5,
-  },
-  {
-    name: "Tom Bradley",
-    role: "COO",
-    company: "FlexPay",
-    avatar: "TB",
-    gradient: "from-landing-accent to-landing-accent",
-    text: "We switched from a $50k/year enterprise CRM to Nexxus and our team's productivity actually increased. The AI insights are unmatched at this price point.",
-    stars: 5,
-  },
-];
+interface Testimonial {
+  name: string;
+  role: string;
+  company: string;
+  avatar: string;
+  gradient: string;
+  text: string;
+  stars: number;
+}
 
-function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
+function TestimonialCard({ t }: { t: Testimonial }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -103,6 +40,8 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
     mouseX.set(0);
     mouseY.set(0);
   }, [mouseX, mouseY]);
+
+  const { t: tr } = useTranslation();
 
   return (
     <motion.div
@@ -148,7 +87,7 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
         <div>
           <p className="text-sm font-semibold text-foreground">{t.name}</p>
           <p className="text-xs text-muted-foreground">
-            {t.role} at {t.company}
+            {t.role} {tr("landing.testimonials.roleAt")} {t.company}
           </p>
         </div>
       </div>
@@ -156,7 +95,7 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
   );
 }
 
-function TestimonialMarquee({ reverse = false, speed = 40 }: { reverse?: boolean; speed?: number }) {
+function TestimonialMarquee({ reverse = false, speed = 40, testimonials }: { reverse?: boolean; speed?: number; testimonials: Testimonial[] }) {
   const half1 = testimonials.slice(0, 4);
   const half2 = testimonials.slice(4);
   const items = reverse ? half2 : half1;
@@ -184,6 +123,82 @@ function TestimonialMarquee({ reverse = false, speed = 40 }: { reverse?: boolean
 export function TestimonialsSection() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const { t } = useTranslation();
+
+  const testimonials: Testimonial[] = [
+    {
+      name: "Sarah Mitchell",
+      role: "VP of Sales",
+      company: "TechFlow",
+      avatar: "SM",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.sarah"),
+      stars: 5,
+    },
+    {
+      name: "James Rodriguez",
+      role: "Head of Growth",
+      company: "ScaleUp Inc",
+      avatar: "JR",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.james"),
+      stars: 5,
+    },
+    {
+      name: "Lena Park",
+      role: "CEO",
+      company: "Sparkline",
+      avatar: "LP",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.lena"),
+      stars: 5,
+    },
+    {
+      name: "Marcus Chen",
+      role: "Sales Director",
+      company: "CloudBase",
+      avatar: "MC",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.marcus"),
+      stars: 5,
+    },
+    {
+      name: "Anna Williams",
+      role: "Founder",
+      company: "GrowthLab",
+      avatar: "AW",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.anna"),
+      stars: 5,
+    },
+    {
+      name: "David Kim",
+      role: "CRO",
+      company: "FinBridge",
+      avatar: "DK",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.david"),
+      stars: 5,
+    },
+    {
+      name: "Elena Vasquez",
+      role: "Sales Manager",
+      company: "NovaTech",
+      avatar: "EV",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.elena"),
+      stars: 5,
+    },
+    {
+      name: "Tom Bradley",
+      role: "COO",
+      company: "FlexPay",
+      avatar: "TB",
+      gradient: "from-landing-accent to-landing-accent",
+      text: t("landing.testimonials.items.tom"),
+      stars: 5,
+    },
+  ];
 
   return (
     <section
@@ -211,24 +226,24 @@ export function TestimonialsSection() {
       >
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 dark:border-white/10 bg-white/5 dark:bg-white/5 px-5 py-2 text-xs font-semibold tracking-wide text-muted-foreground backdrop-blur-xl mb-6">
           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-          Loved by Teams
+          {t("landing.testimonials.badge")}
         </span>
         <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
-          Don&apos;t take our
+          {t("landing.testimonials.title")}
           <br />
           <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
-            word for it
+            {t("landing.testimonials.titleHighlight")}
           </span>
         </h2>
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-          See why thousands of sales teams switched to Nexxus CRM and never looked back.
+          {t("landing.testimonials.subtitle")}
         </p>
       </motion.div>
 
       {/* Marquee rows */}
       <div className="flex flex-col gap-5 sm:gap-6">
-        <TestimonialMarquee speed={45} />
-        <TestimonialMarquee reverse speed={50} />
+        <TestimonialMarquee speed={45} testimonials={testimonials} />
+        <TestimonialMarquee reverse speed={50} testimonials={testimonials} />
       </div>
     </section>
   );
