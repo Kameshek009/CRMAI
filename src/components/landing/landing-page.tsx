@@ -4,9 +4,12 @@ import { PublicAuthHeader } from "@/components/public-auth-header";
 import { HeroSection } from "./hero-section";
 import { TrustedBySection } from "./trusted-by-section";
 import { FeaturesSection } from "./features-section";
+import { HowItWorksSection } from "./how-it-works-section";
 import { AISection } from "./ai-section";
 import { StatsSection } from "./stats-section";
 import { TestimonialsSection } from "./testimonials-section";
+import { FAQSection } from "./faq-section";
+import { PricingSection } from "./pricing-section";
 import { CTASection } from "./cta-section";
 import { FooterSection } from "./footer-section";
 
@@ -39,11 +42,17 @@ export function LandingPage() {
         <SectionDivider />
         <FeaturesSection />
         <SectionDivider />
+        <HowItWorksSection />
+        <SectionDivider />
         <AISection />
         <SectionDivider />
         <StatsSection />
         <SectionDivider />
         <TestimonialsSection />
+        <SectionDivider />
+        <FAQSection />
+        <SectionDivider />
+        <PricingSection />
         <CTASection />
       </main>
       <FooterSection />

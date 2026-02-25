@@ -1,0 +1,404 @@
+{
+  "header": {
+    "product": "Product",
+    "learn": "Learn",
+    "pricing": "Pricing",
+    "signIn": "Sign in",
+    "getStarted": "Get started",
+    "productColumns": {
+      "projects": "PROJECTS",
+      "communication": "COMMUNICATION",
+      "knowledge": "KNOWLEDGE",
+      "time": "TIME",
+      "more": "MORE"
+    },
+    "productItems": {
+      "tasks": "Tasks",
+      "dashboards": "Dashboards",
+      "boardView": "Board view",
+      "gantt": "Gantt",
+      "chat": "Chat",
+      "syncUp": "SyncUp",
+      "inbox": "Inbox",
+      "clips": "Clips",
+      "docs": "Docs",
+      "whiteboards": "Whiteboards",
+      "wiki": "Wiki",
+      "forms": "Forms",
+      "calendar": "Calendar",
+      "scheduling": "Scheduling",
+      "automations": "Automations",
+      "timeTracking": "Time tracking",
+      "allFeatures": "All features",
+      "integrations": "Integrations",
+      "getStarted": "Get started",
+      "watchDemo": "Watch demo"
+    },
+    "learnColumns": {
+      "resources": "RESOURCES",
+      "learning": "LEARNING"
+    },
+    "learnItems": {
+      "blog": "Blog",
+      "guides": "Guides",
+      "faq": "FAQ",
+      "helpCenter": "Help Center",
+      "tutorials": "Tutorials",
+      "webinars": "Webinars",
+      "documentation": "Documentation",
+      "api": "API"
+    }
+  },
+  "hero": {
+    "badge": "Now with AI-Powered Insights",
+    "typedWords": "CRM,Sales,Growth,Revenue",
+    "subtitle": "The AI-powered CRM that helps you",
+    "subtitleHighlight": "close more deals",
+    "subtitleEnd": ", nurture deeper relationships, and scale revenue —",
+    "subtitleEffortlessly": "effortlessly",
+    "ctaPrimary": "Get Started Free",
+    "ctaSecondary": "See Features",
+    "subCta": "Free forever. No credit card required.",
+    "stats": {
+      "activeUsers": "Active Users",
+      "uptime": "Uptime",
+      "dealsTracked": "Deals Tracked",
+      "userRating": "User Rating"
+    },
+    "preview": {
+      "title": "Nexxus CRM — Dashboard",
+      "revenue": "Revenue",
+      "successfulDeals": "Successful Deals",
+      "conversion": "Conversion",
+      "deal": "Deal",
+      "value": "Value",
+      "growth": "Growth",
+      "status": "Status",
+      "revenueTrend": "Revenue Trend",
+      "aiInsight": "AI INSIGHT",
+      "aiInsightText": "3 deals need follow-up this week. Expected close rate: 78%"
+    }
+  },
+  "trustedBy": {
+    "title": "Built for teams at companies like"
+  },
+  "features": {
+    "badge": "Powerful Features",
+    "title": "Everything you need to",
+    "titleHighlight": "close more deals",
+    "subtitle": "A complete CRM toolkit designed for modern sales teams. Every feature built to save time and increase revenue.",
+    "learnMore": "Learn more",
+    "items": {
+      "aiPowered": {
+        "title": "AI-Powered CRM",
+        "description": "Let artificial intelligence score contacts, predict outcomes, and draft follow-ups. Your AI co-pilot works 24/7 so you never miss an opportunity."
+      },
+      "pipeline": {
+        "title": "Pipeline Management",
+        "description": "Drag-and-drop deals through custom stages. Visualize your entire funnel with real-time updates and automated transitions."
+      },
+      "teamCollab": {
+        "title": "Team Collaboration",
+        "description": "Share pipelines, assign deals, mention teammates, and keep everyone aligned in real time."
+      },
+      "analytics": {
+        "title": "Analytics & Insights",
+        "description": "Beautiful dashboards with conversion rates, revenue forecasts, and performance metrics that update in real time."
+      },
+      "automation": {
+        "title": "Smart Automation",
+        "description": "Create triggers and workflows that eliminate repetitive tasks. Auto-assign contacts, send follow-ups, update stages — hands free."
+      },
+      "sync": {
+        "title": "Real-time Sync",
+        "description": "Instant sync across all devices. Connect with Gmail, Outlook, Slack, Zapier, and 50+ tools seamlessly."
+      }
+    }
+  },
+  "ai": {
+    "badge": "AI-Powered",
+    "title": "Your AI sales assistant",
+    "titleHighlight": "that never sleeps",
+    "subtitle": "Ask questions in natural language, get instant insights, automate follow-ups, and let AI handle the busywork while you focus on selling.",
+    "assistantTitle": "Nexxus AI Assistant",
+    "online": "Online",
+    "thinking": "AI is thinking...",
+    "inputPlaceholder": "Ask AI anything about your CRM...",
+    "chatMessages": {
+      "user1": "Show me deals closing this month over $10k",
+      "ai1": "Found 7 deals worth $142,500 total. 3 are in negotiation stage — Acme Corp ($45k), Globex ($28k), and Wayne Ent ($31k) need follow-ups this week.",
+      "user2": "Draft follow-up emails for all three",
+      "ai2": "Done! I've drafted personalized emails for each contact based on their last interaction. Acme: pricing discussion follow-up. Globex: demo feedback. Wayne: contract review."
+    },
+    "capabilities": {
+      "contactScoring": {
+        "title": "AI Contact Scoring",
+        "description": "Automatically rank contacts based on behavior, engagement, and fit. Focus on deals that matter most.",
+        "stat": "94%",
+        "statLabel": "Accuracy"
+      },
+      "followUps": {
+        "title": "Smart Follow-ups",
+        "description": "AI drafts personalized emails based on conversation history, deal stage, and contact preferences.",
+        "stat": "3x",
+        "statLabel": "Response rate"
+      },
+      "forecasting": {
+        "title": "Revenue Forecasting",
+        "description": "Predict monthly revenue with AI that learns from your historical data and win rates.",
+        "stat": "±5%",
+        "statLabel": "Variance"
+      },
+      "insights": {
+        "title": "Deal Insights",
+        "description": "Get AI-powered recommendations on next steps, risk alerts, and deal health analysis.",
+        "stat": "24/7",
+        "statLabel": "Monitoring"
+      }
+    },
+    "metrics": {
+      "security": { "label": "Enterprise Security", "value": "SOC 2" },
+      "responseTime": { "label": "Avg Response Time", "value": "<1s" },
+      "models": { "label": "Models Trained On", "value": "10B+" },
+      "actions": { "label": "AI Actions/Day", "value": "2M+" }
+    }
+  },
+  "stats": {
+    "title": "The numbers speak",
+    "titleHighlight": "for themselves",
+    "items": {
+      "moreDeals": {
+        "label": "More Deals Closed",
+        "description": "Teams using Nexxus CRM close 3x more deals on average"
+      },
+      "lessWork": {
+        "label": "Less Manual Work",
+        "description": "AI automations eliminate repetitive data entry and follow-ups"
+      },
+      "fasterCycle": {
+        "label": "Faster Sales Cycle",
+        "description": "Shorten your pipeline with AI-powered insights and scoring"
+      },
+      "teamsTrust": {
+        "label": "Teams Trust Us",
+        "description": "Growing businesses worldwide choose Nexxus CRM"
+      }
+    }
+  },
+  "testimonials": {
+    "badge": "Loved by Teams",
+    "title": "Don't take our",
+    "titleHighlight": "word for it",
+    "subtitle": "See why thousands of sales teams switched to Nexxus CRM and never looked back.",
+    "items": {
+      "sarah": "Nexxus CRM transformed how our team sells. The AI insights alone helped us identify $200K in pipeline we were about to lose. We closed 40% more deals in Q1.",
+      "james": "We tried Salesforce, HubSpot, and Pipedrive. Nexxus CRM is the first CRM our sales team actually enjoys using. The AI assistant is like having an extra team member.",
+      "lena": "The pipeline view and AI scoring are game-changers. We went from spreadsheets to a real sales machine. Our conversion rate jumped 35% in two months.",
+      "marcus": "Finally a CRM that doesn't feel like it was built in 2005. Clean, fast, and the AI actually delivers on its promises. My reps save 2 hours daily.",
+      "anna": "As a startup, we needed something powerful but simple. Nexxus CRM gave us enterprise features without the enterprise complexity. Best investment this year.",
+      "david": "The revenue forecasting is scary accurate. We planned our entire hiring roadmap based on Nexxus CRM predictions and hit targets within 5% variance.",
+      "elena": "Onboarding new sales reps used to take weeks. With Nexxus CRM's AI assistant, new team members are productive from day one. Absolute game changer.",
+      "tom": "We switched from a $50k/year enterprise CRM to Nexxus and our team's productivity actually increased. The AI insights are unmatched at this price point."
+    },
+    "roleAt": "at"
+  },
+  "cta": {
+    "badge": "Start for free today",
+    "title": "Ready to supercharge",
+    "titleHighlight": "your sales?",
+    "subtitle": "Join 10,000+ teams already using Nexxus CRM to close more deals, faster. Free forever — no credit card required.",
+    "ctaPrimary": "Get Started Free",
+    "ctaSecondary": "View Pricing",
+    "badges": {
+      "noCreditCard": "No credit card",
+      "freeForever": "Free forever",
+      "setupIn2Min": "Setup in 2 min",
+      "cancelAnytime": "Cancel anytime"
+    }
+  },
+  "pricing": {
+    "badge": "Simple Pricing",
+    "title": "Choose your",
+    "titleHighlight": "perfect plan",
+    "subtitle": "Start free, scale as you grow. All plans include core CRM features and AI-powered insights.",
+    "footer": "All plans include SSL, 99.9% uptime SLA, and GDPR compliance. Cancel anytime.",
+    "perUserMonth": "/ user / month",
+    "mostPopular": "Most Popular",
+    "plans": {
+      "free": {
+        "cta": "Get Started",
+        "features": [
+          "50K AI tokens / month",
+          "Up to 100 contacts",
+          "Up to 5 companies",
+          "Up to 50 deals",
+          "Up to 50 tasks",
+          "Basic pipeline (3 stages)",
+          "3 email templates",
+          "5 custom fields",
+          "Up to 3 team members",
+          "Community support"
+        ],
+        "tokenHighlight": "50K tokens/mo"
+      },
+      "pro": {
+        "cta": "Upgrade to Pro",
+        "inheritLabel": "Everything from Free, plus:",
+        "features": [
+          "500K AI tokens / month",
+          "Up to 5,000 contacts",
+          "Up to 500 companies",
+          "Up to 2,500 deals",
+          "Unlimited tasks & pipeline stages",
+          "10 active automations",
+          "25 email templates · 5 sequences",
+          "30 custom fields · 3 visibility groups",
+          "AI deal insights & contact scoring",
+          "Import / Export (CSV)",
+          "Priority support",
+          "Unlimited team members"
+        ],
+        "tokenHighlight": "500K tokens/mo"
+      },
+      "max": {
+        "cta": "Upgrade to Max",
+        "inheritLabel": "Everything from Pro, plus:",
+        "features": [
+          "1.5M AI tokens / month",
+          "Up to 25,000 contacts",
+          "Up to 5,000 companies",
+          "Up to 15,000 deals",
+          "50 active automations",
+          "100 email templates · 25 sequences",
+          "100 custom fields · 10 visibility groups",
+          "Advanced analytics & reports",
+          "Dedicated support",
+          "SLA guarantee",
+          "Unlimited team members"
+        ],
+        "tokenHighlight": "1.5M tokens/mo"
+      },
+      "enterprise": {
+        "cta": "Contact Sales",
+        "inheritLabel": "Everything from Max, plus:",
+        "features": [
+          "Unlimited AI tokens",
+          "Unlimited contacts & companies",
+          "Unlimited deals",
+          "200 active automations",
+          "Unlimited email templates & sequences",
+          "500 custom fields",
+          "White labeling · SSO (SAML / OAuth)",
+          "Audit logs · Dedicated infrastructure",
+          "24/7 priority support",
+          "Custom SLA & onboarding"
+        ],
+        "tokenHighlight": "Unlimited"
+      }
+    }
+  },
+  "howItWorks": {
+    "badge": "How It Works",
+    "title": "Get started in",
+    "titleHighlight": "3 simple steps",
+    "subtitle": "From sign-up to closing deals — it only takes minutes to get your team up and running.",
+    "steps": {
+      "signUp": {
+        "step": "01",
+        "title": "Create your account",
+        "description": "Sign up for free in under a minute. No credit card required. Invite your team and set up your workspace."
+      },
+      "setup": {
+        "step": "02",
+        "title": "Set up your pipeline",
+        "description": "Customize deal stages, import contacts, and configure automations. Use templates or build from scratch."
+      },
+      "close": {
+        "step": "03",
+        "title": "Let AI help you close",
+        "description": "AI scores your contacts, suggests next steps, drafts follow-ups, and predicts revenue — so you focus on selling."
+      }
+    }
+  },
+  "faq": {
+    "badge": "FAQ",
+    "title": "Frequently asked",
+    "titleHighlight": "questions",
+    "items": {
+      "q1": {
+        "question": "Is Nexxus CRM really free?",
+        "answer": "Yes! The Free plan is free forever with no credit card required. It includes up to 100 contacts, 50 deals, 50K AI tokens per month, and up to 3 team members. You can upgrade anytime as your business grows."
+      },
+      "q2": {
+        "question": "How does the AI assistant work?",
+        "answer": "Our AI assistant analyzes your CRM data to provide insights, score contacts, draft follow-up emails, and predict deal outcomes. Just ask questions in natural language — like chatting with a knowledgeable team member who knows your entire pipeline."
+      },
+      "q3": {
+        "question": "Can I import data from another CRM?",
+        "answer": "Absolutely. Nexxus CRM supports CSV import for contacts, companies, and deals. You can migrate your data from Salesforce, HubSpot, Pipedrive, or any other CRM in just a few clicks."
+      },
+      "q4": {
+        "question": "Is my data secure?",
+        "answer": "Security is our top priority. We use enterprise-grade encryption, SOC 2 compliance, row-level security in the database, and regular security audits. Your data is stored in secure cloud infrastructure with 99.9% uptime SLA."
+      },
+      "q5": {
+        "question": "Can I integrate with other tools?",
+        "answer": "Yes. Nexxus CRM integrates with WhatsApp Business, email providers, and more. We also support webhooks and API access on Pro and higher plans for custom integrations."
+      },
+      "q6": {
+        "question": "What happens when I exceed my plan limits?",
+        "answer": "We'll notify you before you hit your limits. You can upgrade your plan at any time to get more contacts, deals, and AI tokens. We never delete your data — you just won't be able to add new records until you upgrade or free up space."
+      },
+      "q7": {
+        "question": "Do you offer a discount for annual billing?",
+        "answer": "Currently we offer monthly billing. Annual billing with discounts is coming soon. Stay tuned for updates!"
+      }
+    }
+  },
+  "footer": {
+    "description": "The AI-powered CRM that helps modern sales teams close more deals, faster. Built for the future of selling.",
+    "newsletter": {
+      "title": "Stay in the loop",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe",
+      "success": "Thanks for subscribing!"
+    },
+    "columns": {
+      "product": {
+        "title": "Product",
+        "features": "Features",
+        "pricing": "Pricing",
+        "aiAssistant": "AI Assistant",
+        "howItWorks": "How It Works",
+        "testimonials": "Testimonials"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "getStarted": "Get Started",
+        "signIn": "Sign In"
+      },
+      "resources": {
+        "title": "Resources",
+        "aiChat": "AI Chat",
+        "faq": "FAQ",
+        "pipeline": "Pipeline",
+        "analytics": "Analytics"
+      },
+      "legal": {
+        "title": "Legal",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "security": "Security"
+      }
+    },
+    "contact": {
+      "text": "Need help? Contact us at",
+      "email": "support@nexxuscrm.com"
+    },
+    "copyright": "Nexxus CRM. All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "security": "Security"
+  }
+}

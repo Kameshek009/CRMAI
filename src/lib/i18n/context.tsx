@@ -21,6 +21,7 @@ import enFields from "@/locales/en/fields.json";
 import enCrm from "@/locales/en/crm.json";
 import enNotes from "@/locales/en/notes.json";
 import enBilling from "@/locales/en/billing.json";
+import enLanding from "@/locales/en/landing.json";
 import ruCommon from "@/locales/ru/common.json";
 import ruSettings from "@/locales/ru/settings.json";
 import ruNav from "@/locales/ru/nav.json";
@@ -30,10 +31,11 @@ import ruFields from "@/locales/ru/fields.json";
 import ruCrm from "@/locales/ru/crm.json";
 import ruNotes from "@/locales/ru/notes.json";
 import ruBilling from "@/locales/ru/billing.json";
+import ruLanding from "@/locales/ru/landing.json";
 
 const translations: Record<Locale, Record<string, unknown>> = {
-  en: { common: enCommon, settings: enSettings, nav: enNav, chat: enChat, team: enTeam, fields: enFields, crm: enCrm, notes: enNotes, billing: enBilling },
-  ru: { common: ruCommon, settings: ruSettings, nav: ruNav, chat: ruChat, team: ruTeam, fields: ruFields, crm: ruCrm, notes: ruNotes, billing: ruBilling },
+  en: { common: enCommon, settings: enSettings, nav: enNav, chat: enChat, team: enTeam, fields: enFields, crm: enCrm, notes: enNotes, billing: enBilling, landing: enLanding },
+  ru: { common: ruCommon, settings: ruSettings, nav: ruNav, chat: ruChat, team: ruTeam, fields: ruFields, crm: ruCrm, notes: ruNotes, billing: ruBilling, landing: ruLanding },
 };
 
 const STORAGE_KEY = "nexxus-language";

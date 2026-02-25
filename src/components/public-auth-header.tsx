@@ -6,78 +6,86 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, CheckSquare, BarChart2, LayoutGrid, Calendar, MessageCircle, Phone, Inbox, Film, FileText, Layout, BookOpen, ClipboardList, Clock, Zap, Timer, Grid3X3, Link2, Download, Play, BookMarked, HelpCircle, GraduationCap, Video, Menu, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggleSlider } from "./theme-toggle-slider";
+import { LanguageToggle } from "./landing/language-toggle";
 import { NexusBrandHeader } from "./nexus-brand";
+import { useTranslation } from "@/lib/i18n";
 
 type ColumnItem = { label: string; href: string; icon: LucideIcon };
 
-const PRODUCT_COLUMNS: { title: string; items: ColumnItem[] }[] = [
-  {
-    title: "PROJECTS",
-    items: [
-      { label: "Tasks", href: "/#features", icon: CheckSquare },
-      { label: "Dashboards", href: "/#features", icon: BarChart2 },
-      { label: "Board view", href: "/#features", icon: LayoutGrid },
-      { label: "Gantt", href: "/#features", icon: Calendar },
-    ],
-  },
-  {
-    title: "COMMUNICATION",
-    items: [
-      { label: "Chat", href: "/#ai", icon: MessageCircle },
-      { label: "SyncUp", href: "/#ai", icon: Phone },
-      { label: "Inbox", href: "/#features", icon: Inbox },
-      { label: "Clips", href: "/#features", icon: Film },
-    ],
-  },
-  {
-    title: "KNOWLEDGE",
-    items: [
-      { label: "Docs", href: "/#features", icon: FileText },
-      { label: "Whiteboards", href: "/#features", icon: Layout },
-      { label: "Wiki", href: "/#features", icon: BookOpen },
-      { label: "Forms", href: "/#features", icon: ClipboardList },
-    ],
-  },
-  {
-    title: "TIME",
-    items: [
-      { label: "Calendar", href: "/#features", icon: Calendar },
-      { label: "Scheduling", href: "/#features", icon: Clock },
-      { label: "Automations", href: "/#ai", icon: Zap },
-      { label: "Time tracking", href: "/#features", icon: Timer },
-    ],
-  },
-  {
-    title: "MORE",
-    items: [
-      { label: "All features", href: "/#features", icon: Grid3X3 },
-      { label: "Integrations", href: "/#features", icon: Link2 },
-      { label: "Get started", href: "/sign-up", icon: Download },
-      { label: "Watch demo", href: "/#ai", icon: Play },
-    ],
-  },
-];
+function useProductColumns() {
+  const { t } = useTranslation();
+  return [
+    {
+      title: t("landing.header.productColumns.projects"),
+      items: [
+        { label: t("landing.header.productItems.tasks"), href: "/#features", icon: CheckSquare },
+        { label: t("landing.header.productItems.dashboards"), href: "/#features", icon: BarChart2 },
+        { label: t("landing.header.productItems.boardView"), href: "/#features", icon: LayoutGrid },
+        { label: t("landing.header.productItems.gantt"), href: "/#features", icon: Calendar },
+      ],
+    },
+    {
+      title: t("landing.header.productColumns.communication"),
+      items: [
+        { label: t("landing.header.productItems.chat"), href: "/#ai", icon: MessageCircle },
+        { label: t("landing.header.productItems.syncUp"), href: "/#ai", icon: Phone },
+        { label: t("landing.header.productItems.inbox"), href: "/#features", icon: Inbox },
+        { label: t("landing.header.productItems.clips"), href: "/#features", icon: Film },
+      ],
+    },
+    {
+      title: t("landing.header.productColumns.knowledge"),
+      items: [
+        { label: t("landing.header.productItems.docs"), href: "/#features", icon: FileText },
+        { label: t("landing.header.productItems.whiteboards"), href: "/#features", icon: Layout },
+        { label: t("landing.header.productItems.wiki"), href: "/#features", icon: BookOpen },
+        { label: t("landing.header.productItems.forms"), href: "/#features", icon: ClipboardList },
+      ],
+    },
+    {
+      title: t("landing.header.productColumns.time"),
+      items: [
+        { label: t("landing.header.productItems.calendar"), href: "/#features", icon: Calendar },
+        { label: t("landing.header.productItems.scheduling"), href: "/#features", icon: Clock },
+        { label: t("landing.header.productItems.automations"), href: "/#ai", icon: Zap },
+        { label: t("landing.header.productItems.timeTracking"), href: "/#features", icon: Timer },
+      ],
+    },
+    {
+      title: t("landing.header.productColumns.more"),
+      items: [
+        { label: t("landing.header.productItems.allFeatures"), href: "/#features", icon: Grid3X3 },
+        { label: t("landing.header.productItems.integrations"), href: "/#features", icon: Link2 },
+        { label: t("landing.header.productItems.getStarted"), href: "/sign-up", icon: Download },
+        { label: t("landing.header.productItems.watchDemo"), href: "/#ai", icon: Play },
+      ],
+    },
+  ];
+}
 
-const LEARN_COLUMNS: { title: string; items: ColumnItem[] }[] = [
-  {
-    title: "RESOURCES",
-    items: [
-      { label: "Blog", href: "/#testimonials", icon: BookMarked },
-      { label: "Guides", href: "/#features", icon: BookOpen },
-      { label: "FAQ", href: "/pricing", icon: HelpCircle },
-      { label: "Help Center", href: "/#cta", icon: HelpCircle },
-    ],
-  },
-  {
-    title: "LEARNING",
-    items: [
-      { label: "Tutorials", href: "/#ai", icon: GraduationCap },
-      { label: "Webinars", href: "/#ai", icon: Video },
-      { label: "Documentation", href: "/#features", icon: FileText },
-      { label: "API", href: "/#features", icon: Link2 },
-    ],
-  },
-];
+function useLearnColumns() {
+  const { t } = useTranslation();
+  return [
+    {
+      title: t("landing.header.learnColumns.resources"),
+      items: [
+        { label: t("landing.header.learnItems.blog"), href: "/#testimonials", icon: BookMarked },
+        { label: t("landing.header.learnItems.guides"), href: "/#features", icon: BookOpen },
+        { label: t("landing.header.learnItems.faq"), href: "/#faq", icon: HelpCircle },
+        { label: t("landing.header.learnItems.helpCenter"), href: "/#faq", icon: HelpCircle },
+      ],
+    },
+    {
+      title: t("landing.header.learnColumns.learning"),
+      items: [
+        { label: t("landing.header.learnItems.tutorials"), href: "/#ai", icon: GraduationCap },
+        { label: t("landing.header.learnItems.webinars"), href: "/#ai", icon: Video },
+        { label: t("landing.header.learnItems.documentation"), href: "/#features", icon: FileText },
+        { label: t("landing.header.learnItems.api"), href: "/#features", icon: Link2 },
+      ],
+    },
+  ];
+}
 
 function MegaDropdown({
   label,
@@ -181,6 +189,8 @@ function MegaDropdown({
 }
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <AnimatePresence>
       {open && (
@@ -208,18 +218,19 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
             <nav className="flex flex-col gap-1">
               <Link href="/#features" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
-                Product
+                {t("landing.header.product")}
               </Link>
               <Link href="/#ai" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
-                Learn
+                {t("landing.header.learn")}
               </Link>
               <Link href="/pricing" onClick={onClose} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
-                Pricing
+                {t("landing.header.pricing")}
               </Link>
             </nav>
 
-            <div className="flex items-center px-3">
+            <div className="flex items-center gap-2 px-3">
               <ThemeToggleSlider />
+              <LanguageToggle />
             </div>
 
             <div className="flex flex-col gap-3 mt-auto">
@@ -228,14 +239,14 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                 onClick={onClose}
                 className="h-11 inline-flex items-center justify-center rounded-xl text-sm font-medium border-2 border-foreground bg-background text-foreground hover:bg-muted transition-all"
               >
-                Sign in
+                {t("landing.header.signIn")}
               </Link>
               <Link
                 href="/sign-up"
                 onClick={onClose}
                 className="h-11 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-foreground text-background hover:opacity-90 transition-all shadow-sm"
               >
-                Get started
+                {t("landing.header.getStarted")}
               </Link>
             </div>
           </motion.div>
@@ -249,6 +260,9 @@ export function PublicAuthHeader() {
   const [openDropdown, setOpenDropdown] = useState<"product" | "learn" | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { t } = useTranslation();
+  const productColumns = useProductColumns();
+  const learnColumns = useLearnColumns();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -273,15 +287,15 @@ export function PublicAuthHeader() {
 
           <nav className="hidden md:flex items-center gap-0.5 ml-6">
             <MegaDropdown
-              label="Product"
-              columns={PRODUCT_COLUMNS}
+              label={t("landing.header.product")}
+              columns={productColumns}
               open={openDropdown === "product"}
               onOpen={() => setOpenDropdown("product")}
               onClose={() => setOpenDropdown(null)}
             />
             <MegaDropdown
-              label="Learn"
-              columns={LEARN_COLUMNS}
+              label={t("landing.header.learn")}
+              columns={learnColumns}
               open={openDropdown === "learn"}
               onOpen={() => setOpenDropdown("learn")}
               onClose={() => setOpenDropdown(null)}
@@ -291,7 +305,7 @@ export function PublicAuthHeader() {
                 href="/pricing"
                 className="flex items-center rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
               >
-                Pricing
+                {t("landing.header.pricing")}
               </Link>
             </motion.div>
           </nav>
@@ -303,7 +317,9 @@ export function PublicAuthHeader() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 25 }}
+            className="flex items-center gap-2"
           >
+            <LanguageToggle />
             <ThemeToggleSlider />
           </motion.div>
           <motion.div
@@ -316,19 +332,20 @@ export function PublicAuthHeader() {
               href="/sign-in"
               className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium border border-white/15 bg-white/5 text-foreground hover:bg-white/10 backdrop-blur-xl transition-all duration-200"
             >
-              Sign in
+              {t("landing.header.signIn")}
             </Link>
             <Link
               href="/sign-up"
               className="h-10 px-5 inline-flex items-center justify-center rounded-xl text-sm font-medium bg-landing-accent text-landing-accent-foreground hover:shadow-lg hover:shadow-landing-accent/20 transition-all duration-200"
             >
-              Get started
+              {t("landing.header.getStarted")}
             </Link>
           </motion.div>
         </div>
 
         {/* Mobile actions */}
         <div className="flex md:hidden items-center gap-2">
+          <LanguageToggle />
           <ThemeToggleSlider />
           <button
             onClick={() => setMobileOpen(true)}
@@ -344,4 +361,3 @@ export function PublicAuthHeader() {
     </>
   );
 }
-

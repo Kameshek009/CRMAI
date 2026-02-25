@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 const companies = [
   "Salesforce", "HubSpot", "Stripe", "Notion", "Linear",
@@ -38,10 +39,10 @@ function MarqueeRow({ reverse = false, speed = 30 }: { reverse?: boolean; speed?
 export function TrustedBySection() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
+  const { t } = useTranslation();
 
   return (
     <section ref={ref} className="relative py-16 sm:py-24 px-4 sm:px-6">
-      {/* Subtle divider line */}
       <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <motion.div
@@ -51,7 +52,7 @@ export function TrustedBySection() {
         className="max-w-6xl mx-auto"
       >
         <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground/60 mb-8 sm:mb-12">
-          Built for teams at companies like
+          {t("landing.trustedBy.title")}
         </p>
 
         <div className="flex flex-col gap-4">
@@ -60,7 +61,6 @@ export function TrustedBySection() {
         </div>
       </motion.div>
 
-      {/* Bottom divider */}
       <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
     </section>
   );

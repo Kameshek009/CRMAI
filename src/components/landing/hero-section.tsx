@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useMotionValue, useTransform, animate, useSpring } from "framer-motion";
 import { ArrowRight, Sparkles, TrendingUp, Users, DollarSign, BarChart3, Zap } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 /* ---------- animated counter ---------- */
 function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -178,6 +179,7 @@ function MouseSpotlight() {
 
 /* ---------- 3D product mockup ---------- */
 function ProductPreview3D() {
+  const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -232,7 +234,7 @@ function ProductPreview3D() {
             <div className="w-3 h-3 rounded-full bg-amber-400/80" />
             <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
           </div>
-          <span className="text-[11px] text-muted-foreground font-medium ml-2">Nexxus CRM — Dashboard</span>
+          <span className="text-[11px] text-muted-foreground font-medium ml-2">{t("landing.hero.preview.title")}</span>
           <div className="ml-auto flex items-center gap-2">
             <div className="h-5 w-24 rounded-md bg-white/5 border border-white/10" />
           </div>
@@ -259,9 +261,9 @@ function ProductPreview3D() {
             {/* Top stats */}
             <div className="grid grid-cols-3 gap-3 mb-4">
               {[
-                { label: "Revenue", value: "$1.2M", change: "+18%", color: "from-landing-accent to-landing-accent" },
-                { label: "Successful Deals", value: "148", change: "+24%", color: "from-landing-accent to-landing-accent" },
-                { label: "Conversion", value: "68%", change: "+7%", color: "from-landing-accent to-landing-accent" },
+                { label: t("landing.hero.preview.revenue"), value: "$1.2M", change: "+18%", color: "from-landing-accent to-landing-accent" },
+                { label: t("landing.hero.preview.successfulDeals"), value: "148", change: "+24%", color: "from-landing-accent to-landing-accent" },
+                { label: t("landing.hero.preview.conversion"), value: "68%", change: "+7%", color: "from-landing-accent to-landing-accent" },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -282,7 +284,7 @@ function ProductPreview3D() {
             {/* Deals table */}
             <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-hidden">
               <div className="grid grid-cols-4 gap-2 px-3 py-2 border-b border-white/10">
-                {["Deal", "Value", "Growth", "Status"].map(h => (
+                {[t("landing.hero.preview.deal"), t("landing.hero.preview.value"), t("landing.hero.preview.growth"), t("landing.hero.preview.status")].map(h => (
                   <span key={h} className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50">{h}</span>
                 ))}
               </div>
@@ -314,7 +316,7 @@ function ProductPreview3D() {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.4 }}
             >
-              <p className="text-[10px] text-muted-foreground/60 mb-2">Revenue Trend</p>
+              <p className="text-[10px] text-muted-foreground/60 mb-2">{t("landing.hero.preview.revenueTrend")}</p>
               <div className="flex items-end gap-1 h-16">
                 {[35, 45, 38, 52, 48, 65, 58, 72, 68, 85, 78, 92].map((h, i) => (
                   <motion.div
@@ -345,10 +347,10 @@ function ProductPreview3D() {
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <Sparkles className="w-3 h-3 text-landing-accent" />
-                <span className="text-[9px] font-bold text-landing-accent">AI INSIGHT</span>
+                <span className="text-[9px] font-bold text-landing-accent">{t("landing.hero.preview.aiInsight")}</span>
               </div>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                3 deals need follow-up this week. Expected close rate: 78%
+                {t("landing.hero.preview.aiInsightText")}
               </p>
             </motion.div>
           </div>
@@ -365,14 +367,6 @@ function ProductPreview3D() {
     </motion.div>
   );
 }
-
-/* ---------- stats items ---------- */
-const stats = [
-  { value: 10000, suffix: "+", label: "Active Users" },
-  { value: 99, suffix: ".9%", label: "Uptime" },
-  { value: 150, suffix: "M+", label: "Deals Tracked" },
-  { value: 4, suffix: ".9/5", label: "User Rating" },
-];
 
 /* ---------- container animations ---------- */
 const containerVariants = {
@@ -426,6 +420,15 @@ function TypedText({ words }: { words: string[] }) {
 }
 
 export function HeroSection() {
+  const { t } = useTranslation();
+
+  const stats = [
+    { value: 10000, suffix: "+", label: t("landing.hero.stats.activeUsers") },
+    { value: 99, suffix: ".9%", label: t("landing.hero.stats.uptime") },
+    { value: 150, suffix: "M+", label: t("landing.hero.stats.dealsTracked") },
+    { value: 4, suffix: ".9/5", label: t("landing.hero.stats.userRating") },
+  ];
+
   return (
     <section className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6 pt-20 pb-12 sm:pt-28 sm:pb-20">
       <GradientMesh />
@@ -459,7 +462,7 @@ export function HeroSection() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            Now with AI-Powered Insights
+            {t("landing.hero.badge")}
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           </motion.span>
         </motion.div>
@@ -473,7 +476,7 @@ export function HeroSection() {
             Nexxus
           </span>
           <br />
-          <TypedText words={["CRM", "Sales", "Growth", "Revenue"]} />
+          <TypedText words={t("landing.hero.typedWords").split(",")} />
         </motion.h1>
 
         {/* Subtitle */}
@@ -481,17 +484,17 @@ export function HeroSection() {
           variants={itemVariants}
           className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed font-light"
         >
-          The AI-powered CRM that helps you{" "}
+          {t("landing.hero.subtitle")}{" "}
           <span className="text-foreground font-medium relative">
-            close more deals
+            {t("landing.hero.subtitleHighlight")}
             <motion.span
               className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent rounded-full"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
               transition={{ delay: 1.5, duration: 0.8, ease: "easeOut" }}
             />
-          </span>, nurture deeper relationships, and scale revenue —{" "}
-          <span className="text-foreground font-medium">effortlessly</span>.
+          </span>{t("landing.hero.subtitleEnd")}{" "}
+          <span className="text-foreground font-medium">{t("landing.hero.subtitleEffortlessly")}</span>.
         </motion.p>
 
         {/* CTA buttons */}
@@ -505,7 +508,7 @@ export function HeroSection() {
               href="/sign-up"
               className="landing-glow-button group relative inline-flex items-center gap-2.5 h-14 px-10 rounded-2xl text-base font-semibold bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent text-landing-accent-foreground shadow-2xl shadow-landing-accent/25 transition-shadow hover:shadow-landing-accent/40"
             >
-              Get Started Free
+              {t("landing.hero.ctaPrimary")}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </motion.div>
@@ -518,14 +521,14 @@ export function HeroSection() {
               href="#features"
               className="group relative inline-flex items-center gap-2.5 h-14 px-10 rounded-2xl text-base font-semibold border border-white/15 dark:border-white/15 bg-white/5 dark:bg-white/5 text-foreground backdrop-blur-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all"
             >
-              See Features
+              {t("landing.hero.ctaSecondary")}
             </Link>
           </motion.div>
         </motion.div>
 
         {/* Sub-CTA text */}
         <motion.p variants={itemVariants} className="text-sm text-muted-foreground">
-          Free forever. No credit card required.
+          {t("landing.hero.subCta")}
         </motion.p>
 
         {/* Stats row */}
