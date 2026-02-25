@@ -1,27 +1,23 @@
+// FILE: ai-section.tsx
 "use client";
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Brain, Sparkles, MessageSquare, Target, TrendingUp, Bot, Wand2, Shield, Clock } from "lucide-react";
-
-/* ---------- chat messages ---------- */
-const chatMessages = [
-  { role: "user" as const, text: "Show me deals closing this month over $10k" },
-  {
-    role: "ai" as const,
-    text: "Found 7 deals worth $142,500 total. 3 are in negotiation stage — Acme Corp ($45k), Globex ($28k), and Wayne Ent ($31k) need follow-ups this week.",
-  },
-  { role: "user" as const, text: "Draft follow-up emails for all three" },
-  {
-    role: "ai" as const,
-    text: "Done! I've drafted personalized emails for each contact based on their last interaction. Acme: pricing discussion follow-up. Globex: demo feedback. Wayne: contract review.",
-  },
-];
+import { useTranslation } from "@/lib/i18n";
 
 function AIChatMockup() {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   const [visibleMessages, setVisibleMessages] = useState(0);
+
+  const chatMessages = [
+    { role: "user" as const, text: t("landing.ai.chatMessages.user1") },
+    { role: "ai" as const, text: t("landing.ai.chatMessages.ai1") },
+    { role: "user" as const, text: t("landing.ai.chatMessages.user2") },
+    { role: "ai" as const, text: t("landing.ai.chatMessages.ai2") },
+  ];
 
   useEffect(() => {
     if (!inView) return;
@@ -30,6 +26,7 @@ function AIChatMockup() {
       timers.push(setTimeout(() => setVisibleMessages(i + 1), i * 1800 + 500));
     });
     return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView]);
 
   return (
@@ -43,11 +40,11 @@ function AIChatMockup() {
         </div>
         <div className="flex items-center gap-1.5 ml-2">
           <Bot className="w-3.5 h-3.5 text-landing-accent" />
-          <span className="text-[11px] text-muted-foreground font-medium">Nexxus AI Assistant</span>
+          <span className="text-[11px] text-muted-foreground font-medium">{t("landing.ai.assistantTitle")}</span>
         </div>
         <div className="ml-auto flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[9px] text-emerald-400 font-medium">Online</span>
+          <span className="text-[9px] text-emerald-400 font-medium">{t("landing.ai.online")}</span>
         </div>
       </div>
 
@@ -99,7 +96,7 @@ function AIChatMockup() {
                 />
               ))}
             </div>
-            <span className="text-[10px] text-muted-foreground ml-1.5">AI is thinking...</span>
+            <span className="text-[10px] text-muted-foreground ml-1.5">{t("landing.ai.thinking")}</span>
           </motion.div>
         )}
       </div>
@@ -108,7 +105,7 @@ function AIChatMockup() {
       <div className="px-4 pb-4">
         <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
           <Wand2 className="w-4 h-4 text-landing-accent/50" />
-          <span className="text-[12px] text-muted-foreground/40 flex-1">Ask AI anything about your CRM...</span>
+          <span className="text-[12px] text-muted-foreground/40 flex-1">{t("landing.ai.inputPlaceholder")}</span>
           <div className="w-7 h-7 rounded-lg bg-landing-accent flex items-center justify-center">
             <svg className="w-3.5 h-3.5 text-landing-accent-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
@@ -176,44 +173,52 @@ function NeuralNetworkBg() {
   );
 }
 
-const capabilities = [
-  {
-    icon: Target,
-    title: "AI Contact Scoring",
-    description: "Automatically rank contacts based on behavior, engagement, and fit. Focus on deals that matter most.",
-    gradient: "from-landing-accent to-landing-accent",
-    stat: "94%",
-    statLabel: "Accuracy",
-  },
-  {
-    icon: MessageSquare,
-    title: "Smart Follow-ups",
-    description: "AI drafts personalized emails based on conversation history, deal stage, and contact preferences.",
-    gradient: "from-landing-accent to-landing-accent",
-    stat: "3x",
-    statLabel: "Response rate",
-  },
-  {
-    icon: TrendingUp,
-    title: "Revenue Forecasting",
-    description: "Predict monthly revenue with AI that learns from your historical data and win rates.",
-    gradient: "from-landing-accent to-landing-accent",
-    stat: "±5%",
-    statLabel: "Variance",
-  },
-  {
-    icon: Brain,
-    title: "Deal Insights",
-    description: "Get AI-powered recommendations on next steps, risk alerts, and deal health analysis.",
-    gradient: "from-landing-accent to-landing-accent",
-    stat: "24/7",
-    statLabel: "Monitoring",
-  },
-];
-
 export function AISection() {
+  const { t } = useTranslation();
   const sectionRef = useRef<HTMLDivElement>(null);
   const inView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  const capabilities = [
+    {
+      icon: Target,
+      title: t("landing.ai.capabilities.contactScoring.title"),
+      description: t("landing.ai.capabilities.contactScoring.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      stat: t("landing.ai.capabilities.contactScoring.stat"),
+      statLabel: t("landing.ai.capabilities.contactScoring.statLabel"),
+    },
+    {
+      icon: MessageSquare,
+      title: t("landing.ai.capabilities.followUps.title"),
+      description: t("landing.ai.capabilities.followUps.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      stat: t("landing.ai.capabilities.followUps.stat"),
+      statLabel: t("landing.ai.capabilities.followUps.statLabel"),
+    },
+    {
+      icon: TrendingUp,
+      title: t("landing.ai.capabilities.forecasting.title"),
+      description: t("landing.ai.capabilities.forecasting.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      stat: t("landing.ai.capabilities.forecasting.stat"),
+      statLabel: t("landing.ai.capabilities.forecasting.statLabel"),
+    },
+    {
+      icon: Brain,
+      title: t("landing.ai.capabilities.insights.title"),
+      description: t("landing.ai.capabilities.insights.description"),
+      gradient: "from-landing-accent to-landing-accent",
+      stat: t("landing.ai.capabilities.insights.stat"),
+      statLabel: t("landing.ai.capabilities.insights.statLabel"),
+    },
+  ];
+
+  const metrics = [
+    { icon: Shield, label: t("landing.ai.metrics.security.label"), value: t("landing.ai.metrics.security.value") },
+    { icon: Clock, label: t("landing.ai.metrics.responseTime.label"), value: t("landing.ai.metrics.responseTime.value") },
+    { icon: Brain, label: t("landing.ai.metrics.models.label"), value: t("landing.ai.metrics.models.value") },
+    { icon: Sparkles, label: t("landing.ai.metrics.actions.label"), value: t("landing.ai.metrics.actions.value") },
+  ];
 
   return (
     <section
@@ -251,17 +256,17 @@ export function AISection() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-landing-accent/20 bg-landing-accent/10 px-5 py-2 text-xs font-semibold tracking-wide text-landing-accent backdrop-blur-xl mb-6">
             <Brain className="w-3.5 h-3.5" />
-            AI-Powered
+            {t("landing.ai.badge")}
           </span>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
-            Your AI sales assistant
+            {t("landing.ai.title")}
             <br />
             <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
-              that never sleeps
+              {t("landing.ai.titleHighlight")}
             </span>
           </h2>
           <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Ask questions in natural language, get instant insights, automate follow-ups, and let AI handle the busywork while you focus on selling.
+            {t("landing.ai.subtitle")}
           </p>
         </motion.div>
 
@@ -344,12 +349,7 @@ export function AISection() {
           transition={{ delay: 0.3 }}
           className="mt-12 sm:mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6"
         >
-          {[
-            { icon: Shield, label: "Enterprise Security", value: "SOC 2" },
-            { icon: Clock, label: "Avg Response Time", value: "<1s" },
-            { icon: Brain, label: "Models Trained On", value: "10B+" },
-            { icon: Sparkles, label: "AI Actions/Day", value: "2M+" },
-          ].map((metric, i) => {
+          {metrics.map((metric, i) => {
             const Icon = metric.icon;
             return (
               <motion.div

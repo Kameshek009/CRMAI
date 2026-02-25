@@ -1,3 +1,4 @@
+// FILE: features-section.tsx
 "use client";
 
 import { useRef, useCallback } from "react";
@@ -11,6 +12,7 @@ import {
   RefreshCw,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface BentoFeature {
   icon: LucideIcon;
@@ -21,65 +23,8 @@ interface BentoFeature {
   size: "lg" | "md" | "sm";
 }
 
-const features: BentoFeature[] = [
-  {
-    icon: Brain,
-    title: "AI-Powered CRM",
-    description:
-      "Let artificial intelligence score contacts, predict outcomes, and draft follow-ups. Your AI co-pilot works 24/7 so you never miss an opportunity.",
-    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
-    iconGradient: "from-landing-accent to-landing-accent",
-    size: "lg",
-  },
-  {
-    icon: GitBranch,
-    title: "Pipeline Management",
-    description:
-      "Drag-and-drop deals through custom stages. Visualize your entire funnel with real-time updates and automated transitions.",
-    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
-    iconGradient: "from-landing-accent to-landing-accent",
-    size: "md",
-  },
-  {
-    icon: Users,
-    title: "Team Collaboration",
-    description:
-      "Share pipelines, assign deals, mention teammates, and keep everyone aligned in real time.",
-    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
-    iconGradient: "from-landing-accent to-landing-accent",
-    size: "sm",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics & Insights",
-    description:
-      "Beautiful dashboards with conversion rates, revenue forecasts, and performance metrics that update in real time.",
-    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
-    iconGradient: "from-landing-accent to-landing-accent",
-    size: "sm",
-  },
-  {
-    icon: Zap,
-    title: "Smart Automation",
-    description:
-      "Create triggers and workflows that eliminate repetitive tasks. Auto-assign contacts, send follow-ups, update stages — hands free.",
-    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
-    iconGradient: "from-landing-accent to-landing-accent",
-    size: "md",
-  },
-  {
-    icon: RefreshCw,
-    title: "Real-time Sync",
-    description:
-      "Instant sync across all devices. Connect with Gmail, Outlook, Slack, Zapier, and 50+ tools seamlessly.",
-    gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
-    iconGradient: "from-landing-accent to-landing-accent",
-    size: "lg",
-  },
-];
-
 /* ---------- mouse-following glow card with 3D tilt ---------- */
-function BentoCard({ feature, index }: { feature: BentoFeature; index: number }) {
+function BentoCard({ feature, index, learnMoreText }: { feature: BentoFeature; index: number; learnMoreText: string }) {
   const Icon = feature.icon;
   const cardRef = useRef<HTMLDivElement>(null);
   const glowX = useMotionValue(0);
@@ -194,7 +139,7 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
           initial={false}
         >
           <span className={`bg-gradient-to-r ${feature.iconGradient} bg-clip-text text-transparent`}>
-            Learn more
+            {learnMoreText}
           </span>
           <motion.span
             animate={{ x: [0, 3, 0] }}
@@ -210,6 +155,59 @@ function BentoCard({ feature, index }: { feature: BentoFeature; index: number })
 }
 
 export function FeaturesSection() {
+  const { t } = useTranslation();
+
+  const features: BentoFeature[] = [
+    {
+      icon: Brain,
+      title: t("landing.features.items.aiPowered.title"),
+      description: t("landing.features.items.aiPowered.description"),
+      gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+      iconGradient: "from-landing-accent to-landing-accent",
+      size: "lg",
+    },
+    {
+      icon: GitBranch,
+      title: t("landing.features.items.pipeline.title"),
+      description: t("landing.features.items.pipeline.description"),
+      gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+      iconGradient: "from-landing-accent to-landing-accent",
+      size: "md",
+    },
+    {
+      icon: Users,
+      title: t("landing.features.items.teamCollab.title"),
+      description: t("landing.features.items.teamCollab.description"),
+      gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+      iconGradient: "from-landing-accent to-landing-accent",
+      size: "sm",
+    },
+    {
+      icon: BarChart3,
+      title: t("landing.features.items.analytics.title"),
+      description: t("landing.features.items.analytics.description"),
+      gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+      iconGradient: "from-landing-accent to-landing-accent",
+      size: "sm",
+    },
+    {
+      icon: Zap,
+      title: t("landing.features.items.automation.title"),
+      description: t("landing.features.items.automation.description"),
+      gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+      iconGradient: "from-landing-accent to-landing-accent",
+      size: "md",
+    },
+    {
+      icon: RefreshCw,
+      title: t("landing.features.items.sync.title"),
+      description: t("landing.features.items.sync.description"),
+      gradient: "from-landing-accent/20 via-landing-accent/10 to-transparent",
+      iconGradient: "from-landing-accent to-landing-accent",
+      size: "lg",
+    },
+  ];
+
   return (
     <section id="features" className="relative py-24 sm:py-36 px-4 sm:px-6 overflow-hidden">
       {/* Background decoration */}
@@ -241,24 +239,24 @@ export function FeaturesSection() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 dark:border-white/10 bg-white/5 dark:bg-white/5 px-5 py-2 text-xs font-semibold tracking-wide text-muted-foreground backdrop-blur-xl mb-6">
             <Zap className="w-3.5 h-3.5 text-amber-400" />
-            Powerful Features
+            {t("landing.features.badge")}
           </span>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
-            Everything you need to
+            {t("landing.features.title")}
             <br />
             <span className="landing-gradient-text bg-gradient-to-r from-landing-accent via-landing-accent to-landing-accent bg-clip-text text-transparent">
-              close more deals
+              {t("landing.features.titleHighlight")}
             </span>
           </h2>
           <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            A complete CRM toolkit designed for modern sales teams. Every feature built to save time and increase revenue.
+            {t("landing.features.subtitle")}
           </p>
         </motion.div>
 
         {/* Bento grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5 auto-rows-auto">
           {features.map((feature, i) => (
-            <BentoCard key={feature.title} feature={feature} index={i} />
+            <BentoCard key={feature.title} feature={feature} index={i} learnMoreText={t("landing.features.learnMore")} />
           ))}
         </div>
       </div>
