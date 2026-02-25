@@ -28,6 +28,14 @@ const isPublicRoute = createRouteMatcher([
 // Define API routes that need JWT validation
 const isApiRoute = createRouteMatcher(["/api/(.*)"]);
 
+// Routes that handle their own Bearer token validation (not Clerk sessions)
+const isBearerAuthRoute = createRouteMatcher([
+  "/api/llm/chat",        // Desktop app — validates desktop JWT
+  "/api/sync/stream",     // Desktop app — validates desktop JWT
+  "/api/mobile/(.*)",     // Mobile app — validates Clerk JWT via verifyMobileAuth()
+  "/api/cron/(.*)",       // Cron jobs — validates CRON_SECRET
+]);
+
 export default clerkMiddleware(async (auth, request) => {
   try {
     // Global API rate limit (120 req/min per IP)
@@ -41,17 +49,15 @@ export default clerkMiddleware(async (auth, request) => {
       return;
     }
 
-    // For API routes, check for Bearer token (desktop app auth)
-    if (isApiRoute(request)) {
+    // For whitelisted Bearer routes, let the route handler validate the token
+    if (isBearerAuthRoute(request)) {
       const authHeader = request.headers.get("Authorization");
-
-      // If there's a Bearer token, let the API route handle validation
       if (authHeader?.startsWith("Bearer ")) {
         return;
       }
     }
 
-    // Protect all other routes
+    // Protect all other routes with Clerk session auth
     await auth.protect();
   } catch {
     // Prevent MIDDLEWARE_INVOCATION_FAILED - redirect to sign-in on errors
