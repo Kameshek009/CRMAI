@@ -54,6 +54,17 @@ export async function POST(request: NextRequest) {
           .update({ current_team_id: team.id })
           .eq("id", accountId);
 
+        // Atomically sync seat_count and update Stripe
+        if (team.stripe_subscription_id && team.tier !== "free") {
+          try {
+            const { data: result } = await supabase.rpc("sync_seat_count", { p_team_id: team.id });
+            const newSeatCount = result ?? 1;
+            await updateSubscriptionQuantity(team.stripe_subscription_id, newSeatCount);
+          } catch (err) {
+            logger.error("TeamJoin", "Failed to update Stripe quantity on reactivation", err);
+          }
+        }
+
         return NextResponse.json({ success: true, data: { teamId: team.id, teamName: team.name } });
       }
       return NextResponse.json({ success: false, error: "Already a member of this team" }, { status: 409 });
@@ -106,15 +117,12 @@ export async function POST(request: NextRequest) {
       .update({ current_team_id: team.id })
       .eq("id", accountId);
 
-    // Update Stripe subscription quantity (per-seat billing)
+    // Atomically sync seat_count and update Stripe
     if (team.stripe_subscription_id && team.tier !== "free") {
-      const newSeatCount = (team.seat_count || 1) + 1;
       try {
+        const { data: result } = await supabase.rpc("sync_seat_count", { p_team_id: team.id });
+        const newSeatCount = result ?? 1;
         await updateSubscriptionQuantity(team.stripe_subscription_id, newSeatCount);
-        await supabase
-          .from("teams")
-          .update({ seat_count: newSeatCount })
-          .eq("id", team.id);
       } catch (err) {
         logger.error("TeamJoin", "Failed to update Stripe quantity", err);
       }

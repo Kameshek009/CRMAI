@@ -61,21 +61,18 @@ export async function POST(
       return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
 
-    // Update Stripe subscription quantity (per-seat billing)
+    // Atomically sync seat_count and update Stripe
     const { data: team } = await supabase
       .from("teams")
-      .select("*")
+      .select("stripe_subscription_id, tier")
       .eq("id", id)
       .single();
 
     if (team?.stripe_subscription_id && team.tier !== "free") {
-      const newSeatCount = Math.max(1, (team.seat_count || 1) - 1);
       try {
+        const { data: result } = await supabase.rpc("sync_seat_count", { p_team_id: id });
+        const newSeatCount = result ?? 1;
         await updateSubscriptionQuantity(team.stripe_subscription_id, newSeatCount);
-        await supabase
-          .from("teams")
-          .update({ seat_count: newSeatCount })
-          .eq("id", id);
       } catch (err) {
         logger.error("TeamKick", "Failed to update Stripe quantity", err);
       }

@@ -133,30 +133,18 @@ export async function POST(request: NextRequest) {
         // Auto-fix token_limit if it doesn't match the tier
         const needsLimitSync = expectedLimit > 0 && team.token_limit !== expectedLimit;
 
-        // Auto-fix seat_count by counting active members
-        const { count: activeMembers } = await supabaseAdmin
-          .from("team_members")
-          .select("id", { count: "exact", head: true })
-          .eq("team_id", team.id)
-          .eq("status", "active");
-        const actualSeats = Math.max(activeMembers || 1, 1);
+        // Auto-fix seat_count atomically via DB function
+        const { data: actualSeats } = await supabaseAdmin.rpc("sync_seat_count", { p_team_id: team.id });
         const needsSeatSync = actualSeats !== team.seat_count;
+        if (actualSeats) seatCount = actualSeats;
 
-        if (needsLimitSync || needsSeatSync) {
-          const updates: Record<string, unknown> = {};
-          if (needsLimitSync) {
-            updates.token_limit = expectedLimit;
-            tokenLimit = expectedLimit;
-          }
-          if (needsSeatSync) {
-            updates.seat_count = actualSeats;
-            seatCount = actualSeats;
-          }
+        if (needsLimitSync) {
           await supabaseAdmin
             .from("teams")
-            .update(updates)
+            .update({ token_limit: expectedLimit })
             .eq("id", team.id);
-          logger.info("Auth", `Auto-synced team ${team.id}: token_limit=${tokenLimit}, seat_count=${seatCount}`);
+          tokenLimit = expectedLimit;
+          logger.info("Auth", `Auto-synced team ${team.id}: token_limit=${tokenLimit}`);
         }
 
         enrichedAccount = {
