@@ -47,11 +47,13 @@ export async function GET(request: NextRequest) {
     const contactIds = [...new Set(dueEnrollments.map((e) => e.contact_id).filter(Boolean))] as string[];
 
     const [stepsResult, contactsResult] = await Promise.all([
-      supabase
-        .from("email_sequence_steps")
-        .select("id, sequence_id, position, subject, body, delay_days")
-        .in("sequence_id", sequenceIds)
-        .order("position", { ascending: true }),
+      sequenceIds.length > 0
+        ? supabase
+            .from("email_sequence_steps")
+            .select("id, sequence_id, position, subject, body, delay_days")
+            .in("sequence_id", sequenceIds)
+            .order("position", { ascending: true })
+        : Promise.resolve({ data: [] as { id: string; sequence_id: string; position: number; subject: string; body: string; delay_days: number }[] }),
       contactIds.length > 0
         ? supabase.from("contacts").select("id, email").in("id", contactIds)
         : Promise.resolve({ data: [] as { id: string; email: string | null }[] }),

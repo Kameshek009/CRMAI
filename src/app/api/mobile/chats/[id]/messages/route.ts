@@ -47,17 +47,19 @@ export async function GET(
     const limit = Math.min(parseInt(searchParams.get("limit") || "50") || 50, 100);
     const offset = Math.max(parseInt(searchParams.get("offset") || "0") || 0, 0);
 
-    // Fetch messages with pagination
+    // Fetch messages — polling mode (since) and pagination mode (offset) are mutually exclusive
     let query = supabase
       .from("messages")
       .select("id, chat_id, role, content, message_type, metadata, created_at, local_id, device_origin")
       .eq("chat_id", chatId)
-      .order("created_at", { ascending: true })
-      .range(offset, offset + limit - 1);
+      .order("created_at", { ascending: true });
 
-    // If since is provided, only get messages after that timestamp (polling mode)
     if (since) {
-      query = query.gt("created_at", since);
+      // Polling mode: get new messages after timestamp, limit to prevent huge responses
+      query = query.gt("created_at", since).limit(limit);
+    } else {
+      // Pagination mode: offset-based
+      query = query.range(offset, offset + limit - 1);
     }
 
     const { data: messages, error: messagesError } = await query;

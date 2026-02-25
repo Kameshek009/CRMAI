@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
         // Auto-fix seat_count atomically via DB function
         const { data: actualSeats } = await supabaseAdmin.rpc("sync_seat_count", { p_team_id: team.id });
         const needsSeatSync = actualSeats !== team.seat_count;
-        if (actualSeats) seatCount = actualSeats;
+        if (actualSeats != null) seatCount = actualSeats;
 
         if (needsLimitSync) {
           await supabaseAdmin
