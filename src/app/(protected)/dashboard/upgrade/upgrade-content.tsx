@@ -282,10 +282,15 @@ export function UpgradeContent() {
 
               <CardContent className="flex-1 space-y-6">
                 {/* Price */}
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold">{formatPrice(plan.tier)}</span>
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <span className={cn(
+                    "font-bold truncate",
+                    plan.tier === "enterprise" ? "text-2xl" : "text-3xl"
+                  )}>
+                    {formatPrice(plan.tier)}
+                  </span>
                   {plan.tier !== "enterprise" && (
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-sm whitespace-nowrap">
                       {limits.priceMonthly ? t("billing.upgradePage.perUserMonth") : t("billing.upgradePage.forever")}
                     </span>
                   )}
