@@ -2,7 +2,7 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useInView, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
@@ -26,6 +26,10 @@ function TestimonialCard({ t }: { t: Testimonial }) {
   const glowY = useMotionValue(0);
   const smoothGlowX = useSpring(glowX, { stiffness: 200, damping: 30 });
   const smoothGlowY = useSpring(glowY, { stiffness: 200, damping: 30 });
+  const glowBackground = useTransform(
+    [smoothGlowX, smoothGlowY] as MotionValue[],
+    ([x, y]) => `radial-gradient(300px circle at ${x}px ${y}px, rgba(var(--landing-accent-rgb),0.10), transparent 60%)`
+  );
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return;
@@ -54,9 +58,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
       {/* Mouse-following glow */}
       <motion.div
         className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{
-          background: `radial-gradient(300px circle at ${smoothGlowX}px ${smoothGlowY}px, rgba(var(--landing-accent-rgb),0.10), transparent 60%)`,
-        }}
+        style={{ background: glowBackground }}
       />
 
       {/* Background glow on hover */}

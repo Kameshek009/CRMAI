@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   type ReactNode,
 } from "react";
 import type { Locale } from "./types";
@@ -60,17 +61,30 @@ function resolveKey(obj: unknown, path: string): string | undefined {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
+  const isInitialized = useRef(false);
 
   // Sync locale from localStorage after mount to avoid hydration mismatch
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "en" || stored === "ru") {
-      setLocaleState(stored);
-    }
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === "en" || stored === "ru") {
+        setLocaleState(stored);
+      }
+    } catch {}
+    isInitialized.current = true;
   }, []);
 
+  // Persist locale to localStorage (skip initial render to avoid overwriting saved value)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, locale);
+    if (!isInitialized.current) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, locale);
+    } catch {}
+  }, [locale]);
+
+  // Sync <html lang> attribute
+  useEffect(() => {
+    document.documentElement.lang = locale;
   }, [locale]);
 
   const setLocale = useCallback((newLocale: Locale) => {
@@ -86,7 +100,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
       if (params) {
         for (const [k, v] of Object.entries(params)) {
-          value = value.replace(`{${k}}`, String(v));
+          value = value.replaceAll(`{${k}}`, String(v));
         }
       }
 

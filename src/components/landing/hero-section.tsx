@@ -171,7 +171,7 @@ function MouseSpotlight() {
   return (
     <motion.div
       ref={spotlightRef}
-      className="pointer-events-none fixed inset-0 z-0 opacity-60"
+      className="pointer-events-none absolute inset-0 z-0 opacity-60"
       style={{ background: backgroundValue }}
     />
   );

@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRef, useCallback } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, useInView } from "framer-motion";
 import { Check, Sparkles, Zap, Crown, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
@@ -42,6 +42,10 @@ function PricingCard({ plan }: { plan: PlanCard }) {
   const glowY = useMotionValue(0);
   const smoothX = useSpring(glowX, { stiffness: 200, damping: 30 });
   const smoothY = useSpring(glowY, { stiffness: 200, damping: 30 });
+  const glowBackground = useTransform(
+    [smoothX, smoothY],
+    ([x, y]) => `radial-gradient(350px circle at ${x}px ${y}px, rgba(var(--landing-accent-rgb),0.10), transparent 60%)`
+  );
   const Icon = plan.icon;
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -68,9 +72,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       {/* Mouse-following glow */}
       <motion.div
         className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{
-          background: `radial-gradient(350px circle at ${smoothX}px ${smoothY}px, rgba(var(--landing-accent-rgb),0.10), transparent 60%)`,
-        }}
+        style={{ background: glowBackground }}
       />
 
       {/* Animated gradient border for popular */}
@@ -285,7 +287,8 @@ export function PricingSection() {
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className="text-center mb-10 sm:mb-14"
         >
@@ -309,7 +312,8 @@ export function PricingSection() {
         <motion.div
           variants={container}
           initial="hidden"
-          animate="show"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5"
         >
           {plans.map((plan) => (
@@ -320,7 +324,8 @@ export function PricingSection() {
         {/* FAQ-like note */}
         <motion.p
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
           transition={{ delay: 0.6 }}
           className="text-center text-xs text-muted-foreground mt-8 sm:mt-12"
         >

@@ -28,6 +28,7 @@ function FAQItem({ questionKey, index }: { questionKey: string; index: number })
         <button
           type="button"
           onClick={() => setOpen(!open)}
+          aria-expanded={open}
           className="flex items-center justify-between w-full text-left px-6 py-5 sm:px-8 sm:py-6"
         >
           <span className="text-sm sm:text-base font-semibold text-foreground pr-4">
