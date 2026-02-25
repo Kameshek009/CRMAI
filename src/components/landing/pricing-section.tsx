@@ -110,7 +110,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
           </div>
           <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
         </div>
-        <div className="flex items-baseline gap-1">
+        <div className="flex items-baseline gap-1 flex-wrap">
           <span className={cn(
             "text-3xl sm:text-4xl font-bold tracking-tight",
             plan.popular
@@ -120,7 +120,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
             {plan.price}
           </span>
           {plan.priceSuffix && (
-            <span className="text-sm text-muted-foreground">{plan.priceSuffix}</span>
+            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">{plan.priceSuffix}</span>
           )}
         </div>
       </div>
