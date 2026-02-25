@@ -30,7 +30,7 @@ interface ChatComposerProps {
   onSend: (content: string, attachment?: AttachmentData) => void;
 }
 
-const ACCEPT_TYPES = 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml,application/pdf,text/plain,text/csv,application/json,.doc,.docx';
+const ACCEPT_TYPES = 'image/jpeg,image/png,image/gif,image/webp,application/pdf,text/plain,text/csv,application/json,.doc,.docx';
 
 export function ChatComposer({
   chat,
