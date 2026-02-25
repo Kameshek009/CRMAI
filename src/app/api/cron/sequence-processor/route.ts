@@ -42,18 +42,38 @@ export async function GET(request: NextRequest) {
     let processed = 0;
     let completed = 0;
 
+    // Batch-load all steps and contacts upfront (instead of N+1 queries in loop)
+    const sequenceIds = [...new Set(dueEnrollments.map((e) => e.sequence_id))];
+    const contactIds = [...new Set(dueEnrollments.map((e) => e.contact_id).filter(Boolean))] as string[];
+
+    const [stepsResult, contactsResult] = await Promise.all([
+      supabase
+        .from("email_sequence_steps")
+        .select("id, sequence_id, position, subject, body, delay_days")
+        .in("sequence_id", sequenceIds)
+        .order("position", { ascending: true }),
+      contactIds.length > 0
+        ? supabase.from("contacts").select("id, email").in("id", contactIds)
+        : Promise.resolve({ data: [] as { id: string; email: string | null }[] }),
+    ]);
+
+    // Build lookup maps
+    const stepsBySequence = new Map<string, typeof stepsResult.data>();
+    for (const step of stepsResult.data || []) {
+      if (!stepsBySequence.has(step.sequence_id)) stepsBySequence.set(step.sequence_id, []);
+      stepsBySequence.get(step.sequence_id)!.push(step);
+    }
+    const contactEmailMap = new Map<string, string>();
+    for (const c of (contactsResult.data || []) as { id: string; email: string | null }[]) {
+      if (c.email) contactEmailMap.set(c.id, c.email);
+    }
+
     for (const enrollment of dueEnrollments) {
       try {
         const teamId = (enrollment.email_sequences as { team_id: string })?.team_id;
         if (!teamId) continue;
 
-        // Get all steps for this sequence
-        const { data: steps } = await supabase
-          .from("email_sequence_steps")
-          .select("*")
-          .eq("sequence_id", enrollment.sequence_id)
-          .order("position", { ascending: true });
-
+        const steps = stepsBySequence.get(enrollment.sequence_id);
         if (!steps || steps.length === 0) continue;
 
         const currentStep = steps[enrollment.current_step];
@@ -67,19 +87,10 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Resolve recipient email
-        let toEmail: string | null = null;
-        if (enrollment.contact_id) {
-          const { data: contact } = await supabase
-            .from("contacts")
-            .select("email")
-            .eq("id", enrollment.contact_id)
-            .single();
-          toEmail = contact?.email || null;
-        }
+        // Resolve recipient email from pre-loaded map
+        const toEmail = enrollment.contact_id ? contactEmailMap.get(enrollment.contact_id) || null : null;
 
         if (!toEmail) {
-          // Skip if no email found
           await supabase
             .from("email_sequence_enrollments")
             .update({ status: "completed", updated_at: now })

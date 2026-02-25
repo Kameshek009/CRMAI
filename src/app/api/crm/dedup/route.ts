@@ -22,49 +22,33 @@ export async function GET(request: NextRequest) {
   const groups: DuplicateGroup[] = [];
 
   if (entity === "contacts") {
-    // Find duplicates by email
-    const { data: emailDups } = await supabase.rpc("find_contact_email_duplicates", {
-      p_team_id: context.workspaceId,
-    }).select("*");
-
-    if (!emailDups) {
-      // Fallback: manual query for email duplicates
-      const { data: contacts } = await supabase
-        .from("contacts")
-        .select("id,first_name,last_name,email,phone,status,created_at")
-        .eq("team_id", context.workspaceId)
-        .eq("is_deleted", false)
-        .not("email", "is", null)
-        .order("created_at", { ascending: true });
-
-      if (contacts) {
-        const byEmail = new Map<string, typeof contacts>();
-        for (const c of contacts) {
-          if (!c.email) continue;
-          const key = (c.email as string).toLowerCase().trim();
-          if (!byEmail.has(key)) byEmail.set(key, []);
-          byEmail.get(key)!.push(c);
-        }
-        for (const [key, recs] of byEmail) {
-          if (recs.length > 1) {
-            groups.push({ match_key: key, match_type: "email", records: recs });
-          }
-        }
-      }
-    }
-
-    // Find duplicates by phone
-    const { data: contacts2 } = await supabase
+    // Single query for all contacts (instead of 3 separate full scans)
+    const { data: contacts } = await supabase
       .from("contacts")
       .select("id,first_name,last_name,email,phone,status,created_at")
       .eq("team_id", context.workspaceId)
       .eq("is_deleted", false)
-      .not("phone", "is", null)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(5000);
 
-    if (contacts2) {
-      const byPhone = new Map<string, typeof contacts2>();
-      for (const c of contacts2) {
+    if (contacts) {
+      // 1) Duplicates by email
+      const byEmail = new Map<string, typeof contacts>();
+      for (const c of contacts) {
+        if (!c.email) continue;
+        const key = (c.email as string).toLowerCase().trim();
+        if (!byEmail.has(key)) byEmail.set(key, []);
+        byEmail.get(key)!.push(c);
+      }
+      for (const [key, recs] of byEmail) {
+        if (recs.length > 1) {
+          groups.push({ match_key: key, match_type: "email", records: recs });
+        }
+      }
+
+      // 2) Duplicates by phone (skip groups already found by email)
+      const byPhone = new Map<string, typeof contacts>();
+      for (const c of contacts) {
         if (!c.phone) continue;
         const key = (c.phone as string).replace(/\D/g, "");
         if (key.length < 7) continue;
@@ -80,19 +64,10 @@ export async function GET(request: NextRequest) {
           }
         }
       }
-    }
 
-    // Find duplicates by name
-    const { data: contacts3 } = await supabase
-      .from("contacts")
-      .select("id,first_name,last_name,email,phone,status,created_at")
-      .eq("team_id", context.workspaceId)
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: true });
-
-    if (contacts3) {
-      const byName = new Map<string, typeof contacts3>();
-      for (const c of contacts3) {
+      // 3) Duplicates by name (skip contacts already in groups)
+      const byName = new Map<string, typeof contacts>();
+      for (const c of contacts) {
         const name = `${(c.first_name || "").toLowerCase().trim()} ${(c.last_name || "").toLowerCase().trim()}`.trim();
         if (name.length < 3) continue;
         if (!byName.has(name)) byName.set(name, []);
@@ -109,16 +84,17 @@ export async function GET(request: NextRequest) {
       }
     }
   } else {
-    // Companies: duplicates by domain
+    // Single query for all companies (instead of 2 separate scans)
     const { data: companies } = await supabase
       .from("companies")
       .select("id,name,domain,industry,size,created_at")
       .eq("team_id", context.workspaceId)
       .eq("is_deleted", false)
-      .not("domain", "is", null)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(5000);
 
     if (companies) {
+      // 1) Duplicates by domain
       const byDomain = new Map<string, typeof companies>();
       for (const c of companies) {
         if (!c.domain) continue;
@@ -131,19 +107,10 @@ export async function GET(request: NextRequest) {
           groups.push({ match_key: key, match_type: "domain", records: recs });
         }
       }
-    }
 
-    // Companies: duplicates by name
-    const { data: companies2 } = await supabase
-      .from("companies")
-      .select("id,name,domain,industry,size,created_at")
-      .eq("team_id", context.workspaceId)
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: true });
-
-    if (companies2) {
-      const byName = new Map<string, typeof companies2>();
-      for (const c of companies2) {
+      // 2) Duplicates by name (skip companies already in groups)
+      const byName = new Map<string, typeof companies>();
+      for (const c of companies) {
         const name = ((c.name as string) || "").toLowerCase().trim();
         if (name.length < 2) continue;
         if (!byName.has(name)) byName.set(name, []);
@@ -161,5 +128,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ success: true, data: groups, total: groups.length });
+  // Limit response size to prevent huge payloads
+  const limitedGroups = groups.slice(0, 200);
+  return NextResponse.json({ success: true, data: limitedGroups, total: groups.length });
 }

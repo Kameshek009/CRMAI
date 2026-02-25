@@ -41,18 +41,21 @@ export async function GET(
       );
     }
 
-    // Check for since parameter (for polling)
+    // Pagination & polling params
     const { searchParams } = new URL(request.url);
     const since = searchParams.get("since");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50") || 50, 100);
+    const offset = Math.max(parseInt(searchParams.get("offset") || "0") || 0, 0);
 
-    // Fetch messages
+    // Fetch messages with pagination
     let query = supabase
       .from("messages")
-      .select("*")
+      .select("id, chat_id, role, content, message_type, metadata, created_at, local_id, device_origin")
       .eq("chat_id", chatId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .range(offset, offset + limit - 1);
 
-    // If since is provided, only get messages after that timestamp
+    // If since is provided, only get messages after that timestamp (polling mode)
     if (since) {
       query = query.gt("created_at", since);
     }

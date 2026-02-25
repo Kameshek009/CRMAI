@@ -22,23 +22,9 @@ export async function GET(request: NextRequest) {
 
     const supabase = createSupabaseAdmin();
 
-    const { data: chats, error } = await supabase
-      .from("chats")
-      .select(`
-        id,
-        title,
-        mode,
-        updated_at,
-        vision_board_id,
-        messages (
-          id,
-          content,
-          created_at
-        )
-      `)
-      .eq("account_id", auth.accountId)
-      .eq("is_deleted", false)
-      .order("updated_at", { ascending: false });
+    // Fetch chat list with last message preview via DB function (single query)
+    const { data: chatList, error } = await supabase
+      .rpc("get_chat_list", { p_account_id: auth.accountId, p_limit: 50 });
 
     if (error) {
       logger.error("MobileChats", "List error", error);
@@ -47,24 +33,6 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    // Transform to include message count and preview
-    const chatList = (chats || []).map((chat) => {
-      const messages = chat.messages || [];
-      const sortedMessages = messages.sort(
-        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      const lastMessage = sortedMessages[0];
-
-      return {
-        id: chat.id,
-        title: chat.title,
-        mode: chat.mode,
-        updated_at: chat.updated_at,
-        message_count: messages.length,
-        last_message_preview: lastMessage?.content?.slice(0, 100),
-      };
-    });
 
     return NextResponse.json({
       success: true,

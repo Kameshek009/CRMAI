@@ -30,7 +30,7 @@ export async function GET(
     // Fetch chat - verify it belongs to the account
     const { data: chat, error: chatError } = await supabase
       .from("chats")
-      .select("*")
+      .select("id, title, mode, updated_at, vision_board_id")
       .eq("id", chatId)
       .eq("account_id", auth.accountId)
       .eq("is_deleted", false)
@@ -46,24 +46,28 @@ export async function GET(
       throw chatError;
     }
 
-    // Fetch messages for the chat
+    // Fetch last 50 messages (client can paginate via /messages endpoint)
     const { data: messages, error: messagesError } = await supabase
       .from("messages")
-      .select("*")
+      .select("id, chat_id, role, content, message_type, metadata, created_at, local_id, device_origin")
       .eq("chat_id", chatId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false })
+      .limit(50);
 
     if (messagesError) {
       logger.error("MobileChatDetail", "Error fetching messages", messagesError);
       throw messagesError;
     }
 
-    // Fetch vision board if exists
+    // Reverse to chronological order for the client
+    const sortedMessages = (messages || []).reverse();
+
+    // Fetch vision board if exists (join in single query)
     let visionBoard = null;
     if (chat.vision_board_id) {
       const { data: boardData } = await supabase
         .from("vision_boards")
-        .select("*")
+        .select("id, title, data, created_at, updated_at")
         .eq("id", chat.vision_board_id)
         .single();
 
@@ -73,7 +77,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       chat,
-      messages: messages || [],
+      messages: sortedMessages,
       visionBoard,
     });
   } catch (error) {
