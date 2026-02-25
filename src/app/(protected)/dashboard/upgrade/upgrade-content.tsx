@@ -308,10 +308,10 @@ export function UpgradeContent() {
 
                 {/* Features */}
                 <ul className="space-y-2">
-                  {limits.features.map((feature, i) => (
+                  {limits.featureKeys.map((key, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <Check className="size-3.5 text-primary mt-1 shrink-0" />
-                      <span className="text-sm leading-snug">{feature}</span>
+                      <span className="text-sm leading-snug">{t(key)}</span>
                     </li>
                   ))}
                 </ul>

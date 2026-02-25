@@ -252,6 +252,59 @@
     "faqEnterpriseQ": "How does Enterprise pricing work?",
     "faqEnterpriseA": "Enterprise plans are fully customised. Contact our sales team to discuss your requirements, and we'll create a tailored solution with volume discounts and dedicated support."
   },
+  "tierFeatures": {
+    "free": {
+      "0": "50K AI tokens/month (team pool)",
+      "1": "Up to 100 contacts",
+      "2": "Up to 5 companies",
+      "3": "Up to 50 deals",
+      "4": "Up to 50 tasks",
+      "5": "Basic pipeline (3 stages)",
+      "6": "3 email templates",
+      "7": "5 custom fields",
+      "8": "Up to 3 team members",
+      "9": "Community support"
+    },
+    "pro": {
+      "0": "500K AI tokens/month (team pool)",
+      "1": "Up to 5,000 contacts",
+      "2": "Up to 500 companies",
+      "3": "Up to 2,500 deals",
+      "4": "Unlimited tasks & pipeline stages",
+      "5": "10 active automations",
+      "6": "25 email templates · 5 sequences",
+      "7": "30 custom fields · 3 visibility groups",
+      "8": "AI deal insights",
+      "9": "Import / Export (CSV)",
+      "10": "Priority support",
+      "11": "Unlimited team members"
+    },
+    "max": {
+      "0": "1.5M AI tokens/month (team pool)",
+      "1": "Up to 25,000 contacts",
+      "2": "Up to 5,000 companies",
+      "3": "Up to 15,000 deals",
+      "4": "50 active automations",
+      "5": "100 email templates · 25 sequences",
+      "6": "100 custom fields · 10 visibility groups",
+      "7": "Advanced analytics & reports",
+      "8": "Dedicated support",
+      "9": "SLA guarantee",
+      "10": "Unlimited team members"
+    },
+    "enterprise": {
+      "0": "Unlimited AI tokens (team pool)",
+      "1": "Unlimited contacts & companies",
+      "2": "Unlimited deals",
+      "3": "200 active automations",
+      "4": "Unlimited email templates & sequences",
+      "5": "500 custom fields",
+      "6": "White labeling · SSO (SAML / OAuth)",
+      "7": "Audit logs · Dedicated infrastructure",
+      "8": "24/7 priority support",
+      "9": "Custom SLA & onboarding"
+    }
+  },
   "invoices": {
     "title": "Invoices",
     "emptyState": "No invoices yet. Invoices will appear here after your first payment.",
