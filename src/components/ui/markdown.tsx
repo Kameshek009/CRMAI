@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { cn } from '@/lib/utils';
 import { Check, Copy } from 'lucide-react';
 import hljs from 'highlight.js/lib/core';
@@ -57,7 +58,7 @@ export function Markdown({ content, className }: MarkdownProps) {
         seg.type === 'code' ? (
           <CodeBlock key={i} language={seg.lang} code={seg.code} />
         ) : (
-          <div key={i} dangerouslySetInnerHTML={{ __html: seg.html }} />
+          <div key={i} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(seg.html) }} />
         )
       )}
     </div>
@@ -102,7 +103,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
         </button>
       </div>
       <pre className="code-block-body">
-        <code dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
+        <code dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(highlightedHtml) }} />
       </pre>
     </div>
   );
@@ -175,7 +176,9 @@ function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function applyInlineFormatting(str: string): string {
