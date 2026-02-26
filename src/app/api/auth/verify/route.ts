@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { TIER_TOKEN_LIMITS } from "@/lib/constants/tiers";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { SubscriptionTier } from "@/types";
 import { logger } from "@/lib/logger";
 
@@ -10,6 +11,9 @@ import { logger } from "@/lib/logger";
  * Verify JWT token from desktop app and return account info
  */
 export async function POST(request: NextRequest) {
+  const rlError = checkRateLimit(request, { limit: 10, keyPrefix: "auth" });
+  if (rlError) return rlError;
+
   try {
     // Get auth from Clerk (handles both session and Bearer token)
     const { userId } = await auth();

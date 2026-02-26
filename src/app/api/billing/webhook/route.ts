@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe, getTierFromPriceId, TIER_TOKEN_LIMITS } from "@/lib/stripe/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { TIER_MAX_MEMBERS } from "@/lib/constants/tiers";
 import type Stripe from "stripe";
 import type { SubscriptionTier } from "@/types";
@@ -30,6 +31,9 @@ const relevantEvents = new Set([
 ]);
 
 export async function POST(request: NextRequest) {
+  const rlError = checkRateLimit(request, { limit: 100, keyPrefix: "webhook" });
+  if (rlError) return rlError;
+
   const body = await request.text();
   const headersList = await headers();
   const signature = headersList.get("stripe-signature");

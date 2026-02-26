@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateAccessToken } from "@/lib/desktop-auth";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { sanitizeLLMResponse } from "@/lib/sanitize";
 import Groq from "groq-sdk";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
@@ -62,6 +64,9 @@ const chatRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const rlError = checkRateLimit(request, { limit: 30, keyPrefix: "llm" });
+  if (rlError) return rlError;
+
   try {
     // 1. Extract and validate Bearer token
     const authHeader = request.headers.get("Authorization");
@@ -210,7 +215,7 @@ export async function POST(request: NextRequest) {
     }
 
     const choice = completion.choices[0];
-    const responseContent = choice?.message?.content || "";
+    const responseContent = sanitizeLLMResponse(choice?.message?.content || "");
     const toolCalls = choice?.message?.tool_calls;
     const tokensUsed = completion.usage?.total_tokens || 0;
 

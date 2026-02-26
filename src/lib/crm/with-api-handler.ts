@@ -247,6 +247,22 @@ export function withApiHandler<
     nextContext?: NextRouteContext,
   ): Promise<NextResponse> {
     try {
+      // ── 0. CSRF protection for mutating methods ───────────────────────
+      const method = request.method.toUpperCase();
+      if (["POST", "PATCH", "PUT", "DELETE"].includes(method)) {
+        const origin = request.headers.get("origin");
+        if (origin) {
+          const allowed = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+          const allowedOrigin = new URL(allowed).origin;
+          if (new URL(origin).origin !== allowedOrigin) {
+            return NextResponse.json(
+              { success: false, error: "Forbidden" },
+              { status: 403 },
+            );
+          }
+        }
+      }
+
       // ── 1. Authentication & workspace resolution ──────────────────────
       const { context, error: ctxError } = await getWorkspaceContext();
       if (ctxError) return ctxError;
