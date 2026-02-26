@@ -69,8 +69,9 @@ describe("Companies API", () => {
 
   describe("POST /api/crm/companies", () => {
     it("creates company with valid data", async () => {
+      const companyId = "00000000-0000-0000-0000-000000000001";
       const newCompany = {
-        id: "company-1",
+        id: companyId,
         name: "New Company",
         team_id: "ws-test-456",
         account_id: "acc-test-123",
@@ -89,7 +90,7 @@ describe("Companies API", () => {
         teamId: "ws-test-456",
         accountId: "acc-test-123",
         entityType: "company",
-        entityId: "company-1",
+        entityId: companyId,
         action: "create",
       });
     });
@@ -107,23 +108,41 @@ describe("Companies API", () => {
 
   describe("GET /api/crm/companies/[id]", () => {
     it("returns company with contact_count and deal_count", async () => {
+      const companyId = "00000000-0000-0000-0000-000000000001";
       const company = {
-        id: "company-1",
+        id: companyId,
         name: "Test Company",
         team_id: "ws-test-456",
         is_deleted: false,
       };
-      setResult("companies", { data: company });
-      setResult("contacts", { count: 5 });
-      setResult("deals", { count: 3 });
 
-      const req = createTestRequest("GET", "/api/crm/companies/company-1");
-      const res = await GET_BY_ID(req, mockParams("company-1"));
+      // Create a sophisticated mock to handle Promise.all with different tables
+      const tableResponses: Record<string, any> = {
+        companies: { data: company, error: null },
+        contacts: { data: null, error: null, count: 5 },
+        deals: { data: null, error: null, count: 3 },
+      };
+
+      const mockFrom = vi.fn().mockImplementation((table: string) => {
+        const response = tableResponses[table] || { data: null, error: null, count: 0 };
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({ data: response.data, error: response.error }),
+          then: (resolve: any) => Promise.resolve({ ...response }).then(resolve),
+        };
+      });
+
+      const mockSupabase = { from: mockFrom };
+      vi.mocked(createSupabaseAdmin).mockReturnValue(mockSupabase as any);
+
+      const req = createTestRequest("GET", `/api/crm/companies/${companyId}`);
+      const res = await GET_BY_ID(req, mockParams(companyId));
       const json = await res.json();
 
       expect(res.status).toBe(200);
       expect(json.success).toBe(true);
-      expect(json.data.id).toBe("company-1");
+      expect(json.data.id).toBe(companyId);
       expect(json.data.contact_count).toBe(5);
       expect(json.data.deal_count).toBe(3);
     });
@@ -153,13 +172,14 @@ describe("Companies API", () => {
 
   describe("PATCH /api/crm/companies/[id]", () => {
     it("updates company", async () => {
+      const companyId = "00000000-0000-0000-0000-000000000001";
       const oldRecord = {
-        id: "company-1",
+        id: companyId,
         name: "Old Name",
         team_id: "ws-test-456",
       };
       const updatedCompany = {
-        id: "company-1",
+        id: companyId,
         name: "Updated Name",
         team_id: "ws-test-456",
       };
@@ -182,8 +202,8 @@ describe("Companies API", () => {
 
       setResult("crm_activities", { data: {} });
 
-      const req = createTestRequest("PATCH", "/api/crm/companies/company-1", { name: "Updated Name" });
-      const res = await PATCH(req, mockParams("company-1"));
+      const req = createTestRequest("PATCH", `/api/crm/companies/${companyId}`, { name: "Updated Name" });
+      const res = await PATCH(req, mockParams(companyId));
       const json = await res.json();
 
       expect(res.status).toBe(200);
@@ -193,7 +213,7 @@ describe("Companies API", () => {
         teamId: "ws-test-456",
         accountId: "acc-test-123",
         entityType: "company",
-        entityId: "company-1",
+        entityId: companyId,
         action: "update",
         changes: {},
       });
@@ -202,11 +222,12 @@ describe("Companies API", () => {
 
   describe("DELETE /api/crm/companies/[id]", () => {
     it("soft-deletes company", async () => {
+      const companyId = "00000000-0000-0000-0000-000000000001";
       setResult("companies", { data: { name: "Company to Delete" } });
       setResult("crm_activities", { data: {} });
 
-      const req = createTestRequest("DELETE", "/api/crm/companies/company-1");
-      const res = await DELETE(req, mockParams("company-1"));
+      const req = createTestRequest("DELETE", `/api/crm/companies/${companyId}`);
+      const res = await DELETE(req, mockParams(companyId));
       const json = await res.json();
 
       expect(res.status).toBe(200);
@@ -214,17 +235,18 @@ describe("Companies API", () => {
     });
 
     it("calls logAudit", async () => {
+      const companyId = "00000000-0000-0000-0000-000000000001";
       setResult("companies", { data: { name: "Company to Delete" } });
       setResult("crm_activities", { data: {} });
 
-      const req = createTestRequest("DELETE", "/api/crm/companies/company-1");
-      await DELETE(req, mockParams("company-1"));
+      const req = createTestRequest("DELETE", `/api/crm/companies/${companyId}`);
+      await DELETE(req, mockParams(companyId));
 
       expect(logAudit).toHaveBeenCalledWith({
         teamId: "ws-test-456",
         accountId: "acc-test-123",
         entityType: "company",
-        entityId: "company-1",
+        entityId: companyId,
         action: "delete",
       });
     });

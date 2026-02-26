@@ -103,10 +103,11 @@ describe("POST /api/crm/notes", () => {
     vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
     vi.mocked(requirePermission).mockReturnValue(null);
 
+    const contactId = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
     const newNote = {
       id: "note-new-123",
       content: "New note content",
-      contact_id: "contact-123",
+      contact_id: contactId,
       account_id: "acc-test-123",
       team_id: "ws-test-456",
       is_deleted: false,
@@ -119,7 +120,7 @@ describe("POST /api/crm/notes", () => {
 
     const req = createTestRequest("POST", "/api/crm/notes", {
       content: "New note content",
-      contact_id: "contact-123",
+      contact_id: contactId,
     });
     const res = await POST(req);
     const json = await res.json();

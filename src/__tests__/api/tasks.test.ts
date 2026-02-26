@@ -66,8 +66,9 @@ describe("Tasks API", () => {
 
   describe("POST /api/crm/tasks", () => {
     it("creates task with valid data", async () => {
+      const taskId = "00000000-0000-0000-0000-000000000001";
       const newTask = {
-        id: "task-1",
+        id: taskId,
         title: "New Task",
         team_id: "ws-test-456",
         account_id: "acc-test-123",
@@ -98,8 +99,9 @@ describe("Tasks API", () => {
 
   describe("GET /api/crm/tasks/[id]", () => {
     it("returns single task", async () => {
+      const taskId = "00000000-0000-0000-0000-000000000001";
       const task = {
-        id: "task-1",
+        id: taskId,
         title: "Test Task",
         team_id: "ws-test-456",
         is_deleted: false,
@@ -107,13 +109,13 @@ describe("Tasks API", () => {
       };
       setResult("crm_tasks", { data: task });
 
-      const req = createTestRequest("GET", "/api/crm/tasks/task-1");
-      const res = await GET_BY_ID(req, mockParams("task-1"));
+      const req = createTestRequest("GET", `/api/crm/tasks/${taskId}`);
+      const res = await GET_BY_ID(req, mockParams(taskId));
       const json = await res.json();
 
       expect(res.status).toBe(200);
       expect(json.success).toBe(true);
-      expect(json.data.id).toBe("task-1");
+      expect(json.data.id).toBe(taskId);
       expect(json.data.title).toBe("Test Task");
     });
 
@@ -130,8 +132,9 @@ describe("Tasks API", () => {
 
   describe("PATCH /api/crm/tasks/[id]", () => {
     it("updates task", async () => {
+      const taskId = "00000000-0000-0000-0000-000000000001";
       const updatedTask = {
-        id: "task-1",
+        id: taskId,
         title: "Updated Task",
         team_id: "ws-test-456",
         status: "in_progress",
@@ -139,8 +142,8 @@ describe("Tasks API", () => {
       setResult("crm_tasks", { data: updatedTask });
       setResult("crm_activities", { data: {} });
 
-      const req = createTestRequest("PATCH", "/api/crm/tasks/task-1", { title: "Updated Task" });
-      const res = await PATCH(req, mockParams("task-1"));
+      const req = createTestRequest("PATCH", `/api/crm/tasks/${taskId}`, { title: "Updated Task" });
+      const res = await PATCH(req, mockParams(taskId));
       const json = await res.json();
 
       expect(res.status).toBe(200);
@@ -149,8 +152,9 @@ describe("Tasks API", () => {
     });
 
     it("sets completed_at when status is done", async () => {
+      const taskId = "00000000-0000-0000-0000-000000000001";
       const updatedTask = {
-        id: "task-1",
+        id: taskId,
         title: "Completed Task",
         team_id: "ws-test-456",
         status: "done",
@@ -159,8 +163,8 @@ describe("Tasks API", () => {
       setResult("crm_tasks", { data: updatedTask });
       setResult("crm_activities", { data: {} });
 
-      const req = createTestRequest("PATCH", "/api/crm/tasks/task-1", { status: "done" });
-      const res = await PATCH(req, mockParams("task-1"));
+      const req = createTestRequest("PATCH", `/api/crm/tasks/${taskId}`, { status: "done" });
+      const res = await PATCH(req, mockParams(taskId));
       const json = await res.json();
 
       expect(res.status).toBe(200);
@@ -172,19 +176,20 @@ describe("Tasks API", () => {
 
   describe("DELETE /api/crm/tasks/[id]", () => {
     it("soft-deletes task", async () => {
+      const taskId = "00000000-0000-0000-0000-000000000001";
       setResult("crm_tasks", { data: { title: "Task to Delete" } });
       setResult("crm_activities", { data: {} });
 
-      const req = createTestRequest("DELETE", "/api/crm/tasks/task-1");
-      const res = await DELETE(req, mockParams("task-1"));
+      const req = createTestRequest("DELETE", `/api/crm/tasks/${taskId}`);
+      const res = await DELETE(req, mockParams(taskId));
       const json = await res.json();
 
       expect(res.status).toBe(200);
       expect(json.success).toBe(true);
     });
 
-    it("returns 404 when task not found", async () => {
-      setResult("crm_tasks", { data: null });
+    it("returns 500 when task not found", async () => {
+      const taskId = "00000000-0000-0000-0000-000000000000";
 
       const mock = createMockSupabase();
       supabase = mock.supabase;
@@ -192,24 +197,19 @@ describe("Tasks API", () => {
       vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
 
       // First call returns null for existing task check
-      let callCount = 0;
       mock.chain.single.mockImplementation(() => {
-        callCount++;
         return Promise.resolve({ data: null });
       });
 
-      // Second call (update) returns error
-      mock.chain.then.mockImplementation((resolve: any) => {
-        return Promise.resolve({ error: { message: "Not found" } }).then(resolve);
-      });
+      // Mock the update to return error
+      mock.setResult("crm_tasks", { error: { message: "Not found" } });
 
-      const req = createTestRequest("DELETE", "/api/crm/tasks/00000000-0000-0000-0000-000000000000");
-      const res = await DELETE(req, mockParams("00000000-0000-0000-0000-000000000000"));
+      const req = createTestRequest("DELETE", `/api/crm/tasks/${taskId}`);
+      const res = await DELETE(req, mockParams(taskId));
       const json = await res.json();
 
-      // Note: The route doesn't explicitly check for 404, it returns 500 on DB error
-      // This test verifies the error handling behavior
-      expect(res.status).toBeGreaterThanOrEqual(500);
+      // The route returns 500 on DB error
+      expect(res.status).toBe(500);
       expect(json.success).toBe(false);
     });
   });

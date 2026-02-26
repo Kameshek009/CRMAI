@@ -39,10 +39,27 @@ describe("Search API", () => {
         { id: "t1", title: "Follow up call", status: "todo", priority: "high" },
       ];
 
-      setResult("contacts", { data: contacts });
-      setResult("companies", { data: companies });
-      setResult("deals", { data: deals });
-      setResult("crm_tasks", { data: tasks });
+      // Create a more sophisticated mock that handles parallel queries
+      const tableData: Record<string, any> = {
+        contacts: { data: contacts },
+        companies: { data: companies },
+        deals: { data: deals },
+        crm_tasks: { data: tasks },
+      };
+
+      const mockFrom = vi.fn().mockImplementation((table: string) => {
+        const tableResult = tableData[table] || { data: [] };
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          or: vi.fn().mockReturnThis(),
+          ilike: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue(tableResult),
+        };
+      });
+
+      const mockSupabase = { from: mockFrom };
+      vi.mocked(createSupabaseAdmin).mockReturnValue(mockSupabase as any);
 
       const req = createTestRequest("GET", "/api/crm/search?q=test");
       const res = await GET(req);

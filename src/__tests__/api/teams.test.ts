@@ -49,7 +49,7 @@ describe("POST /api/teams", () => {
   it("creates team successfully", async () => {
     vi.mocked(getAccountId).mockResolvedValue({ accountId: "acc-123", error: null });
 
-    // Mock: no existing team
+    // Mock: no existing team (PGRST116 = no rows)
     setResult("teams", { data: null, error: { code: "PGRST116" } });
 
     // Mock RPC call
@@ -57,6 +57,9 @@ describe("POST /api/teams", () => {
 
     // Mock account tier
     setResult("accounts", { data: { id: "acc-123", tier: "free" }, error: null });
+
+    // Mock teams.update() — the update call after RPC (thenable, no .single())
+    setResult("teams", { data: null, error: null });
 
     // Mock final team retrieval
     setResult("teams", {
