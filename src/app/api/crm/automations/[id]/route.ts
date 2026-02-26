@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 const updateAutomationSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -25,34 +24,24 @@ const updateAutomationSchema = z.object({
   })).min(1).optional(),
 });
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isOwner);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "team_settings", action: "manage" },
+    bodySchema: updateAutomationSchema,
+    logTag: "Automations",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
-    }
-
-    const body = await request.json();
-    const parsed = updateAutomationSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("automations")
-      .update(parsed.data)
+      .update(body)
       .eq("id", id)
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .select()
       .single();
 
@@ -61,24 +50,16 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Automations", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isOwner);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const DELETE = withApiHandler(
+  {
+    permission: { resource: "team_settings", action: "manage" },
+    logTag: "Automations",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -88,16 +69,10 @@ export async function DELETE(
       .from("automations")
       .delete()
       .eq("id", id)
-      .eq("team_id", context.workspaceId);
+      .eq("team_id", ctx.workspaceId);
 
-    if (dbError) {
-      logger.error("Automations", "Failed to delete", dbError);
-      return NextResponse.json({ success: false, error: "Failed to delete" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to delete", 500);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Automations", "DELETE error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

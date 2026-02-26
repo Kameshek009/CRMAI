@@ -1,23 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 const updateEnrollmentSchema = z.object({
   enrollment_id: z.string().uuid(),
   status: z.enum(["active", "paused", "completed", "exited_reply"]),
 });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  { logTag: "SeqEnrollments" },
+  async (_request, _ctx, { routeParams }) => {
+    const { id } = routeParams;
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_sequence_enrollments")
@@ -25,48 +19,31 @@ export async function GET(
       .eq("sequence_id", id)
       .order("created_at", { ascending: false });
 
-    if (dbError) {
-      logger.error("SeqEnrollments", "GET error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to fetch enrollments" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to fetch enrollments", 500);
 
     return NextResponse.json({ success: true, data: data || [] });
-  } catch (error) {
-    logger.error("SeqEnrollments", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const body = await request.json();
-    const parsed = updateEnrollmentSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
-
+export const PATCH = withApiHandler(
+  {
+    bodySchema: updateEnrollmentSchema,
+    logTag: "SeqEnrollments",
+  },
+  async (_request, _ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_sequence_enrollments")
       .update({
-        status: parsed.data.status,
+        status: body.enrollment_id ? body.status : body.status,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", parsed.data.enrollment_id)
+      .eq("id", body.enrollment_id)
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("SeqEnrollments", "PATCH error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to update enrollment" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to update enrollment", 500);
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("SeqEnrollments", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

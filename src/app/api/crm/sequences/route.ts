@@ -1,9 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { requireFeatureLimit } from "@/lib/usage/feature-limits";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 const createSequenceSchema = z.object({
   name: z.string().min(1).max(200),
@@ -11,24 +9,18 @@ const createSequenceSchema = z.object({
   settings: z.record(z.string(), z.unknown()).optional(),
 });
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
+export const GET = withApiHandler(
+  { logTag: "Sequences" },
+  async (_request, ctx) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_sequences")
       .select("*, email_sequence_steps(id), email_sequence_enrollments(id, status)")
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .order("created_at", { ascending: false });
 
-    if (dbError) {
-      logger.error("Sequences", "GET error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to fetch sequences" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to fetch sequences", 500);
 
-    // Enrich with counts
     const enriched = (data || []).map((seq) => ({
       ...seq,
       step_count: seq.email_sequence_steps?.length || 0,
@@ -41,48 +33,30 @@ export async function GET() {
     }));
 
     return NextResponse.json({ success: true, data: enriched });
-  } catch (error) {
-    logger.error("Sequences", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isOwner);
-    if (permError) return permError;
-
-    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "emailSequences");
-    if (limitError) return limitError;
-
-    const body = await request.json();
-    const parsed = createSequenceSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "team_settings", action: "manage" },
+    featureLimit: "emailSequences",
+    bodySchema: createSequenceSchema,
+    logTag: "Sequences",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_sequences")
       .insert({
-        team_id: context.workspaceId,
-        created_by: context.accountId,
-        ...parsed.data,
+        team_id: ctx.workspaceId,
+        created_by: ctx.accountId,
+        ...body,
       })
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("Sequences", "POST error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to create sequence" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to create sequence", 500);
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Sequences", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

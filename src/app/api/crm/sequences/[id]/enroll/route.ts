@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 
@@ -8,24 +8,14 @@ const enrollSchema = z.object({
   contact_ids: z.array(z.string().uuid()).optional(),
 });
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "update", context.isOwner);
-    if (permError) return permError;
-
-    const { id: sequenceId } = await params;
-    const body = await request.json();
-    const parsed = enrollSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "update" },
+    bodySchema: enrollSchema,
+    logTag: "SeqEnroll",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id: sequenceId } = routeParams;
     const supabase = createSupabaseAdmin();
 
     // Get first step to calculate next_send_at
@@ -44,7 +34,7 @@ export async function POST(
     const nextSendAt = new Date();
     nextSendAt.setDate(nextSendAt.getDate() + firstStep.delay_days);
 
-    const contactIds = parsed.data.contact_ids || [];
+    const contactIds = body.contact_ids || [];
 
     // Verify all contact_ids belong to the team
     if (contactIds.length > 0) {
@@ -52,30 +42,20 @@ export async function POST(
         .from("contacts")
         .select("id", { count: "exact", head: true })
         .in("id", contactIds)
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("is_deleted", false);
       if (count !== contactIds.length) {
         return NextResponse.json({ success: false, error: "Some contacts not found or not accessible" }, { status: 400 });
       }
     }
 
-    const enrollments: {
-      sequence_id: string;
-      contact_id?: string;
-      enrolled_by: string;
-      current_step: number;
-      next_send_at: string;
-    }[] = [];
-
-    for (const contactId of contactIds) {
-      enrollments.push({
-        sequence_id: sequenceId,
-        contact_id: contactId,
-        enrolled_by: context.accountId,
-        current_step: 0,
-        next_send_at: nextSendAt.toISOString(),
-      });
-    }
+    const enrollments = contactIds.map((contactId: string) => ({
+      sequence_id: sequenceId,
+      contact_id: contactId,
+      enrolled_by: ctx.accountId,
+      current_step: 0,
+      next_send_at: nextSendAt.toISOString(),
+    }));
 
     if (enrollments.length === 0) {
       return NextResponse.json({ success: false, error: "No contacts specified" }, { status: 400 });
@@ -88,12 +68,9 @@ export async function POST(
 
     if (dbError) {
       logger.error("SeqEnroll", "POST error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to enroll" }, { status: 500 });
+      throw new ApiError("Failed to enroll", 500);
     }
 
     return NextResponse.json({ success: true, data, enrolled: data?.length || 0 });
-  } catch (error) {
-    logger.error("SeqEnroll", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

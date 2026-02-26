@@ -4,10 +4,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseAdmin: vi.fn(),
 }));
-vi.mock("@/lib/crm/team-helpers", () => ({
-  getTeamContext: vi.fn(),
-  requirePermission: vi.fn(),
-}));
+vi.mock("@/lib/crm/team-helpers", () => {
+  const f = vi.fn();
+  return { getTeamContext: f, getWorkspaceContext: f, requirePermission: vi.fn() };
+});
 vi.mock("@/lib/crm/helpers", () => ({
   ensureDealStages: vi.fn(),
 }));

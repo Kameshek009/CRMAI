@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 const createStepSchema = z.object({
   position: z.number().int().min(0),
@@ -11,15 +10,10 @@ const createStepSchema = z.object({
   body: z.string().max(10000),
 });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  { logTag: "SeqSteps" },
+  async (_request, _ctx, { routeParams }) => {
+    const { id } = routeParams;
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_sequence_steps")
@@ -27,51 +21,29 @@ export async function GET(
       .eq("sequence_id", id)
       .order("position", { ascending: true });
 
-    if (dbError) {
-      logger.error("SeqSteps", "GET error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to fetch steps" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to fetch steps", 500);
 
     return NextResponse.json({ success: true, data: data || [] });
-  } catch (error) {
-    logger.error("SeqSteps", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isOwner);
-    if (permError) return permError;
-
-    const { id } = await params;
-    const body = await request.json();
-    const parsed = createStepSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "team_settings", action: "manage" },
+    bodySchema: createStepSchema,
+    logTag: "SeqSteps",
+  },
+  async (_request, _ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_sequence_steps")
-      .insert({ sequence_id: id, ...parsed.data })
+      .insert({ sequence_id: id, ...body })
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("SeqSteps", "POST error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to create step" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to create step", 500);
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("SeqSteps", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

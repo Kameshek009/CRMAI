@@ -1,45 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { ensureDealStages } from "@/lib/crm/helpers";
 import { createPipelineStageSchema, reorderStagesSchema } from "@/lib/crm/validation";
-import { requireFeatureLimit } from "@/lib/usage/feature-limits";
-import { logger } from "@/lib/logger";
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "pipeline", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "pipeline", action: "read" },
+    logTag: "Pipeline",
+  },
+  async (_request, ctx) => {
     const supabase = createSupabaseAdmin();
-    await ensureDealStages(context.accountId, context.teamId);
+    await ensureDealStages(ctx.accountId, ctx.workspaceId);
 
-    // Get stages with deal counts
     const { data: stages, error: stagesError } = await supabase
       .from("deal_stages")
       .select("*")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .order("position", { ascending: true });
 
-    if (stagesError) {
-      logger.error("Pipeline", "Failed to fetch stages", stagesError);
-      return NextResponse.json({ success: false, error: "Failed to fetch stages" }, { status: 500 });
-    }
+    if (stagesError) throw new ApiError("Failed to fetch stages", 500);
 
-    // Get open deals for pipeline view (limit to prevent memory issues)
     const { data: deals } = await supabase
       .from("deals")
       .select("*, contacts(id, first_name, last_name), companies(id, name), accounts!deals_assigned_to_fkey(id, first_name, last_name)")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .eq("status", "open")
       .order("created_at", { ascending: false })
       .limit(2000);
 
-    // Build pipeline columns (with deal rotting detection)
     const now = Date.now();
     const columns = stages!.map((stage) => {
       const rottingDays = stage.rotting_days as number | null;
@@ -76,78 +66,49 @@ export async function GET() {
         openDealsCount: openColumns.reduce((sum, c) => sum + c.count, 0),
       },
     });
-  } catch (error) {
-    logger.error("Pipeline", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "pipeline", "manage", context.isDirector);
-    if (permError) return permError;
-
-    const limitError = await requireFeatureLimit(context.teamId, context.tier, "pipelineStages");
-    if (limitError) return limitError;
-
-    const body = await request.json();
-    const parsed = createPipelineStageSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "pipeline", action: "manage" },
+    featureLimit: "pipelineStages",
+    bodySchema: createPipelineStageSchema,
+    logTag: "Pipeline",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("deal_stages")
-      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
+      .insert({ account_id: ctx.accountId, team_id: ctx.workspaceId, ...body })
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("Pipeline", "Failed to create stage", dbError);
-      return NextResponse.json({ success: false, error: "Failed to create stage" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to create stage", 500);
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Pipeline", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "pipeline", "manage", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = reorderStagesSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
-
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "pipeline", action: "manage" },
+    bodySchema: reorderStagesSchema,
+    logTag: "Pipeline",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
 
-    // Batch update positions using Promise.all instead of sequential N+1
     await Promise.all(
-      parsed.data.stages.map((stage) =>
+      body.stages.map((stage: { id: string; position: number }) =>
         supabase
           .from("deal_stages")
           .update({ position: stage.position })
           .eq("id", stage.id)
-          .eq("team_id", context.teamId)
+          .eq("team_id", ctx.workspaceId)
       )
     );
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Pipeline", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
