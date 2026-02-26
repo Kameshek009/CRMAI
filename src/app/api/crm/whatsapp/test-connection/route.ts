@@ -1,20 +1,17 @@
 import { NextResponse } from "next/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 import { getWhatsAppConfig } from "@/lib/whatsapp/helpers";
 import { WhatsAppClient } from "@/lib/whatsapp/client";
-import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { logger } from "@/lib/logger";
 
-export async function POST() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    if (!context.isDirector) {
+export const POST = withApiHandler(
+  { logTag: "WhatsApp" },
+  async (_request, ctx) => {
+    if (!ctx.isOwner) {
       return NextResponse.json({ success: false, error: "Only admins can test connection" }, { status: 403 });
     }
 
-    const config = await getWhatsAppConfig(context.teamId);
+    const config = await getWhatsAppConfig(ctx.workspaceId);
     if (!config) {
       return NextResponse.json({ success: false, error: "WhatsApp not configured" }, { status: 400 });
     }
@@ -27,7 +24,7 @@ export async function POST() {
     const { data: team } = await supabase
       .from("teams")
       .select("settings")
-      .eq("id", context.teamId)
+      .eq("id", ctx.workspaceId)
       .single();
 
     const settings = (team?.settings || {}) as Record<string, unknown>;
@@ -37,12 +34,8 @@ export async function POST() {
       .update({
         settings: { ...settings, whatsapp: { ...wa, is_connected: true } },
       })
-      .eq("id", context.teamId);
+      .eq("id", ctx.workspaceId);
 
     return NextResponse.json({ success: true, data: { name: profile.name, about: profile.about } });
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : "Connection failed";
-    logger.error("WhatsApp", "Test connection failed", error);
-    return NextResponse.json({ success: false, error: msg }, { status: 502 });
   }
-}
+);

@@ -1,27 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { sendWhatsAppMessageSchema } from "@/lib/crm/validation";
 import { getWhatsAppConfig } from "@/lib/whatsapp/helpers";
 import { WhatsAppClient } from "@/lib/whatsapp/client";
 import { logger } from "@/lib/logger";
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "create", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = sendWhatsAppMessageSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "create" },
+    bodySchema: sendWhatsAppMessageSchema,
+    logTag: "WhatsApp",
+  },
+  async (_request, ctx, { body }) => {
     // Load WhatsApp config
-    const config = await getWhatsAppConfig(context.teamId);
+    const config = await getWhatsAppConfig(ctx.workspaceId);
     if (!config) {
       return NextResponse.json({ success: false, error: "WhatsApp not configured" }, { status: 400 });
     }
@@ -30,21 +23,21 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseAdmin();
 
     let waMessageId: string;
-    const messageType = parsed.data.message_type || "text";
+    const messageType = body.message_type || "text";
 
     try {
-      if (messageType === "template" && parsed.data.template_name) {
+      if (messageType === "template" && body.template_name) {
         waMessageId = await client.sendTemplateMessage(
-          parsed.data.to_number,
-          parsed.data.template_name,
+          body.to_number,
+          body.template_name,
           "en",
-          parsed.data.template_params || []
+          body.template_params || []
         );
       } else {
-        if (!parsed.data.content) {
+        if (!body.content) {
           return NextResponse.json({ success: false, error: "Content is required for text messages" }, { status: 400 });
         }
-        waMessageId = await client.sendTextMessage(parsed.data.to_number, parsed.data.content);
+        waMessageId = await client.sendTextMessage(body.to_number, body.content);
       }
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : "Failed to send";
@@ -52,18 +45,18 @@ export async function POST(request: NextRequest) {
 
       // Save failed message
       await supabase.from("whatsapp_messages").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
-        contact_id: parsed.data.contact_id || null,
-        lead_id: parsed.data.lead_id || null,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
+        contact_id: body.contact_id || null,
+        lead_id: body.lead_id || null,
         from_number: config.phoneNumberId,
-        to_number: parsed.data.to_number,
-        content: parsed.data.content || null,
+        to_number: body.to_number,
+        content: body.content || null,
         message_type: messageType,
         direction: "outbound",
         status: "failed",
-        template_name: parsed.data.template_name || null,
-        template_params: parsed.data.template_params || [],
+        template_name: body.template_name || null,
+        template_params: body.template_params || [],
         error_message: errMsg,
       });
 
@@ -74,44 +67,38 @@ export async function POST(request: NextRequest) {
     const { data, error: dbError } = await supabase
       .from("whatsapp_messages")
       .insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
-        contact_id: parsed.data.contact_id || null,
-        lead_id: parsed.data.lead_id || null,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
+        contact_id: body.contact_id || null,
+        lead_id: body.lead_id || null,
         wa_message_id: waMessageId,
         from_number: config.phoneNumberId,
-        to_number: parsed.data.to_number,
-        content: parsed.data.content || null,
+        to_number: body.to_number,
+        content: body.content || null,
         message_type: messageType,
         direction: "outbound",
         status: "sent",
-        template_name: parsed.data.template_name || null,
-        template_params: parsed.data.template_params || [],
+        template_name: body.template_name || null,
+        template_params: body.template_params || [],
         sent_at: new Date().toISOString(),
       })
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("WhatsApp", "Failed to save sent message", dbError);
-      return NextResponse.json({ success: false, error: "Message sent but failed to save" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Message sent but failed to save", 500);
 
     // Log activity
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
-        contact_id: parsed.data.contact_id || null,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
+        contact_id: body.contact_id || null,
         type: "whatsapp",
-        title: `WhatsApp: ${messageType === "template" ? parsed.data.template_name : (parsed.data.content?.slice(0, 50) || "message")}`,
-        description: parsed.data.content?.slice(0, 200) || null,
+        title: `WhatsApp: ${messageType === "template" ? body.template_name : (body.content?.slice(0, 50) || "message")}`,
+        description: body.content?.slice(0, 200) || null,
       });
     } catch (e) { logger.error("WhatsApp", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("WhatsApp", "Send error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

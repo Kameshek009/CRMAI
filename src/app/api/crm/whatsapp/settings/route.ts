@@ -1,20 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { whatsappSettingsSchema } from "@/lib/crm/validation";
-import { logger } from "@/lib/logger";
 import { randomBytes } from "crypto";
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
+export const GET = withApiHandler(
+  { logTag: "WhatsApp" },
+  async (_request, ctx) => {
     const supabase = createSupabaseAdmin();
     const { data: team } = await supabase
       .from("teams")
       .select("settings")
-      .eq("id", context.teamId)
+      .eq("id", ctx.workspaceId)
       .single();
 
     const settings = team?.settings as Record<string, unknown> | null;
@@ -36,26 +33,18 @@ export async function GET() {
         is_connected: wa.is_connected || false,
       },
     });
-  } catch (error) {
-    logger.error("WhatsApp", "GET settings error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
+export const POST = withApiHandler(
+  {
+    bodySchema: whatsappSettingsSchema,
+    logTag: "WhatsApp",
+  },
+  async (_request, ctx, { body }) => {
     // Only owner / admin should save settings
-    if (!context.isDirector) {
+    if (!ctx.isOwner) {
       return NextResponse.json({ success: false, error: "Only admins can update integrations" }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const parsed = whatsappSettingsSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
@@ -64,17 +53,17 @@ export async function POST(request: NextRequest) {
     const { data: team } = await supabase
       .from("teams")
       .select("settings")
-      .eq("id", context.teamId)
+      .eq("id", ctx.workspaceId)
       .single();
 
     const existingSettings = (team?.settings || {}) as Record<string, unknown>;
 
     // Auto-generate verify token if not provided
-    const webhookVerifyToken = parsed.data.webhook_verify_token || randomBytes(16).toString("hex");
+    const webhookVerifyToken = body.webhook_verify_token || randomBytes(16).toString("hex");
 
     // Keep existing access_token if not provided
     const existingWa = existingSettings.whatsapp as Record<string, unknown> | undefined;
-    const accessToken = parsed.data.access_token || (existingWa?.access_token as string) || "";
+    const accessToken = body.access_token || (existingWa?.access_token as string) || "";
 
     if (!accessToken) {
       return NextResponse.json({ success: false, error: "Access token is required" }, { status: 400 });
@@ -83,8 +72,8 @@ export async function POST(request: NextRequest) {
     const newSettings = {
       ...existingSettings,
       whatsapp: {
-        phone_number_id: parsed.data.phone_number_id,
-        waba_id: parsed.data.waba_id,
+        phone_number_id: body.phone_number_id,
+        waba_id: body.waba_id,
         access_token: accessToken,
         webhook_verify_token: webhookVerifyToken,
         is_connected: false,
@@ -94,23 +83,17 @@ export async function POST(request: NextRequest) {
     const { error: updateError } = await supabase
       .from("teams")
       .update({ settings: newSettings })
-      .eq("id", context.teamId);
+      .eq("id", ctx.workspaceId);
 
-    if (updateError) {
-      logger.error("WhatsApp", "Failed to save settings", updateError);
-      return NextResponse.json({ success: false, error: updateError.message }, { status: 500 });
-    }
+    if (updateError) throw new ApiError(updateError.message, 500);
 
     return NextResponse.json({
       success: true,
       data: {
-        phone_number_id: parsed.data.phone_number_id,
-        waba_id: parsed.data.waba_id,
+        phone_number_id: body.phone_number_id,
+        waba_id: body.waba_id,
         webhook_verify_token: webhookVerifyToken,
       },
     });
-  } catch (error) {
-    logger.error("WhatsApp", "POST settings error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
