@@ -192,7 +192,7 @@ export function WhatsAppChat({ entityType, entityId, phoneNumber }: WhatsAppChat
   return (
     <div className="flex flex-col h-[500px]">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2" role="log" aria-live="polite">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <MessageSquare className="h-8 w-8 text-muted-foreground" />

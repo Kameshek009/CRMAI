@@ -251,7 +251,7 @@ export function SearchDialog() {
           {isLoading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
         </div>
 
-        <div ref={listRef} className="max-h-80 overflow-y-auto py-1">
+        <div ref={listRef} className="max-h-80 overflow-y-auto py-1" aria-live="polite" aria-label={`${allItems.length} results`}>
           {sections.map((section) => (
             <div key={section.label}>
               <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">

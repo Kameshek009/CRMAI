@@ -163,6 +163,8 @@ export function EntityForm({
                     placeholder={field.placeholder}
                     rows={3}
                     className={cn(error && "border-destructive focus-visible:ring-destructive")}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? `${fieldId}-error` : undefined}
                   />
                 ) : field.type === "select" ? (
                   <select
@@ -174,6 +176,8 @@ export function EntityForm({
                       "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       error && "border-destructive focus-visible:ring-destructive"
                     )}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? `${fieldId}-error` : undefined}
                   >
                     <option value="">{t("crm.entityForm.select")}</option>
                     {field.options?.map((opt) => (

@@ -67,7 +67,7 @@ export function CallTimerPopup() {
         )}
         <p className="text-xs text-muted-foreground">{state.phoneNumber}</p>
 
-        <p className="text-3xl font-mono font-bold tabular-nums">
+        <p className="text-3xl font-mono font-bold tabular-nums" aria-live="off">
           {formatTime(state.elapsedSeconds)}
         </p>
 

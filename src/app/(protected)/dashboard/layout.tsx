@@ -21,13 +21,14 @@ export default async function DashboardLayout({
       <WorkspaceProvider>
         <CallTimerProvider>
         <SidebarProvider defaultOpen={true}>
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground">Skip to content</a>
           <AppSidebar />
           <SidebarInset>
             <header className="flex h-14 shrink-0 items-center gap-2 border-b px-8">
               <DashboardHeader />
             </header>
             <WorkspaceGuard>
-              <main className="flex-1 overflow-auto">
+              <main id="main-content" className="flex-1 overflow-auto">
                 <ErrorBoundary>
                   {children}
                 </ErrorBoundary>

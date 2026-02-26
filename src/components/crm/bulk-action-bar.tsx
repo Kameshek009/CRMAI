@@ -38,7 +38,7 @@ export function BulkActionBar({ selectedCount, onDeselectAll, actions }: BulkAct
           aria-label="Bulk actions"
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-lg border bg-background px-4 py-2 shadow-lg"
         >
-          <span className="text-sm font-medium whitespace-nowrap">
+          <span className="text-sm font-medium whitespace-nowrap" aria-live="assertive">
             {selectedCount} selected
           </span>
           <Button variant="ghost" size="sm" onClick={onDeselectAll} className="h-7 px-2" aria-label="Clear selection">
