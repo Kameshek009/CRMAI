@@ -66,8 +66,8 @@ describe("formatCurrency", () => {
   it("formats USD with dollar sign", () => {
     expect(formatCurrency(1000)).toBe("$1,000");
   });
-  it("formats without decimal places", () => {
-    expect(formatCurrency(99.99)).toBe("$100");
+  it("formats fractional amounts", () => {
+    expect(formatCurrency(99.99)).toBe("$99.99");
   });
   it("handles zero", () => {
     expect(formatCurrency(0)).toBe("$0");

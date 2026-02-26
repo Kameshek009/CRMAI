@@ -5,7 +5,7 @@ import { logger } from "@/lib/logger";
 // Types
 // ============================================================================
 
-interface Condition {
+export interface Condition {
   field: string;
   operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "contains" | "not_contains";
   value: unknown;
@@ -16,7 +16,7 @@ interface AutomationAction {
   config: Record<string, unknown>;
 }
 
-interface Automation {
+export interface Automation {
   id: string;
   team_id: string;
   name: string;
@@ -33,7 +33,7 @@ interface Automation {
   actions: AutomationAction[];
 }
 
-interface TriggerParams {
+export interface TriggerParams {
   teamId: string;
   accountId: string;
   triggerType: "record_created" | "record_updated" | "field_changed" | "deal_stage_changed";
@@ -47,7 +47,8 @@ interface TriggerParams {
 // Condition evaluation
 // ============================================================================
 
-function evaluateCondition(condition: Condition, record: Record<string, unknown>): boolean {
+/** @internal — exported for testing */
+export function evaluateCondition(condition: Condition, record: Record<string, unknown>): boolean {
   const fieldValue = record[condition.field];
   const targetValue = condition.value;
 
@@ -73,7 +74,8 @@ function evaluateCondition(condition: Condition, record: Record<string, unknown>
   }
 }
 
-function evaluateConditions(conditions: Condition[], record: Record<string, unknown>): boolean {
+/** @internal — exported for testing */
+export function evaluateConditions(conditions: Condition[], record: Record<string, unknown>): boolean {
   if (!conditions || conditions.length === 0) return true;
   return conditions.every((c) => evaluateCondition(c, record));
 }
@@ -82,7 +84,8 @@ function evaluateConditions(conditions: Condition[], record: Record<string, unkn
 // Trigger matching
 // ============================================================================
 
-function matchesTrigger(
+/** @internal — exported for testing */
+export function matchesTrigger(
   automation: Automation,
   params: TriggerParams
 ): boolean {

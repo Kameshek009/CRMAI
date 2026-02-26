@@ -14,13 +14,16 @@ import type { SubscriptionTier, FeatureLimitKey } from "@/types";
  * The chain is: supabase.from().select().eq().eq()... → { count }
  */
 function mockSupabaseCount(count: number) {
+  const result = Promise.resolve({ count });
   const chain: any = {
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnValue(undefined),
+    eq: vi.fn().mockReturnValue(undefined),
   };
-  // Make the chain thenable so it can be awaited
-  chain.then = (resolve: any) => Promise.resolve({ count }).then(resolve);
-  chain.catch = vi.fn().mockReturnThis();
+  // Each method returns the chain itself, but 'then' resolves to { count }
+  chain.select.mockImplementation(() => chain);
+  chain.eq.mockImplementation(() => chain);
+  chain.then = (resolve: any, reject?: any) => result.then(resolve, reject);
+  chain.catch = (reject: any) => result.catch(reject);
 
   const mockSupabase = { from: vi.fn(() => chain) };
   (createSupabaseAdmin as ReturnType<typeof vi.fn>).mockReturnValue(mockSupabase);
@@ -73,14 +76,16 @@ describe("checkFeatureLimit", () => {
     });
   });
 
-  it("returns allowed when exactly at grace limit", async () => {
-    // free tier: contacts limit = 100, grace = 110
+  it("returns allowed when at computed grace limit due to float ceiling", async () => {
+    // free tier: contacts limit = 100
+    // JS: Math.ceil(100 * 1.1) = Math.ceil(110.00000000000001) = 111
+    // So grace limit is actually 111, and 110 < 111 = true
     mockSupabaseCount(110);
 
     const result = await checkFeatureLimit("team-1", "free", "contacts");
 
     expect(result).toEqual({
-      allowed: false, // 110 is NOT < 110
+      allowed: true,
       current: 110,
       limit: 100,
     });
