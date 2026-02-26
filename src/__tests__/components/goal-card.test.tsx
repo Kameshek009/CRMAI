@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { GoalCard } from "@/components/goals/goal-card";
@@ -9,12 +10,12 @@ vi.mock("@/lib/i18n", () => ({
 
 // Mock Badge
 vi.mock("@/components/ui/badge", () => ({
-  Badge: ({ children, className, ...props }: any) => <span className={className} {...props}>{children}</span>,
+  Badge: ({ children, className, ...props }: { children?: React.ReactNode; className?: string; [key: string]: unknown }) => <span className={className} {...props}>{children}</span>,
 }));
 
 // Mock Button
 vi.mock("@/components/ui/button", () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Button: ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) => <button {...props}>{children}</button>,
 }));
 
 interface Goal {

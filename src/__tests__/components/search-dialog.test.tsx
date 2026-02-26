@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import { SearchDialog } from "@/components/crm/search-dialog";
@@ -21,15 +22,15 @@ vi.mock("@/stores/search-store", () => ({
 
 // Mock Radix Dialog (portals don't work in jsdom)
 vi.mock("@/components/ui/dialog", () => ({
-  Dialog: ({ open, children }: any) => open ? <div data-testid="dialog">{children}</div> : null,
-  DialogContent: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  DialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  DialogDescription: ({ children }: any) => <p>{children}</p>,
+  Dialog: ({ open, children }: { children?: React.ReactNode; open?: boolean }) => open ? <div data-testid="dialog">{children}</div> : null,
+  DialogContent: ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) => <div {...props}>{children}</div>,
+  DialogTitle: ({ children }: { children?: React.ReactNode }) => <h2>{children}</h2>,
+  DialogDescription: ({ children }: { children?: React.ReactNode }) => <p>{children}</p>,
 }));
 
 // Mock Input to forward ref and pass props
 vi.mock("@/components/ui/input", () => ({
-  Input: vi.fn().mockImplementation(({ className, ...props }: any) => <input {...props} />),
+  Input: vi.fn().mockImplementation(({ className, ...props }: { className?: string; [key: string]: unknown }) => <input {...props} />),
 }));
 
 // Mock fetch for search API

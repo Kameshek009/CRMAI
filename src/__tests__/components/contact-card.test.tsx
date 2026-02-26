@@ -1,24 +1,25 @@
+import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ContactCard } from "@/components/crm/contact-card";
 
 // Mock next/link
 vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: any) => <a href={href} {...props}>{children}</a>,
+  default: ({ href, children, ...props }: { href: string; children?: React.ReactNode; [key: string]: unknown }) => <a href={href} {...props}>{children}</a>,
 }));
 
 // Mock Radix Tooltip (portals don't work in jsdom)
 vi.mock("@/components/ui/tooltip", () => ({
-  TooltipProvider: ({ children }: any) => <>{children}</>,
-  Tooltip: ({ children }: any) => <>{children}</>,
-  TooltipTrigger: ({ children, asChild, ...props }: any) => <span {...props}>{children}</span>,
+  TooltipProvider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  Tooltip: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children, asChild, ...props }: { children?: React.ReactNode; asChild?: boolean; [key: string]: unknown }) => <span {...props}>{children}</span>,
   TooltipContent: () => null,
 }));
 
 // Mock Radix Avatar (image loading unreliable in jsdom)
 vi.mock("@/components/ui/avatar", () => ({
-  Avatar: ({ children, className }: any) => <div className={className}>{children}</div>,
-  AvatarFallback: ({ children }: any) => <span>{children}</span>,
+  Avatar: ({ children, className }: { children?: React.ReactNode; className?: string }) => <div className={className}>{children}</div>,
+  AvatarFallback: ({ children }: { children?: React.ReactNode }) => <span>{children}</span>,
   AvatarImage: () => null,
 }));
 

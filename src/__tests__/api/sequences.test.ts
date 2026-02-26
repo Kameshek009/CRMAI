@@ -67,7 +67,7 @@ describe("GET /api/crm/sequences", () => {
       },
     ];
     setResult("email_sequences", { data: mockSequences });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/sequences");
     const response = await GET(request);
@@ -109,7 +109,7 @@ describe("GET /api/crm/sequences/[id]", () => {
       email_sequence_steps: [{ id: "s1", subject: "Welcome!" }],
     };
     setResult("email_sequences", { data: sequence, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", `/api/crm/sequences/${UUID}`);
     const response = await GET_BY_ID(request, mockParams(UUID));
@@ -125,7 +125,7 @@ describe("GET /api/crm/sequences/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("email_sequences", { data: null, error: { message: "Not found" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", `/api/crm/sequences/${UUID}`);
     const response = await GET_BY_ID(request, mockParams(UUID));
@@ -152,7 +152,7 @@ describe("POST /api/crm/sequences", () => {
     const { supabase, setResult } = createMockSupabase();
     const newSequence = { id: "seq-new", name: "Onboarding", trigger_type: "manual" };
     setResult("email_sequences", { data: newSequence, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/sequences", {
       name: "Onboarding",
@@ -212,7 +212,7 @@ describe("PATCH /api/crm/sequences/[id]", () => {
     const { supabase, setResult } = createMockSupabase();
     const updated = { id: UUID, name: "Updated name", is_active: true };
     setResult("email_sequences", { data: updated, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", `/api/crm/sequences/${UUID}`, {
       name: "Updated name",
@@ -240,7 +240,7 @@ describe("DELETE /api/crm/sequences/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("email_sequences", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("DELETE", `/api/crm/sequences/${UUID}`);
     const response = await DELETE(request, mockParams(UUID));
@@ -267,7 +267,7 @@ describe("GET /api/crm/sequences/[id]/steps", () => {
       { id: "s2", position: 1, delay_days: 3, subject: "Follow up" },
     ];
     setResult("email_sequence_steps", { data: mockSteps });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", `/api/crm/sequences/${UUID}/steps`);
     const response = await GET_STEPS(request, mockParams(UUID));
@@ -294,7 +294,7 @@ describe("POST /api/crm/sequences/[id]/steps", () => {
     const { supabase, setResult, chain } = createMockSupabase();
     const newStep = { id: "s-new", sequence_id: UUID, position: 0, delay_days: 1, subject: "Hi!", body: "Body text" };
     setResult("email_sequence_steps", { data: newStep, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", `/api/crm/sequences/${UUID}/steps`, {
       position: 0,
@@ -341,7 +341,7 @@ describe("POST /api/crm/sequences/[id]/enroll", () => {
       { id: "enr-2", sequence_id: UUID, contact_id: UUID2 },
     ];
     setResult("email_sequence_enrollments", { data: enrollmentData, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", `/api/crm/sequences/${UUID}/enroll`, {
       contact_ids: [UUID, UUID2],
@@ -359,7 +359,7 @@ describe("POST /api/crm/sequences/[id]/enroll", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("email_sequence_steps", { data: [] });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", `/api/crm/sequences/${UUID}/enroll`, {
       contact_ids: [UUID],
@@ -389,7 +389,7 @@ describe("GET /api/crm/sequences/[id]/enrollments", () => {
       { id: "e2", status: "completed", contacts: { id: UUID2, first_name: "Jane", last_name: "Smith", email: "jane@test.com" } },
     ];
     setResult("email_sequence_enrollments", { data: mockEnrollments });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", `/api/crm/sequences/${UUID}/enrollments`);
     const response = await GET_ENROLLMENTS(request, mockParams(UUID));

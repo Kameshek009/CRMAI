@@ -38,7 +38,7 @@ describe("GET /api/crm/leads", () => {
       { id: "2", first_name: "Bob", last_name: "Green" },
     ];
     setResult("leads", { data: mockLeads, count: 2 });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/leads");
     const response = await GET(request);
@@ -74,7 +74,7 @@ describe("POST /api/crm/leads", () => {
     const { supabase, setResult } = createMockSupabase();
     const newLead = { id: "new-lead-1", first_name: "Alice", last_name: "Brown", email: "alice@example.com" };
     setResult("leads", { data: newLead, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/leads", {
       first_name: "Alice",
@@ -109,7 +109,7 @@ describe("POST /api/crm/leads", () => {
     const { supabase, setResult, chain } = createMockSupabase();
     const newLead = { id: "new-lead-2", first_name: "Bob", email: null };
     setResult("leads", { data: newLead, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/leads", {
       first_name: "Bob",
@@ -129,7 +129,7 @@ describe("POST /api/crm/leads", () => {
     const { supabase, setResult } = createMockSupabase();
     const newLead = { id: "new-lead-3", first_name: "Charlie" };
     setResult("leads", { data: newLead, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/leads", {
       first_name: "Charlie",
@@ -159,7 +159,7 @@ describe("GET /api/crm/leads/[id]", () => {
     const { supabase, setResult } = createMockSupabase();
     const lead = { id: TEST_UUID, first_name: "Alice", last_name: "Brown" };
     setResult("leads", { data: lead, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", `/api/crm/leads/${TEST_UUID}`);
     const response = await GET_BY_ID(request, mockParams(TEST_UUID));
@@ -196,7 +196,7 @@ describe("DELETE /api/crm/leads/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("leads", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("DELETE", `/api/crm/leads/${TEST_UUID}`);
     const response = await DELETE(request, mockParams(TEST_UUID));
@@ -241,7 +241,7 @@ describe("POST /api/crm/leads/[id]/convert", () => {
     setResult("contacts", { data: { id: "new-contact-id" } });
     // 3rd call: update lead status (thenable)
     setResult("leads", { data: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", `/api/crm/leads/${TEST_UUID}/convert`, {
       create_contact: true,
@@ -274,7 +274,7 @@ describe("POST /api/crm/leads/[id]/convert", () => {
     const { supabase, setResult } = createMockSupabase();
     // Lead not found
     setResult("leads", { data: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", `/api/crm/leads/${TEST_UUID}/convert`, {
       create_contact: true,

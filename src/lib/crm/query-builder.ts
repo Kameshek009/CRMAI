@@ -83,13 +83,20 @@ export function parseListParams(url: URL): ListQueryParams {
 // Query Builder
 // ============================================================================
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export function applyListQuery(
-  query: any,
+/** Minimal interface for a chainable Supabase query (no generated DB types). */
+interface ChainableQuery {
+  eq(column: string, value: unknown): ChainableQuery;
+  or(conditions: string): ChainableQuery;
+  order(column: string, options: { ascending: boolean }): ChainableQuery;
+  range(from: number, to: number): ChainableQuery;
+}
+
+export function applyListQuery<Q extends ChainableQuery>(
+  query: Q,
   entityType: string,
   params: ListQueryParams,
   searchFields?: string[]
-): any {
+): Q {
   const allowedSorts = ALLOWED_SORT_FIELDS[entityType] || [];
   const allowedFilters = ALLOWED_FILTER_FIELDS[entityType] || [];
 
@@ -97,7 +104,7 @@ export function applyListQuery(
   if (params.filters) {
     for (const [field, value] of Object.entries(params.filters)) {
       if (allowedFilters.includes(field) && value) {
-        query = query.eq(field, value);
+        query = query.eq(field, value) as Q;
       }
     }
   }
@@ -108,7 +115,7 @@ export function applyListQuery(
     const orConditions = searchFields
       .map((field) => `${field}.ilike.%${sanitized}%`)
       .join(",");
-    query = query.or(orConditions);
+    query = query.or(orConditions) as Q;
   }
 
   // Apply sort
@@ -116,13 +123,13 @@ export function applyListQuery(
     ? params.sort_by
     : "created_at";
   const sortOrder = params.sort_order || "desc";
-  query = query.order(sortBy, { ascending: sortOrder === "asc" });
+  query = query.order(sortBy, { ascending: sortOrder === "asc" }) as Q;
 
   // Apply pagination
   const page = params.page || 1;
   const limit = params.limit || 50;
   const offset = (page - 1) * limit;
-  query = query.range(offset, offset + limit - 1);
+  query = query.range(offset, offset + limit - 1) as Q;
 
   return query;
 }
@@ -135,11 +142,11 @@ export function applyListQuery(
  * Entity must have: visibility, account_id columns.
  * Optional: assigned_to column.
  */
-export function applyVisibilityFilter(
-  query: any,
+export function applyVisibilityFilter<Q extends ChainableQuery>(
+  query: Q,
   entityType: string,
   ctx: VisibilityContext
-): any {
+): Q {
   // Owners and admins see everything
   if (ctx.isOwner || ctx.fixedRole === "owner" || ctx.fixedRole === "admin") {
     return query;
@@ -147,7 +154,7 @@ export function applyVisibilityFilter(
 
   // Viewers: only workspace-visible records
   if (ctx.fixedRole === "viewer") {
-    return query.eq("visibility", "workspace");
+    return query.eq("visibility", "workspace") as Q;
   }
 
   // Members: workspace records + own + assigned + group records
@@ -170,6 +177,5 @@ export function applyVisibilityFilter(
     );
   }
 
-  return query.or(conditions.join(","));
+  return query.or(conditions.join(",")) as Q;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */

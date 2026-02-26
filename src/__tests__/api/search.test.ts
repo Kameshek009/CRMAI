@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { GET } from "@/app/api/crm/search/route";
 import { createMockSupabase } from "@/__tests__/helpers/mock-supabase";
 import { mockTeamContext, mockAuthError, createTestRequest } from "@/__tests__/helpers/mock-context";
@@ -24,7 +25,7 @@ describe("Search API", () => {
     setResult = mock.setResult;
 
     vi.mocked(getTeamContext).mockResolvedValue(mockTeamContext());
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   describe("GET /api/crm/search", () => {
@@ -43,7 +44,7 @@ describe("Search API", () => {
       ];
 
       // Create a more sophisticated mock that handles parallel queries
-      const tableData: Record<string, any> = {
+      const tableData: Record<string, { data: unknown[] }> = {
         contacts: { data: contacts },
         companies: { data: companies },
         deals: { data: deals },
@@ -62,7 +63,7 @@ describe("Search API", () => {
       });
 
       const mockSupabase = { from: mockFrom };
-      vi.mocked(createSupabaseAdmin).mockReturnValue(mockSupabase as any);
+      vi.mocked(createSupabaseAdmin).mockReturnValue(mockSupabase as unknown as SupabaseClient);
 
       const req = createTestRequest("GET", "/api/crm/search?q=test");
       const res = await GET(req);
@@ -72,31 +73,31 @@ describe("Search API", () => {
       expect(json.success).toBe(true);
       expect(json.data).toHaveLength(4);
 
-      const types = json.data.map((r: any) => r.type);
+      const types = json.data.map((r: { type: string; title: string; subtitle: string }) => r.type);
       expect(types).toContain("contact");
       expect(types).toContain("company");
       expect(types).toContain("deal");
       expect(types).toContain("task");
 
-      const contact = json.data.find((r: any) => r.type === "contact");
+      const contact = json.data.find((r: { type: string; title: string; subtitle: string }) => r.type === "contact");
       expect(contact.title).toBe("John Doe");
       expect(contact.subtitle).toBe("john@example.com");
 
-      const company = json.data.find((r: any) => r.type === "company");
+      const company = json.data.find((r: { type: string; title: string; subtitle: string }) => r.type === "company");
       expect(company.title).toBe("Acme Corp");
       expect(company.subtitle).toBe("Tech");
 
-      const deal = json.data.find((r: any) => r.type === "deal");
+      const deal = json.data.find((r: { type: string; title: string; subtitle: string }) => r.type === "deal");
       expect(deal.title).toBe("Big Deal");
       expect(deal.subtitle).toBe("$50,000 - open");
 
-      const task = json.data.find((r: any) => r.type === "task");
+      const task = json.data.find((r: { type: string; title: string; subtitle: string }) => r.type === "task");
       expect(task.title).toBe("Follow up call");
       expect(task.subtitle).toBe("high - todo");
     });
 
     it("returns 401 when not authenticated", async () => {
-      vi.mocked(getTeamContext).mockResolvedValue(mockAuthError() as any);
+      vi.mocked(getTeamContext).mockResolvedValue(mockAuthError());
 
       const req = createTestRequest("GET", "/api/crm/search?q=test");
       const res = await GET(req);

@@ -60,7 +60,7 @@ describe("GET /api/crm/email-templates", () => {
       { id: "t2", name: "Follow Up", subject: "Checking in", body: "<p>Hello again</p>" },
     ];
     setResult("email_templates", { data: mockTemplates });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/email-templates");
     const response = await GET(request);
@@ -88,7 +88,7 @@ describe("GET /api/crm/email-templates", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("email_templates", { data: [] });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/email-templates");
     const response = await GET(request);
@@ -120,7 +120,7 @@ describe("POST /api/crm/email-templates", () => {
       account_id: "acc-test-123",
     };
     setResult("email_templates", { data: newTemplate, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/email-templates", validTemplateBody);
     const response = await POST(request);
@@ -195,7 +195,7 @@ describe("PATCH /api/crm/email-templates/[id]", () => {
     const { supabase, setResult } = createMockSupabase();
     const updated = { id: UUID, name: "Updated Welcome", subject: "Hello!", body: "<p>Updated</p>" };
     setResult("email_templates", { data: updated, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", `/api/crm/email-templates/${UUID}`, {
       name: "Updated Welcome",
@@ -240,7 +240,7 @@ describe("DELETE /api/crm/email-templates/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("email_templates", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("DELETE", `/api/crm/email-templates/${UUID}`);
     const response = await DELETE(request, mockParams(UUID));

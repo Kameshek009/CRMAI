@@ -83,7 +83,7 @@ describe("POST /api/crm/contacts/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("contacts", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/contacts/bulk", {
       action: "delete",
@@ -102,7 +102,7 @@ describe("POST /api/crm/contacts/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("contacts", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/contacts/bulk", {
       action: "update_status",
@@ -121,7 +121,7 @@ describe("POST /api/crm/contacts/bulk", () => {
     vi.mocked(getTeamContext).mockResolvedValue(mockTeamContext());
 
     const { supabase } = createMockSupabase();
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/contacts/bulk", {
       action: "unknown_action",
@@ -162,7 +162,7 @@ describe("POST /api/crm/companies/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("companies", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/companies/bulk", {
       action: "delete",
@@ -180,7 +180,7 @@ describe("POST /api/crm/companies/bulk", () => {
     vi.mocked(getTeamContext).mockResolvedValue(mockTeamContext());
 
     const { supabase } = createMockSupabase();
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/companies/bulk", {
       action: "update_status",
@@ -207,7 +207,7 @@ describe("POST /api/crm/deals/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/deals/bulk", {
       action: "delete",
@@ -226,7 +226,7 @@ describe("POST /api/crm/deals/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/deals/bulk", {
       action: "update_status",
@@ -246,7 +246,7 @@ describe("POST /api/crm/deals/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: null, error: { message: "DB error" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/deals/bulk", {
       action: "delete",
@@ -273,7 +273,7 @@ describe("POST /api/crm/tasks/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("crm_tasks", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/tasks/bulk", {
       action: "delete",
@@ -292,7 +292,7 @@ describe("POST /api/crm/tasks/bulk", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("crm_tasks", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/tasks/bulk", {
       action: "update_status",
@@ -311,7 +311,7 @@ describe("POST /api/crm/tasks/bulk", () => {
     vi.mocked(getTeamContext).mockResolvedValue(mockTeamContext());
 
     const { supabase } = createMockSupabase();
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/tasks/bulk", {
       action: "archive",

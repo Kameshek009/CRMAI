@@ -58,7 +58,7 @@ describe("GET /api/crm/automations", () => {
       { id: "auto-2", name: "Update deal stage", trigger_type: "field_changed" },
     ];
     setResult("automations", { data: mockAutomations });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const response = await GET();
     const json = await response.json();
@@ -97,7 +97,7 @@ describe("POST /api/crm/automations", () => {
       created_by: "acc-test-123",
     };
     setResult("automations", { data: newAutomation, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/automations", validAutomationBody);
     const response = await POST(request);
@@ -199,7 +199,7 @@ describe("POST /api/crm/automations", () => {
       created_by: "acc-test-123",
     };
     setResult("automations", { data: newAutomation, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/automations", bodyWithConditions);
     const response = await POST(request);
@@ -224,7 +224,7 @@ describe("POST /api/crm/automations", () => {
       created_by: "acc-test-123",
     };
     setResult("automations", { data: newAutomation, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/automations", validAutomationBody);
     await POST(request);

@@ -85,7 +85,7 @@ describe("GET /api/crm/deals", () => {
       },
     ];
     setResult("deals", { data: mockDeals, count: 2 });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/deals");
     const response = await GET(request);
@@ -130,7 +130,7 @@ describe("POST /api/crm/deals", () => {
       deal_stages: { id: stageId, name: "Prospecting", color: "yellow" },
     };
     setResult("deals", { data: newDeal, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/deals", {
       title: "New Deal",
@@ -208,7 +208,7 @@ describe("GET /api/crm/deals/[id]", () => {
       deal_stages: { id: "stage-1", name: "Negotiation", color: "blue" },
     };
     setResult("deals", { data: deal, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/deals/550e8400-e29b-41d4-a716-446655440000");
     const response = await GET_BY_ID(request, mockParams("550e8400-e29b-41d4-a716-446655440000"));
@@ -236,7 +236,7 @@ describe("GET /api/crm/deals/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: null, error: { message: "Not found" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/deals/550e8400-e29b-41d4-a716-446655440000");
     const response = await GET_BY_ID(request, mockParams("550e8400-e29b-41d4-a716-446655440000"));
@@ -265,7 +265,7 @@ describe("PATCH /api/crm/deals/[id]", () => {
       deal_stages: { id: "stage-1", name: "Negotiation", color: "blue" },
     };
     setResult("deals", { data: updatedDeal, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", "/api/crm/deals/550e8400-e29b-41d4-a716-446655440000", {
       title: "Updated Deal",
@@ -297,7 +297,7 @@ describe("PATCH /api/crm/deals/[id]", () => {
 
     // First call returns oldRecord, second returns updatedDeal
     setResult("deals", { data: updatedDeal, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", "/api/crm/deals/550e8400-e29b-41d4-a716-446655440000", {
       stage_id: newStageId,
@@ -324,7 +324,7 @@ describe("DELETE /api/crm/deals/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("DELETE", "/api/crm/deals/550e8400-e29b-41d4-a716-446655440000");
     const response = await DELETE(request, mockParams("550e8400-e29b-41d4-a716-446655440000"));
@@ -345,7 +345,7 @@ describe("DELETE /api/crm/deals/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: null, error: { message: "Not found" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("DELETE", "/api/crm/deals/550e8400-e29b-41d4-a716-446655440000");
     const response = await DELETE(request, mockParams("550e8400-e29b-41d4-a716-446655440000"));

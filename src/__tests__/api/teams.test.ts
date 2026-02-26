@@ -36,6 +36,8 @@ import { getAccountId } from "@/lib/crm/helpers";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
 import { cancelSubscriptionImmediately } from "@/lib/stripe/server";
 
+type TeamContextReturn = Awaited<ReturnType<typeof getTeamContext>>;
+
 describe("POST /api/teams", () => {
   let supabase: ReturnType<typeof createMockSupabase>["supabase"];
   let setResult: ReturnType<typeof createMockSupabase>["setResult"];
@@ -47,7 +49,7 @@ describe("POST /api/teams", () => {
     supabase = mock.supabase;
     setResult = mock.setResult;
     setRpcResult = mock.setRpcResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("creates team successfully", async () => {
@@ -131,12 +133,12 @@ describe("GET /api/teams/[id]", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("returns team data", async () => {
     const ctx = mockTeamContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx as unknown as TeamContextReturn);
 
     setResult("teams", {
       data: { id: "ws-test-456", name: "Test Team", owner_account_id: "acc-test-123" },
@@ -154,7 +156,7 @@ describe("GET /api/teams/[id]", () => {
 
   it("returns 403 when accessing other team", async () => {
     const ctx = mockTeamContext({ teamId: "ws-test-456" });
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx as unknown as TeamContextReturn);
 
     const req = createTestRequest("GET", "/api/teams/ws-other-999");
     const res = await GET(req, mockParams("ws-other-999"));
@@ -175,12 +177,12 @@ describe("PATCH /api/teams/[id]", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("updates team settings", async () => {
     const ctx = mockTeamContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx as unknown as TeamContextReturn);
     vi.mocked(requirePermission).mockReturnValue(null);
 
     setResult("teams", {
@@ -199,7 +201,7 @@ describe("PATCH /api/teams/[id]", () => {
 
   it("returns 403 when no manage permission", async () => {
     const ctx = mockNoPermContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx as unknown as TeamContextReturn);
     vi.mocked(requirePermission).mockReturnValue(
       NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     );
@@ -222,12 +224,12 @@ describe("DELETE /api/teams/[id]", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("soft-deletes team and calls cancelSubscriptionImmediately", async () => {
     const ctx = mockTeamContext({ isDirector: true });
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx as unknown as TeamContextReturn);
     vi.mocked(cancelSubscriptionImmediately).mockResolvedValue(undefined);
 
     // Mock team with subscription
@@ -250,7 +252,7 @@ describe("DELETE /api/teams/[id]", () => {
 
   it("returns 403 if not director", async () => {
     const ctx = mockTeamContext({ isDirector: false, isOwner: false });
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx as unknown as TeamContextReturn);
 
     const req = createTestRequest("DELETE", "/api/teams/ws-test-456");
     const res = await DELETE(req, mockParams("ws-test-456"));

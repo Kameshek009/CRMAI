@@ -21,6 +21,9 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { createPortalSession } from "@/lib/stripe/server";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 
+type AuthReturn = Awaited<ReturnType<typeof auth>>;
+type CurrentUserReturn = Awaited<ReturnType<typeof currentUser>>;
+
 describe("POST /api/billing/portal", () => {
   let supabase: ReturnType<typeof createMockSupabase>["supabase"];
   let setResult: ReturnType<typeof createMockSupabase>["setResult"];
@@ -30,11 +33,11 @@ describe("POST /api/billing/portal", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: null } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: null } as unknown as AuthReturn);
 
     const req = createTestRequest("POST", "/api/billing/portal");
     const res = await POST(req);
@@ -46,7 +49,7 @@ describe("POST /api/billing/portal", () => {
   });
 
   it("returns 404 when user not found (currentUser returns null)", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
     vi.mocked(currentUser).mockResolvedValue(null);
 
     const req = createTestRequest("POST", "/api/billing/portal");
@@ -59,13 +62,13 @@ describe("POST /api/billing/portal", () => {
   });
 
   it("returns 404 when account not found", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
     vi.mocked(currentUser).mockResolvedValue({
       id: "clerk-user-123",
       emailAddresses: [{ id: "email-1", emailAddress: "test@example.com" }],
       primaryEmailAddressId: "email-1",
       fullName: "Test User",
-    } as any);
+    } as unknown as CurrentUserReturn);
 
     // No account
     setResult("accounts", { data: null, error: { code: "PGRST116" } });
@@ -80,13 +83,13 @@ describe("POST /api/billing/portal", () => {
   });
 
   it("returns 403 when user does not own a team", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
     vi.mocked(currentUser).mockResolvedValue({
       id: "clerk-user-123",
       emailAddresses: [{ id: "email-1", emailAddress: "test@example.com" }],
       primaryEmailAddressId: "email-1",
       fullName: "Test User",
-    } as any);
+    } as unknown as CurrentUserReturn);
 
     // Account found
     setResult("accounts", {
@@ -107,17 +110,17 @@ describe("POST /api/billing/portal", () => {
   });
 
   it("creates portal session successfully", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
     vi.mocked(currentUser).mockResolvedValue({
       id: "clerk-user-123",
       emailAddresses: [{ id: "email-1", emailAddress: "test@example.com" }],
       primaryEmailAddressId: "email-1",
       fullName: "Test User",
-    } as any);
+    } as unknown as CurrentUserReturn);
     vi.mocked(getOrCreateStripeCustomer).mockResolvedValue("cus_test_123");
     vi.mocked(createPortalSession).mockResolvedValue({
       url: "https://billing.stripe.com/session/test_portal",
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createPortalSession>>);
 
     // Account found
     setResult("accounts", {

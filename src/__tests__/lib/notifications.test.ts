@@ -22,7 +22,7 @@ describe("createNotification", () => {
     supabase = mock.supabase;
     chain = mock.chain;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("inserts notification with correct fields", async () => {
@@ -169,7 +169,7 @@ describe("createTeamNotification", () => {
     supabase = mock.supabase;
     chain = mock.chain;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("fetches active members and creates notification for each", async () => {

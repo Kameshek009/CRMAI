@@ -17,7 +17,7 @@ describe("GET /api/health", () => {
   it("returns 200 with healthy status when database check succeeds", async () => {
     const { supabase, setResult } = createMockSupabase();
     setResult("accounts", { data: [{ id: "test-id" }], error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const response = await GET();
     const json = await response.json();
@@ -30,7 +30,7 @@ describe("GET /api/health", () => {
   it("returns 503 with degraded status when database returns error", async () => {
     const { supabase, setResult } = createMockSupabase();
     setResult("accounts", { data: null, error: { message: "DB connection failed" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const response = await GET();
     const json = await response.json();
@@ -43,7 +43,7 @@ describe("GET /api/health", () => {
   it("includes timestamp, checks, and latencyMs in response", async () => {
     const { supabase, setResult } = createMockSupabase();
     setResult("accounts", { data: [{ id: "test-id" }], error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const response = await GET();
     const json = await response.json();
@@ -57,7 +57,7 @@ describe("GET /api/health", () => {
   it("includes status and latencyMs in database check", async () => {
     const { supabase, setResult } = createMockSupabase();
     setResult("accounts", { data: [{ id: "test-id" }], error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const response = await GET();
     const json = await response.json();

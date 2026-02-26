@@ -27,12 +27,12 @@ describe("GET /api/crm/notes", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("returns notes list", async () => {
     const ctx = mockTeamContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx);
     vi.mocked(requirePermission).mockReturnValue(null);
 
     const mockNotes = [
@@ -54,7 +54,7 @@ describe("GET /api/crm/notes", () => {
 
   it("filters by contact_id when provided", async () => {
     const ctx = mockTeamContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx);
     vi.mocked(requirePermission).mockReturnValue(null);
 
     const mockNotes = [
@@ -75,7 +75,7 @@ describe("GET /api/crm/notes", () => {
 
   it("returns 401 when not authenticated", async () => {
     const authErr = mockAuthError();
-    vi.mocked(getTeamContext).mockResolvedValue(authErr as any);
+    vi.mocked(getTeamContext).mockResolvedValue(authErr);
 
     const req = createTestRequest("GET", "/api/crm/notes");
     const res = await GET(req);
@@ -95,12 +95,12 @@ describe("POST /api/crm/notes", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("creates note with valid data", async () => {
     const ctx = mockTeamContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx);
     vi.mocked(requirePermission).mockReturnValue(null);
 
     const contactId = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
@@ -133,7 +133,7 @@ describe("POST /api/crm/notes", () => {
 
   it("returns 400 on invalid input (missing content)", async () => {
     const ctx = mockTeamContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx);
     vi.mocked(requirePermission).mockReturnValue(null);
 
     const req = createTestRequest("POST", "/api/crm/notes", {
@@ -150,7 +150,7 @@ describe("POST /api/crm/notes", () => {
 
   it("returns 403 when no permission", async () => {
     const ctx = mockNoPermContext();
-    vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
+    vi.mocked(getTeamContext).mockResolvedValue(ctx);
     vi.mocked(requirePermission).mockReturnValue(
       NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     );

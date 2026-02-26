@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface MockResult {
   data?: unknown;
@@ -12,7 +13,7 @@ interface MockResult {
  * Usage:
  *   const { supabase, setResult } = createMockSupabase();
  *   setResult("contacts", { data: [{ id: "1" }], count: 1 });
- *   vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+ *   vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
  */
 export function createMockSupabase() {
   const resultQueues: Record<string, MockResult[]> = {};
@@ -98,7 +99,7 @@ export function createMockSupabase() {
     return Promise.resolve(r);
   });
 
-  const supabase = { from, rpc };
+  const supabase = { from, rpc } as unknown as SupabaseClient;
 
   return { supabase, from, rpc, chain, setResult, setRpcResult };
 }

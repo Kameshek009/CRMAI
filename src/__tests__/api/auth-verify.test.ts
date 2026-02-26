@@ -17,6 +17,9 @@ vi.mock("@/lib/supabase/server", () => ({
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 
+type AuthReturn = Awaited<ReturnType<typeof auth>>;
+type ClerkClientReturn = Awaited<ReturnType<typeof clerkClient>>;
+
 describe("POST /api/auth/verify", () => {
   let supabase: ReturnType<typeof createMockSupabase>["supabase"];
   let setResult: ReturnType<typeof createMockSupabase>["setResult"];
@@ -26,11 +29,11 @@ describe("POST /api/auth/verify", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("returns existing account data when found", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
 
     setResult("accounts", {
       data: {
@@ -58,7 +61,7 @@ describe("POST /api/auth/verify", () => {
   });
 
   it("creates new account when not found", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-new" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-new" } as unknown as AuthReturn);
 
     // Mock Clerk user lookup
     const mockClerkClient = {
@@ -70,7 +73,7 @@ describe("POST /api/auth/verify", () => {
         }),
       },
     };
-    vi.mocked(clerkClient).mockResolvedValue(mockClerkClient as any);
+    vi.mocked(clerkClient).mockResolvedValue(mockClerkClient as unknown as ClerkClientReturn);
 
     // First call: no account found
     setResult("accounts", { data: null, error: { code: "PGRST116" } });
@@ -100,7 +103,7 @@ describe("POST /api/auth/verify", () => {
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: null } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: null } as unknown as AuthReturn);
 
     const req = createTestRequest("POST", "/api/auth/verify");
     const res = await POST(req);
@@ -112,7 +115,7 @@ describe("POST /api/auth/verify", () => {
   });
 
   it("returns 403 for deactivated account", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-inactive" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-inactive" } as unknown as AuthReturn);
 
     setResult("accounts", {
       data: {
@@ -135,7 +138,7 @@ describe("POST /api/auth/verify", () => {
   });
 
   it("response includes userId and account data", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
 
     setResult("accounts", {
       data: {
@@ -161,7 +164,7 @@ describe("POST /api/auth/verify", () => {
   });
 
   it("handles Clerk user lookup for new accounts", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-new" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-new" } as unknown as AuthReturn);
 
     const mockClerkClient = {
       users: {
@@ -172,7 +175,7 @@ describe("POST /api/auth/verify", () => {
         }),
       },
     };
-    vi.mocked(clerkClient).mockResolvedValue(mockClerkClient as any);
+    vi.mocked(clerkClient).mockResolvedValue(mockClerkClient as unknown as ClerkClientReturn);
 
     // No existing account
     setResult("accounts", { data: null, error: { code: "PGRST116" } });

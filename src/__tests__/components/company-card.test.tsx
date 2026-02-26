@@ -1,34 +1,35 @@
+import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { CompanyCard } from "@/components/crm/company-card";
 
 // Mock next/link
 vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: any) => <a href={href} {...props}>{children}</a>,
+  default: ({ href, children, ...props }: { href: string; children?: React.ReactNode; [key: string]: unknown }) => <a href={href} {...props}>{children}</a>,
 }));
 
 // Mock Radix Avatar
 vi.mock("@/components/ui/avatar", () => ({
-  Avatar: ({ children, className }: any) => <div className={className}>{children}</div>,
-  AvatarFallback: ({ children }: any) => <span>{children}</span>,
+  Avatar: ({ children, className }: { children?: React.ReactNode; className?: string }) => <div className={className}>{children}</div>,
+  AvatarFallback: ({ children }: { children?: React.ReactNode }) => <span>{children}</span>,
   AvatarImage: () => null,
 }));
 
 // Mock Badge
 vi.mock("@/components/ui/badge", () => ({
-  Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+  Badge: ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) => <span {...props}>{children}</span>,
 }));
 
 // Mock Checkbox
 vi.mock("@/components/ui/checkbox", () => ({
-  Checkbox: ({ checked, onCheckedChange, ...props }: any) => (
+  Checkbox: ({ checked, onCheckedChange, ...props }: { checked?: boolean; onCheckedChange?: (v: boolean) => void; [key: string]: unknown }) => (
     <button role="checkbox" aria-checked={!!checked} onClick={() => onCheckedChange?.(!checked)} {...props} />
   ),
 }));
 
 // Mock ScoreBadge (resolved from @/components/crm/score-badge)
 vi.mock("@/components/crm/score-badge", () => ({
-  ScoreBadge: ({ score }: any) => <div data-testid="score-badge">{score}</div>,
+  ScoreBadge: ({ score }: { score: number }) => <div data-testid="score-badge">{score}</div>,
 }));
 
 interface CompanyCardProps {

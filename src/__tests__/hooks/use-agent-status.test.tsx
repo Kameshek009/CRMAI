@@ -8,14 +8,14 @@ class MockEventSource {
   url: string;
   onopen: ((event: Event) => void) | null = null;
   onerror: ((event: Event) => void) | null = null;
-  listeners: Record<string, ((event: any) => void)[]> = {};
+  listeners: Record<string, ((event: MessageEvent) => void)[]> = {};
 
   constructor(url: string) {
     this.url = url;
     MockEventSource.instances.push(this);
   }
 
-  addEventListener(type: string, handler: (event: any) => void) {
+  addEventListener(type: string, handler: (event: MessageEvent) => void) {
     if (!this.listeners[type]) this.listeners[type] = [];
     this.listeners[type].push(handler);
   }
@@ -23,9 +23,9 @@ class MockEventSource {
   close() {}
 
   // Helper to simulate events
-  simulateEvent(type: string, data: any) {
+  simulateEvent(type: string, data: unknown) {
     const handlers = this.listeners[type] || [];
-    handlers.forEach((h) => h({ data: JSON.stringify(data) }));
+    handlers.forEach((h) => h({ data: JSON.stringify(data) } as MessageEvent));
   }
 }
 
@@ -48,7 +48,7 @@ describe("useAgentStatus", () => {
 
   beforeEach(() => {
     MockEventSource.instances = [];
-    global.EventSource = MockEventSource as any;
+    global.EventSource = MockEventSource as unknown as typeof EventSource;
 
     fetchMock = vi.fn().mockResolvedValue(successResponse);
     global.fetch = fetchMock;

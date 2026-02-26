@@ -158,15 +158,16 @@ export async function getCustomerBillingInfo(
     let subscription: SubscriptionInfo | null = null;
     const firstSubscription = subscriptionsResponse.data[0];
     if (firstSubscription) {
-      const sub = firstSubscription as any;
-      const priceId = sub.items?.data?.[0]?.price?.id || "";
-      const quantity = sub.items?.data?.[0]?.quantity || 1;
+      const sub = firstSubscription;
+      const firstItem = sub.items?.data?.[0];
+      const priceId = firstItem?.price?.id || "";
+      const quantity = firstItem?.quantity || 1;
 
       subscription = {
         id: sub.id,
         status: sub.status,
-        currentPeriodStart: new Date((sub.current_period_start || 0) * 1000),
-        currentPeriodEnd: new Date((sub.current_period_end || 0) * 1000),
+        currentPeriodStart: new Date((firstItem?.current_period_start || 0) * 1000),
+        currentPeriodEnd: new Date((firstItem?.current_period_end || 0) * 1000),
         cancelAtPeriodEnd: sub.cancel_at_period_end || false,
         cancelAt: sub.cancel_at ? new Date(sub.cancel_at * 1000) : null,
         priceId,

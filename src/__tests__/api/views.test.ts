@@ -74,7 +74,7 @@ describe("GET /api/crm/views", () => {
       { id: "v-2", label: "Open Deals", entity_type: "deals", is_pinned: true },
     ];
     setResult("saved_views", { data: mockViews, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/views");
     const response = await GET(request);
@@ -101,7 +101,7 @@ describe("GET /api/crm/views", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("saved_views", { data: null, error: { message: "DB error" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/views");
     const response = await GET(request);
@@ -131,7 +131,7 @@ describe("POST /api/crm/views", () => {
       created_by_account_id: "acc-test-123",
     };
     setResult("saved_views", { data: newView, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/views", {
       entity_type: "contacts",
@@ -177,7 +177,7 @@ describe("PATCH /api/crm/views/[id]", () => {
       entity_type: "contacts",
     };
     setResult("saved_views", { data: updatedView, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", "/api/crm/views/550e8400-e29b-41d4-a716-446655440000", {
       label: "Updated View",
@@ -209,7 +209,7 @@ describe("PATCH /api/crm/views/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("saved_views", { data: null, error: { message: "Not found" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", "/api/crm/views/550e8400-e29b-41d4-a716-446655440000", {
       label: "Updated",
@@ -234,7 +234,7 @@ describe("DELETE /api/crm/views/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("saved_views", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("DELETE", "/api/crm/views/550e8400-e29b-41d4-a716-446655440000");
     const response = await DELETE(request, mockParams("550e8400-e29b-41d4-a716-446655440000"));
@@ -275,7 +275,7 @@ describe("PATCH /api/crm/views/[id]/pin", () => {
       data: { id: "550e8400-e29b-41d4-a716-446655440000", is_pinned: true },
       error: null,
     });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", "/api/crm/views/550e8400-e29b-41d4-a716-446655440000/pin");
     const response = await TOGGLE_PIN(request, mockParams("550e8400-e29b-41d4-a716-446655440000"));
@@ -291,7 +291,7 @@ describe("PATCH /api/crm/views/[id]/pin", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("saved_views", { data: null, error: { message: "Not found" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", "/api/crm/views/550e8400-e29b-41d4-a716-446655440000/pin");
     const response = await TOGGLE_PIN(request, mockParams("550e8400-e29b-41d4-a716-446655440000"));
@@ -318,7 +318,7 @@ describe("GET /api/crm/views/pinned", () => {
       { id: "v-2", label: "Pinned View 2", is_pinned: true, entity_type: "deals" },
     ];
     setResult("saved_views", { data: pinnedViews, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/views/pinned");
     const response = await GET_PINNED(request);
@@ -334,7 +334,7 @@ describe("GET /api/crm/views/pinned", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("saved_views", { data: null, error: { message: "DB error" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/views/pinned");
     const response = await GET_PINNED(request);

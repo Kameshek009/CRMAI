@@ -31,6 +31,9 @@ import { POST } from "@/app/api/billing/webhook/route";
 import { headers } from "next/headers";
 import { stripe, getTierFromPriceId } from "@/lib/stripe/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import type Stripe from "stripe";
+
+type HeadersReturn = Awaited<ReturnType<typeof headers>>;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -46,11 +49,11 @@ function makeRequest(body = "raw-body-here"): NextRequest {
 }
 
 function mockHeaders(map: Record<string, string> = {}) {
-  vi.mocked(headers).mockResolvedValue(new Headers(map) as any);
+  vi.mocked(headers).mockResolvedValue(new Headers(map) as unknown as HeadersReturn);
 }
 
 function mockConstructEvent(event: Record<string, unknown>) {
-  vi.mocked(stripe.webhooks.constructEvent).mockReturnValue(event as any);
+  vi.mocked(stripe.webhooks.constructEvent).mockReturnValue(event as unknown as Stripe.Event);
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -65,7 +68,7 @@ describe("POST /api/billing/webhook", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     // Ensure the webhook secret env var is present for every test
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_secret";
@@ -174,7 +177,7 @@ describe("POST /api/billing/webhook", () => {
     // stripe.subscriptions.retrieve returns seat quantity
     vi.mocked(stripe.subscriptions.retrieve).mockResolvedValue({
       items: { data: [{ quantity: 5 }] },
-    } as any);
+    } as unknown as Stripe.Response<Stripe.Subscription>);
 
     // Team update succeeds
     setResult("teams", { data: null, error: null });
@@ -231,7 +234,7 @@ describe("POST /api/billing/webhook", () => {
     // No other active subscriptions for this customer
     vi.mocked(stripe.subscriptions.list).mockResolvedValue({
       data: [],
-    } as any);
+    } as unknown as Stripe.ApiList<Stripe.Subscription>);
 
     // Team update (downgrade) succeeds
     setResult("teams", { data: null, error: null });

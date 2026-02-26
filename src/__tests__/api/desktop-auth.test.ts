@@ -30,6 +30,10 @@ vi.mock("@/lib/logger", () => ({
 // ── Imports (after mocks) ────────────────────────────────────────────────────
 
 import { auth, currentUser, clerkClient } from "@clerk/nextjs/server";
+
+type AuthReturn = Awaited<ReturnType<typeof auth>>;
+type CurrentUserReturn = Awaited<ReturnType<typeof currentUser>>;
+type ClerkClientReturn = Awaited<ReturnType<typeof clerkClient>>;
 import {
   generateDesktopTokens,
   validateAccessToken,
@@ -84,7 +88,7 @@ describe("Desktop Auth API Routes", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -93,7 +97,7 @@ describe("Desktop Auth API Routes", () => {
 
   describe("POST /api/auth/desktop/authorize", () => {
     it("returns 401 when not authenticated", async () => {
-      vi.mocked(auth).mockResolvedValue({ userId: null } as any);
+      vi.mocked(auth).mockResolvedValue({ userId: null } as unknown as AuthReturn);
 
       const req = createJsonRequest("POST", "/api/auth/desktop/authorize", {
         state: "random-state",
@@ -107,14 +111,14 @@ describe("Desktop Auth API Routes", () => {
     });
 
     it("returns 400 when missing state", async () => {
-      vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-1" } as any);
+      vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-1" } as unknown as AuthReturn);
       vi.mocked(currentUser).mockResolvedValue({
         firstName: "Test",
         lastName: "User",
         username: "testuser",
         emailAddresses: [{ emailAddress: "test@example.com" }],
         imageUrl: "https://img.clerk.com/avatar.png",
-      } as any);
+      } as unknown as CurrentUserReturn);
 
       const req = createJsonRequest("POST", "/api/auth/desktop/authorize", {});
       const res = await authorizePost(req);
@@ -126,14 +130,14 @@ describe("Desktop Auth API Routes", () => {
     });
 
     it("authorizes successfully when account found", async () => {
-      vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-1" } as any);
+      vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-1" } as unknown as AuthReturn);
       vi.mocked(currentUser).mockResolvedValue({
         firstName: "Test",
         lastName: "User",
         username: "testuser",
         emailAddresses: [{ emailAddress: "test@example.com" }],
         imageUrl: "https://img.clerk.com/avatar.png",
-      } as any);
+      } as unknown as CurrentUserReturn);
 
       // Existing account found
       setResult("accounts", {
@@ -349,7 +353,7 @@ describe("Desktop Auth API Routes", () => {
           }),
         },
       };
-      vi.mocked(clerkClient).mockResolvedValue(mockClerkClient as any);
+      vi.mocked(clerkClient).mockResolvedValue(mockClerkClient as unknown as ClerkClientReturn);
 
       const req = createBearerRequest("GET", "/api/auth/desktop/me");
       const res = await meGet(req);

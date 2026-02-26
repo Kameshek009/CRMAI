@@ -59,7 +59,7 @@ describe("GET /api/crm/fields", () => {
       { id: "f2", entity_type: "deal", field_key: "source", label: "Source", field_type: "select" },
     ];
     setResult("field_definitions", { data: mockFields });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/fields");
     const response = await GET(request);
@@ -89,7 +89,7 @@ describe("GET /api/crm/fields", () => {
       { id: "f1", entity_type: "contact", field_key: "custom_score", label: "Score", field_type: "number" },
     ];
     setResult("field_definitions", { data: mockFields });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/fields?entity_type=contact");
     const response = await GET(request);
@@ -117,7 +117,7 @@ describe("POST /api/crm/fields", () => {
     const { supabase, setResult } = createMockSupabase();
     const newField = { id: "f-new", ...validFieldBody, team_id: "ws-test-456" };
     setResult("field_definitions", { data: newField, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/fields", validFieldBody);
     const response = await POST(request);
@@ -151,7 +151,7 @@ describe("POST /api/crm/fields", () => {
       data: null,
       error: { code: "23505", message: "duplicate key value" },
     });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("POST", "/api/crm/fields", validFieldBody);
     const response = await POST(request);
@@ -192,7 +192,7 @@ describe("PATCH /api/crm/fields/[id]", () => {
     const { supabase, setResult } = createMockSupabase();
     const updatedField = { id: UUID, label: "Updated Label", field_type: "number" };
     setResult("field_definitions", { data: updatedField, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", `/api/crm/fields/${UUID}`, {
       label: "Updated Label",
@@ -224,7 +224,7 @@ describe("PATCH /api/crm/fields/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("field_definitions", { data: null, error: { message: "Not found" } });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("PATCH", `/api/crm/fields/${UUID}`, {
       label: "Updated",
@@ -251,7 +251,7 @@ describe("DELETE /api/crm/fields/[id]", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("field_definitions", { data: null, error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("DELETE", `/api/crm/fields/${UUID}`);
     const response = await DELETE(request, mockParams(UUID));

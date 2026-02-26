@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { GET, POST } from "@/app/api/crm/companies/route";
 import { GET as GET_BY_ID, PATCH, DELETE } from "@/app/api/crm/companies/[id]/route";
 import { createMockSupabase } from "@/__tests__/helpers/mock-supabase";
@@ -32,7 +33,7 @@ describe("Companies API", () => {
     vi.mocked(requireFeatureLimit).mockResolvedValue(null);
     vi.mocked(parseListParams).mockReturnValue({});
     vi.mocked(applyListQuery).mockImplementation((query) => query);
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
     vi.mocked(computeChanges).mockReturnValue({});
   });
 
@@ -55,7 +56,7 @@ describe("Companies API", () => {
     });
 
     it("returns 401 when not authenticated", async () => {
-      vi.mocked(getTeamContext).mockResolvedValue(mockAuthError() as any);
+      vi.mocked(getTeamContext).mockResolvedValue(mockAuthError());
 
       const req = createTestRequest("GET", "/api/crm/companies");
       const res = await GET(req);
@@ -134,7 +135,7 @@ describe("Companies API", () => {
       });
 
       const mockSupabase = { from: mockFrom };
-      vi.mocked(createSupabaseAdmin).mockReturnValue(mockSupabase as any);
+      vi.mocked(createSupabaseAdmin).mockReturnValue(mockSupabase as unknown as SupabaseClient);
 
       const req = createTestRequest("GET", `/api/crm/companies/${companyId}`);
       const res = await GET_BY_ID(req, mockParams(companyId));
@@ -188,7 +189,7 @@ describe("Companies API", () => {
       const mock = createMockSupabase();
       supabase = mock.supabase;
       setResult = mock.setResult;
-      vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+      vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
       // First call returns old record, second returns updated
       let callCount = 0;

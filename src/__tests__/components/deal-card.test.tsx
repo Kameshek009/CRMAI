@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { DealCard, DealCardOverlay } from "@/components/crm/deal-card";
@@ -5,7 +6,7 @@ import type { DealForCard } from "@/components/crm/deal-card";
 
 // Mock next/link
 vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: any) => <a href={href} {...props}>{children}</a>,
+  default: ({ href, children, ...props }: { href: string; children?: React.ReactNode; [key: string]: unknown }) => <a href={href} {...props}>{children}</a>,
 }));
 
 // Mock dnd-kit

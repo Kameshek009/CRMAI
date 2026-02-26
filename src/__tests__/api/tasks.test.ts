@@ -30,7 +30,7 @@ describe("Tasks API", () => {
     vi.mocked(requireFeatureLimit).mockResolvedValue(null);
     vi.mocked(parseListParams).mockReturnValue({});
     vi.mocked(applyListQuery).mockImplementation((query) => query);
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   describe("GET /api/crm/tasks", () => {
@@ -52,7 +52,7 @@ describe("Tasks API", () => {
     });
 
     it("returns 401 when not authenticated", async () => {
-      vi.mocked(getTeamContext).mockResolvedValue(mockAuthError() as any);
+      vi.mocked(getTeamContext).mockResolvedValue(mockAuthError());
 
       const req = createTestRequest("GET", "/api/crm/tasks");
       const res = await GET(req);
@@ -194,7 +194,7 @@ describe("Tasks API", () => {
       const mock = createMockSupabase();
       supabase = mock.supabase;
       setResult = mock.setResult;
-      vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+      vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
       // First call returns null for existing task check
       mock.chain.single.mockImplementation(() => {

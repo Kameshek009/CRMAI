@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { StageColumn } from "@/components/pipeline/stage-column";
@@ -28,17 +29,17 @@ vi.mock("@dnd-kit/utilities", () => ({
 
 // Mock next/link
 vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: any) => <a href={href} {...props}>{children}</a>,
+  default: ({ href, children, ...props }: { href: string; children?: React.ReactNode; [key: string]: unknown }) => <a href={href} {...props}>{children}</a>,
 }));
 
 // Mock Button
 vi.mock("@/components/ui/button", () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Button: ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) => <button {...props}>{children}</button>,
 }));
 
 // Mock Input
 vi.mock("@/components/ui/input", () => ({
-  Input: (props: any) => <input {...props} />,
+  Input: (props: { className?: string; [key: string]: unknown }) => <input {...props} />,
 }));
 
 interface StageData {

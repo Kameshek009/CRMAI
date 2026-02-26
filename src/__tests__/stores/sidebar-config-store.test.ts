@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   useSidebarConfigStore,
@@ -6,7 +7,7 @@ import {
 } from "@/stores/sidebar-config-store";
 import type { SidebarConfig } from "@/types/sidebar";
 
-const FakeIcon = (() => null) as any;
+const FakeIcon = (() => null) as unknown as React.ComponentType;
 
 const staticItems = [
   { key: "contacts", labelKey: "nav.contacts", href: "/contacts", icon: FakeIcon },

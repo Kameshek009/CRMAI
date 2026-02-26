@@ -65,7 +65,7 @@ describe("GET /api/crm/stats", () => {
       data: [{ won_count: 8, won_value: 120000 }],
       error: null,
     });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/stats");
     const response = await GET_STATS(request);
@@ -176,7 +176,7 @@ describe("GET /api/crm/stats/analytics", () => {
       ],
       error: null,
     });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/stats/analytics");
     const response = await GET_ANALYTICS(request);
@@ -214,7 +214,7 @@ describe("GET /api/crm/stats/analytics", () => {
     setResult("activities", { data: [], error: null });
     setResult("crm_tasks", { data: [], error: null });
     setResult("companies", { data: [], error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/stats/analytics");
     const response = await GET_ANALYTICS(request);
@@ -265,7 +265,7 @@ describe("GET /api/crm/stats/forecast", () => {
       ],
       error: null,
     });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/stats/forecast");
     const response = await GET_FORECAST(request);
@@ -300,7 +300,7 @@ describe("GET /api/crm/stats/forecast", () => {
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: [], error: null });
     setResult("deal_stages", { data: [], error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/stats/forecast");
     const response = await GET_FORECAST(request);
@@ -334,7 +334,7 @@ describe("GET /api/crm/stats/revenue-trend", () => {
       ],
       error: null,
     });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/stats/revenue-trend");
     const response = await GET_REVENUE_TREND(request);
@@ -365,7 +365,7 @@ describe("GET /api/crm/stats/revenue-trend", () => {
 
     const { supabase, setResult } = createMockSupabase();
     setResult("deals", { data: [], error: null });
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
     const request = createTestRequest("GET", "/api/crm/stats/revenue-trend");
     const response = await GET_REVENUE_TREND(request);

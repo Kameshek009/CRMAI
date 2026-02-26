@@ -83,7 +83,7 @@ describe("Desktop Sync API Routes", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   // ════════════════════════════════════════════════════════════════════════════

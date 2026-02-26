@@ -16,6 +16,8 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { calculateTeamUsageStats } from "@/lib/usage/check";
 import { getCustomerBillingInfo } from "@/lib/stripe/customer";
 
+type AuthReturn = Awaited<ReturnType<typeof auth>>;
+
 describe("GET /api/billing/account", () => {
   let supabase: ReturnType<typeof createMockSupabase>["supabase"];
   let setResult: ReturnType<typeof createMockSupabase>["setResult"];
@@ -25,11 +27,11 @@ describe("GET /api/billing/account", () => {
     const mock = createMockSupabase();
     supabase = mock.supabase;
     setResult = mock.setResult;
-    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase as any);
+    vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: null } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: null } as unknown as AuthReturn);
 
     const req = createTestRequest("GET", "/api/billing/account");
     const res = await GET();
@@ -41,7 +43,7 @@ describe("GET /api/billing/account", () => {
   });
 
   it("returns 404 when account not found", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
 
     setResult("accounts", { data: null, error: { code: "PGRST116" } });
 
@@ -55,7 +57,7 @@ describe("GET /api/billing/account", () => {
   });
 
   it("returns 404 when no team found", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
 
     // Account found
     setResult("accounts", {
@@ -76,7 +78,7 @@ describe("GET /api/billing/account", () => {
   });
 
   it("returns billing data successfully", async () => {
-    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "clerk-user-123" } as unknown as AuthReturn);
 
     const mockAccount = {
       id: "acc-123",
@@ -137,8 +139,8 @@ describe("GET /api/billing/account", () => {
       error: null,
     });
 
-    vi.mocked(calculateTeamUsageStats).mockReturnValue(mockUsageStats as any);
-    vi.mocked(getCustomerBillingInfo).mockResolvedValue(mockStripeBilling as any);
+    vi.mocked(calculateTeamUsageStats).mockReturnValue(mockUsageStats as unknown as ReturnType<typeof calculateTeamUsageStats>);
+    vi.mocked(getCustomerBillingInfo).mockResolvedValue(mockStripeBilling as unknown as Awaited<ReturnType<typeof getCustomerBillingInfo>>);
 
     const req = createTestRequest("GET", "/api/billing/account");
     const res = await GET();

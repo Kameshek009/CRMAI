@@ -15,15 +15,15 @@ import type { SubscriptionTier, FeatureLimitKey } from "@/types";
  */
 function mockSupabaseCount(count: number) {
   const result = Promise.resolve({ count });
-  const chain: any = {
+  const chain: Record<string, unknown> = {
     select: vi.fn().mockReturnValue(undefined),
     eq: vi.fn().mockReturnValue(undefined),
   };
   // Each method returns the chain itself, but 'then' resolves to { count }
-  chain.select.mockImplementation(() => chain);
-  chain.eq.mockImplementation(() => chain);
-  chain.then = (resolve: any, reject?: any) => result.then(resolve, reject);
-  chain.catch = (reject: any) => result.catch(reject);
+  (chain.select as ReturnType<typeof vi.fn>).mockImplementation(() => chain);
+  (chain.eq as ReturnType<typeof vi.fn>).mockImplementation(() => chain);
+  chain.then = (resolve: (value: unknown) => unknown, reject?: (reason: unknown) => unknown) => result.then(resolve, reject);
+  chain.catch = (reject: (reason: unknown) => unknown) => result.catch(reject);
 
   const mockSupabase = { from: vi.fn(() => chain) };
   (createSupabaseAdmin as ReturnType<typeof vi.fn>).mockReturnValue(mockSupabase);
@@ -142,11 +142,11 @@ describe("checkFeatureLimit", () => {
 
   it("handles null count as 0", async () => {
     // Simulate Supabase returning null count
-    const chain: any = {
+    const chain: Record<string, unknown> = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
     };
-    chain.then = (resolve: any) => Promise.resolve({ count: null }).then(resolve);
+    chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve({ count: null }).then(resolve);
     chain.catch = vi.fn().mockReturnThis();
 
     const mockSupabase = { from: vi.fn(() => chain) };
