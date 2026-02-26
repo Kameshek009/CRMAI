@@ -1,8 +1,9 @@
 "use client";
 
+import { memo } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-export function ForecastChart({
+export const ForecastChart = memo(function ForecastChart({
   data,
 }: {
   data: Array<{ month: string; revenue: number }>;
@@ -50,4 +51,4 @@ export function ForecastChart({
       </ResponsiveContainer>
     </div>
   );
-}
+});

@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { HelpCircle, ChevronDown } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
 const faqKeys = ["q1", "q2", "q3", "q4", "q5", "q6", "q7"] as const;
 
-function FAQItem({ questionKey, index }: { questionKey: string; index: number }) {
+const FAQItem = memo(function FAQItem({ questionKey, index }: { questionKey: string; index: number }) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -64,7 +64,7 @@ function FAQItem({ questionKey, index }: { questionKey: string; index: number })
       </div>
     </motion.div>
   );
-}
+});
 
 export function FAQSection() {
   const ref = useRef<HTMLDivElement>(null);

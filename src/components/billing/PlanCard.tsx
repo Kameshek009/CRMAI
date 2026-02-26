@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +63,7 @@ function getTierConfig(t: (key: string, params?: Record<string, string | number>
   };
 }
 
-export function PlanCard({
+export const PlanCard = memo(function PlanCard({
   tier,
   currentTier,
   onSelect,
@@ -170,4 +171,4 @@ export function PlanCard({
       </CardFooter>
     </Card>
   );
-}
+});

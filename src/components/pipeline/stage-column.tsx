@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { DealCard, type DealForCard } from "@/components/crm/deal-card";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ interface StageColumnProps {
   onQuickAdd: (stageId: string, title: string) => Promise<void>;
 }
 
-export function StageColumn({
+export const StageColumn = memo(function StageColumn({
   stage,
   deals,
   totalValue,
@@ -262,4 +262,4 @@ export function StageColumn({
       )}
     </div>
   );
-}
+});

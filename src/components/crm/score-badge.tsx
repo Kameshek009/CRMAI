@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 
 interface ScoreBadgeProps {
@@ -8,7 +9,7 @@ interface ScoreBadgeProps {
   size?: "sm" | "md";
 }
 
-export function ScoreBadge({ score, label, size = "sm" }: ScoreBadgeProps) {
+export const ScoreBadge = memo(function ScoreBadge({ score, label, size = "sm" }: ScoreBadgeProps) {
   const getColor = () => {
     if (score >= 70) return { text: "text-emerald-600", bg: "bg-emerald-500/10", stroke: "#22c55e" };
     if (score >= 40) return { text: "text-amber-600", bg: "bg-amber-500/10", stroke: "#f59e0b" };
@@ -65,4 +66,4 @@ export function ScoreBadge({ score, label, size = "sm" }: ScoreBadgeProps) {
       </span>
     </div>
   );
-}
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -13,7 +14,7 @@ interface ChartWidgetProps {
   isEmpty?: boolean;
 }
 
-export function ChartWidget({ title, icon: Icon, children, emptyIcon: EmptyIcon, emptyMessage, isEmpty }: ChartWidgetProps) {
+export const ChartWidget = memo(function ChartWidget({ title, icon: Icon, children, emptyIcon: EmptyIcon, emptyMessage, isEmpty }: ChartWidgetProps) {
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -34,4 +35,4 @@ export function ChartWidget({ title, icon: Icon, children, emptyIcon: EmptyIcon,
       </CardContent>
     </Card>
   );
-}
+});

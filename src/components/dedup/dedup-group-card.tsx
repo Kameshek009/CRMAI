@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/lib/i18n";
 import { Users, Building2, Mail, Phone, Type } from "lucide-react";
@@ -25,7 +26,7 @@ const MATCH_COLORS: Record<string, string> = {
   domain: "bg-emerald-500/10 text-emerald-600 border-emerald-200/50",
 };
 
-export function DedupGroupCard({
+export const DedupGroupCard = memo(function DedupGroupCard({
   group,
   entityType,
   onClick,
@@ -77,4 +78,4 @@ export function DedupGroupCard({
       </Badge>
     </button>
   );
-}
+});

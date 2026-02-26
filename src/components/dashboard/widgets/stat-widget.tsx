@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ interface StatWidgetProps {
   trend?: { direction: "up" | "down"; text: string };
 }
 
-export function StatWidget({ href, label, value, formattedValue, subtitle, icon: Icon, trend }: StatWidgetProps) {
+export const StatWidget = memo(function StatWidget({ href, label, value, formattedValue, subtitle, icon: Icon, trend }: StatWidgetProps) {
   const animatedValue = useAnimatedNumber(value);
 
   return (
@@ -68,4 +68,4 @@ export function StatWidget({ href, label, value, formattedValue, subtitle, icon:
       </Card>
     </Link>
   );
-}
+});

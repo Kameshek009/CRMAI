@@ -1,7 +1,7 @@
 // FILE: stats-section.tsx
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { memo, useEffect, useState, useRef, useCallback } from "react";
 import { motion, useMotionValue, useTransform, animate, useInView, useSpring } from "framer-motion";
 import { useTranslation } from "@/lib/i18n";
 
@@ -107,7 +107,7 @@ function ProgressRing({
 }
 
 /* ---------- 3D tilt stat card ---------- */
-function StatCard({ stat, index, inView }: { stat: StatItem; index: number; inView: boolean }) {
+const StatCard = memo(function StatCard({ stat, index, inView }: { stat: StatItem; index: number; inView: boolean }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -186,7 +186,7 @@ function StatCard({ stat, index, inView }: { stat: StatItem; index: number; inVi
       </p>
     </motion.div>
   );
-}
+});
 
 export function StatsSection() {
   const ref = useRef<HTMLDivElement>(null);

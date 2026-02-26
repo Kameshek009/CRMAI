@@ -1,11 +1,13 @@
 "use client";
 
+import { memo } from "react";
+
 interface RoleBadgeProps {
   name: string;
   color: string;
 }
 
-export function RoleBadge({ name, color }: RoleBadgeProps) {
+export const RoleBadge = memo(function RoleBadge({ name, color }: RoleBadgeProps) {
   return (
     <span
       className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
@@ -18,4 +20,4 @@ export function RoleBadge({ name, color }: RoleBadgeProps) {
       {name}
     </span>
   );
-}
+});

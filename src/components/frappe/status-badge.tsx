@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import type { ContactStatus, DealStatus, CrmTaskStatus, CallLogStatus, ShowingStatus } from "@/types/crm";
 
@@ -57,7 +58,7 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export function StatusBadge({
+export const StatusBadge = memo(function StatusBadge({
   status,
   label,
   size = "sm",
@@ -83,4 +84,4 @@ export function StatusBadge({
       {displayLabel}
     </span>
   );
-}
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import {
   PieChart,
   Pie,
@@ -34,7 +35,7 @@ interface DashboardChartsProps {
   totalTasks: number;
 }
 
-export function DashboardCharts({ revenueTrend, taskStatusData, totalTasks }: DashboardChartsProps) {
+export const DashboardCharts = memo(function DashboardCharts({ revenueTrend, taskStatusData, totalTasks }: DashboardChartsProps) {
   const { t } = useTranslation();
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -163,4 +164,4 @@ export function DashboardCharts({ revenueTrend, taskStatusData, totalTasks }: Da
       </ChartWidget>
     </div>
   );
-}
+});

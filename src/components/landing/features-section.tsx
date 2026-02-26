@@ -1,7 +1,7 @@
 // FILE: features-section.tsx
 "use client";
 
-import { useRef, useCallback } from "react";
+import { memo, useRef, useCallback } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import {
   Brain,
@@ -24,7 +24,7 @@ interface BentoFeature {
 }
 
 /* ---------- mouse-following glow card with 3D tilt ---------- */
-function BentoCard({ feature, index, learnMoreText }: { feature: BentoFeature; index: number; learnMoreText: string }) {
+const BentoCard = memo(function BentoCard({ feature, index, learnMoreText }: { feature: BentoFeature; index: number; learnMoreText: string }) {
   const Icon = feature.icon;
   const cardRef = useRef<HTMLDivElement>(null);
   const glowX = useMotionValue(0);
@@ -152,7 +152,7 @@ function BentoCard({ feature, index, learnMoreText }: { feature: BentoFeature; i
       </div>
     </motion.div>
   );
-}
+});
 
 export function FeaturesSection() {
   const { t } = useTranslation();

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useTranslation } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,7 @@ function formatValue(value: number, type: string): string {
   return String(value);
 }
 
-export function GoalCard({
+export const GoalCard = memo(function GoalCard({
   goal,
   progress,
   onDelete,
@@ -112,4 +113,4 @@ export function GoalCard({
       </div>
     </div>
   );
-}
+});

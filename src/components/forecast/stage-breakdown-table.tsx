@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useTranslation } from "@/lib/i18n";
 
 interface StageData {
@@ -19,7 +20,7 @@ function formatMoney(value: number): string {
   return `$${value}`;
 }
 
-export function StageBreakdownTable({ stages }: { stages: StageData[] }) {
+export const StageBreakdownTable = memo(function StageBreakdownTable({ stages }: { stages: StageData[] }) {
   const { t } = useTranslation();
 
   if (stages.length === 0) {
@@ -67,4 +68,4 @@ export function StageBreakdownTable({ stages }: { stages: StageData[] }) {
       </table>
     </div>
   );
-}
+});

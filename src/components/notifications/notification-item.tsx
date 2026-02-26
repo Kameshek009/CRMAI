@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Handshake, CheckSquare, Users, Bell, Target, UserPlus, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +48,7 @@ function timeAgo(dateStr: string): string {
   return `${days}d`;
 }
 
-export function NotificationItem({
+export const NotificationItem = memo(function NotificationItem({
   notification,
   onClick,
 }: {
@@ -85,4 +86,4 @@ export function NotificationItem({
       )}
     </button>
   );
-}
+});

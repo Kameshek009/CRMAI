@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useCallback } from "react";
+import { memo, useRef, useCallback } from "react";
 import { motion, useMotionValue, useSpring, useTransform, useInView } from "framer-motion";
 import { Check, Sparkles, Zap, Crown, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ const item = {
   show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 200, damping: 22 } },
 };
 
-function PricingCard({ plan }: { plan: PlanCard }) {
+const PricingCard = memo(function PricingCard({ plan }: { plan: PlanCard }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const glowX = useMotionValue(0);
   const glowY = useMotionValue(0);
@@ -170,7 +170,7 @@ function PricingCard({ plan }: { plan: PlanCard }) {
       </ul>
     </motion.div>
   );
-}
+});
 
 export function PricingSection() {
   const { t } = useTranslation();

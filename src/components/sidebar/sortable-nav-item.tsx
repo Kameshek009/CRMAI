@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Eye, EyeOff } from "lucide-react";
@@ -15,7 +16,7 @@ interface SortableNavItemProps {
   onToggleVisibility: () => void;
 }
 
-export function SortableNavItem({ id, labelKey, icon: Icon, visible, onToggleVisibility }: SortableNavItemProps) {
+export const SortableNavItem = memo(function SortableNavItem({ id, labelKey, icon: Icon, visible, onToggleVisibility }: SortableNavItemProps) {
   const { t } = useTranslation();
   const {
     attributes,
@@ -58,4 +59,4 @@ export function SortableNavItem({ id, labelKey, icon: Icon, visible, onToggleVis
       </button>
     </div>
   );
-}
+});

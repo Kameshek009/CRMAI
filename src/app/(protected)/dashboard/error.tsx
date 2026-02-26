@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { logger } from "@/lib/logger";
 
 export default function DashboardError({
   error,
@@ -13,7 +14,7 @@ export default function DashboardError({
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.error(error);
+    logger.error("DashboardError", "Dashboard error", error);
   }, [error]);
 
   return (

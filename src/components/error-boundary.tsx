@@ -4,6 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { logger } from "@/lib/logger";
 
 function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () => void }) {
   const { t } = useTranslation();
@@ -47,7 +48,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    logger.error("ErrorBoundary", "Caught an error", { error, errorInfo });
   }
 
   handleReset = () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
@@ -23,7 +24,7 @@ export interface DealForCard {
 
 // ── Pure presentation (no hooks) ────────────────────────────────────────
 
-function DealCardInner({
+const DealCardInner = memo(function DealCardInner({
   deal,
   dragHandle,
   className,
@@ -121,7 +122,7 @@ function DealCardInner({
       </div>
     </Card>
   );
-}
+});
 
 // ── Draggable wrapper (uses hooks) ──────────────────────────────────────
 

@@ -1,7 +1,7 @@
 // FILE: testimonials-section.tsx
 "use client";
 
-import { useRef, useCallback } from "react";
+import { memo, useRef, useCallback } from "react";
 import { motion, useInView, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
@@ -16,7 +16,7 @@ interface Testimonial {
   stars: number;
 }
 
-function TestimonialCard({ t }: { t: Testimonial }) {
+const TestimonialCard = memo(function TestimonialCard({ t }: { t: Testimonial }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -95,7 +95,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
       </div>
     </motion.div>
   );
-}
+});
 
 function TestimonialMarquee({ reverse = false, speed = 40, testimonials }: { reverse?: boolean; speed?: number; testimonials: Testimonial[] }) {
   const half1 = testimonials.slice(0, 4);
