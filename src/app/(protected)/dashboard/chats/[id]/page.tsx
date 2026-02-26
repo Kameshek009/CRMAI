@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { useAccount } from '@/contexts/account-context';
+import { logger } from '@/lib/logger';
 import { AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -91,7 +92,7 @@ export default function ChatDetailPage() {
         lastSSETimestamp.current = msgs[msgs.length - 1].created_at;
       }
     } catch (err) {
-      console.error('Error fetching chat:', err);
+      logger.error('ChatDetailPage', 'Error fetching chat:', err);
       toast.error(t('chat.failedToLoad'));
     } finally {
       setIsLoading(false);
@@ -137,7 +138,7 @@ export default function ChatDetailPage() {
             return [...prev, newMessage];
           });
         } catch (err) {
-          console.error('[Chat] Failed to parse SSE message:', err);
+          logger.error('ChatDetailPage', 'Failed to parse SSE message:', err);
         }
       });
 
@@ -233,7 +234,7 @@ export default function ChatDetailPage() {
         lastSSETimestamp.current = result.message.created_at;
       }
     } catch (err) {
-      console.error('Error sending message:', err);
+      logger.error('ChatDetailPage', 'Error sending message:', err);
       toast.error(t('chat.failedToSend'));
       setMessages((prev) => prev.filter((m) => m.local_id !== localId));
       setIsSending(false);
@@ -277,7 +278,7 @@ export default function ChatDetailPage() {
           if (aiJson.resetsAt) setRateLimitResetsAt(aiJson.resetsAt);
           aiContent = t('chat.dailyLimitMessage');
         } else {
-          console.error('[Chat AI] Error response:', aiJson);
+          logger.error('ChatDetailPage', 'AI error response:', aiJson);
           aiContent = t('chat.aiError');
         }
 
@@ -391,12 +392,12 @@ export default function ChatDetailPage() {
                 }
               }
             } catch (notifErr) {
-              console.error('[Chat] notification save error:', notifErr);
+              logger.error('ChatDetailPage', 'Notification save error:', notifErr);
             }
           }
         }
       } catch (err) {
-        console.error('[Chat AI] Error:', err);
+        logger.error('ChatDetailPage', 'AI error:', err);
         const errorContent = err instanceof DOMException && err.name === 'AbortError'
           ? t('chat.aiTimeout')
           : t('chat.aiError');
@@ -450,7 +451,7 @@ export default function ChatDetailPage() {
       toast.success(t('common.delete'));
       router.push('/dashboard/chats');
     } catch (err) {
-      console.error('Error deleting chat:', err);
+      logger.error('ChatDetailPage', 'Error deleting chat:', err);
       toast.error(t('common.error'));
     }
   }, [chatId, router]);

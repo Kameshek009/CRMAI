@@ -11,6 +11,7 @@ import {
   ReactNode,
 } from "react";
 import { useAccount } from "@/contexts/account-context";
+import { logger } from "@/lib/logger";
 import { supabase } from "@/lib/supabase/client";
 import type { WorkspacePermissions, FixedRole } from "@/types/team";
 import { FIXED_ROLE_PERMISSIONS, tierUsesFixedRoles } from "@/types/team";
@@ -215,7 +216,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       setIsOwner(data.isDirector || false);
       setMemberId(data.memberId || null);
     } catch (err) {
-      console.error("[WorkspaceContext] Error loading workspaces:", err);
+      logger.error('WorkspaceContext', 'Error loading workspaces:', err);
       setError(err instanceof Error ? err : new Error("Unknown error"));
     } finally {
       setIsLoading(false);
@@ -233,7 +234,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
 
       await fetchWorkspaces();
     } catch (err) {
-      console.error("[WorkspaceContext] Error switching workspace:", err);
+      logger.error('WorkspaceContext', 'Error switching workspace:', err);
       throw err;
     }
   }, [fetchWorkspaces]);
@@ -287,7 +288,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       )
       .subscribe((status: string, err?: Error) => {
         if (err) {
-          console.error("[WorkspaceContext] Realtime subscription error:", err.message);
+          logger.error('WorkspaceContext', 'Realtime subscription error:', err.message);
         }
       });
 

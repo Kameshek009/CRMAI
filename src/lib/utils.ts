@@ -11,15 +11,15 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format number with commas
  */
-export function formatNumber(num: number): string {
-  return new Intl.NumberFormat("en-US").format(num);
+export function formatNumber(num: number, locale = "en-US"): string {
+  return new Intl.NumberFormat(locale).format(num);
 }
 
 /**
  * Format number as compact (e.g., 10K, 1M)
  */
-export function formatCompact(num: number): string {
-  return new Intl.NumberFormat("en-US", {
+export function formatCompact(num: number, locale = "en-US"): string {
+  return new Intl.NumberFormat(locale, {
     notation: "compact",
     compactDisplay: "short",
   }).format(num);
@@ -28,10 +28,10 @@ export function formatCompact(num: number): string {
 /**
  * Format currency
  */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
+export function formatCurrency(amount: number, locale = "en-US", currency = "USD"): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "USD",
+    currency,
     minimumFractionDigits: 0,
   }).format(amount);
 }
@@ -47,7 +47,7 @@ export function calculatePercentage(used: number, total: number): number {
 /**
  * Format relative time
  */
-export function formatRelativeTime(date: Date): string {
+export function formatRelativeTime(date: Date, locale = "en-US"): string {
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const seconds = Math.floor(diff / 1000);
@@ -60,7 +60,7 @@ export function formatRelativeTime(date: Date): string {
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
 
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
   });

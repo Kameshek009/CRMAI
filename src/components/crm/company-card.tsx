@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -35,7 +36,7 @@ function getHealthLevel(score: number): string {
   return "poor";
 }
 
-export function CompanyCard({
+export const CompanyCard = memo(function CompanyCard({
   id,
   name,
   industry,
@@ -110,4 +111,4 @@ export function CompanyCard({
       </div>
     </div>
   );
-}
+});

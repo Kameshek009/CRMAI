@@ -12,6 +12,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { logger } from '@/lib/logger';
 
 type AgentMode = 'chat' | 'agent' | 'auto';
 
@@ -77,7 +78,7 @@ export function useAgentStatus(): UseAgentStatusReturn {
       }
     } catch (err) {
       if (!mountedRef.current) return;
-      console.error('[useAgentStatus] Fetch error:', err);
+      logger.error('useAgentStatus', 'Fetch error:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch status'));
     } finally {
       if (mountedRef.current) {
@@ -101,7 +102,7 @@ export function useAgentStatus(): UseAgentStatusReturn {
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
-        console.log('[useAgentStatus] SSE connected');
+        logger.info('useAgentStatus', 'SSE connected');
         // Stop polling when SSE is connected
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
@@ -122,12 +123,12 @@ export function useAgentStatus(): UseAgentStatusReturn {
           setError(null);
           setIsLoading(false);
         } catch (err) {
-          console.error('[useAgentStatus] Failed to parse SSE event:', err);
+          logger.error('useAgentStatus', 'Failed to parse SSE event:', err);
         }
       });
 
       eventSource.addEventListener('connected', (event) => {
-        console.log('[useAgentStatus] SSE stream ready');
+        logger.info('useAgentStatus', 'SSE stream ready');
         // Parse initial status from connected event
         try {
           const data = JSON.parse(event.data);
@@ -147,7 +148,7 @@ export function useAgentStatus(): UseAgentStatusReturn {
       });
 
       eventSource.onerror = () => {
-        console.warn('[useAgentStatus] SSE connection error, falling back to polling');
+        logger.warn('useAgentStatus', 'SSE connection error, falling back to polling');
         eventSource.close();
         eventSourceRef.current = null;
 
@@ -166,7 +167,7 @@ export function useAgentStatus(): UseAgentStatusReturn {
         }, SSE_RECONNECT_DELAY_MS);
       };
     } catch (err) {
-      console.error('[useAgentStatus] Failed to create EventSource:', err);
+      logger.error('useAgentStatus', 'Failed to create EventSource:', err);
       // Fall back to polling
       if (!pollIntervalRef.current) {
         pollIntervalRef.current = setInterval(fetchStatus, POLL_INTERVAL_MS);

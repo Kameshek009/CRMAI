@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { loadStripe, StripeEmbeddedCheckout } from "@stripe/stripe-js";
 import { AlertCircle, CheckCircle, X, RefreshCw, Loader2 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { logger } from "@/lib/logger";
 
 // Load Stripe outside of component to avoid recreating on every render
 const stripePromise = loadStripe(
@@ -92,7 +93,7 @@ export function EmbeddedCheckout({
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), CHECKOUT_TIMEOUT_MS);
 
-    console.log("[Checkout] Fetching client secret from:", endpoint, body);
+    logger.info('EmbeddedCheckout', 'Fetching client secret from:', { endpoint, body });
 
     try {
       const response = await fetch(endpoint, {
@@ -106,7 +107,7 @@ export function EmbeddedCheckout({
 
       // Check if response is ok before parsing JSON
       if (!response.ok) {
-        console.error("[Checkout] API error:", response.status, response.statusText);
+        logger.error('EmbeddedCheckout', 'API error:', { status: response.status, statusText: response.statusText });
         // Try to get error message from response
         const text = await response.text();
         let errorMessage = `Server error (${response.status})`;
@@ -123,7 +124,7 @@ export function EmbeddedCheckout({
       }
 
       const data = await response.json();
-      console.log("[Checkout] API response:", { success: data.success, hasClientSecret: !!data.data?.clientSecret });
+      logger.info('EmbeddedCheckout', 'API response:', { success: data.success, hasClientSecret: !!data.data?.clientSecret });
 
       if (!data.success) {
         throw new Error(data.error || "Failed to create checkout session");
@@ -136,7 +137,7 @@ export function EmbeddedCheckout({
       return data.data.clientSecret;
     } catch (error) {
       clearTimeout(timeoutId);
-      console.error("[Checkout] fetchClientSecret error:", error);
+      logger.error('EmbeddedCheckout', 'fetchClientSecret error:', error);
       if (error instanceof Error && error.name === "AbortError") {
         throw new Error("Request timed out. Please check your connection and try again.");
       }
@@ -157,12 +158,12 @@ export function EmbeddedCheckout({
         setState("loading");
         setErrorMessage(null);
 
-        console.log("[Checkout] Starting initialization for:", type, itemId);
+        logger.info('EmbeddedCheckout', 'Starting initialization for:', { type, itemId });
 
         // Set a timeout for the entire initialization process
         timeoutId = setTimeout(() => {
           if (mounted && !initCompleted) {
-            console.error("[Checkout] Initialization timed out after", CHECKOUT_TIMEOUT_MS, "ms");
+            logger.error('EmbeddedCheckout', 'Initialization timed out after ms:', CHECKOUT_TIMEOUT_MS);
             setErrorMessage("Checkout is taking too long to load. Please try again.");
             setState("error");
             onError?.("Checkout timeout");
@@ -170,31 +171,31 @@ export function EmbeddedCheckout({
         }, CHECKOUT_TIMEOUT_MS);
 
         // Load Stripe
-        console.log("[Checkout] Loading Stripe.js...");
+        logger.info('EmbeddedCheckout', 'Loading Stripe.js...');
         const stripe = await stripePromise;
         if (!stripe) {
           throw new Error("Failed to load payment system. Please refresh and try again.");
         }
-        console.log("[Checkout] Stripe.js loaded successfully");
+        logger.info('EmbeddedCheckout', 'Stripe.js loaded successfully');
         if (!mounted) return;
 
         // Fetch client secret
-        console.log("[Checkout] Fetching client secret...");
+        logger.info('EmbeddedCheckout', 'Fetching client secret...');
         const clientSecret = await fetchClientSecret();
-        console.log("[Checkout] Client secret received");
+        logger.info('EmbeddedCheckout', 'Client secret received');
         if (!mounted) return;
 
         // Initialize embedded checkout
-        console.log("[Checkout] Initializing Stripe Embedded Checkout...");
+        logger.info('EmbeddedCheckout', 'Initializing Stripe Embedded Checkout...');
         const embeddedCheckout = await stripe.initEmbeddedCheckout({
           clientSecret,
           onComplete: () => {
-            console.log("[Checkout] Payment completed!");
+            logger.info('EmbeddedCheckout', 'Payment completed!');
             setState("complete");
             onComplete?.("completed");
           },
         });
-        console.log("[Checkout] Stripe Embedded Checkout initialized");
+        logger.info('EmbeddedCheckout', 'Stripe Embedded Checkout initialized');
 
         if (!mounted) {
           embeddedCheckout.destroy();
@@ -204,23 +205,23 @@ export function EmbeddedCheckout({
         embeddedCheckoutRef.current = embeddedCheckout;
 
         // Mount to container - container should always exist now
-        console.log("[Checkout] Mounting to container...");
+        logger.info('EmbeddedCheckout', 'Mounting to container...');
         if (!checkoutRef.current) {
           // This shouldn't happen now that container is always rendered
-          console.error("[Checkout] Container ref is null - waiting for next render");
+          logger.error('EmbeddedCheckout', 'Container ref is null - waiting for next render');
           throw new Error("Checkout container not ready. Please try again.");
         }
         embeddedCheckout.mount(checkoutRef.current);
         initCompleted = true;
         if (timeoutId) clearTimeout(timeoutId);
         setState("ready");
-        console.log("[Checkout] Checkout is ready!");
+        logger.info('EmbeddedCheckout', 'Checkout is ready!');
       } catch (error) {
         if (!mounted) return;
         initCompleted = true;
         if (timeoutId) clearTimeout(timeoutId);
 
-        console.error("[Checkout] Initialization failed:", error);
+        logger.error('EmbeddedCheckout', 'Initialization failed:', error);
         const message =
           error instanceof Error ? error.message : "Failed to load checkout";
         setErrorMessage(message);

@@ -60,7 +60,7 @@ export default clerkMiddleware(async (auth, request) => {
     // Protect all other routes with Clerk session auth
     await auth.protect();
   } catch {
-    // Prevent MIDDLEWARE_INVOCATION_FAILED - redirect to sign-in on errors
+    // Prevent PROXY_INVOCATION_FAILED - redirect to sign-in on errors
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 });

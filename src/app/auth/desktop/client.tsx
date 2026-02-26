@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 interface DesktopAuthClientProps {
   state: string;
@@ -63,7 +64,7 @@ export default function DesktopAuthClient({
         setIsAuthorizing(false);
       }, 3000);
     } catch (err) {
-      console.error("Authorization error:", err);
+      logger.error('DesktopAuthClient', 'Authorization error:', err);
       setError(err instanceof Error ? err.message : "Authorization failed");
       setIsAuthorizing(false);
     }

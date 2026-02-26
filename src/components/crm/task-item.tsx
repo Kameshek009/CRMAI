@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ const priorityConfig: Record<string, { color: string; badge: string; dot: string
   low: { color: "border-gray-200 dark:border-gray-800", badge: "bg-gray-500/10 text-gray-600 border-gray-200 dark:border-gray-800", dot: "bg-gray-400" },
 };
 
-export function TaskItem({
+export const TaskItem = memo(function TaskItem({
   id,
   title,
   type,
@@ -99,7 +100,7 @@ export function TaskItem({
               isOverdue ? "text-red-600 font-semibold" : "text-muted-foreground"
             )}>
               <Calendar className="size-3" />
-              {new Date(dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              {new Date(dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
               {isOverdue && <span className="text-[9px] uppercase tracking-wide ml-1">overdue</span>}
             </span>
           )}
@@ -131,4 +132,4 @@ export function TaskItem({
       </div>
     </div>
   );
-}
+});

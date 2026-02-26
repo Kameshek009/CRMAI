@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -38,7 +39,7 @@ const avatarGradients: Record<string, string> = {
   churned: "from-red-500/20 to-orange-500/20",
 };
 
-export function ContactCard({
+export const ContactCard = memo(function ContactCard({
   id,
   firstName,
   lastName,
@@ -131,4 +132,4 @@ export function ContactCard({
       </Link>
     </div>
   );
-}
+});

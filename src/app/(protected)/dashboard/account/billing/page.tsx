@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 import { PageContainer, PageHeader } from "@/components/dashboard/page-container";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ function BillingPageContent() {
         window.location.href = result.data.url;
       }
     } catch (err) {
-      console.error("Checkout error:", err);
+      logger.error('BillingPage', 'Checkout error:', err);
       setError(err instanceof Error ? err.message : t("billing.page.checkoutFailed"));
       setLoadingTier(null);
     }

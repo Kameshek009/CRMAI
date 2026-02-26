@@ -7,6 +7,7 @@
 import { NextRequest } from "next/server";
 import { verifyToken } from "@clerk/backend";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 export interface MobileAuthResult {
   success: true;
@@ -46,7 +47,7 @@ export async function verifyMobileAuth(
     });
     clerkUserId = verified.sub;
   } catch (verifyError) {
-    console.error("[mobile/auth] Token verification failed:", verifyError);
+    logger.error('MobileAuth', 'Token verification failed:', verifyError);
     return {
       success: false,
       error: "Invalid token",

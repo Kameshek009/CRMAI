@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { logger } from "@/lib/logger";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -144,7 +145,7 @@ export function CustomerBillingCard({
         window.open(data.data.url, "_blank");
       }
     } catch (error) {
-      console.error("Failed to open billing portal:", error);
+      logger.error('CustomerBillingCard', 'Failed to open billing portal:', error);
     } finally {
       setIsPortalLoading(false);
     }

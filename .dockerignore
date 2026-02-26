@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+.env
+.env.*
+*.md
+.vscode
+.idea
+.DS_Store
+coverage
+.vercel
+src/__tests__
+vitest.config.*

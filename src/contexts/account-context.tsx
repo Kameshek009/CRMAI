@@ -11,6 +11,7 @@ import {
   ReactNode,
 } from "react";
 import { useUser } from "@clerk/nextjs";
+import { logger } from "@/lib/logger";
 import { supabase } from "@/lib/supabase/client";
 import type { SubscriptionTier } from "@/types";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -216,7 +217,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
         throw new Error("No account data in response");
       }
     } catch (err) {
-      console.error("[AccountContext] Error loading account:", err);
+      logger.error('AccountContext', 'Error loading account:', err);
       setError(err instanceof Error ? err : new Error("Unknown error"));
     } finally {
       setIsLoading(false);
@@ -281,7 +282,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
       .subscribe((status: string, err?: Error) => {
         setIsConnected(status === "SUBSCRIBED");
         if (err) {
-          console.error("[AccountContext] Realtime subscription error:", err.message);
+          logger.error('AccountContext', 'Realtime subscription error:', err.message);
         }
       });
 

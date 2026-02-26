@@ -10,3 +10,9 @@
 /.clerk/
 node_modules
 .vercel
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

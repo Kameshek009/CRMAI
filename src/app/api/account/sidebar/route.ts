@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { sidebarConfigSchema } from "@/lib/validations/sidebar";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   const { userId } = await auth();
@@ -19,7 +20,7 @@ export async function GET() {
     .single();
 
   if (accountError) {
-    console.error("[sidebar GET] DB error:", accountError.message);
+    logger.error('SidebarRoute', 'GET DB error:', accountError.message);
     return NextResponse.json({ success: false, error: accountError.message }, { status: 500 });
   }
 
@@ -61,7 +62,7 @@ export async function PATCH(request: Request) {
     .eq("clerk_user_id", userId);
 
   if (error) {
-    console.error("[sidebar PATCH] DB error:", error.message);
+    logger.error('SidebarRoute', 'PATCH DB error:', error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 
@@ -80,7 +81,7 @@ export async function DELETE() {
     .eq("clerk_user_id", userId);
 
   if (error) {
-    console.error("[sidebar DELETE] DB error:", error.message);
+    logger.error('SidebarRoute', 'DELETE DB error:', error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 

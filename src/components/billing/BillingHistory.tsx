@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { logger } from "@/lib/logger";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -167,11 +168,11 @@ export function ManageSubscriptionButton({
         // Use location.href instead of window.open to avoid popup blockers
         window.location.href = data.data.url;
       } else {
-        console.error("Portal error:", data.error || "No URL returned");
+        logger.error('BillingHistory', 'Portal error:', data.error || 'No URL returned');
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Failed to open billing portal:", error);
+      logger.error('BillingHistory', 'Failed to open billing portal:', error);
       setIsLoading(false);
     }
   };

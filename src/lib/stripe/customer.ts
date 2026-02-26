@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { stripe, createCustomer } from "./server";
+import { logger } from "@/lib/logger";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,7 +36,7 @@ export async function getOrCreateStripeCustomer(
         return existingStripeCustomerId;
       }
     } catch {
-      console.log(`Customer ${existingStripeCustomerId} not found, creating new one`);
+      logger.info('StripeCustomer', `Customer ${existingStripeCustomerId} not found, creating new one`);
     }
   }
 
@@ -202,7 +203,7 @@ export async function getCustomerBillingInfo(
       balance: customer.balance || 0,
     };
   } catch (error) {
-    console.error("Error fetching customer billing info:", error);
+    logger.error('StripeCustomer', 'Error fetching customer billing info:', error);
     return null;
   }
 }

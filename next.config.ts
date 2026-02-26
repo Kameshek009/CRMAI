@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: [
@@ -37,11 +39,11 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.clerk.accounts.dev https://*.clerk.com",
+              "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.clerk.accounts.dev https://*.clerk.com https://*.sentry.io",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://img.clerk.com https://*.stripe.com",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.clerk.accounts.dev https://*.clerk.com https://api.stripe.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.clerk.accounts.dev https://*.clerk.com https://api.stripe.com https://*.ingest.sentry.io",
               "frame-src 'self' https://js.stripe.com https://*.clerk.accounts.dev https://*.clerk.com",
               "worker-src 'self' blob:",
               "object-src 'none'",
@@ -56,4 +58,15 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Disable source map upload (no auth token needed)
+  sourcemaps: {
+    disable: true,
+  },
+
+  // Disable Sentry telemetry
+  telemetry: false,
+
+  // Suppress logs during build
+  silent: true,
+});
