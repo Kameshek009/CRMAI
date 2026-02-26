@@ -1,18 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
+import { requirePermission } from "@/lib/crm/team-helpers";
 import { createRoleSchema } from "@/lib/crm/team-validation";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const GET = withApiHandler(
+  { logTag: "TeamRoles" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
@@ -23,37 +19,25 @@ export async function GET(
       .eq("team_id", id)
       .order("priority", { ascending: false });
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data: roles });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const POST = withApiHandler(
+  {
+    bodySchema: createRoleSchema,
+    logTag: "TeamRoles",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    const permError = requirePermission(ctx.permissions, "team_settings", "manage", ctx.isOwner);
     if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = createRoleSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
 
     const supabase = createSupabaseAdmin();
 
@@ -75,21 +59,17 @@ export async function POST(
       .from("team_roles")
       .insert({
         team_id: id,
-        name: parsed.data.name,
-        color: parsed.data.color || "#6b7280",
-        priority: parsed.data.priority,
-        permissions: parsed.data.permissions || defaultPermissions,
+        name: body.name,
+        color: body.color || "#6b7280",
+        priority: body.priority,
+        permissions: body.permissions || defaultPermissions,
         is_system: false,
       })
       .select()
       .single();
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

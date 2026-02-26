@@ -1,18 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
+import { requirePermission } from "@/lib/crm/team-helpers";
 import { sidebarConfigSchema } from "@/lib/validations/sidebar";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const GET = withApiHandler(
+  { logTag: "SidebarDefaults" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
@@ -26,32 +22,22 @@ export async function GET(
       success: true,
       data: team?.settings?.sidebar_defaults || null,
     });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const PATCH = withApiHandler(
+  {
+    bodySchema: sidebarConfigSchema,
+    logTag: "SidebarDefaults",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    const permError = requirePermission(ctx.permissions, "team_settings", "manage", ctx.isOwner);
     if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = sidebarConfigSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid sidebar config" }, { status: 400 });
-    }
 
     const supabase = createSupabaseAdmin();
 
@@ -63,37 +49,28 @@ export async function PATCH(
       .single();
 
     const currentSettings = team?.settings || {};
-    const newSettings = { ...currentSettings, sidebar_defaults: parsed.data };
+    const newSettings = { ...currentSettings, sidebar_defaults: body };
 
     const { error: dbError } = await supabase
       .from("teams")
       .update({ settings: newSettings })
       .eq("id", id);
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
-    return NextResponse.json({ success: true, data: parsed.data });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ success: true, data: body });
   }
-}
+);
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const DELETE = withApiHandler(
+  { logTag: "SidebarDefaults" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    const permError = requirePermission(ctx.permissions, "team_settings", "manage", ctx.isOwner);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
@@ -112,12 +89,8 @@ export async function DELETE(
       .update({ settings: currentSettings })
       .eq("id", id);
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

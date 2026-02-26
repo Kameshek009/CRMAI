@@ -1,20 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
+import { requirePermission } from "@/lib/crm/team-helpers";
 import { updateTeamSchema } from "@/lib/crm/team-validation";
 import { cancelSubscriptionImmediately } from "@/lib/stripe/server";
 import { logger } from "@/lib/logger";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const GET = withApiHandler(
+  { logTag: "Team" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
@@ -25,66 +21,45 @@ export async function GET(
       .eq("id", id)
       .single();
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data: team });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const PATCH = withApiHandler(
+  {
+    bodySchema: updateTeamSchema,
+    logTag: "Team",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    const permError = requirePermission(ctx.permissions, "team_settings", "manage", ctx.isOwner);
     if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = updateTeamSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
 
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("teams")
-      .update(parsed.data)
+      .update(body)
       .eq("id", id)
       .select()
       .single();
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id || !context.isDirector) {
+export const DELETE = withApiHandler(
+  { logTag: "Team" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id || !ctx.isOwner) {
       return NextResponse.json({ success: false, error: "Only the director can delete a team" }, { status: 403 });
     }
 
@@ -111,9 +86,7 @@ export async function DELETE(
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     // For each member whose current_team_id points to the deleted team,
     // auto-switch them to their next available active team
@@ -152,7 +125,5 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

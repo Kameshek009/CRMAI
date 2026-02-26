@@ -1,59 +1,45 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getWorkspaceContext } from "@/lib/crm/team-helpers";
+import { NextResponse } from "next/server";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { updateGoalSchema } from "@/lib/crm/validation";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { context, error } = await getWorkspaceContext();
-  if (error) return error;
+export const PATCH = withApiHandler(
+  {
+    bodySchema: updateGoalSchema,
+    logTag: "Goals",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
+    const supabase = createSupabaseAdmin();
 
-  const { id } = await params;
-  const body = await request.json();
-  const parsed = updateGoalSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
+    const { data, error: dbError } = await supabase
+      .from("goals")
+      .update({ ...body, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .eq("team_id", ctx.workspaceId)
+      .select()
+      .single();
+
+    if (dbError || !data) throw new ApiError("Failed to update goal", 500);
+
+    return NextResponse.json({ success: true, data });
   }
+);
 
-  const supabase = createSupabaseAdmin();
+export const DELETE = withApiHandler(
+  { logTag: "Goals" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
+    const supabase = createSupabaseAdmin();
 
-  const { data, error: dbError } = await supabase
-    .from("goals")
-    .update({ ...parsed.data, updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("team_id", context.workspaceId)
-    .select()
-    .single();
+    const { error: dbError } = await supabase
+      .from("goals")
+      .update({ is_active: false })
+      .eq("id", id)
+      .eq("team_id", ctx.workspaceId);
 
-  if (dbError || !data) {
-    return NextResponse.json({ success: false, error: "Failed to update goal" }, { status: 500 });
+    if (dbError) throw new ApiError("Failed to delete goal", 500);
+
+    return NextResponse.json({ success: true });
   }
-
-  return NextResponse.json({ success: true, data });
-}
-
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { context, error } = await getWorkspaceContext();
-  if (error) return error;
-
-  const { id } = await params;
-
-  const supabase = createSupabaseAdmin();
-
-  const { error: dbError } = await supabase
-    .from("goals")
-    .update({ is_active: false })
-    .eq("id", id)
-    .eq("team_id", context.workspaceId);
-
-  if (dbError) {
-    return NextResponse.json({ success: false, error: "Failed to delete goal" }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
-}
+);

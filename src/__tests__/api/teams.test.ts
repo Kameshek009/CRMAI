@@ -17,10 +17,14 @@ vi.mock("@/lib/crm/helpers", () => ({
 }));
 
 // Mock team helpers for [id] routes
-vi.mock("@/lib/crm/team-helpers", () => ({
-  getTeamContext: vi.fn(),
-  requirePermission: vi.fn(),
-}));
+vi.mock("@/lib/crm/team-helpers", () => {
+  const f = vi.fn();
+  return {
+    getTeamContext: f,
+    getWorkspaceContext: f,
+    requirePermission: vi.fn(),
+  };
+});
 
 // Mock Stripe
 vi.mock("@/lib/stripe/server", () => ({
@@ -245,7 +249,7 @@ describe("DELETE /api/teams/[id]", () => {
   });
 
   it("returns 403 if not director", async () => {
-    const ctx = mockTeamContext({ isDirector: false });
+    const ctx = mockTeamContext({ isDirector: false, isOwner: false });
     vi.mocked(getTeamContext).mockResolvedValue(ctx as any);
 
     const req = createTestRequest("DELETE", "/api/teams/ws-test-456");

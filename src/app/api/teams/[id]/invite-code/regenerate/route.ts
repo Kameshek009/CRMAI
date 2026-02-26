@@ -1,21 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
+import { requirePermission } from "@/lib/crm/team-helpers";
 
-export async function POST(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
-    if (context.teamId !== id) {
+export const POST = withApiHandler(
+  { logTag: "InviteCode" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    const permError = requirePermission(ctx.permissions, "team_settings", "manage", ctx.isOwner);
     if (permError) return permError;
 
     const supabase = createSupabaseAdmin();
@@ -32,12 +28,8 @@ export async function POST(
       .select("invite_code")
       .single();
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

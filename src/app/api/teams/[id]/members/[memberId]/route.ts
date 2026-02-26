@@ -1,29 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
+import { requirePermission } from "@/lib/crm/team-helpers";
 import { updateMemberRoleSchema } from "@/lib/crm/team-validation";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string; memberId: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id, memberId } = await params;
-    if (context.teamId !== id) {
+export const PATCH = withApiHandler(
+  {
+    bodySchema: updateMemberRoleSchema,
+    logTag: "TeamMembers",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id, memberId } = routeParams;
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
-    const permError = requirePermission(context.permissions, "team_settings", "manage", context.isDirector);
+    const permError = requirePermission(ctx.permissions, "team_settings", "manage", ctx.isOwner);
     if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = updateMemberRoleSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
 
     const supabase = createSupabaseAdmin();
 
@@ -46,17 +39,17 @@ export async function PATCH(
     const updateData: Record<string, unknown> = {};
 
     // Update fixed_role (for Free/Pro tiers)
-    if (parsed.data.fixed_role) {
-      updateData.fixed_role = parsed.data.fixed_role;
+    if (body.fixed_role) {
+      updateData.fixed_role = body.fixed_role;
     }
 
     // Update role_id (for Max/Enterprise tiers with custom roles)
-    if (parsed.data.role_id) {
+    if (body.role_id) {
       // Verify the role belongs to this team
       const { data: role } = await supabase
         .from("team_roles")
         .select("id")
-        .eq("id", parsed.data.role_id)
+        .eq("id", body.role_id)
         .eq("team_id", id)
         .single();
 
@@ -64,7 +57,7 @@ export async function PATCH(
         return NextResponse.json({ success: false, error: "Role not found in this workspace" }, { status: 404 });
       }
 
-      updateData.role_id = parsed.data.role_id;
+      updateData.role_id = body.role_id;
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -79,12 +72,8 @@ export async function PATCH(
       .select("*, team_roles(*)")
       .single();
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

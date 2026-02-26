@@ -1,21 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { isValidUUID } from "@/lib/crm/helpers";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  { logTag: "TeamMembers" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
-    if (context.teamId !== id) {
+    if (ctx.workspaceId !== id) {
       return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
@@ -28,12 +23,8 @@ export async function GET(
       .order("is_director", { ascending: false })
       .order("joined_at", { ascending: true });
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data: members });
-  } catch {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
