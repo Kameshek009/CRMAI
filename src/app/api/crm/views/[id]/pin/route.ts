@@ -1,18 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 import { isValidUUID } from "@/lib/crm/helpers";
-import { logger } from "@/lib/logger";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
+export const PATCH = withApiHandler(
+  { logTag: "Views/Pin" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -24,7 +18,7 @@ export async function PATCH(
       .from("saved_views")
       .select("is_pinned")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .single();
 
     if (fetchError || !view) {
@@ -35,7 +29,7 @@ export async function PATCH(
       .from("saved_views")
       .update({ is_pinned: !view.is_pinned })
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .select()
       .single();
 
@@ -44,8 +38,5 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Views/Pin", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

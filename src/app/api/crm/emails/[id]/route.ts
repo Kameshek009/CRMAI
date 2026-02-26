@@ -1,21 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { isValidUUID } from "@/lib/crm/helpers";
-import { logger } from "@/lib/logger";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "read", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "read" },
+    logTag: "Emails",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -25,7 +19,7 @@ export async function GET(
       .from("email_communications")
       .select("*")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -34,24 +28,16 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Emails", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "delete", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const DELETE = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "delete" },
+    logTag: "Emails",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -59,18 +45,12 @@ export async function DELETE(
     const supabase = createSupabaseAdmin();
     const { error: dbError } = await supabase
       .from("email_communications")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: context.accountId })
+      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: ctx.accountId })
       .eq("id", id)
-      .eq("team_id", context.teamId);
+      .eq("team_id", ctx.workspaceId);
 
-    if (dbError) {
-      logger.error("Emails", "DELETE error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to delete email" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to delete email", 500);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Emails", "DELETE error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

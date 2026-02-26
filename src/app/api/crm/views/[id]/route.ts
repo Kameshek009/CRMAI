@@ -1,19 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { updateSavedViewSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
-import { logger } from "@/lib/logger";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  { logTag: "Views" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -23,7 +17,7 @@ export async function GET(
       .from("saved_views")
       .select("*")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .single();
 
     if (dbError || !data) {
@@ -31,37 +25,26 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Views", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
+export const PATCH = withApiHandler(
+  {
+    bodySchema: updateSavedViewSchema,
+    logTag: "Views",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
-    }
-
-    const body = await request.json();
-    const parsed = updateSavedViewSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("saved_views")
-      .update(parsed.data)
+      .update(body)
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .select()
       .single();
 
@@ -70,21 +53,13 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Views", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const { id } = await params;
+export const DELETE = withApiHandler(
+  { logTag: "Views" },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -94,17 +69,11 @@ export async function DELETE(
       .from("saved_views")
       .delete()
       .eq("id", id)
-      .eq("team_id", context.teamId)
-      .eq("created_by_account_id", context.accountId);
+      .eq("team_id", ctx.workspaceId)
+      .eq("created_by_account_id", ctx.accountId);
 
-    if (dbError) {
-      logger.error("Views", "DELETE error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to delete view" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to delete view", 500);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Views", "DELETE error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

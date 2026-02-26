@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 import type { AIInsight } from "@/types/crm";
-import { logger } from "@/lib/logger";
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "analytics", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "analytics", action: "read" },
+    logTag: "CrmAiInsights",
+  },
+  async (_request, ctx) => {
     const supabase = createSupabaseAdmin();
     const now = new Date();
     const thirtyDaysAgo = new Date(now);
@@ -24,13 +21,13 @@ export async function GET() {
       supabase
         .from("crm_tasks")
         .select("id", { count: "exact", head: true })
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .in("status", ["todo", "in_progress"])
         .lt("due_date", now.toISOString()),
       supabase
         .from("deals")
         .select("id, title, updated_at")
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("status", "open")
         .eq("is_deleted", false)
         .lt("updated_at", thirtyDaysAgo.toISOString())
@@ -38,14 +35,14 @@ export async function GET() {
       supabase
         .from("contacts")
         .select("id", { count: "exact", head: true })
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("status", "active")
         .eq("is_deleted", false)
         .lt("engagement_score", 20),
       supabase
         .from("deals")
         .select("id, title, value, expected_close_date")
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("status", "open")
         .eq("is_deleted", false)
         .lte("expected_close_date", nextWeek.toISOString().split("T")[0])
@@ -112,8 +109,5 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, data: insights });
-  } catch (error) {
-    logger.error("CrmAiInsights", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

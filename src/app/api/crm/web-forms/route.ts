@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { logAudit } from "@/lib/crm/audit";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 const createFormSchema = z.object({
   name: z.string().min(1).max(200),
@@ -31,48 +30,33 @@ function generateSlug(): string {
   return slug;
 }
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "leads", action: "read" },
+    logTag: "WebForms",
+  },
+  async (_request, ctx) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("web_forms")
       .select("*")
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
 
-    if (dbError) {
-      logger.error("WebForms", "Failed to fetch forms", dbError);
-      return NextResponse.json({ success: false, error: "Failed to fetch forms" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to fetch forms", 500);
 
     return NextResponse.json({ success: true, data });
-  } catch (err) {
-    logger.error("WebForms", "GET error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "create", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = createFormSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "leads", action: "create" },
+    bodySchema: createFormSchema,
+    logTag: "WebForms",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
 
     // Generate unique slug
@@ -92,37 +76,31 @@ export async function POST(request: NextRequest) {
     const { data, error: dbError } = await supabase
       .from("web_forms")
       .insert({
-        team_id: context.workspaceId,
-        account_id: context.accountId,
+        team_id: ctx.workspaceId,
+        account_id: ctx.accountId,
         slug,
-        name: parsed.data.name,
-        description: parsed.data.description || null,
-        fields: parsed.data.fields || [],
-        success_message: parsed.data.success_message || "Thank you!",
-        redirect_url: parsed.data.redirect_url || null,
-        notify_emails: parsed.data.notify_emails || [],
-        primary_color: parsed.data.primary_color || "#3b82f6",
-        is_active: parsed.data.is_active ?? true,
+        name: body.name,
+        description: body.description || null,
+        fields: body.fields || [],
+        success_message: body.success_message || "Thank you!",
+        redirect_url: body.redirect_url || null,
+        notify_emails: body.notify_emails || [],
+        primary_color: body.primary_color || "#3b82f6",
+        is_active: body.is_active ?? true,
       })
       .select("*")
       .single();
 
-    if (dbError) {
-      logger.error("WebForms", "Failed to create form", dbError);
-      return NextResponse.json({ success: false, error: "Failed to create form" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to create form", 500);
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "web_form",
       entityId: data.id,
       action: "create",
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (err) {
-    logger.error("WebForms", "POST error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

@@ -1,18 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createShowingSchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "deals", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "deals", action: "read" },
+    logTag: "Showings",
+  },
+  async (request, ctx) => {
     const url = new URL(request.url);
     const params = parseListParams(url);
 
@@ -21,7 +19,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("property_showings")
       .select("*, contacts:contact_id(first_name, last_name), deals:deal_id(title)", { count: "exact" })
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false);
 
     // Support date range filter for calendar view
@@ -34,59 +32,40 @@ export async function GET(request: NextRequest) {
 
     const { data, error: dbError, count } = await query;
 
-    if (dbError) {
-      logger.error("Showings", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch (error) {
-    logger.error("Showings", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "deals", "create", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = createShowingSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "deals", action: "create" },
+    bodySchema: createShowingSchema,
+    logTag: "Showings",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("property_showings")
-      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
+      .insert({ account_id: ctx.accountId, team_id: ctx.workspaceId, ...body })
       .select("*, contacts:contact_id(first_name, last_name), deals:deal_id(title)")
       .single();
 
-    if (dbError) {
-      logger.error("Showings", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     // Log activity
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
-        contact_id: parsed.data.contact_id || null,
-        deal_id: parsed.data.deal_id || null,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
+        contact_id: body.contact_id || null,
+        deal_id: body.deal_id || null,
         type: "meeting",
         title: `Showing scheduled: ${data.title}`,
       });
     } catch (e) { logger.error("Showings", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Showings", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

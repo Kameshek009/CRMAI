@@ -1,22 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { updateCallLogSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
-import { logger } from "@/lib/logger";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "call_logs", "read", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  {
+    permission: { resource: "call_logs", action: "read" },
+    logTag: "CallLogs",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -26,7 +20,7 @@ export async function GET(
       .from("call_logs")
       .select("*, contacts(id, first_name, last_name)")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -35,40 +29,27 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("CallLogs", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "call_logs", "update", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "call_logs", action: "update" },
+    bodySchema: updateCallLogSchema,
+    logTag: "CallLogs",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
-    }
-
-    const body = await request.json();
-    const parsed = updateCallLogSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("call_logs")
-      .update(parsed.data)
+      .update(body)
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .select("*, contacts(id, first_name, last_name)")
       .single();
 
@@ -77,24 +58,16 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("CallLogs", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "call_logs", "delete", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const DELETE = withApiHandler(
+  {
+    permission: { resource: "call_logs", action: "delete" },
+    logTag: "CallLogs",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -102,18 +75,12 @@ export async function DELETE(
     const supabase = createSupabaseAdmin();
     const { error: dbError } = await supabase
       .from("call_logs")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: context.accountId })
+      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: ctx.accountId })
       .eq("id", id)
-      .eq("team_id", context.teamId);
+      .eq("team_id", ctx.workspaceId);
 
-    if (dbError) {
-      logger.error("CallLogs", "Failed to delete call log", dbError);
-      return NextResponse.json({ success: false, error: "Failed to delete call log" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to delete call log", 500);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("CallLogs", "DELETE error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

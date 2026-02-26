@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "analytics", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "analytics", action: "read" },
+    logTag: "CrmRevenueTrend",
+  },
+  async (_request, ctx) => {
     const supabase = createSupabaseAdmin();
     const now = new Date();
     const thirtyDaysAgo = new Date(now);
@@ -19,7 +16,7 @@ export async function GET() {
     const { data: wonDeals } = await supabase
       .from("deals")
       .select("value, actual_close_date")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("status", "won")
       .eq("is_deleted", false)
       .gte("actual_close_date", thirtyDaysAgo.toISOString().split("T")[0])
@@ -51,8 +48,5 @@ export async function GET() {
     return NextResponse.json({ success: true, data: cumulativeData }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });
-  } catch (error) {
-    logger.error("CrmRevenueTrend", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

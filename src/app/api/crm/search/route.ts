@@ -1,14 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 import { sanitizeLike } from "@/lib/crm/helpers";
-import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
+export const GET = withApiHandler(
+  { logTag: "Search" },
+  async (request, ctx) => {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q");
     const limit = Math.min(20, parseInt(searchParams.get("limit") || "10", 10));
@@ -31,28 +28,28 @@ export async function GET(request: NextRequest) {
       supabase
         .from("contacts")
         .select("id, first_name, last_name, email, title")
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("is_deleted", false)
         .or(`first_name.ilike.%${sq}%,last_name.ilike.%${sq}%,email.ilike.%${sq}%`)
         .limit(limit),
       supabase
         .from("companies")
         .select("id, name, industry, domain")
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("is_deleted", false)
         .or(`name.ilike.%${sq}%,domain.ilike.%${sq}%,industry.ilike.%${sq}%`)
         .limit(limit),
       supabase
         .from("deals")
         .select("id, title, value, status")
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("is_deleted", false)
         .ilike("title", `%${sq}%`)
         .limit(limit),
       supabase
         .from("crm_tasks")
         .select("id, title, status, priority")
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .eq("is_deleted", false)
         .ilike("title", `%${sq}%`)
         .limit(limit),
@@ -100,8 +97,5 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, data: results });
-  } catch (error) {
-    logger.error("Search", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

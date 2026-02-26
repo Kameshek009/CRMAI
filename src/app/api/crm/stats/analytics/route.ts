@@ -1,29 +1,24 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "analytics", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "analytics", action: "read" },
+    logTag: "CrmAnalytics",
+  },
+  async (_request, ctx) => {
     const supabase = createSupabaseAdmin();
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-    const ninetyDaysAgo = new Date(now);
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
     // --- Conversion rates by stage ---
     const { data: allDeals } = await supabase
       .from("deals")
       .select("id, value, status, stage_id, ai_win_probability, created_at, actual_close_date, expected_close_date, deal_stages(name, color, position, is_won, is_lost)")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false);
 
     const deals = allDeals || [];
@@ -32,7 +27,7 @@ export async function GET() {
     const { data: stages } = await supabase
       .from("deal_stages")
       .select("id, name, color, position, is_won, is_lost")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .order("position", { ascending: true });
 
     const stageConversion = (stages || []).map((stage) => {
@@ -112,7 +107,7 @@ export async function GET() {
     const { data: contacts } = await supabase
       .from("contacts")
       .select("id, status, source, engagement_score, created_at")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false);
 
     const contactsByStatus: Record<string, number> = {};
@@ -136,7 +131,7 @@ export async function GET() {
     const { data: recentActivities } = await supabase
       .from("activities")
       .select("type, created_at")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .gte("created_at", thirtyDaysAgo.toISOString());
 
     const activityByType: Record<string, number> = {};
@@ -160,7 +155,7 @@ export async function GET() {
     const { data: allTasks } = await supabase
       .from("crm_tasks")
       .select("id, status, priority, type, due_date, completed_at, created_at")
-      .eq("team_id", context.teamId);
+      .eq("team_id", ctx.workspaceId);
 
     const tasksByStatus: Record<string, number> = {};
     const tasksByPriority: Record<string, number> = {};
@@ -199,7 +194,7 @@ export async function GET() {
     const { data: companies } = await supabase
       .from("companies")
       .select("id, ai_health_score, industry")
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false);
 
     const healthBuckets = { excellent: 0, good: 0, fair: 0, poor: 0 };
@@ -277,8 +272,5 @@ export async function GET() {
     }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });
-  } catch (error) {
-    logger.error("CrmAnalytics", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

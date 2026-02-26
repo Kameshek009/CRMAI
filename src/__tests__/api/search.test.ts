@@ -4,7 +4,10 @@ import { createMockSupabase } from "@/__tests__/helpers/mock-supabase";
 import { mockTeamContext, mockAuthError, createTestRequest } from "@/__tests__/helpers/mock-context";
 
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseAdmin: vi.fn() }));
-vi.mock("@/lib/crm/team-helpers", () => ({ getTeamContext: vi.fn() }));
+vi.mock("@/lib/crm/team-helpers", () => {
+  const f = vi.fn();
+  return { getTeamContext: f, getWorkspaceContext: f };
+});
 vi.mock("@/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 
 const { createSupabaseAdmin } = await import("@/lib/supabase/server");

@@ -1,31 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getWorkspaceContext } from "@/lib/crm/team-helpers";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
+import { z } from "zod";
 
-export async function PATCH(request: NextRequest) {
-  const { context, error } = await getWorkspaceContext();
-  if (error) return error;
+const markReadSchema = z.object({
+  ids: z.array(z.string().uuid()).optional(),
+});
 
-  const body = await request.json();
-  const { ids } = body as { ids?: string[] };
+export const PATCH = withApiHandler(
+  {
+    bodySchema: markReadSchema,
+    logTag: "Notifications",
+  },
+  async (_request, ctx, { body }) => {
+    const supabase = createSupabaseAdmin();
 
-  const supabase = createSupabaseAdmin();
+    let query = supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("account_id", ctx.accountId)
+      .eq("team_id", ctx.workspaceId);
 
-  let query = supabase
-    .from("notifications")
-    .update({ is_read: true })
-    .eq("account_id", context.accountId)
-    .eq("team_id", context.workspaceId);
+    if (body.ids && body.ids.length > 0) {
+      query = query.in("id", body.ids);
+    }
 
-  if (ids && ids.length > 0) {
-    query = query.in("id", ids);
+    const { error: dbError } = await query;
+
+    if (dbError) throw new ApiError("Failed to mark as read", 500);
+
+    return NextResponse.json({ success: true });
   }
-
-  const { error: dbError } = await query;
-
-  if (dbError) {
-    return NextResponse.json({ success: false, error: "Failed to mark as read" }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
-}
+);

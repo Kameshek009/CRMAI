@@ -1,21 +1,12 @@
 import { NextResponse } from "next/server";
-import { getTeamContext } from "@/lib/crm/team-helpers";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 import { getAllUsageCounts } from "@/lib/usage/feature-limits";
-import { logger } from "@/lib/logger";
 
-export async function GET() {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const counts = await getAllUsageCounts(context.workspaceId, context.tier);
+export const GET = withApiHandler(
+  { logTag: "UsageCounts" },
+  async (_request, ctx) => {
+    const counts = await getAllUsageCounts(ctx.workspaceId, ctx.tier);
 
     return NextResponse.json({ success: true, data: counts });
-  } catch (error) {
-    logger.error("UsageCounts", "GET error", error);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
   }
-}
+);

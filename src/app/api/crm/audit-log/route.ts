@@ -1,16 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { logger } from "@/lib/logger";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "team_settings", "read", context.isOwner);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "team_settings", action: "read" },
+    logTag: "AuditLog",
+  },
+  async (request, ctx) => {
     const url = new URL(request.url);
     const entityType = url.searchParams.get("entity_type");
     const entityId = url.searchParams.get("entity_id");
@@ -26,7 +23,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("audit_log")
       .select("*", { count: "exact" })
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -48,10 +45,7 @@ export async function GET(request: NextRequest) {
 
     const { data, count, error: dbError } = await query;
 
-    if (dbError) {
-      logger.error("AuditLog", "GET error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to fetch audit log" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to fetch audit log", 500);
 
     return NextResponse.json({
       success: true,
@@ -60,8 +54,5 @@ export async function GET(request: NextRequest) {
       page,
       limit,
     });
-  } catch (err) {
-    logger.error("AuditLog", "GET error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

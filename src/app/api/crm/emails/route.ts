@@ -1,18 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { createEmailSchema } from "@/lib/crm/validation";
 import { parsePagination } from "@/lib/crm/helpers";
 import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "read" },
+    logTag: "Emails",
+  },
+  async (request, ctx) => {
     const { searchParams } = new URL(request.url);
     const { limit, offset } = parsePagination(searchParams);
     const contactId = searchParams.get("contact_id");
@@ -23,7 +21,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("email_communications")
       .select("*", { count: "exact" })
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
@@ -33,65 +31,49 @@ export async function GET(request: NextRequest) {
 
     const { data, error: dbError, count } = await query;
 
-    if (dbError) {
-      logger.error("Emails", "GET error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to fetch emails" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to fetch emails", 500);
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch (error) {
-    logger.error("Emails", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "create", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = createEmailSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "create" },
+    bodySchema: createEmailSchema,
+    logTag: "Emails",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("email_communications")
       .insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
-        ...parsed.data,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
+        ...body,
       })
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("Emails", "POST error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to create email" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to create email", 500);
 
     // Log activity
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
-        contact_id: parsed.data.contact_id || null,
-        deal_id: parsed.data.deal_id || null,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
+        contact_id: body.contact_id || null,
+        deal_id: body.deal_id || null,
         type: "email",
-        title: `Email: ${parsed.data.subject || "(no subject)"}`,
-        description: parsed.data.body_text?.slice(0, 200) || null,
+        title: `Email: ${body.subject || "(no subject)"}`,
+        description: body.body_text?.slice(0, 200) || null,
       });
     } catch (e) { logger.error("Emails", "Failed to log activity", e); }
 
     // Exit condition: inbound email exits active sequence enrollments
-    if (parsed.data.direction === "inbound") {
+    if (body.direction === "inbound") {
       try {
-        const contactId = parsed.data.contact_id;
+        const contactId = body.contact_id;
         if (contactId) {
           await supabase
             .from("email_sequence_enrollments")
@@ -103,8 +85,5 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Emails", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

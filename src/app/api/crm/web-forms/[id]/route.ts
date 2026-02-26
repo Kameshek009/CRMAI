@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { logAudit } from "@/lib/crm/audit";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 const updateFormSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -22,24 +21,20 @@ const updateFormSchema = z.object({
   is_active: z.boolean().optional(),
 });
 
-type RouteContext = { params: Promise<{ id: string }> };
-
-export async function GET(_request: NextRequest, ctx: RouteContext) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "read", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await ctx.params;
+export const GET = withApiHandler(
+  {
+    permission: { resource: "leads", action: "read" },
+    logTag: "WebForms",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     const supabase = createSupabaseAdmin();
 
     const { data, error: dbError } = await supabase
       .from("web_forms")
       .select("*")
       .eq("id", id)
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -54,44 +49,34 @@ export async function GET(_request: NextRequest, ctx: RouteContext) {
       .eq("form_id", id);
 
     return NextResponse.json({ success: true, data: { ...data, submissions_count: count || 0 } });
-  } catch (err) {
-    logger.error("WebForms", "GET [id] error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(request: NextRequest, ctx: RouteContext) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "create", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await ctx.params;
-    const body = await request.json();
-    const parsed = updateFormSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "leads", action: "create" },
+    bodySchema: updateFormSchema,
+    logTag: "WebForms",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     const supabase = createSupabaseAdmin();
 
     const updates: Record<string, unknown> = {};
-    if (parsed.data.name !== undefined) updates.name = parsed.data.name;
-    if (parsed.data.description !== undefined) updates.description = parsed.data.description;
-    if (parsed.data.fields !== undefined) updates.fields = parsed.data.fields;
-    if (parsed.data.success_message !== undefined) updates.success_message = parsed.data.success_message;
-    if (parsed.data.redirect_url !== undefined) updates.redirect_url = parsed.data.redirect_url || null;
-    if (parsed.data.notify_emails !== undefined) updates.notify_emails = parsed.data.notify_emails;
-    if (parsed.data.primary_color !== undefined) updates.primary_color = parsed.data.primary_color;
-    if (parsed.data.is_active !== undefined) updates.is_active = parsed.data.is_active;
+    if (body.name !== undefined) updates.name = body.name;
+    if (body.description !== undefined) updates.description = body.description;
+    if (body.fields !== undefined) updates.fields = body.fields;
+    if (body.success_message !== undefined) updates.success_message = body.success_message;
+    if (body.redirect_url !== undefined) updates.redirect_url = body.redirect_url || null;
+    if (body.notify_emails !== undefined) updates.notify_emails = body.notify_emails;
+    if (body.primary_color !== undefined) updates.primary_color = body.primary_color;
+    if (body.is_active !== undefined) updates.is_active = body.is_active;
 
     const { data, error: dbError } = await supabase
       .from("web_forms")
       .update(updates)
       .eq("id", id)
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .select("*")
       .single();
@@ -101,53 +86,42 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
     }
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "web_form",
       entityId: data.id,
       action: "update",
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (err) {
-    logger.error("WebForms", "PATCH error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(_request: NextRequest, ctx: RouteContext) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "delete", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await ctx.params;
+export const DELETE = withApiHandler(
+  {
+    permission: { resource: "leads", action: "delete" },
+    logTag: "WebForms",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     const supabase = createSupabaseAdmin();
 
     const { error: dbError } = await supabase
       .from("web_forms")
       .update({ is_deleted: true })
       .eq("id", id)
-      .eq("team_id", context.workspaceId);
+      .eq("team_id", ctx.workspaceId);
 
-    if (dbError) {
-      logger.error("WebForms", "Failed to delete form", dbError);
-      return NextResponse.json({ success: false, error: "Failed to delete form" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to delete form", 500);
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "web_form",
       entityId: id,
       action: "delete",
     });
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    logger.error("WebForms", "DELETE error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

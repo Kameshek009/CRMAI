@@ -1,18 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parsePagination } from "@/lib/crm/helpers";
 import { createActivitySchema } from "@/lib/crm/validation";
-import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "read" },
+    logTag: "CrmActivities",
+  },
+  async (request, ctx) => {
     const { searchParams } = new URL(request.url);
     const { limit, offset } = parsePagination(searchParams);
     const contactId = searchParams.get("contact_id");
@@ -24,7 +21,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("crm_activities")
       .select("*", { count: "exact" })
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
@@ -35,45 +32,28 @@ export async function GET(request: NextRequest) {
 
     const { data, error: dbError, count } = await query;
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch (error) {
-    logger.error("CrmActivities", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "create", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = createActivitySchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "create" },
+    bodySchema: createActivitySchema,
+    logTag: "CrmActivities",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("crm_activities")
-      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
+      .insert({ account_id: ctx.accountId, team_id: ctx.workspaceId, ...body })
       .select()
       .single();
 
-    if (dbError) {
-      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
-    }
+    if (dbError) throw new ApiError(dbError.message, 500);
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("CrmActivities", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

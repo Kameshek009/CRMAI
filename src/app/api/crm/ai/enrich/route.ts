@@ -1,26 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
 import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
+const enrichSchema = z.object({
+  contact_id: z.string().uuid(),
+});
 
-    const permError = requirePermission(context.permissions, "contacts", "update", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const { contact_id } = body as { contact_id: string };
-
-    if (!contact_id) {
-      return NextResponse.json({ success: false, error: "contact_id required" }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "update" },
+    bodySchema: enrichSchema,
+    logTag: "AiEnrich",
+  },
+  async (_request, ctx, { body }) => {
+    const { contact_id } = body;
     const supabase = createSupabaseAdmin();
 
     // Fetch the contact
@@ -28,7 +26,7 @@ export async function POST(request: NextRequest) {
       .from("contacts")
       .select("id, first_name, last_name, email, phone, title, source, metadata, company_id, companies(name, website, industry)")
       .eq("id", contact_id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -113,7 +111,7 @@ Respond ONLY with valid JSON (no markdown, no comments), in this exact format:
         .from("contacts")
         .update(updates)
         .eq("id", contact_id)
-        .eq("team_id", context.teamId)
+        .eq("team_id", ctx.workspaceId)
         .select("*, companies(id, name)")
         .single();
 
@@ -139,8 +137,5 @@ Respond ONLY with valid JSON (no markdown, no comments), in this exact format:
         contact,
       },
     });
-  } catch (err) {
-    logger.error("AiEnrich", "POST error", err);
-    return NextResponse.json({ success: false, error: "Enrichment failed" }, { status: 500 });
   }
-}
+);
