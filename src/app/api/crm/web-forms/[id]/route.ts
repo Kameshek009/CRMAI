@@ -103,7 +103,7 @@ export const DELETE = withApiHandler(
     logTag: "WebForms",
   },
   async (_request, ctx, { routeParams }) => {
-    const { id } = routeParams;
+    const id = routeParams.id!;
     const supabase = createSupabaseAdmin();
 
     const { error: dbError } = await supabase

@@ -344,7 +344,7 @@ export default function ChatDetailPage() {
 
           for (const [toolName, results] of grouped) {
             const eType = entityTypes[toolName];
-            const [single, plural] = entityLabels[eType] || ['item', 'items'];
+            const [single, plural] = (eType && entityLabels[eType]) || ['item', 'items'];
 
             // Calculate actual count (accounting for batch results with count field)
             let totalCount = 0;
@@ -361,8 +361,9 @@ export default function ChatDetailPage() {
               }
             }
 
-            const notifContent = totalCount === 1
-              ? (results[0].data?.title as string || results[0].data?.first_name as string || results[0].result)
+            const firstResult = results[0];
+            const notifContent = totalCount === 1 && firstResult
+              ? (firstResult.data?.title as string || firstResult.data?.first_name as string || firstResult.result)
               : `Создано ${totalCount} ${plural}`;
 
             try {

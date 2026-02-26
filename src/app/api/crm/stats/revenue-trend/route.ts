@@ -35,7 +35,7 @@ export const GET = withApiHandler(
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split("T")[0];
+      const dateStr = d.toISOString().split("T")[0] ?? "";
       dailyData.push({ date: dateStr, revenue: revenueByDate.get(dateStr) || 0 });
     }
 

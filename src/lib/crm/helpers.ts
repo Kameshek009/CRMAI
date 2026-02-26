@@ -47,8 +47,8 @@ export async function getAccountId(): Promise<
 /**
  * Validate that a string is a properly formatted UUID v4
  */
-export function isValidUUID(id: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+export function isValidUUID(id: string | undefined): id is string {
+  return typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
 /**

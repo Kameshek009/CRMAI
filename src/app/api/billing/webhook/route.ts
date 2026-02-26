@@ -221,7 +221,7 @@ async function handleSubscriptionChange(
 ) {
   const supabase = createSupabaseAdmin();
   const customerId = subscription.customer as string;
-  const priceId = subscription.items.data[0]?.price.id;
+  const priceId = subscription.items.data[0]?.price.id ?? "";
   const quantity = subscription.items.data[0]?.quantity || 1;
 
   logger.info("Webhook", `Subscription ${eventType}: customer=${customerId}, priceId=${priceId}, quantity=${quantity}`);

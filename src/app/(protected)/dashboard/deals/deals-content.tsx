@@ -428,7 +428,7 @@ export function DealsContent() {
       />
 
       <QuickFilters
-        options={FILTER_OPTIONS[0].options?.map(o => ({
+        options={FILTER_OPTIONS[0]?.options?.map(o => ({
           value: o.value,
           label: o.label,
           count: deals.filter(d => d.status === o.value).length,

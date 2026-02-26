@@ -843,7 +843,7 @@ export function AnalyticsContent() {
                 {(data.leadConversionFunnel || []).map((step, i) => {
                   const maxCount = Math.max(...(data.leadConversionFunnel || []).map((s) => s.count), 1);
                   const pct = Math.round((step.count / maxCount) * 100);
-                  const prevCount = i > 0 ? (data.leadConversionFunnel || [])[i - 1].count : 0;
+                  const prevCount = i > 0 ? (data.leadConversionFunnel || [])[i - 1]?.count ?? 0 : 0;
                   const convRate = i > 0 && prevCount > 0 ? Math.round((step.count / prevCount) * 100) : null;
                   return (
                     <div key={step.stage} className="space-y-1">

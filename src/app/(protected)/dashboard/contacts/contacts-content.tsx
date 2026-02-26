@@ -358,7 +358,7 @@ export function ContactsContent() {
       />
 
       <QuickFilters
-        options={FILTER_OPTIONS[0].options?.map(o => ({
+        options={FILTER_OPTIONS[0]?.options?.map(o => ({
           value: o.value,
           label: o.label,
           count: contacts.filter(c => c.status === o.value).length,

@@ -211,7 +211,7 @@ export function TasksContent() {
         type: formMode.task.type || "",
         priority: formMode.task.priority || "",
         status: formMode.task.status || "todo",
-        due_date: formMode.task.due_date ? formMode.task.due_date.split("T")[0] : "",
+        due_date: formMode.task.due_date ? formMode.task.due_date.split("T")[0] ?? "" : "",
         phone_number: metaStr.phone_number || "",
         email_address: metaStr.email_address || "",
         location: metaStr.location || "",

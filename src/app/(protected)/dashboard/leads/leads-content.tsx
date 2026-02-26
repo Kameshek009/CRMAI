@@ -284,7 +284,7 @@ export function LeadsContent() {
       />
 
       <QuickFilters
-        options={FILTER_OPTIONS[0].options?.map(o => ({
+        options={FILTER_OPTIONS[0]?.options?.map(o => ({
           value: o.value,
           label: o.label,
           count: leads.filter(l => l.status === o.value).length,

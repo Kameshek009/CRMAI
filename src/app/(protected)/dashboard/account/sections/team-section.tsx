@@ -202,7 +202,7 @@ export function TeamSection() {
                   <Label>{t("team.settings.ai.permissionLevel", { value: aiPerms.permission_level })}</Label>
                   <Slider
                     value={[aiPerms.permission_level]}
-                    onValueChange={([v]) => setAiPerms({ ...aiPerms, permission_level: v })}
+                    onValueChange={([v]) => setAiPerms({ ...aiPerms, permission_level: v ?? 0 })}
                     max={100}
                     step={5}
                   />

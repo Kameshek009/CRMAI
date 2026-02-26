@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
       const toolMessages = toolCalls.map((tc, i) => ({
         role: "tool" as const,
         tool_call_id: tc.id,
-        content: toolResults[i].result,
+        content: toolResults[i]?.result ?? "",
       }));
 
       const finalCompletion = await groq.chat.completions.create({

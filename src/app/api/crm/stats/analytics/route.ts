@@ -147,7 +147,7 @@ export const GET = withApiHandler(
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split("T")[0];
+      const dateStr = d.toISOString().split("T")[0] ?? "";
       dailyActivity.push({ date: dateStr, count: activityByDay[dateStr] || 0 });
     }
 

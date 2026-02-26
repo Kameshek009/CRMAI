@@ -30,7 +30,7 @@ export const POST = withApiHandler(
       return NextResponse.json({ success: false, error: "Sequence has no steps" }, { status: 400 });
     }
 
-    const firstStep = steps[0];
+    const firstStep = steps[0]!;
     const nextSendAt = new Date();
     nextSendAt.setDate(nextSendAt.getDate() + firstStep.delay_days);
 

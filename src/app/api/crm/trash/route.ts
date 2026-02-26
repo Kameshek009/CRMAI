@@ -42,7 +42,7 @@ export const GET = withApiHandler(
 
     await Promise.all(
       entitiesToQuery.map(async (entity) => {
-        const config = ENTITY_TABLES[entity];
+        const config = ENTITY_TABLES[entity]!;
         const { data } = await supabase
           .from(config.table)
           .select(config.selectFields)
@@ -62,15 +62,16 @@ export const GET = withApiHandler(
             } else if (entity === "call_logs") {
               name = (row as unknown as Record<string, string>).summary || `Call to ${(row as unknown as Record<string, string>).to_number || "unknown"}`;
             } else {
-              name = (row as unknown as Record<string, string>)[config.nameField.split(",")[0]] || "";
+              name = (row as unknown as Record<string, string>)[config.nameField.split(",")[0] ?? ""] || "";
             }
 
+            const r = row as unknown as Record<string, string>;
             results.push({
-              id: (row as unknown as Record<string, string>).id,
+              id: r.id ?? "",
               entity_type: entity,
               name,
-              deleted_at: (row as unknown as Record<string, string>).deleted_at,
-              deleted_by: (row as unknown as Record<string, string>).deleted_by || null,
+              deleted_at: r.deleted_at ?? "",
+              deleted_by: r.deleted_by || null,
             });
           }
         }

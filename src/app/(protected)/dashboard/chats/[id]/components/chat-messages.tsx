@@ -83,7 +83,7 @@ export function ChatMessages({
     if (!endEl) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => setIsAtBottom(entry.isIntersecting),
+      ([entry]) => entry && setIsAtBottom(entry.isIntersecting),
       { threshold: 0.5 }
     );
     observer.observe(endEl);
@@ -143,7 +143,7 @@ export function ChatMessages({
         currentLabel = label;
         groups.push({ label, messages: [msg] });
       } else {
-        groups[groups.length - 1].messages.push(msg);
+        groups[groups.length - 1]?.messages.push(msg);
       }
     }
     return groups;

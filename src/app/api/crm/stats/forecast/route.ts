@@ -104,8 +104,8 @@ export const GET = withApiHandler(
     wonDeals.forEach((d) => {
       if (d.actual_close_date) {
         const m = new Date(d.actual_close_date).getMonth();
-        monthTotals[m] += Number(d.value);
-        monthCounts[m]++;
+        monthTotals[m]! += Number(d.value);
+        monthCounts[m]!++;
       }
     });
     const avgMonthly = monthTotals.reduce((a, b) => a + b, 0) / 12;
