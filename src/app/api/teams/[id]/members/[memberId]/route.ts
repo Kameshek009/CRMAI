@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { requirePermission } from "@/lib/crm/team-helpers";
 import { updateMemberRoleSchema } from "@/lib/crm/team-validation";
+import { logAudit } from "@/lib/crm/audit";
 
 export const PATCH = withApiHandler(
   {
@@ -73,6 +74,17 @@ export const PATCH = withApiHandler(
       .single();
 
     if (dbError) throw new ApiError(dbError.message, 500);
+
+    logAudit({
+      teamId: id,
+      accountId: ctx.accountId,
+      entityType: "team_member",
+      entityId: memberId ?? "",
+      action: "update",
+      changes: Object.fromEntries(
+        Object.entries(updateData).map(([k, v]) => [k, { old: null, new: v }])
+      ),
+    });
 
     return NextResponse.json({ success: true, data });
   }

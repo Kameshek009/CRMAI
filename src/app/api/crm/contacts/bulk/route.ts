@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { requirePermission } from "@/lib/crm/team-helpers";
 import { bulkContactsSchema } from "@/lib/crm/validation";
+import { logAudit } from "@/lib/crm/audit";
 
 export const POST = withApiHandler(
   {
@@ -26,6 +27,16 @@ export const POST = withApiHandler(
 
       if (dbError) throw new ApiError(dbError.message, 500);
 
+      for (const entityId of ids) {
+        logAudit({
+          teamId: ctx.workspaceId,
+          accountId: ctx.accountId,
+          entityType: "contact",
+          entityId,
+          action: "delete",
+        });
+      }
+
       return NextResponse.json({ success: true, deleted: ids.length });
     }
 
@@ -42,6 +53,17 @@ export const POST = withApiHandler(
         .eq("team_id", ctx.workspaceId);
 
       if (dbError) throw new ApiError(dbError.message, 500);
+
+      for (const entityId of ids) {
+        logAudit({
+          teamId: ctx.workspaceId,
+          accountId: ctx.accountId,
+          entityType: "contact",
+          entityId,
+          action: "update",
+          changes: { status: { old: null, new: status } },
+        });
+      }
 
       return NextResponse.json({ success: true, updated: ids.length });
     }

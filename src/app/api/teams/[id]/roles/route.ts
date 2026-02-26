@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { requirePermission } from "@/lib/crm/team-helpers";
 import { createRoleSchema } from "@/lib/crm/team-validation";
+import { logAudit } from "@/lib/crm/audit";
 
 export const GET = withApiHandler(
   { logTag: "TeamRoles" },
@@ -69,6 +70,14 @@ export const POST = withApiHandler(
       .single();
 
     if (dbError) throw new ApiError(dbError.message, 500);
+
+    logAudit({
+      teamId: id,
+      accountId: ctx.accountId,
+      entityType: "team_role",
+      entityId: data.id,
+      action: "create",
+    });
 
     return NextResponse.json({ success: true, data });
   }

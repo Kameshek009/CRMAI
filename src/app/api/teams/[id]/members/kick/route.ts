@@ -4,6 +4,7 @@ import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { requirePermission } from "@/lib/crm/team-helpers";
 import { kickMemberSchema } from "@/lib/crm/team-validation";
 import { updateSubscriptionQuantity } from "@/lib/stripe/server";
+import { logAudit } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export const POST = withApiHandler(
@@ -51,6 +52,14 @@ export const POST = withApiHandler(
       .eq("team_id", id);
 
     if (dbError) throw new ApiError(dbError.message, 500);
+
+    logAudit({
+      teamId: id,
+      accountId: ctx.accountId,
+      entityType: "team_member",
+      entityId: body.member_id,
+      action: "delete",
+    });
 
     // Atomically sync seat_count and update Stripe
     const { data: team } = await supabase

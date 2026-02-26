@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createTaskSchema } from "@/lib/crm/validation";
+import { logAudit } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export const GET = withApiHandler(
@@ -47,6 +48,14 @@ export const POST = withApiHandler(
       .single();
 
     if (dbError) throw new ApiError("Database operation failed", 500);
+
+    logAudit({
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
+      entityType: "task",
+      entityId: data.id,
+      action: "create",
+    });
 
     try {
       await supabase.from("crm_activities").insert({

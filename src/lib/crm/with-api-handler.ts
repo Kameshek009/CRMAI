@@ -133,6 +133,7 @@ import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import type { WorkspaceContext, WorkspacePermissions } from "@/types/team";
 import type { FeatureLimitKey } from "@/types";
 import { logger } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
@@ -185,6 +186,18 @@ export interface ApiHandlerOptions<
    * Defaults to "API" if not provided.
    */
   logTag?: string;
+
+  /**
+   * Rate limiting — applied before auth. If omitted, no rate limit is enforced.
+   * Example: `{ limit: 20, windowMs: 60_000, keyPrefix: "ai-chat" }`
+   */
+  rateLimit?: { limit: number; windowMs?: number; keyPrefix?: string };
+
+  /**
+   * Maximum allowed request body size in bytes (default: 1MB).
+   * Prevents DoS via oversized payloads. Set to 0 to disable.
+   */
+  maxBodySize?: number;
 }
 
 /**
@@ -247,7 +260,25 @@ export function withApiHandler<
     nextContext?: NextRouteContext,
   ): Promise<NextResponse> {
     try {
-      // ── 0. CSRF protection for mutating methods ───────────────────────
+      // ── 0a. Rate limiting (optional) ─────────────────────────────────
+      if (options.rateLimit) {
+        const rateLimitResponse = checkRateLimit(request, options.rateLimit);
+        if (rateLimitResponse) return rateLimitResponse;
+      }
+
+      // ── 0b. Body size check ────────────────────────────────────────────
+      const maxBodySize = options.maxBodySize ?? 1_048_576; // 1MB default
+      if (maxBodySize > 0) {
+        const contentLength = request.headers.get("content-length");
+        if (contentLength && parseInt(contentLength, 10) > maxBodySize) {
+          return NextResponse.json(
+            { success: false, error: "Request body too large" },
+            { status: 413 },
+          );
+        }
+      }
+
+      // ── 0c. CSRF protection for mutating methods ───────────────────────
       const method = request.method.toUpperCase();
       if (["POST", "PATCH", "PUT", "DELETE"].includes(method)) {
         const origin = request.headers.get("origin");

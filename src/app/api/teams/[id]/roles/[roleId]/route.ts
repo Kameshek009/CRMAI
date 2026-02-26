@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { requirePermission } from "@/lib/crm/team-helpers";
 import { updateRoleSchema } from "@/lib/crm/team-validation";
+import { logAudit, computeChanges } from "@/lib/crm/audit";
 
 export const PATCH = withApiHandler(
   {
@@ -36,6 +37,14 @@ export const PATCH = withApiHandler(
       return NextResponse.json({ success: false, error: "Cannot modify system roles" }, { status: 400 });
     }
 
+    // Fetch old record for change tracking
+    const { data: oldRole } = await supabase
+      .from("team_roles")
+      .select("*")
+      .eq("id", roleId)
+      .eq("team_id", id)
+      .single();
+
     const { data, error: dbError } = await supabase
       .from("team_roles")
       .update(body)
@@ -45,6 +54,15 @@ export const PATCH = withApiHandler(
       .single();
 
     if (dbError) throw new ApiError(dbError.message, 500);
+
+    logAudit({
+      teamId: id,
+      accountId: ctx.accountId,
+      entityType: "team_role",
+      entityId: roleId ?? "",
+      action: "update",
+      changes: oldRole ? computeChanges(oldRole as Record<string, unknown>, body as Record<string, unknown>) : undefined,
+    });
 
     return NextResponse.json({ success: true, data });
   }
@@ -96,6 +114,14 @@ export const DELETE = withApiHandler(
       .eq("team_id", id);
 
     if (dbError) throw new ApiError(dbError.message, 500);
+
+    logAudit({
+      teamId: id,
+      accountId: ctx.accountId,
+      entityType: "team_role",
+      entityId: roleId ?? "",
+      action: "delete",
+    });
 
     return NextResponse.json({ success: true });
   }

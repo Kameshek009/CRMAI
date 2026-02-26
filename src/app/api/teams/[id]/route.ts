@@ -4,6 +4,7 @@ import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { requirePermission } from "@/lib/crm/team-helpers";
 import { updateTeamSchema } from "@/lib/crm/team-validation";
 import { cancelSubscriptionImmediately } from "@/lib/stripe/server";
+import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export const GET = withApiHandler(
@@ -51,6 +52,15 @@ export const PATCH = withApiHandler(
 
     if (dbError) throw new ApiError(dbError.message, 500);
 
+    logAudit({
+      teamId: id,
+      accountId: ctx.accountId,
+      entityType: "team",
+      entityId: id,
+      action: "update",
+      changes: computeChanges({}, body as Record<string, unknown>),
+    });
+
     return NextResponse.json({ success: true, data });
   }
 );
@@ -87,6 +97,14 @@ export const DELETE = withApiHandler(
       .eq("id", id);
 
     if (dbError) throw new ApiError(dbError.message, 500);
+
+    logAudit({
+      teamId: id,
+      accountId: ctx.accountId,
+      entityType: "team",
+      entityId: id,
+      action: "delete",
+    });
 
     // For each member whose current_team_id points to the deleted team,
     // auto-switch them to their next available active team

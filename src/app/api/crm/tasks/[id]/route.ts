@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { updateTaskSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
+import { logAudit } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
 
 export const GET = withApiHandler(
@@ -65,6 +66,14 @@ export const PATCH = withApiHandler(
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
 
+    logAudit({
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
+      entityType: "task",
+      entityId: id,
+      action: "update",
+    });
+
     try {
       if (body.status === "done") {
         await supabase.from("crm_activities").insert({
@@ -117,6 +126,14 @@ export const DELETE = withApiHandler(
       .eq("team_id", ctx.workspaceId);
 
     if (dbError) throw new ApiError("Database operation failed", 500);
+
+    logAudit({
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
+      entityType: "task",
+      entityId: id,
+      action: "delete",
+    });
 
     try {
       await supabase.from("crm_activities").insert({
