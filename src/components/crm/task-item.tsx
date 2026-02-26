@@ -59,7 +59,11 @@ export const TaskItem = memo(function TaskItem({
       selected && "ring-2 ring-primary/40 bg-primary/5 shadow-md"
     )}>
       {/* Priority indicator line */}
-      <div className={cn("w-1 self-stretch rounded-full -ml-1 shrink-0", config?.dot, isDone && "opacity-30")} />
+      <div
+        className={cn("w-1 self-stretch rounded-full -ml-1 shrink-0", config?.dot, isDone && "opacity-30")}
+        aria-label={`${priority.charAt(0).toUpperCase() + priority.slice(1)} priority`}
+        role="img"
+      />
 
       {selectable ? (
         <Checkbox

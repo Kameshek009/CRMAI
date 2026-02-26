@@ -44,6 +44,7 @@ export const SortableNavItem = memo(function SortableNavItem({ id, labelKey, ico
     >
       <button
         className="cursor-grab active:cursor-grabbing touch-none p-0.5 text-muted-foreground hover:text-foreground"
+        aria-label={`Reorder ${t(labelKey)}`}
         {...attributes}
         {...listeners}
       >
@@ -54,6 +55,7 @@ export const SortableNavItem = memo(function SortableNavItem({ id, labelKey, ico
       <button
         onClick={onToggleVisibility}
         className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+        aria-label={visible ? `Hide ${t(labelKey)}` : `Show ${t(labelKey)}`}
       >
         {visible ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
       </button>

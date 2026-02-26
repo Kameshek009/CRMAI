@@ -103,6 +103,7 @@ export function SidebarGroupEditor({ items, onSave, onClose }: SidebarGroupEdito
         <button
           onClick={onClose}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Close editor"
         >
           <X className="size-3" />
         </button>

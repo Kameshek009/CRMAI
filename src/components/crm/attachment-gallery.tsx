@@ -97,6 +97,7 @@ export function AttachmentGallery({
                 type="button"
                 onClick={() => handleDelete(att.id)}
                 className="absolute top-0.5 right-0.5 size-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Delete ${att.filename}`}
               >
                 <X className="size-3 text-white" />
               </button>
@@ -115,6 +116,7 @@ export function AttachmentGallery({
               accept="image/jpeg,image/png,image/gif,image/webp"
               className="hidden"
               disabled={isUploading}
+              aria-label={t("crm.attachments.uploadAttachment")}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) handleUpload(file);

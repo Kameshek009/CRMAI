@@ -1120,7 +1120,8 @@
     "deleteFailed": "Delete failed",
     "maxReached": "Maximum {max} attachments",
     "noAttachments": "No attachments yet",
-    "counter": "{count} / {max}"
+    "counter": "{count} / {max}",
+    "uploadAttachment": "Upload attachment"
   },
   "showings": {
     "title": "Showings",

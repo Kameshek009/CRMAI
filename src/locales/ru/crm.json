@@ -1120,7 +1120,8 @@
     "deleteFailed": "Ошибка удаления",
     "maxReached": "Максимум {max} вложений",
     "noAttachments": "Нет вложений",
-    "counter": "{count} / {max}"
+    "counter": "{count} / {max}",
+    "uploadAttachment": "Загрузить вложение"
   },
   "showings": {
     "title": "Показы",

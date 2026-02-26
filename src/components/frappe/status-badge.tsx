@@ -77,6 +77,7 @@ export const StatusBadge = memo(function StatusBadge({
         size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
         className
       )}
+      aria-label={`Status: ${displayLabel}`}
     >
       {showDot && (
         <span className={cn("rounded-full shrink-0", colors.dot, size === "sm" ? "h-1.5 w-1.5" : "h-2 w-2")} />

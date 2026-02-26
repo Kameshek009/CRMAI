@@ -303,7 +303,7 @@ export function AppSidebar() {
 
         {/* CRM and Tools groups (customizable) */}
         {customizableGroups.map(({ group, effectiveItems }) => (
-          <SidebarGroup key={group.groupKey}>
+          <SidebarGroup key={group.groupKey} aria-label={group.labelKey ? t(group.labelKey) : undefined}>
             {group.labelKey && (
               <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group/label">
                 <span>{t(group.labelKey)}</span>
@@ -311,6 +311,7 @@ export function AppSidebar() {
                   <button
                     onClick={() => setEditingGroup(editingGroup === group.groupKey ? null : group.groupKey!)}
                     className="ml-auto opacity-0 group-hover/label:opacity-100 transition-opacity p-0.5 rounded hover:bg-muted"
+                    aria-label={`Edit ${t(group.labelKey!)} section`}
                   >
                     <Pencil className="size-3 text-muted-foreground" />
                   </button>
