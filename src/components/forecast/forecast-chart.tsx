@@ -38,7 +38,7 @@ export const ForecastChart = memo(function ForecastChart({
               borderRadius: "8px",
               fontSize: "12px",
             }}
-            formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+            formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, "Revenue"]}
           />
           <Area
             type="monotone"

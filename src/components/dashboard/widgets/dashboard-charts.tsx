@@ -83,7 +83,7 @@ export const DashboardCharts = memo(function DashboardCharts({ revenueTrend, tas
                   fontSize: "12px",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                 }}
-                formatter={(value: number) => [`$${value.toLocaleString()}`, t("crm.dashboard.charts.revenueLabel")]}
+                formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, t("crm.dashboard.charts.revenueLabel")]}
                 labelFormatter={(label) => new Date(String(label)).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
               />
               <Area

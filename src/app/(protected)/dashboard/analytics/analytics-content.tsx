@@ -389,7 +389,7 @@ export function AnalyticsContent() {
                     <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
                     <Tooltip
                       contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, t("crm.analytics.charts.revenue")]}
+                      formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, t("crm.analytics.charts.revenue")]}
                     />
                     <Bar dataKey="revenue" fill="url(#revenueBarGrad)" radius={[6, 6, 0, 0]} />
                   </BarChart>
@@ -425,9 +425,9 @@ export function AnalyticsContent() {
                       <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
                       <Tooltip
                         contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
-                        formatter={(value: number, name: string) => {
-                          if (name === "value") return [`$${value.toLocaleString()}`, t("crm.analytics.charts.value")];
-                          return [value, t("crm.analytics.charts.deals")];
+                        formatter={(value: number | undefined, name: string | undefined) => {
+                          if (name === "value") return [`$${(value ?? 0).toLocaleString()}`, t("crm.analytics.charts.value")];
+                          return [value ?? 0, t("crm.analytics.charts.deals")];
                         }}
                       />
                       <Bar dataKey="value" radius={[0, 6, 6, 0]}>
