@@ -159,8 +159,8 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
         await supabase
           .from("team_members")
           .update({ status: "active" })
-          .eq("id", anyMembers[0].id);
-        logger.info("WorkspaceContext", `Self-repair: reactivated membership ${anyMembers[0].id}`);
+          .eq("id", anyMembers[0]!.id);
+        logger.info("WorkspaceContext", `Self-repair: reactivated membership ${anyMembers[0]!.id}`);
       } else {
         // Recreate owner membership — find Owner role
         const { data: ownerRoles } = await supabase
@@ -175,7 +175,7 @@ async function fetchWorkspaceContext(userId: string): Promise<WorkspaceContextRe
           const insertData: Record<string, unknown> = {
             team_id: account.current_team_id,
             account_id: account.id,
-            role_id: ownerRoles[0].id,
+            role_id: ownerRoles[0]!.id,
             is_director: true,
             status: "active",
           };

@@ -40,7 +40,7 @@ export async function GET(
     });
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1] ?? "";
   let clerkUserId: string;
 
   try {

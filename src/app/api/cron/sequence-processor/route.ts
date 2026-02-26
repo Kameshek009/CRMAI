@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
           completed++;
         } else {
           // Calculate next send time
-          const nextStep = steps[nextStepIndex];
+          const nextStep = steps[nextStepIndex]!;
           const nextSendAt = new Date();
           nextSendAt.setDate(nextSendAt.getDate() + nextStep.delay_days);
 

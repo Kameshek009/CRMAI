@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     const actionBreakdown: Record<string, number> = {};
 
     records?.forEach((record) => {
-      const date = new Date(record.created_at).toISOString().split("T")[0];
+      const date = new Date(record.created_at).toISOString().split("T")[0] ?? "";
       dailyUsage[date] = (dailyUsage[date] || 0) + record.tokens_consumed;
       actionBreakdown[record.action_type] =
         (actionBreakdown[record.action_type] || 0) + record.tokens_consumed;

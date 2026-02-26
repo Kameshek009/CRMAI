@@ -48,7 +48,7 @@ export const TaskItem = memo(function TaskItem({
   const isDone = status === "done";
   const isInProgress = status === "in_progress";
   const isOverdue = dueDate && new Date(dueDate) < new Date() && !isDone;
-  const config = priorityConfig[priority] || priorityConfig.medium;
+  const config = priorityConfig[priority] ?? priorityConfig["medium"]!;
 
   return (
     <div className={cn(
@@ -59,7 +59,7 @@ export const TaskItem = memo(function TaskItem({
       selected && "ring-2 ring-primary/40 bg-primary/5 shadow-md"
     )}>
       {/* Priority indicator line */}
-      <div className={cn("w-1 self-stretch rounded-full -ml-1 shrink-0", config.dot, isDone && "opacity-30")} />
+      <div className={cn("w-1 self-stretch rounded-full -ml-1 shrink-0", config?.dot, isDone && "opacity-30")} />
 
       {selectable ? (
         <Checkbox
@@ -90,7 +90,7 @@ export const TaskItem = memo(function TaskItem({
           )}
         </div>
         <div className="flex items-center gap-2 mt-2">
-          <Badge variant="outline" className={cn("text-[10px] px-2 py-0", config.badge)}>
+          <Badge variant="outline" className={cn("text-[10px] px-2 py-0", config?.badge)}>
             {priority}
           </Badge>
           <span className="text-[11px] text-muted-foreground capitalize">{type.replace("_", " ")}</span>

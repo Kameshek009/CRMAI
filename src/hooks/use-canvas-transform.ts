@@ -99,8 +99,8 @@ export function useCanvasTransform() {
 
   const getTouchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
+    const dx = touches[0]!.clientX - touches[1]!.clientX;
+    const dy = touches[0]!.clientY - touches[1]!.clientY;
     return Math.sqrt(dx * dx + dy * dy);
   };
 
@@ -109,7 +109,7 @@ export function useCanvasTransform() {
       lastTouchDistance.current = getTouchDistance(e.touches);
     } else if (e.touches.length === 1) {
       isPanning.current = true;
-      lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      lastPosition.current = { x: e.touches[0]!.clientX, y: e.touches[0]!.clientY };
     }
   }, []);
 
@@ -126,9 +126,9 @@ export function useCanvasTransform() {
       }
       lastTouchDistance.current = dist;
     } else if (e.touches.length === 1 && isPanning.current) {
-      const dx = e.touches[0].clientX - lastPosition.current.x;
-      const dy = e.touches[0].clientY - lastPosition.current.y;
-      lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      const dx = e.touches[0]!.clientX - lastPosition.current.x;
+      const dy = e.touches[0]!.clientY - lastPosition.current.y;
+      lastPosition.current = { x: e.touches[0]!.clientX, y: e.touches[0]!.clientY };
 
       setTransform((prev) => ({
         ...prev,

@@ -232,7 +232,7 @@ export async function updateSubscription(
   return stripe.subscriptions.update(subscriptionId, {
     items: [
       {
-        id: subscription.items.data[0].id,
+        id: subscription.items.data[0]!.id,
         price: newPriceId,
       },
     ],

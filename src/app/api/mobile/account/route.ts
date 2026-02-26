@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1] ?? "";
 
     // Verify token with Clerk SDK
     try {

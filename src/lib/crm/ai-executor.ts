@@ -701,7 +701,7 @@ async function updateDeal(
     updates.status = String(args.status);
     changes.push(`status -> "${args.status}"`);
     if (args.status === "won") {
-      updates.actual_close_date = new Date().toISOString().split("T")[0];
+      updates.actual_close_date = new Date().toISOString().split("T")[0] ?? "";
       changes.push("actual close date set to today");
     }
   }

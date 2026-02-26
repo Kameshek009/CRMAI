@@ -37,7 +37,7 @@ export async function verifyMobileAuth(
     };
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1] ?? "";
 
   // Verify Clerk JWT
   let clerkUserId: string;

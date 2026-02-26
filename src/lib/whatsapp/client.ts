@@ -67,7 +67,7 @@ export class WhatsAppClient {
         }),
       }
     );
-    return data.messages[0].id;
+    return data.messages[0]!.id;
   }
 
   async sendTemplateMessage(
@@ -100,7 +100,7 @@ export class WhatsAppClient {
         }),
       }
     );
-    return data.messages[0].id;
+    return data.messages[0]!.id;
   }
 
   async markAsRead(messageId: string): Promise<void> {

@@ -245,6 +245,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
       if (isOwner) return true;
       // permission format: "resource.action" e.g. "contacts.create", "pipeline.manage"
       const [resource, action] = permission.split(".");
+      if (!resource || !action) return false;
       const resourcePerms = permissions[resource as keyof WorkspacePermissions];
       if (!resourcePerms) return false;
       return (resourcePerms as Record<string, boolean>)[action] === true;
