@@ -221,8 +221,8 @@ function renderMarkdownLines(lines: string[]): string {
   function flushTable() {
     if (tableBuffer.length === 0) return;
 
-    if (tableBuffer.length >= 2 && isTableSeparator(tableBuffer[1])) {
-      const headerCells = parseTableRow(tableBuffer[0]);
+    if (tableBuffer.length >= 2 && isTableSeparator(tableBuffer[1]!)) {
+      const headerCells = parseTableRow(tableBuffer[0]!);
 
       let tableHtml = '<table class="markdown-table"><thead><tr>';
       headerCells.forEach((cell) => {
@@ -231,7 +231,7 @@ function renderMarkdownLines(lines: string[]): string {
       tableHtml += '</tr></thead><tbody>';
 
       for (let i = 2; i < tableBuffer.length; i++) {
-        const cells = parseTableRow(tableBuffer[i]);
+        const cells = parseTableRow(tableBuffer[i]!);
         tableHtml += '<tr>';
         cells.forEach((cell) => {
           tableHtml += '<td>' + applyInlineFormatting(escapeHtml(cell)) + '</td>';

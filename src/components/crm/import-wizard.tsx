@@ -40,7 +40,7 @@ export function ImportWizard({ open, onOpenChange, onComplete }: ImportWizardPro
       return;
     }
 
-    const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
+    const headers = lines[0]!.split(",").map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
 
     const hasNameColumn = headers.some((h) => ["first_name", "name", "email"].includes(h));
     if (!hasNameColumn) {

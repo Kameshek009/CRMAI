@@ -31,14 +31,14 @@ export function PrevNextNav({ entityType, currentId }: PrevNextNavProps) {
         if (idx === -1) return;
 
         if (idx > 0) {
-          const p = items[idx - 1];
+          const p = items[idx - 1]!;
           const label = entityType === "companies"
             ? (p.name as string)
             : `${p.first_name || ""} ${p.last_name || ""}`.trim() || (p.title as string) || "";
           setPrev({ id: p.id as string, label });
         }
         if (idx < items.length - 1) {
-          const n = items[idx + 1];
+          const n = items[idx + 1]!;
           const label = entityType === "companies"
             ? (n.name as string)
             : `${n.first_name || ""} ${n.last_name || ""}`.trim() || (n.title as string) || "";

@@ -67,7 +67,7 @@ export function ShowingsCalendar({
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
-      const d = days[i];
+      const d = days[i]!;
       return format(d, "EEEEEE", { locale: dateFnsLocale });
     });
   }, [days, dateFnsLocale]);

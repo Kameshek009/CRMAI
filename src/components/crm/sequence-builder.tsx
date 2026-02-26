@@ -92,9 +92,9 @@ export function SequenceBuilder({ open, onOpenChange, onCreated }: SequenceBuild
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               position: i,
-              delay_days: step.delay_days,
-              subject: step.subject.trim(),
-              body: step.body.trim(),
+              delay_days: step!.delay_days,
+              subject: step!.subject.trim(),
+              body: step!.body.trim(),
             }),
           });
           const stepJson = await stepRes.json();

@@ -68,7 +68,7 @@ export function HowItWorksSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
             {stepKeys.map((key, i) => {
-              const Icon = stepIcons[i];
+              const Icon = stepIcons[i]!;
               return (
                 <motion.div
                   key={key}

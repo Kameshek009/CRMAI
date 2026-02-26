@@ -28,7 +28,7 @@ export function DedupComparison({
   onMerged: (masterId: string, mergedIds: string[]) => void;
 }) {
   const { t } = useTranslation();
-  const [masterId, setMasterId] = useState<string>((group.records[0] as Record<string, string>).id);
+  const [masterId, setMasterId] = useState<string>((group.records[0] as Record<string, string> | undefined)?.id ?? "");
   const [fieldOverrides, setFieldOverrides] = useState<Record<string, unknown>>({});
   const [merging, setMerging] = useState(false);
 
@@ -40,7 +40,7 @@ export function DedupComparison({
 
   const handleMerge = async () => {
     const mergeIds = group.records
-      .map((r) => (r as Record<string, string>).id)
+      .map((r) => (r as Record<string, string>).id!)
       .filter((id) => id !== masterId);
 
     setMerging(true);
@@ -89,7 +89,7 @@ export function DedupComparison({
                 {t("crm.dedup.field")}
               </th>
               {group.records.map((r) => {
-                const id = (r as Record<string, string>).id;
+                const id = (r as Record<string, string>).id!;
                 return (
                   <th key={id} className="px-3 py-2 text-left">
                     <button
@@ -117,7 +117,7 @@ export function DedupComparison({
                   {t(`crm.dedup.fields.${field}`)}
                 </td>
                 {group.records.map((r) => {
-                  const id = (r as Record<string, string>).id;
+                  const id = (r as Record<string, string>).id!;
                   const value = (r as Record<string, unknown>)[field];
                   const isSelected =
                     fieldOverrides[field] !== undefined

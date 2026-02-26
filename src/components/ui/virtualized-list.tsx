@@ -121,7 +121,7 @@ function VirtualizedListInner<T>({
             className="absolute left-0 w-full"
             style={{ top: `${virtualRow.start}px` }}
           >
-            {renderItem(items[virtualRow.index], virtualRow.index)}
+            {renderItem(items[virtualRow.index]!, virtualRow.index)}
           </div>
         ))}
       </div>

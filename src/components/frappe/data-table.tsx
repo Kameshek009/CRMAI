@@ -100,7 +100,8 @@ export function DataTable<T extends { id: string }>({
         const start = Math.min(lastSelectedIndex, index);
         const end = Math.max(lastSelectedIndex, index);
         for (let i = start; i <= end; i++) {
-          next.add(data[i].id);
+          const item = data[i];
+          if (item) next.add(item.id);
         }
       } else {
         if (next.has(id)) {
@@ -137,7 +138,7 @@ export function DataTable<T extends { id: string }>({
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0]?.isIntersecting) {
           onLoadMore();
         }
       },

@@ -143,7 +143,9 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
 
   const updateCondition = (idx: number, key: keyof ConditionForm, val: string) => {
     const updated = [...conditions];
-    updated[idx] = { ...updated[idx], [key]: val };
+    const current = updated[idx];
+    if (!current) return;
+    updated[idx] = { ...current, [key]: val };
     setConditions(updated);
   };
 
@@ -163,7 +165,9 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
 
   const updateActionConfig = (idx: number, key: string, val: string) => {
     const updated = [...actions];
-    updated[idx] = { ...updated[idx], config: { ...updated[idx].config, [key]: val } };
+    const current = updated[idx];
+    if (!current) return;
+    updated[idx] = { ...current, config: { ...current.config, [key]: val } };
     setActions(updated);
   };
 

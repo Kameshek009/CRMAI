@@ -55,8 +55,8 @@ export const ContactCard = memo(function ContactCard({
 }: ContactCardProps) {
   const name = `${firstName} ${lastName || ""}`.trim();
   const initials = `${firstName.charAt(0)}${lastName?.charAt(0) || ""}`.toUpperCase();
-  const config = statusConfig[status] || statusConfig.lead;
-  const gradient = avatarGradients[status] || avatarGradients.lead;
+  const config = statusConfig[status] ?? statusConfig["lead"]!;
+  const gradient = avatarGradients[status] ?? avatarGradients["lead"]!;
 
   return (
     <div
@@ -83,13 +83,13 @@ export const ContactCard = memo(function ContactCard({
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background", config.dot)} />
+          <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background", config?.dot)} />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-semibold truncate text-sm">{name}</span>
-            <Badge variant="outline" className={cn("text-[10px] px-2 py-0 border badge-shimmer", config.color)}>
+            <Badge variant="outline" className={cn("text-[10px] px-2 py-0 border badge-shimmer", config?.color)}>
               {status}
             </Badge>
           </div>

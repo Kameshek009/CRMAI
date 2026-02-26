@@ -90,7 +90,7 @@ export function AgentStatusBadge({ compact = false, className }: AgentStatusBadg
             <span
               className={cn(
                 'text-xs font-semibold uppercase px-1.5 py-0.5 rounded',
-                MODE_COLORS[mode]?.[isOnline ? 'online' : 'offline'] || MODE_COLORS.chat.offline
+                MODE_COLORS[mode]?.[isOnline ? 'online' : 'offline'] || MODE_COLORS.chat!.offline
               )}
             >
               {MODE_LABELS[mode] || 'Chat'}

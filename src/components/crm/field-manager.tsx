@@ -142,9 +142,11 @@ export function FieldManager() {
   const addOption = () => { setForm({ ...form, options: [...form.options, { value: "", label: "" }] }); };
   const updateOption = (idx: number, key: "value" | "label", val: string) => {
     const updated = [...form.options];
-    updated[idx] = { ...updated[idx], [key]: val };
-    if (key === "label" && !updated[idx].value) {
-      updated[idx].value = val.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+    const current = updated[idx];
+    if (!current) return;
+    updated[idx] = { ...current, [key]: val };
+    if (key === "label" && !updated[idx]!.value) {
+      updated[idx]!.value = val.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
     }
     setForm({ ...form, options: updated });
   };

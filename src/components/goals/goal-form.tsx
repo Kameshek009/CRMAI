@@ -18,13 +18,13 @@ function getDateRange(period: string): { start: string; end: string } {
   if (period === "monthly") {
     const start = new Date(year, month, 1);
     const end = new Date(year, month + 1, 0);
-    return { start: start.toISOString().split("T")[0], end: end.toISOString().split("T")[0] };
+    return { start: start.toISOString().split("T")[0]!, end: end.toISOString().split("T")[0]! };
   }
   if (period === "quarterly") {
     const qStart = Math.floor(month / 3) * 3;
     const start = new Date(year, qStart, 1);
     const end = new Date(year, qStart + 3, 0);
-    return { start: start.toISOString().split("T")[0], end: end.toISOString().split("T")[0] };
+    return { start: start.toISOString().split("T")[0]!, end: end.toISOString().split("T")[0]! };
   }
   // yearly
   return { start: `${year}-01-01`, end: `${year}-12-31` };
