@@ -1,82 +1,60 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createContactSchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
 import { runAutomations } from "@/lib/crm/automation-engine";
-import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "read", context.isOwner);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "read" },
+    logTag: "Contacts",
+  },
+  async (request, ctx) => {
     const url = new URL(request.url);
     const params = parseListParams(url);
-
     const supabase = createSupabaseAdmin();
 
     let query = supabase
       .from("contacts")
       .select("*, companies(id, name)", { count: "exact" })
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false);
 
     query = applyListQuery(query, "contacts", params, ["first_name", "last_name", "email"]);
 
     const { data, error: dbError, count } = await query;
 
-    if (dbError) {
-      logger.error("Contacts", "Failed to fetch contacts", dbError);
-      return NextResponse.json({ success: false, error: "Failed to fetch contacts" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to fetch contacts", 500);
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch (error) {
-    logger.error("Contacts", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "create", context.isOwner);
-    if (permError) return permError;
-
-    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "contacts");
-    if (limitError) return limitError;
-
-    const body = await request.json();
-    const parsed = createContactSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "create" },
+    featureLimit: "contacts",
+    bodySchema: createContactSchema,
+    logTag: "Contacts",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("contacts")
-      .insert({ account_id: context.accountId, team_id: context.workspaceId, ...parsed.data })
+      .insert({ account_id: ctx.accountId, team_id: ctx.workspaceId, ...body })
       .select("*, companies(id, name)")
       .single();
 
-    if (dbError) {
-      logger.error("Contacts", "Failed to create contact", dbError);
-      return NextResponse.json({ success: false, error: "Failed to create contact" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to create contact", 500);
 
     // Log activity
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.workspaceId,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
         contact_id: data.id,
         company_id: data.company_id,
         type: "contact_created",
@@ -84,19 +62,17 @@ export async function POST(request: NextRequest) {
       });
     } catch (e) { logger.error("Contacts", "Failed to log activity", e); }
 
-    // Audit log
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "contact",
       entityId: data.id,
       action: "create",
     });
 
-    // Run automations (fire-and-forget)
     runAutomations({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       triggerType: "record_created",
       entityType: "contact",
       entityId: data.id,
@@ -104,8 +80,5 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Contacts", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

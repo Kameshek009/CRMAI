@@ -1,27 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { updateDealStageSchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "deals", "update", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
-    const body = await request.json();
-    const parsed = updateDealStageSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
-    }
-
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "deals", action: "update" },
+    bodySchema: updateDealStageSchema,
+    logTag: "Deals",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     const supabase = createSupabaseAdmin();
 
     // Get current deal (only if not soft-deleted)
@@ -29,7 +19,7 @@ export async function PATCH(
       .from("deals")
       .select("id, title, stage_id, value")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -41,8 +31,8 @@ export async function PATCH(
     const { data: newStage } = await supabase
       .from("deal_stages")
       .select("id, name, is_won, is_lost")
-      .eq("id", parsed.data.stage_id)
-      .eq("team_id", context.teamId)
+      .eq("id", body.stage_id)
+      .eq("team_id", ctx.workspaceId)
       .single();
 
     if (!newStage) {
@@ -50,18 +40,18 @@ export async function PATCH(
     }
 
     // Update deal
-    const updateData: Record<string, unknown> = { stage_id: parsed.data.stage_id };
+    const updateData: Record<string, unknown> = { stage_id: body.stage_id };
     if (newStage.is_won) {
       updateData.status = "won";
       updateData.actual_close_date = new Date().toISOString().split("T")[0];
     } else if (newStage.is_lost) {
       updateData.status = "lost";
       updateData.actual_close_date = new Date().toISOString().split("T")[0];
-      if (parsed.data.lost_reason_id) {
-        updateData.lost_reason_id = parsed.data.lost_reason_id;
+      if (body.lost_reason_id) {
+        updateData.lost_reason_id = body.lost_reason_id;
       }
-      if (parsed.data.lost_reason_note) {
-        updateData.lost_reason_note = parsed.data.lost_reason_note;
+      if (body.lost_reason_note) {
+        updateData.lost_reason_note = body.lost_reason_note;
       }
     } else {
       updateData.status = "open";
@@ -71,20 +61,17 @@ export async function PATCH(
       .from("deals")
       .update(updateData)
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .select("*, deal_stages(id, name, color)")
       .single();
 
-    if (dbError) {
-      logger.error("Deals", "Failed to update stage", dbError);
-      return NextResponse.json({ success: false, error: "Failed to update stage" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to update stage", 500);
 
     // Log activity
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
         deal_id: id,
         type: newStage.is_won ? "deal_won" : newStage.is_lost ? "deal_lost" : "deal_stage_changed",
         title: `Deal "${deal.title}" moved to ${newStage.name}`,
@@ -97,8 +84,5 @@ export async function PATCH(
     } catch (e) { logger.error("Deals", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
-    logger.error("Deals", "Stage update error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

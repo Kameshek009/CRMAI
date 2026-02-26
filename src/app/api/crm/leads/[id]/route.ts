@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit } from "@/lib/crm/audit";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 const updateLeadSchema = z.object({
   first_name: z.string().min(1).max(100).optional(),
@@ -22,18 +21,13 @@ const updateLeadSchema = z.object({
   lead_owner_account_id: z.string().uuid().optional().nullable(),
 });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "read", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  {
+    permission: { resource: "leads", action: "read" },
+    logTag: "Leads",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
     }
@@ -43,7 +37,7 @@ export async function GET(
       .from("leads")
       .select("*")
       .eq("id", id)
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -52,75 +46,51 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (err) {
-    logger.error("Leads", "GET[id] error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "update", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "leads", action: "update" },
+    bodySchema: updateLeadSchema,
+    logTag: "Leads",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
-    }
-
-    const body = await request.json();
-    const parsed = updateLeadSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("leads")
-      .update(parsed.data)
+      .update(body)
       .eq("id", id)
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .select("*")
       .single();
 
-    if (dbError) {
-      logger.error("Leads", "PATCH error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to update lead" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to update lead", 500);
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "lead",
       entityId: id,
       action: "update",
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (err) {
-    logger.error("Leads", "PATCH error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "delete", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const DELETE = withApiHandler(
+  {
+    permission: { resource: "leads", action: "delete" },
+    logTag: "Leads",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
     }
@@ -128,26 +98,20 @@ export async function DELETE(
     const supabase = createSupabaseAdmin();
     const { error: dbError } = await supabase
       .from("leads")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: context.accountId })
+      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: ctx.accountId })
       .eq("id", id)
-      .eq("team_id", context.workspaceId);
+      .eq("team_id", ctx.workspaceId);
 
-    if (dbError) {
-      logger.error("Leads", "DELETE error", dbError);
-      return NextResponse.json({ success: false, error: "Failed to delete lead" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Failed to delete lead", 500);
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "lead",
       entityId: id,
       action: "delete",
     });
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    logger.error("Leads", "DELETE error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

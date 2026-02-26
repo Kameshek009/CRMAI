@@ -1,22 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { updateTaskSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logger } from "@/lib/logger";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "tasks", "read", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const GET = withApiHandler(
+  {
+    permission: { resource: "tasks", action: "read" },
+    logTag: "Tasks",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -26,7 +21,7 @@ export async function GET(
       .from("crm_tasks")
       .select("*")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -35,38 +30,26 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Tasks", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "tasks", "update", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "tasks", action: "update" },
+    bodySchema: updateTaskSchema,
+    logTag: "Tasks",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
-    }
-    const body = await request.json();
-    const parsed = updateTaskSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
 
     // If status changing to done, set completed_at
-    const updateData = { ...parsed.data } as Record<string, unknown>;
-    if (parsed.data.status === "done") {
+    const updateData = { ...body } as Record<string, unknown>;
+    if (body.status === "done") {
       updateData.completed_at = new Date().toISOString();
     }
 
@@ -74,7 +57,7 @@ export async function PATCH(
       .from("crm_tasks")
       .update(updateData)
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .select()
       .single();
 
@@ -82,12 +65,11 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
 
-    // Log activity
     try {
-      if (parsed.data.status === "done") {
+      if (body.status === "done") {
         await supabase.from("crm_activities").insert({
-          account_id: context.accountId,
-          team_id: context.teamId,
+          account_id: ctx.accountId,
+          team_id: ctx.workspaceId,
           contact_id: data.contact_id,
           deal_id: data.deal_id,
           type: "task_completed",
@@ -95,8 +77,8 @@ export async function PATCH(
         });
       } else {
         await supabase.from("crm_activities").insert({
-          account_id: context.accountId,
-          team_id: context.teamId,
+          account_id: ctx.accountId,
+          team_id: ctx.workspaceId,
           contact_id: data.contact_id,
           deal_id: data.deal_id,
           type: "task_updated",
@@ -106,24 +88,16 @@ export async function PATCH(
     } catch (e) { logger.error("Tasks", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Tasks", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "tasks", "delete", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const DELETE = withApiHandler(
+  {
+    permission: { resource: "tasks", action: "delete" },
+    logTag: "Tasks",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -133,24 +107,21 @@ export async function DELETE(
       .from("crm_tasks")
       .select("title, contact_id, deal_id")
       .eq("id", id)
-      .eq("team_id", context.teamId)
+      .eq("team_id", ctx.workspaceId)
       .single();
 
     const { error: dbError } = await supabase
       .from("crm_tasks")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: context.accountId })
+      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: ctx.accountId })
       .eq("id", id)
-      .eq("team_id", context.teamId);
+      .eq("team_id", ctx.workspaceId);
 
-    if (dbError) {
-      logger.error("Tasks", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
         contact_id: existing?.contact_id,
         deal_id: existing?.deal_id,
         type: "task_deleted",
@@ -159,8 +130,5 @@ export async function DELETE(
     } catch (e) { logger.error("Tasks", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Tasks", "DELETE error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

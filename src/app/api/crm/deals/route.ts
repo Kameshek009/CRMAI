@@ -1,84 +1,61 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { ensureDealStages } from "@/lib/crm/helpers";
 import { createDealSchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
 import { runAutomations } from "@/lib/crm/automation-engine";
-import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "deals", "read", context.isOwner);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "deals", action: "read" },
+    logTag: "Deals",
+  },
+  async (request, ctx) => {
     const url = new URL(request.url);
     const params = parseListParams(url);
-
     const supabase = createSupabaseAdmin();
-    await ensureDealStages(context.accountId, context.workspaceId);
+    await ensureDealStages(ctx.accountId, ctx.workspaceId);
 
     let query = supabase
       .from("deals")
       .select("*, deal_stages(id, name, color, position, is_won, is_lost), contacts(id, first_name, last_name), companies(id, name)", { count: "exact" })
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false);
 
     query = applyListQuery(query, "deals", params, ["title"]);
 
     const { data, error: dbError, count } = await query;
 
-    if (dbError) {
-      logger.error("Deals", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch (error) {
-    logger.error("Deals", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "deals", "create", context.isOwner);
-    if (permError) return permError;
-
-    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "deals");
-    if (limitError) return limitError;
-
-    const body = await request.json();
-    const parsed = createDealSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "deals", action: "create" },
+    featureLimit: "deals",
+    bodySchema: createDealSchema,
+    logTag: "Deals",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("deals")
-      .insert({ account_id: context.accountId, team_id: context.workspaceId, ...parsed.data })
+      .insert({ account_id: ctx.accountId, team_id: ctx.workspaceId, ...body })
       .select("*, deal_stages(id, name, color), contacts(id, first_name, last_name), companies(id, name)")
       .single();
 
-    if (dbError) {
-      logger.error("Deals", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
-    // Log activity
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.workspaceId,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
         deal_id: data.id,
         contact_id: data.contact_id,
         company_id: data.company_id,
@@ -89,16 +66,16 @@ export async function POST(request: NextRequest) {
     } catch (e) { logger.error("Deals", "Failed to log activity", e); }
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "deal",
       entityId: data.id,
       action: "create",
     });
 
     runAutomations({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       triggerType: "record_created",
       entityType: "deal",
       entityId: data.id,
@@ -106,8 +83,5 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Deals", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

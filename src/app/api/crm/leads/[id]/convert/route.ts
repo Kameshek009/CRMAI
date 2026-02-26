@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
-import { isValidUUID, ensureDealStages } from "@/lib/crm/helpers";
+import { withApiHandler } from "@/lib/crm/with-api-handler";
+import { ensureDealStages } from "@/lib/crm/helpers";
 import { logAudit } from "@/lib/crm/audit";
+import { isValidUUID } from "@/lib/crm/helpers";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 
@@ -14,26 +15,16 @@ const convertSchema = z.object({
   deal_stage_id: z.string().uuid().optional(),
 });
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "leads", "update", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const POST = withApiHandler(
+  {
+    permission: { resource: "leads", action: "update" },
+    bodySchema: convertSchema,
+    logTag: "Leads",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
-    }
-
-    const body = await request.json();
-    const parsed = convertSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
@@ -43,7 +34,7 @@ export async function POST(
       .from("leads")
       .select("*")
       .eq("id", id)
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .single();
 
@@ -55,12 +46,12 @@ export async function POST(
     let dealId: string | null = null;
 
     // Create contact
-    if (parsed.data.create_contact) {
+    if (body.create_contact) {
       const { data: contact, error: contactErr } = await supabase
         .from("contacts")
         .insert({
-          account_id: context.accountId,
-          team_id: context.workspaceId,
+          account_id: ctx.accountId,
+          team_id: ctx.workspaceId,
           first_name: lead.first_name,
           last_name: lead.last_name,
           email: lead.email,
@@ -80,14 +71,14 @@ export async function POST(
     }
 
     // Create deal
-    if (parsed.data.create_deal) {
-      let stageId = parsed.data.deal_stage_id;
+    if (body.create_deal) {
+      let stageId = body.deal_stage_id;
       if (!stageId) {
-        await ensureDealStages(context.accountId, context.workspaceId);
+        await ensureDealStages(ctx.accountId, ctx.workspaceId);
         const { data: firstStage } = await supabase
           .from("deal_stages")
           .select("id")
-          .eq("team_id", context.workspaceId)
+          .eq("team_id", ctx.workspaceId)
           .order("position")
           .limit(1)
           .single();
@@ -97,10 +88,10 @@ export async function POST(
         const { data: deal, error: dealErr } = await supabase
           .from("deals")
           .insert({
-            account_id: context.accountId,
-            team_id: context.workspaceId,
-            title: parsed.data.deal_title || `${lead.first_name} ${lead.last_name || ""}`.trim(),
-            value: parsed.data.deal_value || 0,
+            account_id: ctx.accountId,
+            team_id: ctx.workspaceId,
+            title: body.deal_title || `${lead.first_name} ${lead.last_name || ""}`.trim(),
+            value: body.deal_value || 0,
             stage_id: stageId,
             contact_id: contactId,
             status: "open",
@@ -131,8 +122,8 @@ export async function POST(
       .eq("id", id);
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "lead",
       entityId: id,
       action: "update",
@@ -144,8 +135,5 @@ export async function POST(
     });
 
     return NextResponse.json({ success: true, data: { contact_id: contactId, deal_id: dealId } });
-  } catch (err) {
-    logger.error("Leads", "Convert error", err);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

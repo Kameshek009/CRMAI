@@ -10,10 +10,10 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 // Mock team helpers
-vi.mock("@/lib/crm/team-helpers", () => ({
-  getTeamContext: vi.fn(),
-  requirePermission: vi.fn(),
-}));
+vi.mock("@/lib/crm/team-helpers", () => {
+  const getTeamContext = vi.fn();
+  return { getTeamContext, getWorkspaceContext: getTeamContext, requirePermission: vi.fn() };
+});
 
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";

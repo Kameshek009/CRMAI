@@ -5,7 +5,7 @@ import { createMockSupabase } from "@/__tests__/helpers/mock-supabase";
 import { mockTeamContext, mockAuthError, createTestRequest, mockParams } from "@/__tests__/helpers/mock-context";
 
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseAdmin: vi.fn() }));
-vi.mock("@/lib/crm/team-helpers", () => ({ getTeamContext: vi.fn(), requirePermission: vi.fn() }));
+vi.mock("@/lib/crm/team-helpers", () => { const f = vi.fn(); return { getTeamContext: f, getWorkspaceContext: f, requirePermission: vi.fn() }; });
 vi.mock("@/lib/usage/feature-limits", () => ({ requireFeatureLimit: vi.fn() }));
 vi.mock("@/lib/crm/query-builder", () => ({ parseListParams: vi.fn(), applyListQuery: vi.fn() }));
 vi.mock("@/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock all dependencies BEFORE importing the routes
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseAdmin: vi.fn() }));
-vi.mock("@/lib/crm/team-helpers", () => ({ getTeamContext: vi.fn(), requirePermission: vi.fn() }));
+vi.mock("@/lib/crm/team-helpers", () => { const f = vi.fn(); return { getTeamContext: f, getWorkspaceContext: f, requirePermission: vi.fn() }; });
 vi.mock("@/lib/crm/audit", () => ({ logAudit: vi.fn() }));
 vi.mock("@/lib/crm/helpers", () => ({ isValidUUID: vi.fn(), ensureDealStages: vi.fn() }));
 vi.mock("@/lib/crm/query-builder", () => ({ parseListParams: vi.fn(), applyListQuery: vi.fn() }));

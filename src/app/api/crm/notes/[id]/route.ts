@@ -1,38 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { updateNoteSchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logger } from "@/lib/logger";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "update", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const PATCH = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "update" },
+    bodySchema: updateNoteSchema,
+    logTag: "Notes",
+  },
+  async (_request, ctx, { body, routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
-    }
-    const body = await request.json();
-    const parsed = updateNoteSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input" }, { status: 400 });
     }
 
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("crm_notes")
-      .update(parsed.data)
+      .update(body)
       .eq("id", id)
-      .eq("team_id", context.teamId)
-      .eq("account_id", context.accountId)
+      .eq("team_id", ctx.workspaceId)
+      .eq("account_id", ctx.accountId)
       .select()
       .single();
 
@@ -42,8 +33,8 @@ export async function PATCH(
 
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
         contact_id: data.contact_id,
         deal_id: data.deal_id,
         company_id: data.company_id,
@@ -53,24 +44,16 @@ export async function PATCH(
     } catch (e) { logger.error("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Notes", "PATCH error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "delete", context.isDirector);
-    if (permError) return permError;
-
-    const { id } = await params;
+export const DELETE = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "delete" },
+    logTag: "Notes",
+  },
+  async (_request, ctx, { routeParams }) => {
+    const { id } = routeParams;
     if (!isValidUUID(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -80,26 +63,23 @@ export async function DELETE(
       .from("crm_notes")
       .select("contact_id, deal_id, company_id")
       .eq("id", id)
-      .eq("team_id", context.teamId)
-      .eq("account_id", context.accountId)
+      .eq("team_id", ctx.workspaceId)
+      .eq("account_id", ctx.accountId)
       .single();
 
     const { error: dbError } = await supabase
       .from("crm_notes")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: context.accountId })
+      .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: ctx.accountId })
       .eq("id", id)
-      .eq("team_id", context.teamId)
-      .eq("account_id", context.accountId);
+      .eq("team_id", ctx.workspaceId)
+      .eq("account_id", ctx.accountId);
 
-    if (dbError) {
-      logger.error("Notes", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
         contact_id: existing?.contact_id,
         deal_id: existing?.deal_id,
         company_id: existing?.company_id,
@@ -109,8 +89,5 @@ export async function DELETE(
     } catch (e) { logger.error("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Notes", "DELETE error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

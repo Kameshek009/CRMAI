@@ -1,80 +1,58 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createCompanySchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
-import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "companies", "read", context.isOwner);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "companies", action: "read" },
+    logTag: "Companies",
+  },
+  async (request, ctx) => {
     const url = new URL(request.url);
     const params = parseListParams(url);
-
     const supabase = createSupabaseAdmin();
 
     let query = supabase
       .from("companies")
       .select("*", { count: "exact" })
-      .eq("team_id", context.workspaceId)
+      .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false);
 
     query = applyListQuery(query, "companies", params, ["name", "industry", "domain"]);
 
     const { data, error: dbError, count } = await query;
 
-    if (dbError) {
-      logger.error("Companies", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch (error) {
-    logger.error("Companies", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "companies", "create", context.isOwner);
-    if (permError) return permError;
-
-    const limitError = await requireFeatureLimit(context.workspaceId, context.tier, "companies");
-    if (limitError) return limitError;
-
-    const body = await request.json();
-    const parsed = createCompanySchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "companies", action: "create" },
+    featureLimit: "companies",
+    bodySchema: createCompanySchema,
+    logTag: "Companies",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("companies")
-      .insert({ account_id: context.accountId, team_id: context.workspaceId, ...parsed.data })
+      .insert({ account_id: ctx.accountId, team_id: ctx.workspaceId, ...body })
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("Companies", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.workspaceId,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
         company_id: data.id,
         type: "company_created",
         title: `Company created: ${data.name}`,
@@ -82,16 +60,13 @@ export async function POST(request: NextRequest) {
     } catch (e) { logger.error("Companies", "Failed to log activity", e); }
 
     logAudit({
-      teamId: context.workspaceId,
-      accountId: context.accountId,
+      teamId: ctx.workspaceId,
+      accountId: ctx.accountId,
       entityType: "company",
       entityId: data.id,
       action: "create",
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Companies", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

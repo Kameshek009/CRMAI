@@ -1,18 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
-import { getTeamContext, requirePermission } from "@/lib/crm/team-helpers";
+import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parsePagination } from "@/lib/crm/helpers";
 import { createNoteSchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "read", context.isDirector);
-    if (permError) return permError;
-
+export const GET = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "read" },
+    logTag: "Notes",
+  },
+  async (request, ctx) => {
     const { searchParams } = new URL(request.url);
     const { limit, offset } = parsePagination(searchParams);
     const contactId = searchParams.get("contact_id");
@@ -24,8 +22,8 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("crm_notes")
       .select("*", { count: "exact" })
-      .eq("team_id", context.teamId)
-      .eq("account_id", context.accountId)
+      .eq("team_id", ctx.workspaceId)
+      .eq("account_id", ctx.accountId)
       .eq("is_deleted", false)
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false })
@@ -37,61 +35,41 @@ export async function GET(request: NextRequest) {
 
     const { data, error: dbError, count } = await query;
 
-    if (dbError) {
-      logger.error("Notes", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
     return NextResponse.json({ success: true, data, total: count });
-  } catch (error) {
-    logger.error("Notes", "GET error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const { context, error } = await getTeamContext();
-    if (error) return error;
-
-    const permError = requirePermission(context.permissions, "contacts", "create", context.isDirector);
-    if (permError) return permError;
-
-    const body = await request.json();
-    const parsed = createNoteSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: "Invalid input", details: parsed.error.issues }, { status: 400 });
-    }
-
+export const POST = withApiHandler(
+  {
+    permission: { resource: "contacts", action: "create" },
+    bodySchema: createNoteSchema,
+    logTag: "Notes",
+  },
+  async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("crm_notes")
-      .insert({ account_id: context.accountId, team_id: context.teamId, ...parsed.data })
+      .insert({ account_id: ctx.accountId, team_id: ctx.workspaceId, ...body })
       .select()
       .single();
 
-    if (dbError) {
-      logger.error("Notes", "DB error", dbError);
-      return NextResponse.json({ success: false, error: "Database operation failed" }, { status: 500 });
-    }
+    if (dbError) throw new ApiError("Database operation failed", 500);
 
-    // Log activity
     try {
       await supabase.from("crm_activities").insert({
-        account_id: context.accountId,
-        team_id: context.teamId,
-        contact_id: parsed.data.contact_id || null,
-        deal_id: parsed.data.deal_id || null,
-        company_id: parsed.data.company_id || null,
+        account_id: ctx.accountId,
+        team_id: ctx.workspaceId,
+        contact_id: body.contact_id || null,
+        deal_id: body.deal_id || null,
+        company_id: body.company_id || null,
         type: "note",
         title: "Note added",
-        description: parsed.data.content.slice(0, 200),
+        description: body.content.slice(0, 200),
       });
     } catch (e) { logger.error("Notes", "Failed to log activity", e); }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
-    logger.error("Notes", "POST error", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-}
+);

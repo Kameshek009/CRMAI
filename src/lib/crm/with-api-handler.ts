@@ -129,7 +129,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getWorkspaceContext, requirePermission } from "@/lib/crm/team-helpers";
+import { requireFeatureLimit } from "@/lib/usage/feature-limits";
 import type { WorkspaceContext, WorkspacePermissions } from "@/types/team";
+import type { FeatureLimitKey } from "@/types";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -171,6 +173,12 @@ export interface ApiHandlerOptions<
 
   /** Zod schema for URL search-params validation (for GET filters, pagination, etc.). */
   querySchema?: TQuerySchema;
+
+  /**
+   * Feature limit check — runs after permission check (for POST / create endpoints).
+   * Pass the FeatureLimitKey (e.g. "contacts", "deals").
+   */
+  featureLimit?: FeatureLimitKey;
 
   /**
    * Tag used in logger.error calls (e.g. "Contacts", "Deals").
@@ -254,7 +262,17 @@ export function withApiHandler<
         if (permError) return permError;
       }
 
-      // ── 3. Parse request body (optional) ──────────────────────────────
+      // ── 3. Feature limit check (optional) ────────────────────────────
+      if (options.featureLimit) {
+        const limitError = await requireFeatureLimit(
+          context.workspaceId,
+          context.tier,
+          options.featureLimit,
+        );
+        if (limitError) return limitError;
+      }
+
+      // ── 4. Parse request body (optional) ──────────────────────────────
       let body: z.infer<TBodySchema> = undefined as z.infer<TBodySchema>;
 
       if (options.bodySchema) {
@@ -282,7 +300,7 @@ export function withApiHandler<
         body = parsed.data as z.infer<TBodySchema>;
       }
 
-      // ── 4. Parse search params (optional) ─────────────────────────────
+      // ── 5. Parse search params (optional) ─────────────────────────────
       let query: z.infer<TQuerySchema> = undefined as z.infer<TQuerySchema>;
 
       if (options.querySchema) {
@@ -306,17 +324,17 @@ export function withApiHandler<
         query = parsed.data as z.infer<TQuerySchema>;
       }
 
-      // ── 5. Resolve dynamic route params ───────────────────────────────
+      // ── 6. Resolve dynamic route params ───────────────────────────────
       let routeParams: Record<string, string> = {};
       if (nextContext?.params) {
         routeParams = await nextContext.params;
       }
 
-      // ── 6. Execute handler ────────────────────────────────────────────
+      // ── 7. Execute handler ────────────────────────────────────────────
       return await handler(request, context, { body, query, routeParams });
 
     } catch (error) {
-      // ── 7. Error handling ─────────────────────────────────────────────
+      // ── 8. Error handling ─────────────────────────────────────────────
       if (error instanceof ApiError) {
         const responseBody: Record<string, unknown> = {
           success: false,
