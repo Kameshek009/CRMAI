@@ -90,7 +90,7 @@ export function Sidebar() {
       )}
 
       {/* Navigation Groups */}
-      <nav className="flex-1 px-4 overflow-y-auto">
+      <nav className="flex-1 px-4 overflow-y-auto" aria-label="Settings navigation">
         {navGroups.map((group, groupIndex) => (
           <div key={groupIndex}>
             {groupIndex > 0 && (
@@ -123,6 +123,7 @@ export function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
                       "flex items-center gap-4 h-10 px-4 rounded-lg text-sm transition-colors",
                       isActive

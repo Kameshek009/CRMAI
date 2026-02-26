@@ -426,7 +426,7 @@ export function ChatsContent() {
                           <h3 className="font-medium text-foreground truncate text-sm sm:text-sm">
                             {chat.title || t("crm.chats.new")}
                           </h3>
-                          <span className="text-xs text-muted-foreground/50 bg-muted px-2 py-1 rounded shrink-0">
+                          <span className="text-xs text-muted-foreground/80 bg-muted px-2 py-1 rounded shrink-0">
                             {chat.mode === 'chat' ? t("crm.chats.modeChat") : chat.mode === 'agent' ? t("crm.chats.modeAgent") : t("crm.chats.modeAuto")}
                           </span>
                           <span className="text-xs text-muted-foreground/70 shrink-0">
@@ -438,10 +438,10 @@ export function ChatsContent() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                        <span className="text-xs text-muted-foreground/60 tabular-nums hidden sm:inline">
+                        <span className="text-xs text-muted-foreground/80 tabular-nums hidden sm:inline">
                           {t("crm.chats.msgs", { count: chat.message_count })}
                         </span>
-                        <span className="text-xs text-muted-foreground/60 tabular-nums sm:hidden">
+                        <span className="text-xs text-muted-foreground/80 tabular-nums sm:hidden">
                           {chat.message_count}
                         </span>
                         <DropdownMenu>

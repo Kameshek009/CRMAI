@@ -192,17 +192,17 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
 
       {/* Footer: timestamp + tokens + delete */}
       <div className="flex items-center gap-2 mt-2 pl-8">
-        <span className="text-xs text-muted-foreground/60">
+        <span className="text-xs text-muted-foreground/80">
           {formatTime(message.created_at || new Date().toISOString())}
         </span>
         {(message.tokens_used ?? 0) > 0 && (
-          <span className="text-xs text-muted-foreground/60">
+          <span className="text-xs text-muted-foreground/80">
             {message.tokens_used} {t('crm.chats.tokens')}
           </span>
         )}
         {onDelete && !message.id.startsWith('temp-') && (
           <button
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground/60 hover:text-destructive flex items-center gap-1"
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground/80 hover:text-destructive flex items-center gap-1"
             onClick={() => onDelete(message.id)}
           >
             <Trash2 className="h-3 w-3" />

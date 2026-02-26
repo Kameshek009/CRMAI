@@ -305,7 +305,7 @@ export function AppSidebar() {
         {customizableGroups.map(({ group, effectiveItems }) => (
           <SidebarGroup key={group.groupKey} aria-label={group.labelKey ? t(group.labelKey) : undefined}>
             {group.labelKey && (
-              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 group/label">
+              <SidebarGroupLabel className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80 group/label">
                 <span>{t(group.labelKey)}</span>
                 {!isCollapsed && (
                   <button

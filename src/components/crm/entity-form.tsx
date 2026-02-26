@@ -65,6 +65,7 @@ export function EntityForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitErrorSummary, setSubmitErrorSummary] = useState("");
   const prevOpenRef = useRef(false);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export function EntityForm({
       setValues(initialValues);
       setErrors({});
       setTouched({});
+      setSubmitErrorSummary("");
     }
     prevOpenRef.current = open;
   }, [open, initialValues]);
@@ -85,7 +87,15 @@ export function EntityForm({
     });
     setErrors(newErrors);
     setTouched(Object.fromEntries(fields.map((f) => [f.name, true])));
-    return Object.keys(newErrors).length === 0;
+    const errorCount = Object.keys(newErrors).length;
+    if (errorCount > 0) {
+      setSubmitErrorSummary(
+        t("crm.entityForm.validationErrors", { count: errorCount })
+      );
+    } else {
+      setSubmitErrorSummary("");
+    }
+    return errorCount === 0;
   };
 
   const handleBlur = (field: FormField) => {
@@ -131,10 +141,18 @@ export function EntityForm({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
+        <div
+          aria-live="assertive"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {submitErrorSummary}
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {fields.map((field) => {
+          {fields.map((field, fieldIndex) => {
             const fieldId = `entity-form-${field.name}`;
             const error = touched[field.name] ? errors[field.name] : undefined;
+            const isFirstFocusable = fieldIndex === fields.findIndex((f) => f.type !== "boolean");
             return (
               <div key={field.name} className="space-y-2">
                 <label htmlFor={fieldId} className="text-sm font-medium">
@@ -162,6 +180,7 @@ export function EntityForm({
                     onBlur={() => handleBlur(field)}
                     placeholder={field.placeholder}
                     rows={3}
+                    autoFocus={isFirstFocusable}
                     className={cn(error && "border-destructive focus-visible:ring-destructive")}
                     aria-invalid={!!error}
                     aria-describedby={error ? `${fieldId}-error` : undefined}
@@ -194,6 +213,7 @@ export function EntityForm({
                     onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
                     onBlur={() => handleBlur(field)}
                     placeholder={field.placeholder}
+                    autoFocus={isFirstFocusable}
                     className={cn(error && "border-destructive focus-visible:ring-destructive")}
                     aria-invalid={!!error}
                     aria-describedby={error ? `${fieldId}-error` : undefined}

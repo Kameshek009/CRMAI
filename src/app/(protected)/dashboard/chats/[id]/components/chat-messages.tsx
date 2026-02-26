@@ -49,7 +49,7 @@ function getDateLabel(dateString: string): string {
 function DateSeparator({ label }: { label: string }) {
   return (
     <div className="flex items-center justify-center py-6">
-      <span className="text-xs text-muted-foreground/50 font-medium">{label}</span>
+      <span className="text-xs text-muted-foreground/80 font-medium">{label}</span>
     </div>
   );
 }

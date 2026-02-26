@@ -119,19 +119,19 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
               className="mb-6 flex overflow-x-auto md:mb-0 md:w-52 md:shrink-0 md:flex-col md:overflow-x-visible md:bg-transparent md:sticky md:top-24 md:self-start md:max-h-[calc(100vh-10rem)] md:overflow-y-auto"
             >
               {/* Personal */}
-              <div className="px-2 pb-1 text-[11px] font-semibold text-muted-foreground/50 tracking-wide select-none">
+              <div className="px-2 pb-1 text-xs font-semibold text-muted-foreground/80 tracking-wide select-none">
                 {t("settings.groups.personal")}
               </div>
               {renderNavItems(PERSONAL_NAV)}
 
               {/* Team */}
-              <div className="mt-3 pt-3 border-t border-border/30 px-2 pb-1 text-[11px] font-semibold text-muted-foreground/50 tracking-wide select-none">
+              <div className="mt-3 pt-3 border-t border-border/30 px-2 pb-1 text-xs font-semibold text-muted-foreground/80 tracking-wide select-none">
                 {t("settings.groups.team")}
               </div>
               {renderNavItems(TEAM_NAV)}
 
               {/* Billing */}
-              <div className="mt-3 pt-3 border-t border-border/30 px-2 pb-1 text-[11px] font-semibold text-muted-foreground/50 tracking-wide select-none">
+              <div className="mt-3 pt-3 border-t border-border/30 px-2 pb-1 text-xs font-semibold text-muted-foreground/80 tracking-wide select-none">
                 {t("settings.groups.billing")}
               </div>
               {renderNavItems(BILLING_NAV)}
