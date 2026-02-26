@@ -2,32 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { motion, useMotionValue, useTransform, animate, useSpring } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ArrowRight, Sparkles, TrendingUp, Users, DollarSign, BarChart3, Zap } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
-
-/* ---------- animated counter ---------- */
-function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, (v) => {
-    if (target >= 1000) return `${Math.round(v / 1000)}K`;
-    return Math.round(v).toString();
-  });
-  const [display, setDisplay] = useState("0");
-
-  useEffect(() => {
-    const controls = animate(count, target, { duration: 2.2, ease: "easeOut" });
-    const unsub = rounded.on("change", (v) => setDisplay(v));
-    return () => { controls.stop(); unsub(); };
-  }, [count, target, rounded]);
-
-  return (
-    <span>
-      {display}
-      {suffix}
-    </span>
-  );
-}
 
 /* ---------- floating orbs ---------- */
 function FloatingOrbs() {
@@ -422,13 +399,6 @@ function TypedText({ words }: { words: string[] }) {
 export function HeroSection() {
   const { t } = useTranslation();
 
-  const stats = [
-    { value: 10000, suffix: "+", label: t("landing.hero.stats.activeUsers") },
-    { value: 99, suffix: ".9%", label: t("landing.hero.stats.uptime") },
-    { value: 150, suffix: "M+", label: t("landing.hero.stats.dealsTracked") },
-    { value: 4, suffix: ".9/5", label: t("landing.hero.stats.userRating") },
-  ];
-
   return (
     <section className="relative min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6 pt-20 pb-12 sm:pt-28 sm:pb-20">
       <GradientMesh />
@@ -526,20 +496,6 @@ export function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* Stats row */}
-        <motion.div
-          variants={itemVariants}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 mt-4 sm:mt-6 pt-8 sm:pt-10 border-t border-white/10 dark:border-white/10 w-full max-w-3xl"
-        >
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center gap-1">
-              <span className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
-                <AnimatedNumber target={stat.value} suffix={stat.suffix} />
-              </span>
-              <span className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</span>
-            </div>
-          ))}
-        </motion.div>
       </motion.div>
 
       {/* 3D Product Preview */}
