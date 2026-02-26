@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ImagePlus, X, Loader2, ImageOff } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
@@ -89,7 +90,7 @@ export function AttachmentGallery({
         {attachments.map((att) => (
           <div key={att.id} className="relative group size-20 rounded-md overflow-hidden border">
             <a href={att.url} target="_blank" rel="noreferrer">
-              <img src={att.url} alt={att.filename} className="size-full object-cover" />
+              <Image src={att.url} alt={att.filename} fill className="object-cover" unoptimized />
             </a>
             {!readOnly && (
               <button

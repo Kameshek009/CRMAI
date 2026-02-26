@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import Image from "next/image";
 import { CheckSquare, Loader2, Phone, Mail, MapPin, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
@@ -644,7 +645,7 @@ export function TasksContent() {
                 <div className="flex flex-wrap gap-2">
                   {attachments.map((att) => (
                     <div key={att.id} className="relative group size-20 rounded-md overflow-hidden border">
-                      <img src={att.url} alt={att.filename} className="size-full object-cover" />
+                      <Image src={att.url} alt={att.filename} fill className="object-cover" unoptimized />
                       <button
                         type="button"
                         onClick={() => handlePhotoDelete(att.id)}

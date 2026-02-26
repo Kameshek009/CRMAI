@@ -4,7 +4,11 @@ import { cn } from "@/lib/utils";
 import { ArrowUp, ArrowDown, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTranslation } from "@/lib/i18n";
+
+const VIRTUALIZATION_THRESHOLD = 50;
+const ESTIMATED_ROW_HEIGHT = 44;
 
 // ============================================================================
 // Types
@@ -152,10 +156,63 @@ export function DataTable<T extends { id: string }>({
   const useInfiniteScroll = !!onLoadMore;
   const total = totalCount ?? data.length;
   const totalPages = Math.ceil(total / pageSize);
+  const shouldVirtualize = !loading && data.length >= VIRTUALIZATION_THRESHOLD;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: shouldVirtualize ? data.length : 0,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => ESTIMATED_ROW_HEIGHT,
+    overscan: 10,
+  });
+
+  const renderRow = useCallback((item: T, rowIndex: number) => (
+    <tr
+      key={item.id}
+      className={cn(
+        "border-b border-border last:border-0 transition-colors",
+        selectedIds.has(item.id) && "bg-muted/50",
+        onRowClick && "cursor-pointer hover:bg-muted/30"
+      )}
+      onClick={() => onRowClick?.(item)}
+    >
+      {selectable && (
+        <td className="px-3 py-2.5" onClick={(e) => {
+          e.stopPropagation();
+          handleSelectRow(item.id, rowIndex, e.shiftKey);
+        }}>
+          <Checkbox
+            checked={selectedIds.has(item.id)}
+            onCheckedChange={() => handleSelectRow(item.id, rowIndex, false)}
+          />
+        </td>
+      )}
+      {columns.map((col) => (
+        <td
+          key={col.key}
+          className={cn(
+            "px-3 py-2.5 text-sm",
+            col.align === "center" && "text-center",
+            col.align === "right" && "text-right"
+          )}
+        >
+          {col.render
+            ? col.render(item)
+            : (item as Record<string, unknown>)[col.key] != null
+              ? String((item as Record<string, unknown>)[col.key])
+              : "—"}
+        </td>
+      ))}
+    </tr>
+  ), [columns, selectable, selectedIds, onRowClick, handleSelectRow]);
 
   return (
     <div className={cn("rounded-lg border border-border overflow-hidden", className)}>
-      <div className="overflow-x-auto">
+      <div
+        ref={scrollContainerRef}
+        className="overflow-auto"
+        style={shouldVirtualize ? { maxHeight: "70vh" } : undefined}
+      >
         <table className="w-full">
           {/* Header */}
           <thead className="sticky top-0 z-10">
@@ -223,46 +280,26 @@ export function DataTable<T extends { id: string }>({
                   {resolvedEmptyMessage}
                 </td>
               </tr>
+            ) : shouldVirtualize ? (
+              <>
+                {virtualizer.getVirtualItems().length > 0 && (
+                  <tr><td style={{ height: virtualizer.getVirtualItems()[0]!.start, padding: 0 }} /></tr>
+                )}
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const item = data[virtualRow.index]!;
+                  return renderRow(item, virtualRow.index);
+                })}
+                {virtualizer.getVirtualItems().length > 0 && (
+                  <tr>
+                    <td style={{
+                      height: virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0),
+                      padding: 0,
+                    }} />
+                  </tr>
+                )}
+              </>
             ) : (
-              data.map((item, rowIndex) => (
-                <tr
-                  key={item.id}
-                  className={cn(
-                    "border-b border-border last:border-0 transition-colors",
-                    selectedIds.has(item.id) && "bg-muted/50",
-                    onRowClick && "cursor-pointer hover:bg-muted/30"
-                  )}
-                  onClick={() => onRowClick?.(item)}
-                >
-                  {selectable && (
-                    <td className="px-3 py-2.5" onClick={(e) => {
-                      e.stopPropagation();
-                      handleSelectRow(item.id, rowIndex, e.shiftKey);
-                    }}>
-                      <Checkbox
-                        checked={selectedIds.has(item.id)}
-                        onCheckedChange={() => handleSelectRow(item.id, rowIndex, false)}
-                      />
-                    </td>
-                  )}
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={cn(
-                        "px-3 py-2.5 text-sm",
-                        col.align === "center" && "text-center",
-                        col.align === "right" && "text-right"
-                      )}
-                    >
-                      {col.render
-                        ? col.render(item)
-                        : (item as Record<string, unknown>)[col.key] != null
-                          ? String((item as Record<string, unknown>)[col.key])
-                          : "—"}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              data.map((item, rowIndex) => renderRow(item, rowIndex))
             )}
 
             {/* Loading more indicator */}

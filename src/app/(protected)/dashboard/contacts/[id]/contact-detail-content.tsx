@@ -24,7 +24,9 @@ import { EmailList } from "@/components/frappe/email-list";
 import { ChangeHistory } from "@/components/crm/change-history";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { ClickToCall } from "@/components/crm/click-to-call";
-import { WhatsAppChat } from "@/components/crm/whatsapp-chat";
+import dynamic from "next/dynamic";
+
+const WhatsAppChat = dynamic(() => import("@/components/crm/whatsapp-chat").then(m => m.WhatsAppChat));
 import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { useTranslation } from "@/lib/i18n";
 import { format } from "date-fns";

@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
       "@dnd-kit/core",
       "@dnd-kit/sortable",
       "@supabase/supabase-js",
+      "@clerk/nextjs",
+      "zod",
     ],
   },
   images: {

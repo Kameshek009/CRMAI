@@ -6,7 +6,9 @@ import { useTranslation } from "@/lib/i18n";
 import { Loader2, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { ForecastSummaryCard } from "@/components/forecast/forecast-summary-card";
-import { ForecastChart } from "@/components/forecast/forecast-chart";
+import dynamic from "next/dynamic";
+
+const ForecastChart = dynamic(() => import("@/components/forecast/forecast-chart").then(m => m.ForecastChart));
 import { StageBreakdownTable } from "@/components/forecast/stage-breakdown-table";
 
 interface ForecastData {
