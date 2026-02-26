@@ -155,6 +155,10 @@ export function ShowingsContent() {
     fetchShowings(nextPage, true);
   }, [isLoadingMore, showings.length, total, fetchShowings]);
 
+  const handleRowClick = useCallback((row: ShowingRow) => {
+    setFormMode({ type: "edit", showing: row });
+  }, []);
+
   // Load contacts and deals for form selects
   const loadFormData = useCallback(async () => {
     try {
@@ -406,7 +410,7 @@ export function ShowingsContent() {
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onRowClick={(row) => setFormMode({ type: "edit", showing: row })}
+          onRowClick={handleRowClick}
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}
           hasMore={showings.length < total}

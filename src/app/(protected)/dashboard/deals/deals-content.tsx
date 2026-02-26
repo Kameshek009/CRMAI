@@ -203,6 +203,10 @@ export function DealsContent() {
     setSortOrder(order);
   }, []);
 
+  const handleRowClick = useCallback((d: { id: string }) => {
+    router.push(`/dashboard/deals/${d.id}`);
+  }, [router]);
+
   const handleKanbanMove = async (itemId: string, toStageId: string) => {
     setDeals(prev => prev.map(d => d.id === itemId ? { ...d, stage_id: toStageId } : d));
     const res = await fetch(`/api/crm/deals/${itemId}`, {
@@ -454,7 +458,7 @@ export function DealsContent() {
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onRowClick={(d) => router.push(`/dashboard/deals/${d.id}`)}
+          onRowClick={handleRowClick}
           totalCount={total}
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}

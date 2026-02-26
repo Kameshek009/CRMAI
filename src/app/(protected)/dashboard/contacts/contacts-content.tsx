@@ -203,6 +203,10 @@ export function ContactsContent() {
     setSortOrder(order);
   }, []);
 
+  const handleRowClick = useCallback((c: { id: string }) => {
+    router.push(`/dashboard/contacts/${c.id}`);
+  }, [router]);
+
   const handleBulkDelete = async () => {
     setIsBulkLoading(true);
     try {
@@ -385,7 +389,7 @@ export function ContactsContent() {
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onRowClick={(c) => router.push(`/dashboard/contacts/${c.id}`)}
+          onRowClick={handleRowClick}
           totalCount={total}
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}

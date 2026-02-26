@@ -186,6 +186,10 @@ export function CompaniesContent() {
     setSortOrder(order);
   }, []);
 
+  const handleRowClick = useCallback((c: { id: string }) => {
+    router.push(`/dashboard/companies/${c.id}`);
+  }, [router]);
+
   const handleBulkDelete = async () => {
     setIsBulkLoading(true);
     try {
@@ -287,7 +291,7 @@ export function CompaniesContent() {
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onRowClick={(c) => router.push(`/dashboard/companies/${c.id}`)}
+          onRowClick={handleRowClick}
           totalCount={total}
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}

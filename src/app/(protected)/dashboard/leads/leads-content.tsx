@@ -162,6 +162,10 @@ export function LeadsContent() {
     setSortOrder(order);
   }, []);
 
+  const handleRowClick = useCallback((l: { id: string }) => {
+    router.push(`/dashboard/leads/${l.id}`);
+  }, [router]);
+
   const handleBulkDelete = async () => {
     setIsBulkLoading(true);
     try {
@@ -310,7 +314,7 @@ export function LeadsContent() {
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onRowClick={(l) => router.push(`/dashboard/leads/${l.id}`)}
+          onRowClick={handleRowClick}
           totalCount={total}
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}

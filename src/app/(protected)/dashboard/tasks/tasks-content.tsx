@@ -290,6 +290,11 @@ export function TasksContent() {
     setSortOrder(order);
   }, []);
 
+  const handleRowClick = useCallback((task: { id: string }) => {
+    const found = tasks.find(x => x.id === task.id);
+    if (found) setFormMode({ type: "edit", task: found });
+  }, [tasks]);
+
   const handleKanbanMove = async (itemId: string, toColumn: string) => {
     setTasks(prev => prev.map(t => t.id === itemId ? { ...t, status: toColumn } : t));
     const res = await fetch(`/api/crm/tasks/${itemId}`, {
@@ -504,10 +509,7 @@ export function TasksContent() {
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onRowClick={(task) => {
-            const found = tasks.find(x => x.id === task.id);
-            if (found) setFormMode({ type: "edit", task: found });
-          }}
+          onRowClick={handleRowClick}
           totalCount={total}
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}
