@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import { DealCard, DealCardOverlay } from "@/components/crm/deal-card";
 import type { DealForCard } from "@/components/crm/deal-card";
 
@@ -40,6 +40,10 @@ function makeDeal(overrides?: Partial<DealForCard>): DealForCard {
     ...overrides,
   };
 }
+
+afterEach(() => {
+  cleanup();
+});
 
 describe("DealCard", () => {
   it("renders deal title as a link to /dashboard/deals/{id}", () => {
