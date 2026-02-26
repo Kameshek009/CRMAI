@@ -44,7 +44,6 @@ export function FooterSection() {
         { label: t("landing.footer.columns.product.pricing"), href: "/pricing" },
         { label: t("landing.footer.columns.product.aiAssistant"), href: "/#ai" },
         { label: t("landing.footer.columns.product.howItWorks"), href: "/#how-it-works" },
-        { label: t("landing.footer.columns.product.testimonials"), href: "/#testimonials" },
       ],
     },
     {

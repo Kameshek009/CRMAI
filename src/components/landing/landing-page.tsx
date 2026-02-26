@@ -7,7 +7,6 @@ import { FeaturesSection } from "./features-section";
 import { HowItWorksSection } from "./how-it-works-section";
 import { AISection } from "./ai-section";
 import { StatsSection } from "./stats-section";
-import { TestimonialsSection } from "./testimonials-section";
 import { FAQSection } from "./faq-section";
 import { PricingSection } from "./pricing-section";
 import { CTASection } from "./cta-section";
@@ -47,8 +46,6 @@ export function LandingPage() {
         <AISection />
         <SectionDivider />
         <StatsSection />
-        <SectionDivider />
-        <TestimonialsSection />
         <SectionDivider />
         <FAQSection />
         <SectionDivider />

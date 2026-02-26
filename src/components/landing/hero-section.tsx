@@ -526,11 +526,6 @@ export function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* Sub-CTA text */}
-        <motion.p variants={itemVariants} className="text-sm text-muted-foreground">
-          {t("landing.hero.subCta")}
-        </motion.p>
-
         {/* Stats row */}
         <motion.div
           variants={itemVariants}
