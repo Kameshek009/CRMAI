@@ -44,6 +44,7 @@ export function NoteEditor({ onSubmit, placeholder }: NoteEditorProps) {
         rows={3}
         className={cn("resize-none", isOverLimit && "border-destructive focus-visible:ring-destructive")}
         aria-label="Note content"
+        autoFocus
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();

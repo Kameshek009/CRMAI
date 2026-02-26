@@ -69,7 +69,7 @@ export const GoalCard = memo(function GoalCard({
           </div>
           <div>
             <p className="text-sm font-medium">{t(`crm.goals.types.${goal.type}`)}</p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {goal.account_id ? t("crm.goals.personal") : t("crm.goals.teamWide")}
             </p>
           </div>
@@ -103,11 +103,11 @@ export const GoalCard = memo(function GoalCard({
             style={{ width: `${Math.min(pct, 100)}%` }}
           />
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1">{pct}% {t("crm.goals.complete")}</p>
+        <p className="text-xs text-muted-foreground mt-1">{pct}% {t("crm.goals.complete")}</p>
       </div>
 
       {/* Period info */}
-      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{t(`crm.goals.periods.${goal.period}`)}</span>
         <span>{new Date(goal.start_date).toLocaleDateString()} — {new Date(goal.end_date).toLocaleDateString()}</span>
       </div>

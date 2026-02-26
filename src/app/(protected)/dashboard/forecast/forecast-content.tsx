@@ -90,22 +90,22 @@ export function ForecastContent() {
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t("crm.forecast.pipelineValue")}</p>
           <p className="text-xl font-bold mt-1">${(data.totalPipelineValue / 1000).toFixed(1)}k</p>
-          <p className="text-[10px] text-muted-foreground">{data.openDealsCount} {t("crm.forecast.openDeals")}</p>
+          <p className="text-xs text-muted-foreground">{data.openDealsCount} {t("crm.forecast.openDeals")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t("crm.forecast.weightedPipeline")}</p>
           <p className="text-xl font-bold mt-1">${(data.weightedPipeline / 1000).toFixed(1)}k</p>
-          <p className="text-[10px] text-muted-foreground">{t("crm.forecast.probabilityAdjusted")}</p>
+          <p className="text-xs text-muted-foreground">{t("crm.forecast.probabilityAdjusted")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t("crm.forecast.winRate")}</p>
           <p className="text-xl font-bold mt-1">{data.winRate}%</p>
-          <p className="text-[10px] text-muted-foreground">{t("crm.forecast.historicalAvg")}</p>
+          <p className="text-xs text-muted-foreground">{t("crm.forecast.historicalAvg")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t("crm.forecast.avgCycle")}</p>
           <p className="text-xl font-bold mt-1">{data.avgCycleTime} {t("crm.forecast.days")}</p>
-          <p className="text-[10px] text-muted-foreground">{t("crm.forecast.timeToClose")}</p>
+          <p className="text-xs text-muted-foreground">{t("crm.forecast.timeToClose")}</p>
         </div>
       </div>
 

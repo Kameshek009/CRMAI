@@ -21,7 +21,7 @@ export function ForecastSummaryCard({
         {t("crm.forecast.nextDays", { days: scenario.days })}
       </p>
       <p className="text-2xl font-bold">{formatMoney(scenario.expected)}</p>
-      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <span className="text-emerald-600">{t("crm.forecast.best")}: {formatMoney(scenario.best)}</span>
         <span className="text-red-500">{t("crm.forecast.worst")}: {formatMoney(scenario.worst)}</span>
       </div>

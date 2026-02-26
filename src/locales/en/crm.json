@@ -75,6 +75,8 @@
     "quickAddFailed": "Failed to create deal",
     "totalDeals": "{count} deals",
     "addDeal": "Add deal",
+    "stageSettings": "Stage settings",
+    "quickAdd": "Quick add deal",
     "filters": {
       "title": "Filters",
       "clearAll": "Clear all",

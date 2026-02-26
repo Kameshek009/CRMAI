@@ -172,9 +172,17 @@ export function DataTable<T extends { id: string }>({
       className={cn(
         "border-b border-border last:border-0 transition-colors",
         selectedIds.has(item.id) && "bg-muted/50",
-        onRowClick && "cursor-pointer hover:bg-muted/30"
+        onRowClick && "cursor-pointer hover:bg-muted/30 focus-within:bg-muted/30"
       )}
+      tabIndex={onRowClick ? 0 : undefined}
+      role={onRowClick ? "button" : undefined}
       onClick={() => onRowClick?.(item)}
+      onKeyDown={onRowClick ? (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onRowClick(item);
+        }
+      } : undefined}
     >
       {selectable && (
         <td className="px-3 py-2.5" onClick={(e) => {

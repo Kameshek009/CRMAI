@@ -75,6 +75,8 @@
     "quickAddFailed": "Не удалось создать сделку",
     "totalDeals": "{count} сделок",
     "addDeal": "Добавить сделку",
+    "stageSettings": "Настройки этапа",
+    "quickAdd": "Быстро добавить сделку",
     "filters": {
       "title": "Фильтры",
       "clearAll": "Сбросить",

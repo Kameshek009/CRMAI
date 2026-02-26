@@ -136,7 +136,7 @@ export const StageColumn = memo(function StageColumn({
                 ${totalValue.toLocaleString()}
               </p>
               {stage.rotting_days && (
-                <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/50">
+                <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                   <Timer className="size-2.5" />
                   {stage.rotting_days}d
                 </span>
@@ -150,6 +150,7 @@ export const StageColumn = memo(function StageColumn({
                 size="icon"
                 className="size-7 text-muted-foreground hover:text-foreground"
                 onClick={() => setShowSettings(!showSettings)}
+                aria-label={t("crm.pipeline.stageSettings")}
               >
                 <Settings2 className="size-3.5" />
               </Button>
@@ -159,6 +160,7 @@ export const StageColumn = memo(function StageColumn({
               size="icon"
               className="size-7 text-muted-foreground hover:text-foreground"
               onClick={() => setShowQuickAdd(true)}
+              aria-label={t("crm.pipeline.quickAdd")}
             >
               <Plus className="size-4" />
             </Button>
@@ -189,7 +191,7 @@ export const StageColumn = memo(function StageColumn({
               <Check className="size-3.5" />
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {t("crm.pipeline.rottingHelp")}
           </p>
         </div>
