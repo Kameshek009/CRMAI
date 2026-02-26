@@ -43,5 +43,10 @@
   "pinToSidebar": "Pin to sidebar",
   "errorUnexpected": "An unexpected error occurred. Please try again or contact support if the problem persists.",
   "total": "total",
-  "noActivityYet": "No activity yet"
+  "noActivityYet": "No activity yet",
+  "offline": "No internet connection",
+  "offlineDescription": "Some features may be unavailable until you reconnect.",
+  "networkError": "Check your internet connection",
+  "insufficientPermissions": "Insufficient permissions",
+  "tooManyRequests": "Too many requests. Please wait a moment."
 }

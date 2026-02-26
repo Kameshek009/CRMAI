@@ -10,6 +10,7 @@ import { CallTimerPopup } from "@/components/crm/call-timer-popup";
 import { PostCallDialog } from "@/components/crm/post-call-dialog";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { OfflineBanner } from "@/components/offline-banner";
 
 export default async function DashboardLayout({
   children,
@@ -24,6 +25,7 @@ export default async function DashboardLayout({
           <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground">Skip to content</a>
           <AppSidebar />
           <SidebarInset>
+            <OfflineBanner />
             <header className="flex h-14 shrink-0 items-center gap-2 border-b px-8">
               <DashboardHeader />
             </header>
