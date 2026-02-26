@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -121,10 +122,11 @@ export function SearchDialog() {
     }
   }, []);
 
+  const debouncedQuery = useDebounce(query, 200);
+
   useEffect(() => {
-    const timer = setTimeout(() => search(query), 200);
-    return () => clearTimeout(timer);
-  }, [query, search]);
+    search(debouncedQuery);
+  }, [debouncedQuery, search]);
 
   // Navigate helper
   const navigate = useCallback((path: string) => {

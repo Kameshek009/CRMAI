@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { Search, SlidersHorizontal, ArrowUpDown, Download, Plus, X, Sparkles } from "lucide-react";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
 import { ViewModeSwitcher } from "./view-mode-switcher";
 import { Button } from "@/components/ui/button";
 import {
@@ -121,29 +122,26 @@ export function ViewControls({
   const { t } = useTranslation();
   const [searchFocused, setSearchFocused] = useState(false);
   const [localSearch, setLocalSearch] = useState(search);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const debouncedSearch = useDebounce(localSearch, 300);
 
   // Sync external search value → local (e.g. when cleared externally)
   useEffect(() => {
     setLocalSearch(search);
   }, [search]);
 
-  // Debounce search callback (300ms)
+  // Propagate debounced value to parent
+  useEffect(() => {
+    if (debouncedSearch !== search) {
+      onSearchChange(debouncedSearch);
+    }
+  }, [debouncedSearch, search, onSearchChange]);
+
   const handleSearchInput = useCallback(
     (value: string) => {
       setLocalSearch(value);
-      clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        onSearchChange(value);
-      }, 300);
     },
-    [onSearchChange]
+    []
   );
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => clearTimeout(debounceRef.current);
-  }, []);
 
   // Feature limit pre-check
   const limitStore = useFeatureLimitStore();
@@ -187,7 +185,7 @@ export function ViewControls({
           {localSearch && (
             <button
               type="button"
-              onClick={() => { setLocalSearch(""); clearTimeout(debounceRef.current); onSearchChange(""); }}
+              onClick={() => { setLocalSearch(""); onSearchChange(""); }}
               className="mr-1.5 rounded p-0.5 hover:bg-muted"
             >
               <X className="h-3.5 w-3.5 text-muted-foreground" />
