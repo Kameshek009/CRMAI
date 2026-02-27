@@ -38,7 +38,7 @@ export function TimeAgo({ date, className }: TimeAgoProps) {
   const [relative, setRelative] = useState(() => getRelativeTime(dateObj, locale));
 
   useEffect(() => {
-    setRelative(getRelativeTime(dateObj, locale));
+    setRelative(getRelativeTime(dateObj, locale)); // eslint-disable-line react-hooks/set-state-in-effect -- timer-driven state update
     const interval = setInterval(() => {
       setRelative(getRelativeTime(dateObj, locale));
     }, 60_000);
