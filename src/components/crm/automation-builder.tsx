@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
@@ -62,8 +63,6 @@ interface ActionForm {
   type: string;
   config: Record<string, string>;
 }
-
-const selectClasses = "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationBuilderProps) {
   const { t } = useTranslation();
@@ -199,19 +198,29 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <Label className="text-xs">{t("crm.automations.builder.trigger")}</Label>
-                <select value={triggerType} onChange={(e) => setTriggerType(e.target.value)} className={selectClasses}>
-                  {TRIGGER_TYPES.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
-                  ))}
-                </select>
+                <Select value={triggerType} onValueChange={setTriggerType}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TRIGGER_TYPES.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{t(opt.label)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">{t("crm.automations.builder.entity")}</Label>
-                <select value={entityType} onChange={(e) => setEntityType(e.target.value)} className={selectClasses}>
-                  {ENTITY_TYPES.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
-                  ))}
-                </select>
+                <Select value={entityType} onValueChange={setEntityType}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ENTITY_TYPES.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{t(opt.label)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             {triggerType === "field_changed" && (
@@ -249,15 +258,16 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                   placeholder={t("crm.automations.builder.fieldPlaceholder")}
                   className="flex-1"
                 />
-                <select
-                  value={c.operator}
-                  onChange={(e) => updateCondition(idx, "operator", e.target.value)}
-                  className={selectClasses + " w-32"}
-                >
-                  {OPERATORS.map((o) => (
-                    <option key={o.value} value={o.value}>{t(o.label)}</option>
-                  ))}
-                </select>
+                <Select value={c.operator} onValueChange={(v) => updateCondition(idx, "operator", v)}>
+                  <SelectTrigger className="h-9 w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {OPERATORS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{t(o.label)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Input
                   value={c.value}
                   onChange={(e) => updateCondition(idx, "value", e.target.value)}
@@ -286,15 +296,16 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
             {actions.map((a, idx) => (
               <div key={idx} className="space-y-2 rounded-md border p-2">
                 <div className="flex items-center gap-2">
-                  <select
-                    value={a.type}
-                    onChange={(e) => updateAction(idx, e.target.value)}
-                    className={selectClasses + " flex-1"}
-                  >
-                    {ACTION_TYPES.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{t(opt.label)}</option>
-                    ))}
-                  </select>
+                  <Select value={a.type} onValueChange={(v) => updateAction(idx, v)}>
+                    <SelectTrigger className="h-9 flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ACTION_TYPES.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{t(opt.label)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button variant="ghost" size="icon" className="size-7 text-red-600 shrink-0" onClick={() => removeAction(idx)}>
                     <Trash2 className="size-3" />
                   </Button>
@@ -307,16 +318,17 @@ export function AutomationBuilder({ open, onOpenChange, onCreated }: AutomationB
                       onChange={(e) => updateActionConfig(idx, "title", e.target.value)}
                       placeholder={t("crm.automations.builder.taskTitle")}
                     />
-                    <select
-                      value={a.config.priority || "medium"}
-                      onChange={(e) => updateActionConfig(idx, "priority", e.target.value)}
-                      className={selectClasses}
-                    >
-                      <option value="low">{t("crm.automations.builder.priorities.low")}</option>
-                      <option value="medium">{t("crm.automations.builder.priorities.medium")}</option>
-                      <option value="high">{t("crm.automations.builder.priorities.high")}</option>
-                      <option value="urgent">{t("crm.automations.builder.priorities.urgent")}</option>
-                    </select>
+                    <Select value={a.config.priority || "medium"} onValueChange={(v) => updateActionConfig(idx, "priority", v)}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">{t("crm.automations.builder.priorities.low")}</SelectItem>
+                        <SelectItem value="medium">{t("crm.automations.builder.priorities.medium")}</SelectItem>
+                        <SelectItem value="high">{t("crm.automations.builder.priorities.high")}</SelectItem>
+                        <SelectItem value="urgent">{t("crm.automations.builder.priorities.urgent")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
                 {a.type === "update_field" && (

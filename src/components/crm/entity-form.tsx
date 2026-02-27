@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
@@ -186,25 +187,36 @@ export function EntityForm({
                     aria-describedby={error ? `${fieldId}-error` : undefined}
                   />
                 ) : field.type === "select" ? (
-                  <select
-                    id={fieldId}
-                    value={values[field.name] || ""}
-                    onChange={(e) => setValues({ ...values, [field.name]: e.target.value })}
-                    onBlur={() => handleBlur(field)}
-                    className={cn(
-                      "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                      error && "border-destructive focus-visible:ring-destructive"
-                    )}
-                    aria-invalid={!!error}
-                    aria-describedby={error ? `${fieldId}-error` : undefined}
+                  <Select
+                    value={values[field.name] || undefined}
+                    onValueChange={(v) => {
+                      setValues({ ...values, [field.name]: v });
+                      setTouched((prev) => ({ ...prev, [field.name]: true }));
+                      const err = validateField(field, v, t);
+                      setErrors((prev) => {
+                        if (err) return { ...prev, [field.name]: err };
+                        const next = { ...prev };
+                        delete next[field.name];
+                        return next;
+                      });
+                    }}
                   >
-                    <option value="">{t("crm.entityForm.select")}</option>
-                    {field.options?.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger
+                      id={fieldId}
+                      className={cn(error && "border-destructive focus-visible:ring-destructive")}
+                      aria-invalid={!!error}
+                      aria-describedby={error ? `${fieldId}-error` : undefined}
+                    >
+                      <SelectValue placeholder={t("crm.entityForm.select")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {field.options?.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <Input
                     id={fieldId}

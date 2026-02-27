@@ -20,6 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import Image from "next/image";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckSquare, Loader2, Phone, Mail, MapPin, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
@@ -64,8 +65,6 @@ const PRIORITY_COLORS: Record<string, string> = {
   medium: "text-amber-600",
   low: "text-blue-600",
 };
-
-const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 const PAGE_SIZE = 50;
 
@@ -600,23 +599,32 @@ export function TasksContent() {
             {isEdit && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t("crm.tasks.fields.status")}</label>
-                <select value={formValues.status || "todo"} onChange={(e) => set("status", e.target.value)} className={selectClass}>
-                  <option value="todo">{t("crm.tasks.statuses.todo")}</option>
-                  <option value="in_progress">{t("crm.tasks.statuses.inProgress")}</option>
-                  <option value="done">{t("crm.tasks.statuses.done")}</option>
-                </select>
+                <Select value={formValues.status || "todo"} onValueChange={(v) => set("status", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">{t("crm.tasks.statuses.todo")}</SelectItem>
+                    <SelectItem value="in_progress">{t("crm.tasks.statuses.inProgress")}</SelectItem>
+                    <SelectItem value="done">{t("crm.tasks.statuses.done")}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("crm.tasks.fields.type")}</label>
-              <select value={formValues.type || ""} onChange={(e) => set("type", e.target.value)} className={selectClass}>
-                <option value="">{t("crm.entityForm.select")}</option>
-                <option value="call">{t("crm.tasks.types.call")}</option>
-                <option value="email">{t("crm.tasks.types.email")}</option>
-                <option value="meeting">{t("crm.tasks.types.meeting")}</option>
-                <option value="follow_up">{t("crm.tasks.types.followUp")}</option>
-                <option value="other">{t("crm.tasks.types.other")}</option>
-              </select>
+              <Select value={formValues.type || undefined} onValueChange={(v) => set("type", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("crm.entityForm.select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="call">{t("crm.tasks.types.call")}</SelectItem>
+                  <SelectItem value="email">{t("crm.tasks.types.email")}</SelectItem>
+                  <SelectItem value="meeting">{t("crm.tasks.types.meeting")}</SelectItem>
+                  <SelectItem value="follow_up">{t("crm.tasks.types.followUp")}</SelectItem>
+                  <SelectItem value="other">{t("crm.tasks.types.other")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {ctxField && (
               <div className="space-y-2">
@@ -629,13 +637,17 @@ export function TasksContent() {
             )}
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("crm.tasks.fields.priority")}</label>
-              <select value={formValues.priority || ""} onChange={(e) => set("priority", e.target.value)} className={selectClass}>
-                <option value="">{t("crm.entityForm.select")}</option>
-                <option value="low">{t("crm.tasks.priorities.low")}</option>
-                <option value="medium">{t("crm.tasks.priorities.medium")}</option>
-                <option value="high">{t("crm.tasks.priorities.high")}</option>
-                <option value="urgent">{t("crm.tasks.priorities.urgent")}</option>
-              </select>
+              <Select value={formValues.priority || undefined} onValueChange={(v) => set("priority", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("crm.entityForm.select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">{t("crm.tasks.priorities.low")}</SelectItem>
+                  <SelectItem value="medium">{t("crm.tasks.priorities.medium")}</SelectItem>
+                  <SelectItem value="high">{t("crm.tasks.priorities.high")}</SelectItem>
+                  <SelectItem value="urgent">{t("crm.tasks.priorities.urgent")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("crm.tasks.fields.dueDate")}</label>
