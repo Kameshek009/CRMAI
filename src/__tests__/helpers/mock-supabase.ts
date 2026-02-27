@@ -45,7 +45,7 @@ export function createMockSupabase() {
     if (queue.length > 1) {
       return queue.shift()!;
     }
-    return queue[0];
+    return queue[0]!;
   }
 
   const chain: Record<string, ReturnType<typeof vi.fn>> = {};
