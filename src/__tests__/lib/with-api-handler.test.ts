@@ -103,7 +103,7 @@ describe("withApiHandler", () => {
     const res = await handler(req);
     expect(res.status).toBe(403);
     const body = await res.json();
-    expect(body.error).toBe("Forbidden");
+    expect(body.error).toBe("Cross-origin request denied");
   });
 
   it("allows same-origin POST requests", async () => {

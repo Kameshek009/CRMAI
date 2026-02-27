@@ -1,7 +1,13 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+function getEnvOrThrow(key: string): string {
+  const value = process.env[key];
+  if (!value) throw new Error(`${key} must be configured`);
+  return value;
+}
+
+const supabaseUrl = getEnvOrThrow("NEXT_PUBLIC_SUPABASE_URL");
+const supabaseAnonKey = getEnvOrThrow("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
 /**
  * Supabase client for client-side operations

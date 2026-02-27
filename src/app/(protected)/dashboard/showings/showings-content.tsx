@@ -134,7 +134,11 @@ export function ShowingsContent() {
           setShowings(json.data);
         }
         setTotal(json.total || 0);
+      } else {
+        handleApiError(json);
       }
+    } catch (e) {
+      toast.error(t("common.error"));
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);

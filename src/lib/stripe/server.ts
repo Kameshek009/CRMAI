@@ -40,8 +40,8 @@ export const stripe = new Proxy({} as Stripe, {
  */
 export function getSeatPrices() {
   return {
-    pro: process.env.STRIPE_PRICE_PRO_SEAT || "",
-    max: process.env.STRIPE_PRICE_MAX_SEAT || "",
+    pro: process.env.STRIPE_PRICE_PRO_SEAT ?? null,
+    max: process.env.STRIPE_PRICE_MAX_SEAT ?? null,
   };
 }
 
@@ -306,11 +306,11 @@ export function constructWebhookEvent(
   payload: string | Buffer,
   signature: string
 ): Stripe.Event {
-  return stripe.webhooks.constructEvent(
-    payload,
-    signature,
-    process.env.STRIPE_WEBHOOK_SECRET!
-  );
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    throw new Error("STRIPE_WEBHOOK_SECRET is not configured");
+  }
+  return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
 }
 
 // ============================================================================

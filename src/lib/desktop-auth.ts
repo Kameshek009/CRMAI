@@ -21,7 +21,7 @@ if (!DESKTOP_SECRET) {
 
 const JWT_SECRET: string = DESKTOP_SECRET || CLERK_SECRET || "";
 if (!JWT_SECRET) {
-  logger.error("DesktopAuth", "No JWT secret configured — desktop auth will not work");
+  throw new Error("No JWT secret configured (DESKTOP_JWT_SECRET or CLERK_SECRET_KEY) — cannot start");
 }
 const ACCESS_TOKEN_EXPIRY = parseInt(process.env.DESKTOP_TOKEN_EXPIRY || "3600"); // 1 hour default
 const REFRESH_TOKEN_EXPIRY_DAYS = 365; // 1 year

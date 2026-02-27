@@ -142,9 +142,12 @@ export function ContactsContent() {
           setContacts(json.data);
         }
         setTotal(json.total || 0);
+      } else {
+        handleApiError(json);
       }
     } catch (e) {
       if (e instanceof Error && e.name === "AbortError") return;
+      toast.error(t("common.error"));
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);

@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
           team_id: teamId,
           account_id: enrollment.enrolled_by,
           contact_id: enrollment.contact_id || null,
-          from_email: "sequence@nexxuscrm.com",
+          from_email: process.env.SEQUENCE_FROM_EMAIL || "sequence@nexxuscrm.com",
           to_emails: [toEmail],
           subject: currentStep.subject,
           body_text: currentStep.body,

@@ -283,11 +283,17 @@ export function withApiHandler<
       if (["POST", "PATCH", "PUT", "DELETE"].includes(method)) {
         const origin = request.headers.get("origin");
         if (origin) {
-          const allowed = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-          const allowedOrigin = new URL(allowed).origin;
-          if (new URL(origin).origin !== allowedOrigin) {
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+          if (!appUrl) {
+            logger.error(tag, "NEXT_PUBLIC_APP_URL is not set — CSRF check cannot proceed");
             return NextResponse.json(
-              { success: false, error: "Forbidden" },
+              { success: false, error: "Server configuration error" },
+              { status: 500 },
+            );
+          }
+          if (new URL(origin).origin !== new URL(appUrl).origin) {
+            return NextResponse.json(
+              { success: false, error: "Cross-origin request denied" },
               { status: 403 },
             );
           }

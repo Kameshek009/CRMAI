@@ -12,8 +12,11 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
  * access, and input validation is handled at the API route level via Zod schemas.
  */
 export function createSupabaseAdmin(): SupabaseClient {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured");
+  }
 
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
