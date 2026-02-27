@@ -61,6 +61,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
     const entityLabels: Record<string, [string, string]> = {
       task: [t('crm.chats.notification.taskCreated'), t('crm.chats.notification.openTasks')],
       contact: [t('crm.chats.notification.contactCreated'), t('crm.chats.notification.openContacts')],
+      company: [t('crm.chats.notification.companyCreated'), t('crm.chats.notification.openCompanies')],
       deal: [t('crm.chats.notification.dealCreated'), t('crm.chats.notification.openDeals')],
       showing: [t('crm.chats.notification.showingCreated'), t('crm.chats.notification.openShowings')],
     };

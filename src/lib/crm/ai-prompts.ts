@@ -25,6 +25,7 @@ RULES:
 You can:
 - Create contacts (with name, email, phone, company, etc.)
 - Update existing contacts (change email, phone, status, company, etc.)
+- Create companies / organizations (with name, industry, phone, email, etc.)
 - Create deals in the pipeline (with value, stage, expected close date)
 - Update deals (change value, stage, status, close date)
 - Create tasks (calls, emails, meetings, follow-ups)
@@ -59,6 +60,27 @@ export const CRM_TOOLS = [
           company_name: { type: "string", description: "Company name (will find or create)" },
           source: { type: "string", description: "Lead source (website, referral, cold_call, etc.)" },
           count: { type: "number", description: "Number of contacts to create (for bulk, max 50)" },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "create_company",
+      description: "Create one or more companies/organizations in the CRM. Use count parameter for bulk creation (names auto-generated).",
+      parameters: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Company name" },
+          industry: { type: "string", description: "Industry (e.g. Technology, Real Estate, Finance)" },
+          phone: { type: "string", description: "Company phone number" },
+          email: { type: "string", description: "Company email" },
+          address: { type: "string", description: "Company address" },
+          website: { type: "string", description: "Company website URL" },
+          size: { type: "string", description: "Company size (e.g. 1-10, 11-50, 51-200)" },
+          count: { type: "number", description: "Number of companies to create (for bulk, max 50)" },
         },
         required: [],
       },

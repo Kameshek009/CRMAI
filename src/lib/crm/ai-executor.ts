@@ -25,6 +25,8 @@ export async function executeCrmToolCall(
   switch (functionName) {
     case "create_contact":
       return createContact(supabase, accountId, teamId, args);
+    case "create_company":
+      return createCompany(supabase, accountId, teamId, args);
     case "create_deal":
       return createDeal(supabase, accountId, teamId, args);
     case "create_task":
@@ -201,6 +203,100 @@ async function createContact(
     success: true,
     result: `Created ${contacts.length} contacts`,
     data: { items: contacts, count: contacts.length },
+  };
+}
+
+// Sample company names for bulk creation
+const COMPANY_NAMES = [
+  "TechStar", "GreenWave", "AeroSoft", "DataBridge", "NexaGroup",
+  "BlueVista", "CloudPeak", "IronForge", "SmartHub", "PrimeCore",
+  "EverGrow", "SkyLab", "NovaEdge", "PulseNet", "ZenithPro",
+  "BoldWorks", "SwiftLine", "CorePath", "BrightSide", "CrystalNet",
+  "FusionTech", "Olympia", "AlphaWave", "TrueNorth", "SolarGrid",
+  "RapidFlow", "InnoVault", "MetaLink", "EliteForce", "OmniTrade",
+  "VectorAI", "FortisGroup", "AquaPrime", "QuantumEdge", "SilverOak",
+  "PeakLogic", "EchoStar", "NetBridge", "GlobalSync", "TitanWorks",
+  "ProAxis", "UltraGen", "SummitOne", "FlexiCore", "CyberNova",
+  "HelixTech", "StarField", "MegaPulse", "PinnacleSoft", "ArcVenture",
+];
+
+async function createCompany(
+  supabase: SupabaseClient,
+  accountId: string,
+  teamId: string,
+  args: Record<string, unknown>
+) {
+  const count = Math.min(Math.max(1, Number(args.count) || 1), 50);
+
+  if (count === 1) {
+    const { data: company, error } = await supabase
+      .from("companies")
+      .insert({
+        account_id: accountId,
+        team_id: teamId,
+        name: String(args.name || "New Company"),
+        industry: args.industry ? String(args.industry) : null,
+        phone: args.phone ? String(args.phone) : null,
+        email: args.email ? String(args.email) : null,
+        address: args.address ? String(args.address) : null,
+        website: args.website ? String(args.website) : null,
+        size: args.size ? String(args.size) : null,
+      })
+      .select("id, name")
+      .single();
+
+    if (error) {
+      return { success: false, result: `Failed to create company: ${error.message}` };
+    }
+
+    await logActivity(supabase, {
+      account_id: accountId,
+      team_id: teamId,
+      company_id: company.id,
+      type: "company_created",
+      title: `Company created: ${company.name}`,
+    });
+
+    return {
+      success: true,
+      result: `Created company "${company.name}"`,
+      data: company,
+    };
+  }
+
+  // Bulk creation
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    rows.push({
+      account_id: accountId,
+      team_id: teamId,
+      name: `${COMPANY_NAMES[i % COMPANY_NAMES.length]} ${Math.floor(i / COMPANY_NAMES.length) > 0 ? Math.floor(i / COMPANY_NAMES.length) + 1 : ""}`.trim(),
+      industry: args.industry ? String(args.industry) : null,
+      phone: args.phone ? String(args.phone) : null,
+      email: args.email ? String(args.email) : null,
+    });
+  }
+
+  const { data: companies, error } = await supabase
+    .from("companies")
+    .insert(rows)
+    .select("id, name");
+
+  if (error) {
+    return { success: false, result: `Failed to create companies: ${error.message}` };
+  }
+
+  await logActivity(supabase, {
+    account_id: accountId,
+    team_id: teamId,
+    type: "company_created",
+    title: `Bulk created ${companies.length} companies`,
+  });
+
+  return {
+    success: true,
+    result: `Created ${companies.length} companies`,
+    data: { items: companies, count: companies.length },
   };
 }
 
