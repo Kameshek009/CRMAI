@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { logger } from "@/lib/logger";
 
-export default function GlobalError({
+export default function AppError({
   error,
   reset,
 }: {
@@ -12,7 +12,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    logger.error("GlobalError", "Unhandled error", error);
+    logger.error("AppError", "Unhandled error", error);
   }, [error]);
 
   return (
@@ -22,6 +22,11 @@ export default function GlobalError({
         <p className="text-muted-foreground">
           An unexpected error occurred. Please try again.
         </p>
+        <pre className="text-left text-xs text-red-600 bg-muted p-4 rounded overflow-auto max-w-lg">
+          {error.message}
+          {"\n\n"}
+          {error.stack}
+        </pre>
         <div className="flex gap-3 justify-center">
           <button
             onClick={reset}
