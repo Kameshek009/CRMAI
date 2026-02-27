@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   useSidebarConfigStore,
@@ -6,8 +5,9 @@ import {
   getAllItemsForEditor,
 } from "@/stores/sidebar-config-store";
 import type { SidebarConfig } from "@/types/sidebar";
+import type { LucideIcon } from "lucide-react";
 
-const FakeIcon = (() => null) as unknown as React.ComponentType;
+const FakeIcon = (() => null) as unknown as LucideIcon;
 
 const staticItems = [
   { key: "contacts", labelKey: "nav.contacts", href: "/contacts", icon: FakeIcon },
@@ -82,11 +82,11 @@ describe("getEffectiveItems", () => {
     const result = getEffectiveItems("crm", staticItems, config);
 
     expect(result).toHaveLength(3);
-    expect(result[0].key).toBe("contacts");
-    expect(result[1].key).toBe("deals");
-    expect(result[1].visible).toBe(true);
-    expect(result[2].key).toBe("tasks");
-    expect(result[2].visible).toBe(true);
+    expect(result[0]!.key).toBe("contacts");
+    expect(result[1]!.key).toBe("deals");
+    expect(result[1]!.visible).toBe(true);
+    expect(result[2]!.key).toBe("tasks");
+    expect(result[2]!.visible).toBe(true);
   });
 
   it("config references item not in static -> skipped", () => {
@@ -103,7 +103,7 @@ describe("getEffectiveItems", () => {
     const result = getEffectiveItems("crm", staticItems, config);
 
     expect(result).toHaveLength(3);
-    expect(result[0].key).toBe("contacts");
+    expect(result[0]!.key).toBe("contacts");
     expect(result.find((r) => r.key === "nonexistent")).toBeUndefined();
   });
 
