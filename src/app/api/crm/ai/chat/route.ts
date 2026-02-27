@@ -140,85 +140,87 @@ export async function POST(request: NextRequest) {
     ];
 
     let realTokensUsed = 0;
-
-    let completion;
-    try {
-      completion = await groq.chat.completions.create({
-        messages,
-        model: "llama-3.3-70b-versatile",
-        temperature: 0.3,
-        max_completion_tokens: 4096,
-        tools: CRM_TOOLS,
-        stream: false,
-      });
-    } catch (groqErr) {
-      // If tool call failed (LLM generated invalid tool args), retry without tools
-      const errBody = groqErr instanceof Error ? groqErr.message : String(groqErr);
-      if (errBody.includes("tool_use_failed") || errBody.includes("tool call validation")) {
-        logger.warn("CrmAI", "Tool call failed, retrying without tools", errBody);
-        completion = await groq.chat.completions.create({
-          messages,
-          model: "llama-3.3-70b-versatile",
-          temperature: 0.3,
-          max_completion_tokens: 4096,
-          stream: false,
-        });
-      } else {
-        throw groqErr;
-      }
-    }
-
-    realTokensUsed += completion.usage?.total_tokens || 0;
-
-    const choice = completion.choices[0];
-    const toolCalls = choice?.message?.tool_calls;
-
-    let responseContent: string;
+    let responseContent: string = "";
     let toolResults: { name: string; success: boolean; result: string; data?: unknown }[] = [];
     const executedTools: { name: string; args?: Record<string, unknown> }[] = [];
 
-    if (toolCalls && toolCalls.length > 0) {
+    // Multi-round tool calling loop — LLM may need several rounds
+    // (e.g. create contacts first, then create deals in a second round)
+    const MAX_TOOL_ROUNDS = 3;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const conversationMessages: any[] = [...messages];
+
+    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      let completion;
+      try {
+        completion = await groq.chat.completions.create({
+          messages: conversationMessages,
+          model: "llama-3.3-70b-versatile",
+          temperature: 0.3,
+          max_completion_tokens: round === 0 ? 4096 : 1024,
+          tools: CRM_TOOLS,
+          stream: false,
+        });
+      } catch (groqErr) {
+        // If tool call failed (LLM generated invalid tool args), retry without tools
+        const errBody = groqErr instanceof Error ? groqErr.message : String(groqErr);
+        if (errBody.includes("tool_use_failed") || errBody.includes("tool call validation")) {
+          logger.warn("CrmAI", "Tool call failed, retrying without tools", errBody);
+          completion = await groq.chat.completions.create({
+            messages: conversationMessages,
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.3,
+            max_completion_tokens: 1024,
+            stream: false,
+          });
+        } else {
+          throw groqErr;
+        }
+      }
+
+      realTokensUsed += completion.usage?.total_tokens || 0;
+
+      const choice = completion.choices[0];
+      const toolCalls = choice?.message?.tool_calls;
+
+      // No tool calls — LLM returned final text response
+      if (!toolCalls || toolCalls.length === 0) {
+        responseContent = sanitizeLLMResponse(choice?.message?.content || "");
+        break;
+      }
+
+      // Execute tool calls for this round
+      const roundResults: typeof toolResults = [];
       for (const tc of toolCalls) {
         let args;
         try {
           args = JSON.parse(tc.function.arguments);
         } catch {
           logger.error("CrmAI", "Failed to parse tool arguments", tc.function);
-          toolResults.push({ name: tc.function.name, success: false, result: "Error: invalid tool call format" });
+          roundResults.push({ name: tc.function.name, success: false, result: "Error: invalid tool call format" });
           continue;
         }
         executedTools.push({ name: tc.function.name, args });
         try {
           const result = await executeCrmToolCall(context.accountId, context.teamId, tc.function.name, args);
-          toolResults.push({ name: tc.function.name, ...result });
+          roundResults.push({ name: tc.function.name, ...result });
         } catch (toolErr) {
           logger.error("CrmAI", `Tool ${tc.function.name} threw`, toolErr);
-          toolResults.push({ name: tc.function.name, success: false, result: `Error executing ${tc.function.name}` });
+          roundResults.push({ name: tc.function.name, success: false, result: `Error executing ${tc.function.name}` });
         }
       }
 
-      const toolMessages = toolCalls.map((tc, i) => ({
-        role: "tool" as const,
-        tool_call_id: tc.id,
-        content: toolResults[i]?.result ?? "",
-      }));
+      toolResults.push(...roundResults);
 
-      const finalCompletion = await groq.chat.completions.create({
-        messages: [
-          ...messages,
-          choice.message,
-          ...toolMessages,
-        ],
-        model: "llama-3.3-70b-versatile",
-        temperature: 0.3,
-        max_completion_tokens: 1024,
-        stream: false,
-      });
-
-      realTokensUsed += finalCompletion.usage?.total_tokens || 0;
-      responseContent = sanitizeLLMResponse(finalCompletion.choices[0]?.message?.content || "");
-    } else {
-      responseContent = sanitizeLLMResponse(choice?.message?.content || "");
+      // Add assistant message + tool results to conversation for next round
+      conversationMessages.push({ ...choice.message, content: choice.message.content ?? "" });
+      conversationMessages.push(
+        ...toolCalls.map((tc, i) => ({
+          role: "tool" as const,
+          tool_call_id: tc.id,
+          content: roundResults[i]?.result ?? "",
+        }))
+      );
     }
 
     // Calculate fair billable tokens based on actions performed
