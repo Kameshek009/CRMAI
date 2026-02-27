@@ -73,9 +73,9 @@ vi.mock("@/components/ui/dialog", () => ({
 
 // Mock Input
 vi.mock("@/components/ui/input", () => ({
-  Input: React.forwardRef((props: Record<string, unknown>, ref: React.Ref<HTMLInputElement>) => (
-    <input ref={ref} {...props} />
-  )),
+  Input: React.forwardRef(function MockInput(props: Record<string, unknown>, ref: React.Ref<HTMLInputElement>) {
+    return <input ref={ref} {...props} />;
+  }),
 }));
 
 afterEach(() => { cleanup(); });

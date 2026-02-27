@@ -48,9 +48,9 @@ interface MarkdownProps {
  * Enhanced Markdown renderer with syntax-highlighted code blocks
  */
 export function Markdown({ content, className }: MarkdownProps) {
-  if (!content) return null;
+  const segments = useMemo(() => content ? parseSegments(content) : [], [content]);
 
-  const segments = useMemo(() => parseSegments(content), [content]);
+  if (!content) return null;
 
   return (
     <div className={cn('markdown-content text-sm', className)}>
