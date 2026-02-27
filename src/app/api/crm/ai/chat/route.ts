@@ -188,8 +188,13 @@ export async function POST(request: NextRequest) {
           continue;
         }
         executedTools.push({ name: tc.function.name, args });
-        const result = await executeCrmToolCall(context.accountId, context.teamId, tc.function.name, args);
-        toolResults.push({ name: tc.function.name, ...result });
+        try {
+          const result = await executeCrmToolCall(context.accountId, context.teamId, tc.function.name, args);
+          toolResults.push({ name: tc.function.name, ...result });
+        } catch (toolErr) {
+          logger.error("CrmAI", `Tool ${tc.function.name} threw`, toolErr);
+          toolResults.push({ name: tc.function.name, success: false, result: `Error executing ${tc.function.name}` });
+        }
       }
 
       const toolMessages = toolCalls.map((tc, i) => ({

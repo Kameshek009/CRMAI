@@ -1,5 +1,15 @@
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { ensureDealStages } from "./helpers";
+import { logger } from "@/lib/logger";
+
+/** Non-critical activity logging — never throws */
+async function logActivity(supabase: SupabaseClient, data: Record<string, unknown>) {
+  try {
+    await supabase.from("crm_activities").insert(data);
+  } catch (err) {
+    logger.error("AI-Executor", "Failed to log activity", err);
+  }
+}
 
 /**
  * Execute a CRM AI tool call and return the result
@@ -136,7 +146,7 @@ async function createContact(
       return { success: false, result: `Failed to create contact: ${error.message}` };
     }
 
-    await supabase.from("crm_activities").insert({
+    await logActivity(supabase, {
       account_id: accountId,
       team_id: teamId,
       contact_id: contact.id,
@@ -297,7 +307,7 @@ async function createDeal(
       return { success: false, result: `Failed to create deal: ${error.message}` };
     }
 
-    await supabase.from("crm_activities").insert({
+    await logActivity(supabase, {
       account_id: accountId,
       team_id: teamId,
       deal_id: deal.id,
