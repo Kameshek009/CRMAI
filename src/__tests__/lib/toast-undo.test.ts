@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 // Helper to extract the action onClick handler from the toast.success call
 function getActionOnClick(): (() => Promise<void>) {
-  const call = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0];
+  const call = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0]!;
   return call[1].action.onClick;
 }
 
@@ -26,7 +26,7 @@ describe("toastWithUndo", () => {
     toastWithUndo("Contact deleted", "contact", "id-1");
 
     expect(toast.success).toHaveBeenCalledTimes(1);
-    expect((toast.success as ReturnType<typeof vi.fn>).mock.calls[0][0]).toBe(
+    expect((toast.success as ReturnType<typeof vi.fn>).mock.calls[0]![0]).toBe(
       "Contact deleted"
     );
   });
@@ -34,7 +34,7 @@ describe("toastWithUndo", () => {
   it("passes an action with label 'Undo' by default", () => {
     toastWithUndo("Deleted", "contact", "id-1");
 
-    const options = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0][1];
+    const options = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0]![1];
     expect(options.action.label).toBe("Undo");
   });
 
@@ -47,14 +47,14 @@ describe("toastWithUndo", () => {
 
     toastWithUndo("Удалено", "contact", "id-1", undefined, customLabels);
 
-    const options = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0][1];
+    const options = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0]![1];
     expect(options.action.label).toBe("Отменить");
   });
 
   it("sets duration to 6000", () => {
     toastWithUndo("Deleted", "contact", "id-1");
 
-    const options = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0][1];
+    const options = (toast.success as ReturnType<typeof vi.fn>).mock.calls[0]![1];
     expect(options.duration).toBe(6000);
   });
 
