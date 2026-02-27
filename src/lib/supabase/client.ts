@@ -1,13 +1,9 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-function getEnvOrThrow(key: string): string {
-  const value = process.env[key];
-  if (!value) throw new Error(`${key} must be configured`);
-  return value;
-}
-
-const supabaseUrl = getEnvOrThrow("NEXT_PUBLIC_SUPABASE_URL");
-const supabaseAnonKey = getEnvOrThrow("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+// IMPORTANT: NEXT_PUBLIC_ vars must be accessed as literal property names
+// (not via computed keys) so Next.js can inline them at build time.
+const supabaseUrl: string = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const supabaseAnonKey: string = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 /**
  * Supabase client for client-side operations
