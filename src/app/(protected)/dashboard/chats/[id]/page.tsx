@@ -320,7 +320,7 @@ export default function ChatDetailPage() {
           const entityLinks: Record<string, string> = {
             create_task: '/dashboard/tasks',
             create_contact: '/dashboard/contacts',
-            create_deal: '/dashboard/pipeline',
+            create_deal: '/dashboard/deals',
           };
           const entityTypes: Record<string, string> = {
             create_task: 'task',
