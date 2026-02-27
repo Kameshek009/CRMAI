@@ -23,7 +23,6 @@ import { CustomFieldsPanel } from "@/components/crm/custom-fields-panel";
 import { EmailList } from "@/components/frappe/email-list";
 import { ChangeHistory } from "@/components/crm/change-history";
 import { PrevNextNav } from "@/components/crm/prev-next-nav";
-import { ClickToCall } from "@/components/crm/click-to-call";
 import dynamic from "next/dynamic";
 
 const WhatsAppChat = dynamic(() => import("@/components/crm/whatsapp-chat").then(m => m.WhatsAppChat));
@@ -438,15 +437,6 @@ export function ContactDetailContent({ contactId }: { contactId: string }) {
             onSave={(v) => updateField("phone", v)}
           />
         </div>
-        {contact.phone && (
-          <ClickToCall
-            phoneNumber={contact.phone}
-            contactId={contactId}
-            contactName={name}
-            variant="icon"
-            size="sm"
-          />
-        )}
       </div>
       <InlineEditField
         label={t("crm.contacts.fields.jobTitle")}

@@ -5,9 +5,6 @@ import { WorkspaceProvider } from "@/contexts/team-context";
 
 import { WorkspaceGuard } from "@/components/auth/team-guard";
 import { CrmOverlays } from "@/components/crm/crm-overlays";
-import { CallTimerProvider } from "@/contexts/call-timer-context";
-import { CallTimerPopup } from "@/components/crm/call-timer-popup";
-import { PostCallDialog } from "@/components/crm/post-call-dialog";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineBanner } from "@/components/offline-banner";
@@ -20,7 +17,6 @@ export default async function DashboardLayout({
   return (
     <AccountProvider>
       <WorkspaceProvider>
-        <CallTimerProvider>
         <SidebarProvider defaultOpen={true}>
           <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground">Skip to content</a>
           <AppSidebar />
@@ -38,10 +34,7 @@ export default async function DashboardLayout({
             </WorkspaceGuard>
           </SidebarInset>
           <CrmOverlays />
-          <CallTimerPopup />
-          <PostCallDialog />
         </SidebarProvider>
-        </CallTimerProvider>
       </WorkspaceProvider>
     </AccountProvider>
   );
