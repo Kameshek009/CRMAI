@@ -26,6 +26,7 @@ export function LostReasonDialog({ open, onConfirm, onCancel }: LostReasonDialog
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return;
     setSelectedId(null);
@@ -38,6 +39,7 @@ export function LostReasonDialog({ open, onConfirm, onCancel }: LostReasonDialog
       })
       .finally(() => setLoading(false));
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel(); }}>

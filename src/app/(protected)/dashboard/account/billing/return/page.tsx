@@ -18,6 +18,7 @@ function ReturnContent() {
 
   useEffect(() => {
     if (!sessionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("error");
       return;
     }

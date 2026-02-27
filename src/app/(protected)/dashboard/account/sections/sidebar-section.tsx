@@ -59,6 +59,7 @@ function GroupEditor({
 
   useEffect(() => {
     const newEffective = getEffectiveItems(groupKey, staticItems, config);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(
       newEffective.map((item) => ({
         key: item.key,

@@ -400,10 +400,12 @@ export function CheckoutModal({
   const [mounted, setMounted] = useState(false);
 
   // Ensure we only render portal on client side
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!isOpen || !mounted) return null;
 

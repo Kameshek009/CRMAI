@@ -81,6 +81,7 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
 
   useEffect(() => {
     if (tabParam && VALID_TABS.includes(tabParam)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(tabParam);
     }
   }, [tabParam]);

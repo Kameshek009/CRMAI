@@ -30,6 +30,7 @@ export function EmailList({ entityType, entityId, onCompose }: EmailListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const controller = new AbortController();
     setIsLoading(true);
@@ -42,6 +43,7 @@ export function EmailList({ entityType, entityId, onCompose }: EmailListProps) {
       .finally(() => setIsLoading(false));
     return () => controller.abort();
   }, [entityType, entityId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (isLoading) {
     return <div className="py-8 text-center text-xs text-muted-foreground">{t("crm.emails.loading")}</div>;

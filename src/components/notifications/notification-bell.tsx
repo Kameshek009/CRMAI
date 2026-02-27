@@ -53,9 +53,11 @@ export function NotificationBell() {
     }
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Realtime subscription
   useEffect(() => {

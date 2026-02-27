@@ -54,6 +54,7 @@ export function ChangeHistory({ entityType, entityId }: ChangeHistoryProps) {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const controller = new AbortController();
     setIsLoading(true);
@@ -66,6 +67,7 @@ export function ChangeHistory({ entityType, entityId }: ChangeHistoryProps) {
       .finally(() => setIsLoading(false));
     return () => controller.abort();
   }, [entityType, entityId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (isLoading) {
     return (

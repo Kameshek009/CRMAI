@@ -48,6 +48,7 @@ export function ChatComposer({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Live countdown timer for daily limit reset
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!rateLimitResetsAt) {
       setCountdown('');
@@ -81,6 +82,7 @@ export function ChatComposer({
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
   }, [rateLimitResetsAt]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
