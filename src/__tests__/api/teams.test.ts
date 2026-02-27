@@ -53,7 +53,7 @@ describe("POST /api/teams", () => {
   });
 
   it("creates team successfully", async () => {
-    vi.mocked(getAccountId).mockResolvedValue({ accountId: "acc-123", error: null });
+    vi.mocked(getAccountId).mockResolvedValue({ accountId: "acc-123", teamId: "ws-test-456", error: null });
 
     // Mock: no existing team (PGRST116 = no rows)
     setResult("teams", { data: null, error: { code: "PGRST116" } });
@@ -85,6 +85,7 @@ describe("POST /api/teams", () => {
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getAccountId).mockResolvedValue({
       accountId: null,
+      teamId: null,
       error: NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 }),
     });
 
@@ -97,7 +98,7 @@ describe("POST /api/teams", () => {
   });
 
   it("returns 400 on invalid input (missing name)", async () => {
-    vi.mocked(getAccountId).mockResolvedValue({ accountId: "acc-123", error: null });
+    vi.mocked(getAccountId).mockResolvedValue({ accountId: "acc-123", teamId: "ws-test-456", error: null });
 
     const req = createTestRequest("POST", "/api/teams", {});
     const res = await POST(req);
@@ -109,7 +110,7 @@ describe("POST /api/teams", () => {
   });
 
   it("returns 409 if owner already has active team", async () => {
-    vi.mocked(getAccountId).mockResolvedValue({ accountId: "acc-123", error: null });
+    vi.mocked(getAccountId).mockResolvedValue({ accountId: "acc-123", teamId: "ws-test-456", error: null });
 
     // Mock existing team
     setResult("teams", { data: { id: "team-existing-123" }, error: null });
@@ -230,7 +231,7 @@ describe("DELETE /api/teams/[id]", () => {
   it("soft-deletes team and calls cancelSubscriptionImmediately", async () => {
     const ctx = mockTeamContext({ isDirector: true });
     vi.mocked(getTeamContext).mockResolvedValue(ctx as unknown as TeamContextReturn);
-    vi.mocked(cancelSubscriptionImmediately).mockResolvedValue(undefined);
+    vi.mocked(cancelSubscriptionImmediately).mockResolvedValue(undefined as never);
 
     // Mock team with subscription
     setResult("teams", {

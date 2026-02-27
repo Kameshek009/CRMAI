@@ -197,7 +197,7 @@ describe("Tasks API", () => {
       vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
       // First call returns null for existing task check
-      mock.chain.single.mockImplementation(() => {
+      mock.chain.single!.mockImplementation(() => {
         return Promise.resolve({ data: null });
       });
 

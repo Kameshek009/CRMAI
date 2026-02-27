@@ -234,7 +234,7 @@ describe("POST /api/billing/webhook", () => {
     // No other active subscriptions for this customer
     vi.mocked(stripe.subscriptions.list).mockResolvedValue({
       data: [],
-    } as unknown as Stripe.ApiList<Stripe.Subscription>);
+    } as never);
 
     // Team update (downgrade) succeeds
     setResult("teams", { data: null, error: null });

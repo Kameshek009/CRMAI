@@ -193,7 +193,7 @@ describe("Companies API", () => {
 
       // First call returns old record, second returns updated
       let callCount = 0;
-      mock.chain.single.mockImplementation(() => {
+      mock.chain.single!.mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return Promise.resolve({ data: oldRecord });

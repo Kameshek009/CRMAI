@@ -41,22 +41,24 @@ import {
   mockAuthError,
   createTestRequest,
 } from "../helpers/mock-context";
-import type { SafeParseReturnType } from "zod";
+type SafeParseResult<T = unknown> = { success: true; data: T } | { success: false; error: { issues: unknown[] } };
 
 // --- Helpers ---
 
-function pipelineContext(overrides?: Record<string, unknown>) {
+function pipelineContext(overrides?: Partial<import("@/types/team").WorkspaceContext>) {
   return mockTeamContext({
     permissions: {
       contacts: { read: true, create: true, update: true, delete: true },
       companies: { read: true, create: true, update: true, delete: true },
       deals: { read: true, create: true, update: true, delete: true },
       tasks: { read: true, create: true, update: true, delete: true },
+      call_logs: { read: true, create: true, update: true, delete: true },
       notes: { read: true, create: true, update: true, delete: true },
-      activities: { read: true },
-      team_settings: { manage: true },
-      analytics: { read: true },
+      leads: { read: true, create: true, update: true, delete: true },
       pipeline: { read: true, manage: true },
+      analytics: { read: true },
+      team_settings: { read: true, manage: true },
+      ai_chat: { allowed: true },
     },
     ...overrides,
   });
@@ -186,7 +188,7 @@ describe("POST /api/crm/pipeline", () => {
     vi.mocked(createPipelineStageSchema.safeParse).mockReturnValue({
       success: true,
       data: { name: "New Stage", position: 1 },
-    } as unknown as SafeParseReturnType<unknown, unknown>);
+    } as never);
 
     const { supabase, setResult } = createMockSupabase();
     const newStage = { id: "s-new", name: "New Stage", position: 1 };
@@ -211,7 +213,7 @@ describe("POST /api/crm/pipeline", () => {
     vi.mocked(createPipelineStageSchema.safeParse).mockReturnValue({
       success: false,
       error: { issues: [{ message: "Required" }] },
-    } as unknown as SafeParseReturnType<unknown, unknown>);
+    } as never);
 
     const request = createTestRequest("POST", "/api/crm/pipeline", {});
     const response = await POST(request);
@@ -262,7 +264,7 @@ describe("PATCH /api/crm/pipeline", () => {
     vi.mocked(reorderStagesSchema.safeParse).mockReturnValue({
       success: true,
       data: reorderData,
-    } as unknown as SafeParseReturnType<unknown, unknown>);
+    } as never);
 
     const { supabase, setResult } = createMockSupabase();
     // Each update call resolves via the deal_stages queue
@@ -283,7 +285,7 @@ describe("PATCH /api/crm/pipeline", () => {
     vi.mocked(reorderStagesSchema.safeParse).mockReturnValue({
       success: false,
       error: { issues: [{ message: "Required" }] },
-    } as unknown as SafeParseReturnType<unknown, unknown>);
+    } as never);
 
     const request = createTestRequest("PATCH", "/api/crm/pipeline", {});
     const response = await PATCH(request);
