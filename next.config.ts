@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
+// import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -60,15 +60,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  // Disable source map upload (no auth token needed)
-  sourcemaps: {
-    disable: true,
-  },
-
-  // Disable Sentry telemetry
-  telemetry: false,
-
-  // Suppress logs during build
-  silent: true,
-});
+export default nextConfig;
