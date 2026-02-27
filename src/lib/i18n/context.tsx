@@ -60,15 +60,20 @@ function resolveKey(obj: unknown, path: string): string | undefined {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === "undefined") return defaultLocale;
+  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
+  const isInitialized = useRef(false);
+
+  // Sync locale from localStorage after mount to avoid hydration mismatch
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "en" || stored === "ru") return stored;
+      if (stored === "en" || stored === "ru") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: read from localStorage after mount to avoid hydration mismatch
+        setLocaleState(stored);
+      }
     } catch {}
-    return defaultLocale;
-  });
-  const isInitialized = useRef(typeof window !== "undefined");
+    isInitialized.current = true;
+  }, []);
 
   // Persist locale to localStorage (skip initial render to avoid overwriting saved value)
   useEffect(() => {
