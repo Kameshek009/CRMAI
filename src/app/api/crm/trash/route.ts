@@ -8,7 +8,6 @@ const ENTITY_TABLES: Record<string, { table: string; nameField: string; selectFi
   deals: { table: "deals", nameField: "title", selectFields: "id,title,value,deleted_at,deleted_by" },
   tasks: { table: "crm_tasks", nameField: "title", selectFields: "id,title,status,deleted_at,deleted_by" },
   notes: { table: "crm_notes", nameField: "content", selectFields: "id,content,deleted_at,deleted_by" },
-  call_logs: { table: "call_logs", nameField: "summary", selectFields: "id,summary,to_number,deleted_at,deleted_by" },
 };
 
 const THIRTY_DAYS_AGO = () => {
@@ -59,8 +58,6 @@ export const GET = withApiHandler(
               name = `${(row as unknown as Record<string, string>).first_name || ""} ${(row as unknown as Record<string, string>).last_name || ""}`.trim();
             } else if (entity === "notes") {
               name = ((row as unknown as Record<string, string>).content || "").slice(0, 60);
-            } else if (entity === "call_logs") {
-              name = (row as unknown as Record<string, string>).summary || `Call to ${(row as unknown as Record<string, string>).to_number || "unknown"}`;
             } else {
               name = (row as unknown as Record<string, string>)[config.nameField.split(",")[0] ?? ""] || "";
             }

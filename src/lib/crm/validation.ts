@@ -223,39 +223,11 @@ export const bulkDealsSchema = z.discriminatedUnion("action", [
 ]);
 
 // ============================================================================
-// Call Log schemas
-// ============================================================================
-
-export const createCallLogSchema = z.object({
-  contact_id: z.string().uuid().optional().nullable(),
-  deal_id: z.string().uuid().optional().nullable(),
-  direction: z.enum(["inbound", "outbound"]).optional(),
-  status: z.enum(["initiated", "completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
-  duration_seconds: z.number().min(0).optional(),
-  from_number: z.string().trim().max(30).optional(),
-  to_number: z.string().trim().max(30).optional(),
-  summary: z.string().trim().max(5000).optional(),
-  recording_url: z.string().trim().max(2000).optional(),
-});
-
-export const updateCallLogSchema = z.object({
-  contact_id: z.string().uuid().optional().nullable(),
-  deal_id: z.string().uuid().optional().nullable(),
-  direction: z.enum(["inbound", "outbound"]).optional(),
-  status: z.enum(["initiated", "completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]).optional(),
-  duration_seconds: z.number().min(0).optional(),
-  from_number: z.string().trim().max(30).optional().nullable(),
-  to_number: z.string().trim().max(30).optional().nullable(),
-  summary: z.string().trim().max(5000).optional().nullable(),
-  recording_url: z.string().trim().max(2000).optional().nullable(),
-});
-
-// ============================================================================
 // Saved View schemas
 // ============================================================================
 
 export const createSavedViewSchema = z.object({
-  entity_type: z.enum(["contacts", "leads", "deals", "organizations", "tasks", "call_logs", "notes"]),
+  entity_type: z.enum(["contacts", "leads", "deals", "organizations", "tasks", "notes"]),
   label: z.string().trim().min(1, "View name is required").max(100),
   icon: z.string().max(50).optional(),
   filters: z.record(z.string(), z.unknown()).optional(),

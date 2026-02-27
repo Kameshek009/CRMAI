@@ -9,7 +9,7 @@ import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { toast } from "sonner";
 import { useWorkspace } from "@/contexts/team-context";
 import {
-  Trash2, RotateCcw, Users, Building2, Handshake, CheckSquare, FileText, Phone, Loader2,
+  Trash2, RotateCcw, Users, Building2, Handshake, CheckSquare, FileText, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,7 @@ interface TrashItem {
   deleted_by: string | null;
 }
 
-const ENTITY_TABS = ["all", "contacts", "companies", "deals", "tasks", "notes", "call_logs"] as const;
+const ENTITY_TABS = ["all", "contacts", "companies", "deals", "tasks", "notes"] as const;
 
 const ENTITY_ICONS: Record<string, typeof Users> = {
   contacts: Users,
@@ -29,7 +29,6 @@ const ENTITY_ICONS: Record<string, typeof Users> = {
   deals: Handshake,
   tasks: CheckSquare,
   notes: FileText,
-  call_logs: Phone,
 };
 
 const ENTITY_COLORS: Record<string, string> = {
@@ -38,7 +37,6 @@ const ENTITY_COLORS: Record<string, string> = {
   deals: "bg-amber-500/10 text-amber-600",
   tasks: "bg-purple-500/10 text-purple-600",
   notes: "bg-slate-500/10 text-slate-600",
-  call_logs: "bg-cyan-500/10 text-cyan-600",
 };
 
 function useTimeAgo() {
@@ -149,7 +147,7 @@ export function TrashContent() {
                 : "bg-muted/50 text-muted-foreground hover:bg-muted"
             )}
           >
-            {t(`crm.trash.entityTypes.${tab === "call_logs" ? "callLogs" : tab}`)}
+            {t(`crm.trash.entityTypes.${tab}`)}
           </button>
         ))}
       </div>
@@ -189,7 +187,7 @@ export function TrashContent() {
                         <div>
                           <span className="text-sm font-medium">{item.name || "—"}</span>
                           <Badge variant="outline" className="ml-2 text-[10px]">
-                            {t(`crm.trash.entityTypes.${item.entity_type === "call_logs" ? "callLogs" : item.entity_type}`)}
+                            {t(`crm.trash.entityTypes.${item.entity_type}`)}
                           </Badge>
                         </div>
                       </div>

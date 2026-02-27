@@ -7,7 +7,6 @@ import {
   bulkTasksSchema,
   bulkCompaniesSchema,
   bulkDealsSchema,
-  createCallLogSchema,
   createSavedViewSchema,
   createEmailSchema,
   createGoalSchema,
@@ -284,47 +283,6 @@ describe("bulkDealsSchema", () => {
   });
 });
 
-describe("createCallLogSchema", () => {
-  it("accepts valid call log with all fields", () => {
-    const result = createCallLogSchema.safeParse({
-      contact_id: "123e4567-e89b-12d3-a456-426614174000",
-      deal_id: "223e4567-e89b-12d3-a456-426614174001",
-      direction: "outbound",
-      status: "completed",
-      duration_seconds: 300,
-      from_number: "+12025551234",
-      to_number: "+12025559999",
-      summary: "Discussed pricing",
-      recording_url: "https://example.com/recording.mp3",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts valid empty call log", () => {
-    const result = createCallLogSchema.safeParse({});
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts valid direction values", () => {
-    for (const direction of ["inbound", "outbound"]) {
-      const result = createCallLogSchema.safeParse({ direction });
-      expect(result.success).toBe(true);
-    }
-  });
-
-  it("accepts valid status values", () => {
-    for (const status of ["initiated", "completed", "missed", "no_answer", "busy", "voicemail", "cancelled"]) {
-      const result = createCallLogSchema.safeParse({ status });
-      expect(result.success).toBe(true);
-    }
-  });
-
-  it("rejects negative duration", () => {
-    const result = createCallLogSchema.safeParse({ duration_seconds: -10 });
-    expect(result.success).toBe(false);
-  });
-});
-
 describe("createSavedViewSchema", () => {
   it("accepts valid saved view", () => {
     const result = createSavedViewSchema.safeParse({
@@ -353,7 +311,7 @@ describe("createSavedViewSchema", () => {
   });
 
   it("accepts valid entity_type values", () => {
-    for (const type of ["contacts", "leads", "deals", "organizations", "tasks", "call_logs", "notes"]) {
+    for (const type of ["contacts", "leads", "deals", "organizations", "tasks", "notes"]) {
       const result = createSavedViewSchema.safeParse({
         entity_type: type,
         label: "Test View",

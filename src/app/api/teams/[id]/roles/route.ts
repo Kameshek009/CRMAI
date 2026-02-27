@@ -48,7 +48,6 @@ export const POST = withApiHandler(
       companies: { read: true, create: true, update: false, delete: false },
       deals: { read: true, create: true, update: true, delete: false },
       tasks: { read: true, create: true, update: true, delete: false },
-      call_logs: { read: true, create: true, update: true, delete: false },
       notes: { read: true, create: true, update: true, delete: false },
       pipeline: { read: true, manage: false },
       analytics: { read: true },

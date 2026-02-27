@@ -10,7 +10,6 @@ const TABLE_MAP: Record<string, string> = {
   deals: "deals",
   tasks: "crm_tasks",
   notes: "crm_notes",
-  call_logs: "call_logs",
 };
 
 const restoreSchema = z.object({

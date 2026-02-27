@@ -52,7 +52,6 @@ function pipelineContext(overrides?: Partial<import("@/types/team").WorkspaceCon
       companies: { read: true, create: true, update: true, delete: true },
       deals: { read: true, create: true, update: true, delete: true },
       tasks: { read: true, create: true, update: true, delete: true },
-      call_logs: { read: true, create: true, update: true, delete: true },
       notes: { read: true, create: true, update: true, delete: true },
       leads: { read: true, create: true, update: true, delete: true },
       pipeline: { read: true, manage: true },

@@ -34,7 +34,6 @@ vi.mock("@/lib/i18n", () => ({
         "nav.search.pages.tasksSub": "Manage tasks",
         "nav.search.pages.notes": "Notes",
         "nav.search.pages.notesSub": "View notes",
-        "nav.search.pages.callLogs": "Call Logs",
         "nav.search.pages.analytics": "Analytics",
         "nav.search.pages.analyticsSub": "View analytics",
         "nav.search.pages.aiChat": "AI Chat",

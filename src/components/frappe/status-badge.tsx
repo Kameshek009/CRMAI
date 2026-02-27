@@ -2,9 +2,9 @@
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
-import type { ContactStatus, DealStatus, CrmTaskStatus, CallLogStatus, ShowingStatus } from "@/types/crm";
+import type { ContactStatus, DealStatus, CrmTaskStatus, ShowingStatus } from "@/types/crm";
 
-type StatusType = ContactStatus | DealStatus | CrmTaskStatus | CallLogStatus | ShowingStatus | string;
+type StatusType = ContactStatus | DealStatus | CrmTaskStatus | ShowingStatus | string;
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   // Contact statuses

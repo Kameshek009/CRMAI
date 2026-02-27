@@ -20,7 +20,6 @@ import {
   MessageSquare,
   Settings,
   FileText,
-  Phone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchStore } from "@/stores/search-store";
@@ -149,7 +148,6 @@ export function SearchDialog() {
     { id: "nav-pipeline", label: t("nav.search.pages.pipeline"), sublabel: t("nav.search.pages.pipelineSub"), icon: Kanban, section: "navigation", action: () => navigate("/dashboard/pipeline") },
     { id: "nav-tasks", label: t("nav.search.pages.tasks"), sublabel: t("nav.search.pages.tasksSub"), icon: CheckSquare, section: "navigation", action: () => navigate("/dashboard/tasks") },
     { id: "nav-notes", label: t("nav.search.pages.notes"), sublabel: t("nav.search.pages.notesSub"), icon: FileText, section: "navigation", action: () => navigate("/dashboard/notes") },
-    { id: "nav-call-logs", label: t("nav.search.pages.callLogs"), icon: Phone, section: "navigation", action: () => navigate("/dashboard/call-logs") },
     { id: "nav-analytics", label: t("nav.search.pages.analytics"), sublabel: t("nav.search.pages.analyticsSub"), icon: TrendingUp, section: "navigation", action: () => navigate("/dashboard/analytics") },
     { id: "nav-chat", label: t("nav.search.pages.aiChat"), sublabel: t("nav.search.pages.aiChatSub"), icon: MessageSquare, section: "navigation", action: () => navigate("/dashboard/chats") },
     { id: "nav-settings", label: t("nav.search.pages.settings"), sublabel: t("nav.search.pages.settingsSub"), icon: Settings, section: "navigation", action: () => navigate("/dashboard/account") },

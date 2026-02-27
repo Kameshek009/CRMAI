@@ -56,7 +56,7 @@ export const POST = withApiHandler(
     // Reassign related records from merged → master
     const fkField = entity_type === "contacts" ? "contact_id" : "company_id";
 
-    const relatedTables = ["deals", "crm_activities", "crm_notes", "crm_tasks", "call_logs"];
+    const relatedTables = ["deals", "crm_activities", "crm_notes", "crm_tasks"];
 
     for (const relTable of relatedTables) {
       for (const mergeId of merge_ids) {

@@ -13,11 +13,10 @@ export type CrmActivityType =
   | "contact_created" | "task_completed" | "import";
 
 // New types for Frappe CRM redesign
-export type CallLogStatus = "completed" | "missed" | "no_answer" | "busy" | "voicemail" | "cancelled";
 export type CallDirection = "inbound" | "outbound";
 export type EmailStatus = "draft" | "sent" | "received" | "failed";
 export type ViewMode = "table" | "kanban" | "group_by";
-export type EntityType = "contacts" | "deals" | "organizations" | "tasks" | "call_logs" | "notes";
+export type EntityType = "contacts" | "deals" | "organizations" | "tasks" | "notes";
 
 // ============================================================================
 // Company
@@ -487,74 +486,6 @@ export interface SearchResult {
   title: string;
   subtitle: string;
   score?: number;
-}
-
-// ============================================================================
-// Call Log
-// ============================================================================
-
-export interface CallLog {
-  id: string;
-  teamId: string;
-  accountId: string;
-  contactId: string | null;
-  dealId: string | null;
-  callerAccountId: string | null;
-  direction: CallDirection;
-  status: CallLogStatus;
-  durationSeconds: number;
-  fromNumber: string | null;
-  toNumber: string | null;
-  summary: string | null;
-  recordingUrl: string | null;
-  metadata: Record<string, unknown>;
-  isDeleted: boolean;
-  createdAt: string;
-  updatedAt: string;
-  // Joined
-  contact?: Contact | null;
-}
-
-export interface CallLogRow {
-  id: string;
-  team_id: string;
-  account_id: string;
-  contact_id: string | null;
-  deal_id: string | null;
-  caller_account_id: string | null;
-  direction: CallDirection;
-  status: CallLogStatus;
-  duration_seconds: number;
-  from_number: string | null;
-  to_number: string | null;
-  summary: string | null;
-  recording_url: string | null;
-  metadata: Record<string, unknown>;
-  is_deleted: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export function transformCallLogRow(row: CallLogRow): CallLog {
-  return {
-    id: row.id,
-    teamId: row.team_id,
-    accountId: row.account_id,
-    contactId: row.contact_id,
-    dealId: row.deal_id,
-    callerAccountId: row.caller_account_id,
-    direction: row.direction,
-    status: row.status,
-    durationSeconds: row.duration_seconds,
-    fromNumber: row.from_number,
-    toNumber: row.to_number,
-    summary: row.summary,
-    recordingUrl: row.recording_url,
-    metadata: row.metadata || {},
-    isDeleted: row.is_deleted,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
 }
 
 // ============================================================================

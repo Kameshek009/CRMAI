@@ -50,7 +50,6 @@ import {
   Zap,
   Handshake,
   FileText,
-  Phone,
   Mail,
   Trash2,
   GitMerge,
@@ -88,8 +87,7 @@ export const crmGroup: NavGroup = {
     { key: "organizations", labelKey: "nav.items.organizations", href: "/dashboard/companies", icon: Building2, permission: "companies.read" },
     { key: "tasks", labelKey: "nav.items.tasks", href: "/dashboard/tasks", icon: CheckSquare, permission: "tasks.read" },
     { key: "notes", labelKey: "nav.items.notes", href: "/dashboard/notes", icon: FileText, permission: "notes.read" },
-    { key: "call-logs", labelKey: "nav.items.callLogs", href: "/dashboard/call-logs", icon: Phone, permission: "call_logs.read" },
-    { key: "leads", labelKey: "nav.items.leads", href: "/dashboard/leads", icon: UserPlus, permission: "leads.read" },
+{ key: "leads", labelKey: "nav.items.leads", href: "/dashboard/leads", icon: UserPlus, permission: "leads.read" },
     { key: "showings", labelKey: "nav.items.showings", href: "/dashboard/showings", icon: CalendarDays, permission: "deals.read" },
   ],
 };

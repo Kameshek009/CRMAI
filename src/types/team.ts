@@ -8,7 +8,6 @@ export interface WorkspacePermissions {
   companies: { read: boolean; create: boolean; update: boolean; delete: boolean };
   deals: { read: boolean; create: boolean; update: boolean; delete: boolean };
   tasks: { read: boolean; create: boolean; update: boolean; delete: boolean };
-  call_logs: { read: boolean; create: boolean; update: boolean; delete: boolean };
   notes: { read: boolean; create: boolean; update: boolean; delete: boolean };
   leads: { read: boolean; create: boolean; update: boolean; delete: boolean };
   pipeline: { read: boolean; manage: boolean };
@@ -57,7 +56,6 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     companies: ALL_CRUD,
     deals: ALL_CRUD,
     tasks: ALL_CRUD,
-    call_logs: ALL_CRUD,
     notes: ALL_CRUD,
     leads: ALL_CRUD,
     pipeline: { read: true, manage: true },
@@ -70,7 +68,6 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     companies: ALL_CRUD,
     deals: ALL_CRUD,
     tasks: ALL_CRUD,
-    call_logs: ALL_CRUD,
     notes: ALL_CRUD,
     leads: ALL_CRUD,
     pipeline: { read: true, manage: true },
@@ -83,7 +80,6 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     companies: READ_CREATE_UPDATE,
     deals: READ_CREATE_UPDATE,
     tasks: READ_CREATE_UPDATE,
-    call_logs: READ_CREATE_UPDATE,
     notes: READ_CREATE_UPDATE,
     leads: READ_CREATE_UPDATE,
     pipeline: { read: true, manage: false },
@@ -96,7 +92,6 @@ export const FIXED_ROLE_PERMISSIONS: Record<FixedRole, WorkspacePermissions> = {
     companies: READ_ONLY_CRUD,
     deals: READ_ONLY_CRUD,
     tasks: READ_ONLY_CRUD,
-    call_logs: READ_ONLY_CRUD,
     notes: READ_ONLY_CRUD,
     leads: READ_ONLY_CRUD,
     pipeline: { read: true, manage: false },

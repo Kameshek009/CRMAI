@@ -114,33 +114,6 @@ export function getDealFields(t: T): FormField[] {
   ];
 }
 
-export function getCallLogFields(t: T): FormField[] {
-  return [
-    {
-      name: "direction", label: t("crm.callLogs.fields.direction"), type: "select",
-      options: [
-        { label: t("crm.callLogs.directions.outbound"), value: "outbound" },
-        { label: t("crm.callLogs.directions.inbound"), value: "inbound" },
-      ],
-    },
-    {
-      name: "status", label: t("crm.callLogs.fields.status"), type: "select",
-      options: [
-        { label: t("crm.callLogs.statuses.completed"), value: "completed" },
-        { label: t("crm.callLogs.statuses.missed"), value: "missed" },
-        { label: t("crm.callLogs.statuses.noAnswer"), value: "no_answer" },
-        { label: t("crm.callLogs.statuses.busy"), value: "busy" },
-        { label: t("crm.callLogs.statuses.voicemail"), value: "voicemail" },
-        { label: t("crm.callLogs.statuses.cancelled"), value: "cancelled" },
-      ],
-    },
-    { name: "from_number", label: t("crm.callLogs.fields.from"), type: "tel", placeholder: "+1 (555) 123-4567" },
-    { name: "to_number", label: t("crm.callLogs.fields.to"), type: "tel", placeholder: "+1 (555) 987-6543" },
-    { name: "duration_seconds", label: t("crm.callLogs.fields.duration"), type: "number", placeholder: "120" },
-    { name: "summary", label: t("crm.callLogs.fields.summary"), type: "textarea" },
-  ];
-}
-
 // ============================================================================
 // Backward-compatible static exports (English defaults)
 // ============================================================================
@@ -150,4 +123,3 @@ const id = (key: string) => key.split(".").pop() || key;
 export const contactFields = getContactFields(id);
 export const companyFields = getCompanyFields(id);
 export const dealFields = getDealFields(id);
-export const callLogFields = getCallLogFields(id);

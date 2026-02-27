@@ -5,7 +5,6 @@ import {
   getContactFields,
   getCompanyFields,
   getDealFields,
-  getCallLogFields,
 } from "@/lib/crm/field-definitions";
 import type { CustomFieldDefinition } from "@/lib/crm/field-definitions";
 
@@ -317,10 +316,3 @@ describe("getDealFields", () => {
   });
 });
 
-describe("getCallLogFields", () => {
-  it("should return 6 fields", () => {
-    const fields = getCallLogFields(mockT);
-
-    expect(fields).toHaveLength(6);
-  });
-});

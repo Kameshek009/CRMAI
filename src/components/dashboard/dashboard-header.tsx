@@ -29,7 +29,6 @@ const segmentKeys: Record<string, string> = {
   settings: "nav.items.settings",
   connections: "nav.items.connections",
   deals: "nav.items.deals",
-  "call-logs": "nav.items.callLogs",
   notes: "nav.items.notes",
   automations: "nav.items.automations",
   sequences: "nav.items.sequences",
