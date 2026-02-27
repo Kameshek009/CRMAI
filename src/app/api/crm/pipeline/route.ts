@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { ensureDealStages } from "@/lib/crm/helpers";
 import { createPipelineStageSchema, reorderStagesSchema } from "@/lib/crm/validation";
+import { logger } from "@/lib/logger";
 
 export const GET = withApiHandler(
   {
@@ -13,7 +14,7 @@ export const GET = withApiHandler(
     const supabase = createSupabaseAdmin();
     await ensureDealStages(ctx.accountId, ctx.workspaceId);
 
-    const { data: stages, error: stagesError } = await supabase
+    let { data: stages, error: stagesError } = await supabase
       .from("deal_stages")
       .select("*")
       .eq("team_id", ctx.workspaceId)
@@ -21,9 +22,54 @@ export const GET = withApiHandler(
 
     if (stagesError) throw new ApiError("Failed to fetch stages", 500);
 
+    // Deduplicate stages by name (keep the one with lowest position)
+    if (stages && stages.length > 0) {
+      const seen = new Map<string, string>(); // name → kept stage id
+      const dupeIds: string[] = [];
+      const remapStageId = new Map<string, string>(); // dupe id → kept id
+
+      for (const s of stages) {
+        const existing = seen.get(s.name);
+        if (existing) {
+          dupeIds.push(s.id);
+          remapStageId.set(s.id, existing);
+        } else {
+          seen.set(s.name, s.id);
+        }
+      }
+
+      if (dupeIds.length > 0) {
+        logger.warn("Pipeline", `Removing ${dupeIds.length} duplicate stages`, dupeIds);
+
+        // Reassign deals from duplicate stages to the kept ones
+        for (const [dupeId, keptId] of remapStageId) {
+          await supabase
+            .from("deals")
+            .update({ stage_id: keptId })
+            .eq("stage_id", dupeId)
+            .eq("team_id", ctx.workspaceId);
+        }
+
+        // Delete duplicate stages
+        await supabase
+          .from("deal_stages")
+          .delete()
+          .in("id", dupeIds);
+
+        // Re-fetch clean stages
+        const refetch = await supabase
+          .from("deal_stages")
+          .select("*")
+          .eq("team_id", ctx.workspaceId)
+          .order("position", { ascending: true });
+
+        stages = refetch.data;
+      }
+    }
+
     const { data: deals } = await supabase
       .from("deals")
-      .select("*, contacts(id, first_name, last_name), companies(id, name), accounts!deals_assigned_to_fkey(id, first_name, last_name)")
+      .select("*, contacts(id, first_name, last_name), companies(id, name), accounts!deals_assigned_to_fkey(id, name)")
       .eq("team_id", ctx.workspaceId)
       .eq("is_deleted", false)
       .eq("status", "open")
