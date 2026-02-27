@@ -363,7 +363,7 @@ describe("EntityForm", () => {
     });
 
     it("shows loading state during submission", async () => {
-      const slowSubmit = vi.fn(() => new Promise(resolve => setTimeout(resolve, 100)));
+      const slowSubmit = vi.fn((): Promise<void> => new Promise(resolve => setTimeout(resolve, 100)));
       const fields: FormField[] = [
         { name: "name", label: "Name", type: "text", required: true },
       ];

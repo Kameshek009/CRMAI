@@ -170,7 +170,7 @@ describe("GoalCard", () => {
       render(<GoalCard goal={makeGoal()} progress={makeProgress()} onDelete={onDelete} />);
       // Find the delete button — it's a button with Trash2 icon
       const buttons = screen.getAllByRole("button");
-      const deleteBtn = buttons[buttons.length - 1];
+      const deleteBtn = buttons[buttons.length - 1]!;
       fireEvent.click(deleteBtn);
       expect(onDelete).toHaveBeenCalledTimes(1);
     });

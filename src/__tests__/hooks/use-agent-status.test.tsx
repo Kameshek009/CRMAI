@@ -51,7 +51,7 @@ describe("useAgentStatus", () => {
     global.EventSource = MockEventSource as unknown as typeof EventSource;
 
     fetchMock = vi.fn().mockResolvedValue(successResponse);
-    global.fetch = fetchMock;
+    global.fetch = fetchMock as typeof fetch;
   });
 
   afterEach(() => {
@@ -144,11 +144,11 @@ describe("useAgentStatus", () => {
     // Get the last MockEventSource instance (created by the hook)
     const eventSource = MockEventSource.instances[MockEventSource.instances.length - 1];
     expect(eventSource).toBeDefined();
-    expect(eventSource.url).toBe("/api/agent/status/stream");
+    expect(eventSource!.url).toBe("/api/agent/status/stream");
 
     // Simulate an SSE status event
     act(() => {
-      eventSource.simulateEvent("status", {
+      eventSource!.simulateEvent("status", {
         online: false,
         mode: "auto",
         lastSeen: "2026-02-26T15:00:00Z",
