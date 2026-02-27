@@ -18,6 +18,9 @@ vi.mock("@/lib/logger", () => ({
     error: vi.fn(),
   },
 }));
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: vi.fn().mockReturnValue(null),
+}));
 
 import { GET, POST } from "@/app/api/crm/automations/route";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
@@ -60,7 +63,7 @@ describe("GET /api/crm/automations", () => {
     setResult("automations", { data: mockAutomations });
     vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
-    const response = await GET();
+    const response = await GET(createTestRequest("GET", "/api/crm/automations"));
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -71,7 +74,7 @@ describe("GET /api/crm/automations", () => {
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getTeamContext).mockResolvedValue(mockAuthError());
 
-    const response = await GET();
+    const response = await GET(createTestRequest("GET", "/api/crm/automations"));
     const json = await response.json();
 
     expect(response.status).toBe(401);

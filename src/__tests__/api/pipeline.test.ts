@@ -25,6 +25,9 @@ vi.mock("@/lib/logger", () => ({
     error: vi.fn(),
   },
 }));
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: vi.fn().mockReturnValue(null),
+}));
 
 import { GET, POST, PATCH } from "@/app/api/crm/pipeline/route";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
@@ -85,7 +88,7 @@ describe("GET /api/crm/pipeline", () => {
     setResult("deals", { data: deals });
     vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
-    const response = await GET();
+    const response = await GET(createTestRequest("GET", "/api/crm/pipeline"));
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -98,7 +101,7 @@ describe("GET /api/crm/pipeline", () => {
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getTeamContext).mockResolvedValue(mockAuthError());
 
-    const response = await GET();
+    const response = await GET(createTestRequest("GET", "/api/crm/pipeline"));
     const json = await response.json();
 
     expect(response.status).toBe(401);
@@ -112,7 +115,7 @@ describe("GET /api/crm/pipeline", () => {
       NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     );
 
-    const response = await GET();
+    const response = await GET(createTestRequest("GET", "/api/crm/pipeline"));
     const json = await response.json();
 
     expect(response.status).toBe(403);
@@ -136,7 +139,7 @@ describe("GET /api/crm/pipeline", () => {
     setResult("deals", { data: deals });
     vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
-    const response = await GET();
+    const response = await GET(createTestRequest("GET", "/api/crm/pipeline"));
     const json = await response.json();
 
     expect(json.data.totalValue).toBe(2000);
@@ -160,7 +163,7 @@ describe("GET /api/crm/pipeline", () => {
     setResult("deals", { data: deals });
     vi.mocked(createSupabaseAdmin).mockReturnValue(supabase);
 
-    const response = await GET();
+    const response = await GET(createTestRequest("GET", "/api/crm/pipeline"));
     const json = await response.json();
 
     // 1000*0.5 + 2000*0.75 = 500 + 1500 = 2000

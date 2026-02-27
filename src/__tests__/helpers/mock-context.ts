@@ -74,7 +74,7 @@ export function createTestRequest(
   const init: RequestInit = { method };
   if (body) {
     init.body = JSON.stringify(body);
-    init.headers = { "Content-Type": "application/json" };
+    init.headers = { "Content-Type": "application/json", origin: "http://localhost:3000" };
   }
   return new NextRequest(new URL(url, "http://localhost:3000"), init);
 }
