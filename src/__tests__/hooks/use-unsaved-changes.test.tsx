@@ -20,7 +20,7 @@ describe("useUnsavedChanges", () => {
     renderHook(() => useUnsavedChanges(false));
 
     const beforeUnloadCalls = addSpy.mock.calls.filter(
-      ([event]) => event === "beforeunload"
+      ([event]: [string, ...unknown[]]) => event === "beforeunload"
     );
     expect(beforeUnloadCalls).toHaveLength(0);
   });
@@ -29,7 +29,7 @@ describe("useUnsavedChanges", () => {
     renderHook(() => useUnsavedChanges(true));
 
     const beforeUnloadCalls = addSpy.mock.calls.filter(
-      ([event]) => event === "beforeunload"
+      ([event]: [string, ...unknown[]]) => event === "beforeunload"
     );
     expect(beforeUnloadCalls).toHaveLength(1);
   });
@@ -40,7 +40,7 @@ describe("useUnsavedChanges", () => {
     unmount();
 
     const removeBeforeUnloadCalls = removeSpy.mock.calls.filter(
-      ([event]) => event === "beforeunload"
+      ([event]: [string, ...unknown[]]) => event === "beforeunload"
     );
     expect(removeBeforeUnloadCalls).toHaveLength(1);
   });
@@ -53,21 +53,21 @@ describe("useUnsavedChanges", () => {
 
     // false → no listener added
     let addCalls = addSpy.mock.calls.filter(
-      ([event]) => event === "beforeunload"
+      ([event]: [string, ...unknown[]]) => event === "beforeunload"
     );
     expect(addCalls).toHaveLength(0);
 
     // false → true: listener added
     rerender({ hasChanges: true });
     addCalls = addSpy.mock.calls.filter(
-      ([event]) => event === "beforeunload"
+      ([event]: [string, ...unknown[]]) => event === "beforeunload"
     );
     expect(addCalls).toHaveLength(1);
 
     // true → false: listener removed (cleanup from previous effect)
     rerender({ hasChanges: false });
     const removeCalls = removeSpy.mock.calls.filter(
-      ([event]) => event === "beforeunload"
+      ([event]: [string, ...unknown[]]) => event === "beforeunload"
     );
     expect(removeCalls).toHaveLength(1);
   });
