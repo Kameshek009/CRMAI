@@ -60,26 +60,32 @@ export const POST = withApiHandler(
 
     for (const relTable of relatedTables) {
       for (const mergeId of merge_ids) {
-        await supabase
+        const { error: reassignErr } = await supabase
           .from(relTable)
           .update({ [fkField]: master_id })
           .eq(fkField, mergeId)
           .eq("team_id", ctx.workspaceId);
+        if (reassignErr) {
+          throw new ApiError(`Failed to reassign ${relTable} records`, 500);
+        }
       }
     }
 
     // Soft-delete merged records
     const now = new Date().toISOString();
     for (const mergeId of merge_ids) {
-      await supabase
+      const { error: delErr } = await supabase
         .from(table)
         .update({ is_deleted: true, deleted_at: now, deleted_by: ctx.accountId })
         .eq("id", mergeId)
         .eq("team_id", ctx.workspaceId);
+      if (delErr) {
+        throw new ApiError(`Failed to soft-delete merged record ${mergeId}`, 500);
+      }
     }
 
-    // Log merge
-    await supabase.from("merge_log").insert({
+    // Log merge (non-critical)
+    const { error: logErr } = await supabase.from("merge_log").insert({
       team_id: ctx.workspaceId,
       account_id: ctx.accountId,
       entity_type,
@@ -87,6 +93,10 @@ export const POST = withApiHandler(
       merged_ids: merge_ids,
       merge_details: field_overrides || {},
     });
+    if (logErr) {
+      // Don't fail the merge if logging fails — just log it
+      logAudit({ teamId: ctx.workspaceId, accountId: ctx.accountId, entityType: "merge_log", entityId: master_id, action: "create", changes: { error: { old: null, new: logErr.message } } });
+    }
 
     logAudit({
       teamId: ctx.workspaceId,

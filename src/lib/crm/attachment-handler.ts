@@ -91,10 +91,15 @@ export async function handleAttachmentUpload(
       attachments: updatedAttachments,
     };
 
-    await supabase
+    const { error: updateErr } = await supabase
       .from(config.table)
       .update({ metadata, updated_at: new Date().toISOString() })
       .eq("id", entityId);
+
+    if (updateErr) {
+      logger.error("CrmAttachment", "Failed to save attachment metadata", updateErr);
+      return NextResponse.json({ success: false, error: "Failed to save attachment" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, attachment, attachments: updatedAttachments });
   } catch (err) {
@@ -159,10 +164,15 @@ export async function handleAttachmentDelete(
       attachments: updatedAttachments,
     };
 
-    await supabase
+    const { error: updateErr } = await supabase
       .from(config.table)
       .update({ metadata, updated_at: new Date().toISOString() })
       .eq("id", entityId);
+
+    if (updateErr) {
+      logger.error("CrmAttachment", "Failed to update attachment metadata", updateErr);
+      return NextResponse.json({ success: false, error: "Failed to update metadata" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, attachments: updatedAttachments });
   } catch (err) {

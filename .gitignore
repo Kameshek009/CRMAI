@@ -5,6 +5,7 @@
 .env
 .env.local
 .env.*.local
+.env.vercel*
 
 # Clerk configuration (can include secrets)
 /.clerk/

@@ -111,7 +111,7 @@ export const POST = withApiHandler(
     }
 
     // Mark lead as converted
-    await supabase
+    const { error: convertErr } = await supabase
       .from("leads")
       .update({
         status: "qualified",
@@ -120,6 +120,11 @@ export const POST = withApiHandler(
         converted_at: new Date().toISOString(),
       })
       .eq("id", id);
+
+    if (convertErr) {
+      logger.error("Leads", "Failed to mark lead as converted", convertErr);
+      return NextResponse.json({ success: false, error: "Failed to update lead status" }, { status: 500 });
+    }
 
     logAudit({
       teamId: ctx.workspaceId,

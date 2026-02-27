@@ -192,10 +192,14 @@ export async function POST(
       }
     }
 
-    await supabase
+    const { error: chatUpdateError } = await supabase
       .from("chats")
       .update(updateData)
       .eq("id", chatId);
+
+    if (chatUpdateError) {
+      logger.error("ChatMessages", "Failed to update chat metadata", chatUpdateError);
+    }
 
     return NextResponse.json({ success: true, message });
   } catch (error) {

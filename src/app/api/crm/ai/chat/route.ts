@@ -242,20 +242,22 @@ export async function POST(request: NextRequest) {
         : team.week_start_date;
 
       // Atomic increment via RPC
-      const { data: rpcResult } = await supabase.rpc("increment_team_tokens", {
+      const { data: rpcResult, error: rpcErr } = await supabase.rpc("increment_team_tokens", {
         p_team_id: context.teamId,
         p_tokens: billableTokens,
         p_daily_tokens: newDailyTokensUsed,
         p_new_day_start: newDayStartDate,
       });
 
-      if (rpcResult && rpcResult[0]) {
+      if (rpcErr) {
+        logger.error("CrmAI", "Failed to increment team tokens", rpcErr);
+      } else if (rpcResult && rpcResult[0]) {
         finalTokensUsed = rpcResult[0].new_tokens_used;
         finalTokenLimit = rpcResult[0].token_limit;
       }
 
-      // Record in usage_records (track both real and billable)
-      await supabase.from("usage_records").insert({
+      // Record in usage_records (non-critical — don't fail the chat)
+      const { error: usageErr } = await supabase.from("usage_records").insert({
         account_id: context.accountId,
         tokens_consumed: billableTokens,
         action_type: "crm_ai_chat",
@@ -269,6 +271,9 @@ export async function POST(request: NextRequest) {
           tools_used: executedTools.map((t) => t.name),
         },
       });
+      if (usageErr) {
+        logger.error("CrmAI", "Failed to record usage", usageErr);
+      }
     }
 
     return NextResponse.json({

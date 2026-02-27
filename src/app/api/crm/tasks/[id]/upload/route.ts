@@ -61,10 +61,15 @@ export async function POST(
     const updatedAttachments = [...existing, attachment];
     const metadata = { ...((task.metadata as Record<string, unknown>) || {}), attachments: updatedAttachments };
 
-    await supabase
+    const { error: updateErr } = await supabase
       .from("crm_tasks")
       .update({ metadata, updated_at: new Date().toISOString() })
       .eq("id", taskId);
+
+    if (updateErr) {
+      logger.error("TaskUpload", "Failed to save metadata", updateErr);
+      return NextResponse.json({ success: false, error: "Failed to save attachment" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, attachment, attachments: updatedAttachments });
   } catch (err) {
@@ -122,10 +127,15 @@ export async function DELETE(
     const updatedAttachments = existing.filter(a => a.id !== attachmentId);
     const metadata = { ...((task.metadata as Record<string, unknown>) || {}), attachments: updatedAttachments };
 
-    await supabase
+    const { error: delUpdateErr } = await supabase
       .from("crm_tasks")
       .update({ metadata, updated_at: new Date().toISOString() })
       .eq("id", taskId);
+
+    if (delUpdateErr) {
+      logger.error("TaskUpload", "Failed to update metadata after delete", delUpdateErr);
+      return NextResponse.json({ success: false, error: "Failed to update metadata" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, attachments: updatedAttachments });
   } catch (err) {

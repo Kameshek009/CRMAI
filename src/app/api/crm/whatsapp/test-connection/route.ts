@@ -29,12 +29,16 @@ export const POST = withApiHandler(
 
     const settings = (team?.settings || {}) as Record<string, unknown>;
     const wa = (settings.whatsapp || {}) as Record<string, unknown>;
-    await supabase
+    const { error: updateErr } = await supabase
       .from("teams")
       .update({
         settings: { ...settings, whatsapp: { ...wa, is_connected: true } },
       })
       .eq("id", ctx.workspaceId);
+
+    if (updateErr) {
+      return NextResponse.json({ success: false, error: "Failed to save connection status" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, data: { name: profile.name, about: profile.about } });
   }
