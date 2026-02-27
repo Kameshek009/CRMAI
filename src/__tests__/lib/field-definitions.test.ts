@@ -263,9 +263,9 @@ describe("mergeFieldsWithCustom", () => {
     const result = mergeFieldsWithCustom(builtIn, customDefs);
 
     expect(result).toHaveLength(3);
-    expect(result[0].name).toBe("name");
-    expect(result[1].name).toBe("email");
-    expect(result[2].name).toBe("metadata.custom1");
+    expect(result[0]!.name).toBe("name");
+    expect(result[1]!.name).toBe("email");
+    expect(result[2]!.name).toBe("metadata.custom1");
   });
 });
 

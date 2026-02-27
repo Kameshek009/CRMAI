@@ -55,22 +55,22 @@ describe("rowToCsv", () => {
 describe("ENTITY_CONFIG", () => {
   it("defines contacts entity", () => {
     expect(ENTITY_CONFIG.contacts).toBeDefined();
-    expect(ENTITY_CONFIG.contacts.table).toBe("contacts");
-    expect(ENTITY_CONFIG.contacts.columns).toContain("email");
+    expect(ENTITY_CONFIG.contacts!.table).toBe("contacts");
+    expect(ENTITY_CONFIG.contacts!.columns).toContain("email");
   });
 
   it("defines deals entity", () => {
     expect(ENTITY_CONFIG.deals).toBeDefined();
-    expect(ENTITY_CONFIG.deals.columns).toContain("value");
+    expect(ENTITY_CONFIG.deals!.columns).toContain("value");
   });
 
   it("defines companies entity", () => {
     expect(ENTITY_CONFIG.companies).toBeDefined();
-    expect(ENTITY_CONFIG.companies.columns).toContain("name");
+    expect(ENTITY_CONFIG.companies!.columns).toContain("name");
   });
 
   it("defines tasks entity", () => {
     expect(ENTITY_CONFIG.tasks).toBeDefined();
-    expect(ENTITY_CONFIG.tasks.columns).toContain("status");
+    expect(ENTITY_CONFIG.tasks!.columns).toContain("status");
   });
 });

@@ -27,7 +27,7 @@ describe("logger", () => {
   });
 
   it("should call console.log in development environment", async () => {
-    process.env.NODE_ENV = "development";
+    Object.defineProperty(process.env, "NODE_ENV", { value: "development", configurable: true });
     vi.resetModules();
 
     const { logger } = await import("../../lib/logger");
@@ -37,7 +37,7 @@ describe("logger", () => {
   });
 
   it("should NOT call console.log in production environment", async () => {
-    process.env.NODE_ENV = "production";
+    Object.defineProperty(process.env, "NODE_ENV", { value: "production", configurable: true });
     vi.resetModules();
 
     const { logger } = await import("../../lib/logger");
