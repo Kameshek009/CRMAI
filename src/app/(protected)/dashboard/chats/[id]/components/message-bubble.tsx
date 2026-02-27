@@ -62,6 +62,7 @@ export function MessageBubble({ message, isNew, isHighlighted, onDelete, userIma
       task: [t('crm.chats.notification.taskCreated'), t('crm.chats.notification.openTasks')],
       contact: [t('crm.chats.notification.contactCreated'), t('crm.chats.notification.openContacts')],
       deal: [t('crm.chats.notification.dealCreated'), t('crm.chats.notification.openDeals')],
+      showing: [t('crm.chats.notification.showingCreated'), t('crm.chats.notification.openShowings')],
     };
     const eType = String(metadata.entity_type || 'task');
     const [singleLabel, viewLabel] = entityLabels[eType] || [t('crm.chats.notification.created'), t('crm.chats.notification.open')];

@@ -321,16 +321,19 @@ export default function ChatDetailPage() {
             create_task: '/dashboard/tasks',
             create_contact: '/dashboard/contacts',
             create_deal: '/dashboard/deals',
+            create_showing: '/dashboard/showings',
           };
           const entityTypes: Record<string, string> = {
             create_task: 'task',
             create_contact: 'contact',
             create_deal: 'deal',
+            create_showing: 'showing',
           };
           const entityLabels: Record<string, [string, string]> = {
             task: ['задача', 'задач'],
             contact: ['контакт', 'контактов'],
             deal: ['сделка', 'сделок'],
+            showing: ['показ', 'показов'],
           };
 
           // Group by entity type — only count SUCCESSFUL tool calls

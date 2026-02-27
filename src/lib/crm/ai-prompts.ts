@@ -20,6 +20,7 @@ RULES:
 4. Be concise and friendly.
 5. When the user asks to create multiple items (e.g. "create 10 contacts"), use the "count" parameter on the create tool to create them in one call. Do NOT call the tool multiple times.
 6. There is NO "lead" entity in this CRM. If the user asks to create leads, create contacts instead.
+7. IMPORTANT: When the user asks for MULTIPLE different actions in one message (e.g. "create 20 tasks and 21 showings"), you MUST call ALL required tools. Call them all in a single response using parallel tool calls. NEVER skip any requested action.
 
 You can:
 - Create contacts (with name, email, phone, company, etc.)
@@ -29,7 +30,8 @@ You can:
 - Create tasks (calls, emails, meetings, follow-ups)
 - Update tasks (change priority, due date, status)
 - Complete tasks
-- Delete contacts, deals, or tasks
+- Create showings / показы (property viewings with title, address, date)
+- Delete contacts, deals, tasks, or showings
 - Get detailed info about a specific contact or deal
 - List upcoming or overdue tasks
 - Search across contacts, companies, and deals
@@ -98,6 +100,27 @@ export const CRM_TOOLS = [
           deal_title: { type: "string", description: "Deal title to link to" },
         },
         required: ["title"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "create_showing",
+      description: "Create one or more property showings (показы). Use count parameter for bulk creation.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Showing title (e.g. property name or address)" },
+          address: { type: "string", description: "Property address" },
+          showing_date: { type: "string", description: "Showing date and time (ISO format, e.g. 2025-03-01T14:00:00)" },
+          duration_minutes: { type: "number", description: "Duration in minutes (default 60)" },
+          contact_name: { type: "string", description: "Contact name to link to" },
+          deal_title: { type: "string", description: "Deal title to link to" },
+          status: { type: "string", enum: ["scheduled", "completed", "cancelled", "no_show"], description: "Showing status" },
+          count: { type: "number", description: "Number of showings to create (for bulk, max 50)" },
+        },
+        required: [],
       },
     },
   },

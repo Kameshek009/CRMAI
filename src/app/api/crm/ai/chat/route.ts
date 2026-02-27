@@ -23,6 +23,7 @@ const TOOL_COSTS: Record<string, { base: number; perField: number }> = {
   create_contact:      { base: 200, perField: 80 },
   create_deal:         { base: 300, perField: 100 },
   create_task:         { base: 200, perField: 60 },
+  create_showing:      { base: 200, perField: 60 },
   update_contact:      { base: 200, perField: 60 },
   update_deal:         { base: 200, perField: 60 },
   update_task:         { base: 150, perField: 50 },

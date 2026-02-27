@@ -29,6 +29,8 @@ export async function executeCrmToolCall(
       return createDeal(supabase, accountId, teamId, args);
     case "create_task":
       return createTask(supabase, accountId, teamId, args);
+    case "create_showing":
+      return createShowing(supabase, accountId, teamId, args);
     case "search_crm":
       return searchCrm(supabase, accountId, teamId, args);
     case "get_pipeline_summary":
@@ -422,6 +424,127 @@ async function createTask(
     success: true,
     result: `Created task "${task.title}"${args.due_date ? ` due ${args.due_date}` : ""}`,
     data: task,
+  };
+}
+
+async function createShowing(
+  supabase: SupabaseClient,
+  accountId: string,
+  teamId: string,
+  args: Record<string, unknown>
+) {
+  const count = Math.min(Math.max(1, Number(args.count) || 1), 50);
+
+  let contactId: string | null = null;
+  if (args.contact_name) {
+    const { data: contact } = await supabase
+      .from("contacts")
+      .select("id")
+      .eq("account_id", accountId)
+      .eq("team_id", teamId)
+      .eq("is_deleted", false)
+      .or(`first_name.ilike.%${sanitizeLike(String(args.contact_name))}%,last_name.ilike.%${sanitizeLike(String(args.contact_name))}%`)
+      .limit(1)
+      .single();
+    contactId = contact?.id || null;
+  }
+
+  let dealId: string | null = null;
+  if (args.deal_title) {
+    const { data: deal } = await supabase
+      .from("deals")
+      .select("id")
+      .eq("account_id", accountId)
+      .eq("team_id", teamId)
+      .ilike("title", `%${sanitizeLike(String(args.deal_title))}%`)
+      .eq("is_deleted", false)
+      .limit(1)
+      .single();
+    dealId = deal?.id || null;
+  }
+
+  const defaultDate = new Date();
+  defaultDate.setDate(defaultDate.getDate() + 1);
+  defaultDate.setHours(14, 0, 0, 0);
+  const defaultDateStr = defaultDate.toISOString();
+
+  if (count === 1) {
+    const { data: showing, error } = await supabase
+      .from("property_showings")
+      .insert({
+        account_id: accountId,
+        team_id: teamId,
+        title: String(args.title || "Показ"),
+        address: String(args.address || "Не указан"),
+        showing_date: args.showing_date ? String(args.showing_date) : defaultDateStr,
+        duration_minutes: Number(args.duration_minutes) || 60,
+        contact_id: contactId,
+        deal_id: dealId,
+        status: String(args.status || "scheduled"),
+      })
+      .select("id, title, address, showing_date")
+      .single();
+
+    if (error) {
+      return { success: false, result: `Failed to create showing: ${error.message}` };
+    }
+
+    await logActivity(supabase, {
+      account_id: accountId,
+      team_id: teamId,
+      contact_id: contactId,
+      deal_id: dealId,
+      type: "meeting",
+      title: `Showing created: ${showing.title}`,
+    });
+
+    return {
+      success: true,
+      result: `Created showing "${showing.title}" at ${showing.address}`,
+      data: showing,
+    };
+  }
+
+  // Bulk creation
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    const showingDate = new Date(defaultDate);
+    showingDate.setHours(10 + (i % 8));
+    showingDate.setDate(showingDate.getDate() + Math.floor(i / 4));
+
+    rows.push({
+      account_id: accountId,
+      team_id: teamId,
+      title: `${String(args.title || "Показ")} ${i + 1}`,
+      address: String(args.address || "Не указан"),
+      showing_date: args.showing_date ? String(args.showing_date) : showingDate.toISOString(),
+      duration_minutes: Number(args.duration_minutes) || 60,
+      contact_id: contactId,
+      deal_id: dealId,
+      status: "scheduled",
+    });
+  }
+
+  const { data: showings, error } = await supabase
+    .from("property_showings")
+    .insert(rows)
+    .select("id, title");
+
+  if (error) {
+    return { success: false, result: `Failed to create showings: ${error.message}` };
+  }
+
+  await logActivity(supabase, {
+    account_id: accountId,
+    team_id: teamId,
+    type: "meeting",
+    title: `Bulk created ${showings.length} showings`,
+  });
+
+  return {
+    success: true,
+    result: `Created ${showings.length} showings`,
+    data: { items: showings, count: showings.length },
   };
 }
 

@@ -595,6 +595,8 @@
       "openContacts": "Open Contacts",
       "dealCreated": "Deal created",
       "openDeals": "Open Deals",
+      "showingCreated": "Showing created",
+      "openShowings": "Open Showings",
       "created": "Created",
       "open": "Open"
     }
