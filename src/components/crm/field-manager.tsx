@@ -194,7 +194,7 @@ export function FieldManager() {
           <div className="space-y-2">
             {fields.map((field) => (
               <div key={field.id} className="flex items-center gap-3 rounded-lg border p-3 group">
-                <GripVertical className="size-4 text-muted-foreground/40 shrink-0" />
+                <GripVertical className="size-4 text-muted-foreground/70 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{field.label}</span>
@@ -208,10 +208,10 @@ export function FieldManager() {
                   <span className="text-xs text-muted-foreground">{field.field_key}</span>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => openEdit(field)}>
+                  <Button variant="ghost" size="icon" className="size-7" onClick={() => openEdit(field)} aria-label={t("common.edit")}>
                     <Pencil className="size-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => handleDelete(field.id)} disabled={deletingId === field.id}>
+                  <Button variant="ghost" size="icon" className="size-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => handleDelete(field.id)} disabled={deletingId === field.id} aria-label={t("common.delete")}>
                     {deletingId === field.id ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
                   </Button>
                 </div>

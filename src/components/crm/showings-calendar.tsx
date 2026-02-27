@@ -126,7 +126,7 @@ export function ShowingsCalendar({
                 className={cn(
                   "text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full",
                   today && "bg-primary text-primary-foreground",
-                  !inMonth && "text-muted-foreground/50"
+                  !inMonth && "text-muted-foreground/70"
                 )}
               >
                 {format(day, "d")}

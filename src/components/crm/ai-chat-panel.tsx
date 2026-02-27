@@ -149,7 +149,7 @@ export function AiChatPanel() {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground py-8">
-            <Bot className="size-8 mx-auto mb-4 text-muted-foreground/50" />
+            <Bot className="size-8 mx-auto mb-4 text-muted-foreground/70" />
             <p className="font-medium">{t("crm.aiChat.emptyGreeting")}</p>
             <p className="mt-1">{t("crm.aiChat.emptySuggestions")}</p>
           </div>

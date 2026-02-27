@@ -31,7 +31,8 @@
     "noData": "Данные не найдены",
     "showing": "Показано {start}–{end} из {total}",
     "previous": "Назад",
-    "next": "Далее"
+    "next": "Далее",
+    "rowCount": "{count} строк"
   },
   "pipeline": {
     "pageTitle": "Воронка",

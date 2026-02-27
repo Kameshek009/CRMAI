@@ -215,7 +215,7 @@ export function DataTable<T extends { id: string }>({
   ), [columns, selectable, selectedIds, onRowClick, handleSelectRow]);
 
   return (
-    <div className={cn("rounded-lg border border-border overflow-hidden", className)}>
+    <div className={cn("rounded-lg border border-border overflow-hidden", className)} aria-busy={loading || undefined}>
       <div
         ref={scrollContainerRef}
         className="overflow-auto"
@@ -244,11 +244,12 @@ export function DataTable<T extends { id: string }>({
                   )}
                   style={col.width ? { width: col.width } : undefined}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
+                  aria-sort={col.sortable ? (sortBy === col.key ? (sortOrder === "asc" ? "ascending" : "descending") : "none") : undefined}
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.label}
                     {col.sortable && (
-                      <span className="text-muted-foreground/50">
+                      <span className="text-muted-foreground/80">
                         {sortBy === col.key ? (
                           sortOrder === "asc" ? (
                             <ArrowUp className="h-3 w-3" />
@@ -323,6 +324,9 @@ export function DataTable<T extends { id: string }>({
             )}
           </tbody>
         </table>
+        <div aria-live="polite" className="sr-only">
+          {!loading && data.length > 0 && t("crm.dataTable.rowCount", { count: data.length })}
+        </div>
       </div>
 
       {/* Infinite scroll sentinel */}

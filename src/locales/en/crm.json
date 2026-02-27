@@ -31,7 +31,8 @@
     "noData": "No data found",
     "showing": "Showing {start}–{end} of {total}",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "rowCount": "{count} rows"
   },
   "pipeline": {
     "pageTitle": "Pipeline",
