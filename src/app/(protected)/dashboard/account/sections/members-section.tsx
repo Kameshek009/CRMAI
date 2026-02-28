@@ -180,7 +180,7 @@ export function MembersSection() {
                   <Select value={member.team_roles.id} onValueChange={(val) => handleCustomRoleChange(member.id, val)}>
                     <SelectTrigger className="w-32 h-8"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {roles.map((r) => (<SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>))}
+                      {roles.filter((r) => r.name !== "AI").map((r) => (<SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
                 )

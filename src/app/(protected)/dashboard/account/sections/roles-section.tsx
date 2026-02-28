@@ -122,7 +122,7 @@ export function RolesSection() {
       </div>
       <Separator />
       <div className="grid gap-4 sm:grid-cols-2">
-        {roles.map((role) => (
+        {roles.filter((role) => role.name !== "AI").map((role) => (
           <Card key={role.id}>
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
               <div className="flex items-center gap-2">
