@@ -825,6 +825,7 @@
     "permanentDeleteTitle": "Удалить навсегда",
     "permanentDeleteConfirm": "Это действие нельзя отменить. Элемент будет удалён безвозвратно.",
     "permanentDelete": "Удалить навсегда",
+    "bulkPurgeConfirm": "Вы уверены, что хотите безвозвратно удалить {count} элементов? Это действие нельзя отменить.",
     "deletedAt": "Удалено",
     "entityTypes": {
       "all": "Все",

@@ -825,6 +825,7 @@
     "permanentDeleteTitle": "Permanently delete",
     "permanentDeleteConfirm": "This action cannot be undone. The item will be permanently removed.",
     "permanentDelete": "Delete permanently",
+    "bulkPurgeConfirm": "Are you sure you want to permanently delete {count} items? This cannot be undone.",
     "deletedAt": "Deleted",
     "entityTypes": {
       "all": "All",

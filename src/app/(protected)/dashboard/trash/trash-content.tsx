@@ -5,7 +5,9 @@ import { PageContainer, PageHeader } from "@/components/dashboard/page-container
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
+import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { toast } from "sonner";
 import { useWorkspace } from "@/contexts/team-context";
 import {
@@ -53,6 +55,17 @@ function useTimeAgo() {
   };
 }
 
+/** Group selected items by entity_type for bulk API calls */
+function groupByType(items: TrashItem[], selectedIds: Set<string>) {
+  const grouped: Record<string, string[]> = {};
+  for (const item of items) {
+    if (!selectedIds.has(item.id)) continue;
+    if (!grouped[item.entity_type]) grouped[item.entity_type] = [];
+    grouped[item.entity_type]!.push(item.id);
+  }
+  return grouped;
+}
+
 export function TrashContent() {
   const { t } = useTranslation();
   const { isOwner } = useWorkspace();
@@ -62,6 +75,9 @@ export function TrashContent() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [purgeItem, setPurgeItem] = useState<TrashItem | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [confirmBulkPurge, setConfirmBulkPurge] = useState(false);
 
   const fetchTrash = useCallback(async () => {
     setLoading(true);
@@ -78,10 +94,27 @@ export function TrashContent() {
       toast.error(t("crm.trash.failedRestore"));
     } finally {
       setLoading(false);
+      setSelectedIds(new Set());
     }
   }, [activeTab, t]);
 
   useEffect(() => { fetchTrash(); }, [fetchTrash]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map((i) => i.id)));
+    }
+  };
 
   const handleRestore = async (item: TrashItem) => {
     setActionLoading(item.id);
@@ -95,6 +128,7 @@ export function TrashContent() {
       if (json.success) {
         toast.success(t("crm.trash.restored"));
         setItems((prev) => prev.filter((i) => i.id !== item.id));
+        setSelectedIds((prev) => { const next = new Set(prev); next.delete(item.id); return next; });
       } else {
         toast.error(json.error || t("crm.trash.failedRestore"));
       }
@@ -118,6 +152,7 @@ export function TrashContent() {
       if (json.success) {
         toast.success(t("crm.trash.deleted"));
         setItems((prev) => prev.filter((i) => i.id !== purgeItem.id));
+        setSelectedIds((prev) => { const next = new Set(prev); next.delete(purgeItem.id); return next; });
       } else {
         toast.error(json.error || t("crm.trash.failedDelete"));
       }
@@ -126,6 +161,63 @@ export function TrashContent() {
     } finally {
       setActionLoading(null);
       setPurgeItem(null);
+    }
+  };
+
+  const handleBulkRestore = async () => {
+    setBulkLoading(true);
+    try {
+      const grouped = groupByType(items, selectedIds);
+      const results = await Promise.all(
+        Object.entries(grouped).map(([entityType, ids]) =>
+          fetch("/api/crm/trash/restore", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ entity_type: entityType, ids }),
+          }).then((r) => r.json())
+        )
+      );
+      const allOk = results.every((r) => r.success);
+      if (allOk) {
+        toast.success(t("crm.trash.restored"));
+        setItems((prev) => prev.filter((i) => !selectedIds.has(i.id)));
+        setSelectedIds(new Set());
+      } else {
+        toast.error(t("crm.trash.failedRestore"));
+      }
+    } catch {
+      toast.error(t("crm.trash.failedRestore"));
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkPurge = async () => {
+    setBulkLoading(true);
+    try {
+      const grouped = groupByType(items, selectedIds);
+      const results = await Promise.all(
+        Object.entries(grouped).map(([entityType, ids]) =>
+          fetch("/api/crm/trash/purge", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ entity_type: entityType, ids }),
+          }).then((r) => r.json())
+        )
+      );
+      const allOk = results.every((r) => r.success);
+      if (allOk) {
+        toast.success(t("crm.trash.deleted"));
+        setItems((prev) => prev.filter((i) => !selectedIds.has(i.id)));
+        setSelectedIds(new Set());
+      } else {
+        toast.error(t("crm.trash.failedDelete"));
+      }
+    } catch {
+      toast.error(t("crm.trash.failedDelete"));
+    } finally {
+      setBulkLoading(false);
+      setConfirmBulkPurge(false);
     }
   };
 
@@ -168,6 +260,13 @@ export function TrashContent() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/50">
+                <th className="px-3 py-2 w-10">
+                  <Checkbox
+                    checked={items.length > 0 && selectedIds.size === items.length}
+                    onCheckedChange={toggleSelectAll}
+                    aria-label={t("common.selectAll")}
+                  />
+                </th>
                 <th className="px-3 py-2 text-xs font-medium text-muted-foreground text-left">{t("crm.trash.entityTypes.all")}</th>
                 <th className="px-3 py-2 text-xs font-medium text-muted-foreground text-left">{t("crm.trash.deletedAt")}</th>
                 <th className="px-3 py-2 text-xs font-medium text-muted-foreground text-right" />
@@ -177,8 +276,16 @@ export function TrashContent() {
               {items.map((item) => {
                 const Icon = ENTITY_ICONS[item.entity_type] || FileText;
                 const color = ENTITY_COLORS[item.entity_type] || "bg-muted text-muted-foreground";
+                const isSelected = selectedIds.has(item.id);
                 return (
-                  <tr key={`${item.entity_type}-${item.id}`} className="border-b border-border last:border-0">
+                  <tr key={`${item.entity_type}-${item.id}`} className={cn("border-b border-border last:border-0", isSelected && "bg-muted/30")}>
+                    <td className="px-3 py-2.5 w-10">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleSelect(item.id)}
+                        aria-label={item.name}
+                      />
+                    </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-3">
                         <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center shrink-0", color)}>
@@ -231,6 +338,24 @@ export function TrashContent() {
         </div>
       )}
 
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onDeselectAll={() => setSelectedIds(new Set())}
+        actions={[
+          {
+            label: t("crm.trash.restore"),
+            icon: <RotateCcw className="size-3.5" />,
+            onClick: handleBulkRestore,
+          },
+          ...(isOwner ? [{
+            label: t("crm.trash.permanentDelete"),
+            variant: "destructive" as const,
+            icon: <Trash2 className="size-3.5" />,
+            onClick: () => setConfirmBulkPurge(true),
+          }] : []),
+        ]}
+      />
+
       <ConfirmDialog
         open={!!purgeItem}
         onOpenChange={(open) => !open && setPurgeItem(null)}
@@ -240,6 +365,17 @@ export function TrashContent() {
         variant="destructive"
         isLoading={!!actionLoading}
         onConfirm={handlePurge}
+      />
+
+      <ConfirmDialog
+        open={confirmBulkPurge}
+        onOpenChange={(open) => !open && setConfirmBulkPurge(false)}
+        title={t("crm.trash.permanentDeleteTitle")}
+        description={t("crm.trash.bulkPurgeConfirm", { count: selectedIds.size })}
+        confirmLabel={t("crm.trash.permanentDelete")}
+        variant="destructive"
+        isLoading={bulkLoading}
+        onConfirm={handleBulkPurge}
       />
     </PageContainer>
   );
