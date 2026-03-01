@@ -454,6 +454,7 @@ export interface AIInsight {
   type: "warning" | "opportunity" | "info" | "action";
   title: string;
   description: string;
+  params?: Record<string, string | number>;
   entityType?: "contact" | "deal" | "company";
   entityId?: string;
   priority: "low" | "medium" | "high";

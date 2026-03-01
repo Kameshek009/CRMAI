@@ -58,8 +58,9 @@ export const GET = withApiHandler(
       insights.push({
         id: "overdue-tasks",
         type: "warning",
-        title: `${overdueTasks} overdue task${overdueTasks > 1 ? "s" : ""}`,
-        description: "You have tasks past their due date. Review and update them.",
+        title: "crm.insights.overdueTasks.title",
+        description: "crm.insights.overdueTasks.description",
+        params: { count: overdueTasks },
         priority: "high",
       });
     }
@@ -69,8 +70,9 @@ export const GET = withApiHandler(
       insights.push({
         id: "stale-deals",
         type: "warning",
-        title: `${staleDeals.length} deal${staleDeals.length > 1 ? "s" : ""} need${staleDeals.length === 1 ? "s" : ""} attention`,
-        description: `These deals haven't been updated in 30+ days: ${staleDeals.map((d) => d.title).join(", ")}`,
+        title: "crm.insights.staleDeals.title",
+        description: "crm.insights.staleDeals.description",
+        params: { count: staleDeals.length, deals: staleDeals.map((d) => d.title).join(", ") },
         priority: "medium",
       });
     }
@@ -80,8 +82,9 @@ export const GET = withApiHandler(
       insights.push({
         id: "cold-contacts",
         type: "opportunity",
-        title: `${coldContacts} contacts with low engagement`,
-        description: "Consider reaching out to re-engage these contacts.",
+        title: "crm.insights.coldContacts.title",
+        description: "crm.insights.coldContacts.description",
+        params: { count: coldContacts },
         priority: "medium",
       });
     }
@@ -92,8 +95,9 @@ export const GET = withApiHandler(
       insights.push({
         id: "closing-deals",
         type: "opportunity",
-        title: `${closingDeals.length} deal${closingDeals.length > 1 ? "s" : ""} closing this week`,
-        description: `Worth $${totalValue.toLocaleString()} total. Focus on closing these deals.`,
+        title: "crm.insights.closingDeals.title",
+        description: "crm.insights.closingDeals.description",
+        params: { count: closingDeals.length, value: totalValue.toLocaleString() },
         priority: "high",
       });
     }
@@ -102,8 +106,8 @@ export const GET = withApiHandler(
       insights.push({
         id: "healthy-pipeline",
         type: "info",
-        title: "Your pipeline looks healthy",
-        description: "Keep up the great work! All tasks are on track and deals are progressing.",
+        title: "crm.insights.healthy.title",
+        description: "crm.insights.healthy.description",
         priority: "low",
       });
     }

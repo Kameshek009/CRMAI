@@ -1159,5 +1159,27 @@
     "table": "Table",
     "today": "Today",
     "noShowings": "No showings"
+  },
+  "insights": {
+    "overdueTasks": {
+      "title": "{count} overdue tasks",
+      "description": "You have tasks past their due date. Review and update them."
+    },
+    "staleDeals": {
+      "title": "{count} deals need attention",
+      "description": "These deals haven't been updated in 30+ days: {deals}"
+    },
+    "coldContacts": {
+      "title": "{count} contacts with low engagement",
+      "description": "Consider reaching out to re-engage these contacts."
+    },
+    "closingDeals": {
+      "title": "{count} deals closing this week",
+      "description": "Worth ${value} total. Focus on closing these deals."
+    },
+    "healthy": {
+      "title": "Your pipeline looks healthy",
+      "description": "Keep up the great work! All tasks are on track and deals are progressing."
+    }
   }
 }

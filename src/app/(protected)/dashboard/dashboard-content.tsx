@@ -624,8 +624,8 @@ export function DashboardContent({ userName }: DashboardContentProps) {
                         <IIcon className="w-3.5 h-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-foreground">{insight.title}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{insight.description}</p>
+                        <p className="text-xs font-medium text-foreground">{t(insight.title, insight.params)}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{t(insight.description, insight.params)}</p>
                       </div>
                     </div>
                   );
