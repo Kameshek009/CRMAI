@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/stores/search-store";
 import { useTranslation } from "@/lib/i18n";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const segmentKeys: Record<string, string> = {
   dashboard: "nav.breadcrumb.home",
@@ -59,28 +60,31 @@ export function DashboardHeader() {
   }
 
   return (
-    <div className="flex items-center justify-between flex-1">
-      <nav className="flex items-center gap-1 text-sm">
-        {crumbs.map((crumb, i) => (
-          <span key={crumb.href} className="flex items-center gap-1">
+    <div className="flex items-center justify-between flex-1 gap-2">
+      <div className="flex items-center gap-2 min-w-0">
+        <SidebarTrigger className="md:hidden" />
+        <nav className="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
+          {crumbs.map((crumb, i) => (
+          <span key={crumb.href} className="flex items-center gap-1 min-w-0">
             {i > 0 && (
-              <ChevronRight className="size-3.5 text-muted-foreground" />
+              <ChevronRight className="size-3.5 text-muted-foreground shrink-0" />
             )}
             {i === crumbs.length - 1 ? (
-              <span className="font-medium text-foreground">{crumb.label}</span>
+              <span className="font-medium text-foreground truncate">{crumb.label}</span>
             ) : (
               <Link
                 href={crumb.href}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors truncate hidden sm:inline"
               >
                 {crumb.label}
               </Link>
             )}
           </span>
         ))}
-      </nav>
+        </nav>
+      </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 shrink-0">
         <NotificationBell />
         <Button
           variant="outline"

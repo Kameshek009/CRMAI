@@ -14,8 +14,20 @@ export const metadata: Metadata = {
   keywords: ["nexxus", "crm", "ai", "sales", "pipeline", "contacts", "deals"],
   authors: [{ name: "Nexxus CRM" }],
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/icon.svg",
   },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Nexxus",
+    statusBarStyle: "default",
+  },
+  applicationName: "Nexxus CRM",
+  formatDetection: { telephone: false },
   openGraph: {
     title: "Nexxus CRM",
     description: "AI-Powered CRM for Growing Teams",
@@ -36,10 +48,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f5f3f0" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

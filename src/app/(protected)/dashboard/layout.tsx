@@ -22,7 +22,7 @@ export default async function DashboardLayout({
           <AppSidebar />
           <SidebarInset>
             <OfflineBanner />
-            <header className="flex h-14 shrink-0 items-center gap-2 border-b px-8">
+            <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur px-4 sm:px-6 md:px-8">
               <DashboardHeader />
             </header>
             <WorkspaceGuard>

@@ -6,6 +6,8 @@ import { ThemedClerkProvider } from "./clerk-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "@/lib/i18n";
 import { CookieConsentBanner } from "./cookie-consent/banner";
+import { RegisterSW } from "./pwa/register-sw";
+import { InstallPrompt } from "./pwa/install-prompt";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -24,6 +26,8 @@ export function Providers({ children }: ProvidersProps) {
           {children}
           <Toaster richColors position="bottom-right" />
           <CookieConsentBanner />
+          <RegisterSW />
+          <InstallPrompt />
         </LanguageProvider>
       </ThemedClerkProvider>
     </NextThemesProvider>
