@@ -3,6 +3,7 @@ import {
   signWebhookBody,
   verifyWebhookSignature,
   generateWebhookSecret,
+  decryptWebhookSecret,
 } from "@/lib/webhooks/signing";
 
 describe("signWebhookBody", () => {
@@ -48,15 +49,17 @@ describe("verifyWebhookSignature", () => {
 });
 
 describe("generateWebhookSecret", () => {
-  it("returns a whsec_-prefixed plaintext and its sha256 hash", () => {
+  it("returns a whsec_-prefixed plaintext and AES-GCM ciphertext that round-trips", () => {
     const s = generateWebhookSecret();
     expect(s.plaintext).toMatch(/^whsec_/);
-    expect(s.hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(s.encrypted).not.toBe(s.plaintext);
+    expect(decryptWebhookSecret(s.encrypted)).toBe(s.plaintext);
   });
 
   it("is unique across calls", () => {
     const a = generateWebhookSecret();
     const b = generateWebhookSecret();
     expect(a.plaintext).not.toBe(b.plaintext);
+    expect(a.encrypted).not.toBe(b.encrypted);
   });
 });

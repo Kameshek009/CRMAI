@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { encryptToken, decryptToken } from "@/lib/api-auth/token-crypto";
 
 /**
  * Signs a raw webhook body with HMAC-SHA256.
@@ -22,11 +23,17 @@ export function verifyWebhookSignature(secret: string, body: string, signatureHe
 }
 
 /**
- * Generates a fresh webhook signing secret for a new endpoint.
- * Shown to the user ONCE; the DB stores only the hash.
+ * Generates a fresh webhook signing secret and its AES-256-GCM ciphertext.
+ *
+ * The plaintext is shown to the user ONCE on endpoint creation so they can
+ * verify our deliveries on their side. The DB stores only `encrypted` (see
+ * migration 053); the dispatcher decrypts at send time to compute the HMAC.
  */
-export function generateWebhookSecret(): { plaintext: string; hash: string } {
+export function generateWebhookSecret(): { plaintext: string; encrypted: string } {
   const plaintext = `whsec_${crypto.randomBytes(24).toString("base64url")}`;
-  const hash = crypto.createHash("sha256").update(plaintext).digest("hex");
-  return { plaintext, hash };
+  return { plaintext, encrypted: encryptToken(plaintext) };
+}
+
+export function decryptWebhookSecret(encrypted: string): string {
+  return decryptToken(encrypted);
 }
