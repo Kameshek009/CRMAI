@@ -275,7 +275,18 @@
       "showToken": "Показать",
       "hideToken": "Скрыть",
       "save": "Сохранить",
-      "accessTokenRequired": "Необходимо указать токен доступа"
+      "accessTokenRequired": "Необходимо указать токен доступа",
+      "appSecret": "App Secret",
+      "appSecretHelp": "Meta App Secret из Meta App Dashboard > Settings > Basic. Используется для верификации подписей webhook.",
+      "appSecretSet": "Задан",
+      "appSecretNotSet": "Не задан",
+      "needsResave": "Настройки мигрированы из старого формата. Пересохраните access token чтобы зашифровать его.",
+      "origin.byo": "Своё приложение Meta",
+      "origin.embedded_signup": "Подключено через Meta Embedded Signup",
+      "connectViaMeta": "Подключить через Meta",
+      "connectViaMetaUnavailable": "Embedded Signup не настроен на сервере",
+      "tabBYO": "Своё приложение",
+      "tabEmbedded": "Embedded Signup (рекомендуется)"
     },
     "google": {
       "title": "Google",

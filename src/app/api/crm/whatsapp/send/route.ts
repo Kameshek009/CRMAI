@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { sendWhatsAppMessageSchema } from "@/lib/crm/validation";
 import { getWhatsAppConfig } from "@/lib/whatsapp/helpers";
+import { WhatsAppMigrationPlaintextError } from "@/lib/whatsapp/store";
 import { WhatsAppClient } from "@/lib/whatsapp/client";
 import { logger } from "@/lib/logger";
 
@@ -14,7 +15,18 @@ export const POST = withApiHandler(
   },
   async (_request, ctx, { body }) => {
     // Load WhatsApp config
-    const config = await getWhatsAppConfig(ctx.workspaceId);
+    let config;
+    try {
+      config = await getWhatsAppConfig(ctx.workspaceId);
+    } catch (e) {
+      if (e instanceof WhatsAppMigrationPlaintextError) {
+        return NextResponse.json(
+          { success: false, error: "Re-save WhatsApp settings to encrypt the token before sending." },
+          { status: 400 },
+        );
+      }
+      throw e;
+    }
     if (!config) {
       return NextResponse.json({ success: false, error: "WhatsApp not configured" }, { status: 400 });
     }

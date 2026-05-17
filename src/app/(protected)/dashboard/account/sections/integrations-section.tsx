@@ -17,9 +17,13 @@ import { Copy, Webhook, MessageSquare, Eye, EyeOff, Loader2, CheckCircle2, XCirc
 interface WhatsAppSettings {
   phone_number_id: string;
   waba_id: string;
-  access_token_masked: string;
+  access_token_masked: string | null;
+  app_secret_set: boolean;
   webhook_verify_token: string;
   is_connected: boolean;
+  origin: "byo" | "embedded_signup";
+  display_name: string | null;
+  needs_resave: boolean;
 }
 
 interface GoogleStatus {
@@ -43,11 +47,13 @@ export function IntegrationsSection() {
     phone_number_id: "",
     waba_id: "",
     access_token: "",
+    app_secret: "",
   });
   const [showToken, setShowToken] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [waLoaded, setWaLoaded] = useState(false);
+  const [waEmbeddedConfigured, setWaEmbeddedConfigured] = useState(false);
 
   // Google integration state
   const [googleStatus, setGoogleStatus] = useState<GoogleStatus | null>(null);
@@ -114,6 +120,17 @@ export function IntegrationsSection() {
   };
 
   useEffect(() => {
+    fetch("/api/oauth/whatsapp/status")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setWaEmbeddedConfigured(Boolean(json.data.embedded_signup_configured));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     fetch("/api/crm/whatsapp/settings")
       .then((r) => r.json())
       .then((json) => {
@@ -123,6 +140,7 @@ export function IntegrationsSection() {
             phone_number_id: json.data.phone_number_id || "",
             waba_id: json.data.waba_id || "",
             access_token: "",
+            app_secret: "",
           });
         }
       })
@@ -151,12 +169,17 @@ export function IntegrationsSection() {
       // Only send token if user entered a new one
       if (waForm.access_token) {
         body.access_token = waForm.access_token;
-      } else if (waSettings?.access_token_masked) {
-        // Keep existing token — don't send empty
-        // The API should handle this, but we skip sending
       }
-      // If no existing token and no new token → require it
-      if (!waForm.access_token && !waSettings?.access_token_masked) {
+      // App secret is optional — only send if user typed one
+      if (waForm.app_secret) {
+        body.app_secret = waForm.app_secret;
+      }
+      // Plaintext-migrated rows REQUIRE a fresh access_token; mask is shown
+      // as legacy and we don't reuse it.
+      const hasUsableExisting =
+        waSettings?.access_token_masked &&
+        !waSettings.needs_resave;
+      if (!waForm.access_token && !hasUsableExisting) {
         toast.error(t("settings.integrations.whatsapp.accessTokenRequired"));
         setIsSaving(false);
         return;
@@ -175,7 +198,7 @@ export function IntegrationsSection() {
         const reloadJson = await reloadRes.json();
         if (reloadJson.success && reloadJson.data) {
           setWaSettings(reloadJson.data);
-          setWaForm((prev) => ({ ...prev, access_token: "" }));
+          setWaForm((prev) => ({ ...prev, access_token: "", app_secret: "" }));
         }
       } else {
         toast.error(json.error || t("settings.integrations.whatsapp.saveFailed"));
@@ -315,6 +338,30 @@ export function IntegrationsSection() {
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">{t("settings.integrations.whatsapp.description")}</p>
 
+          <div className="rounded-md border bg-muted/40 p-3 flex items-center justify-between gap-3">
+            <div className="text-sm">
+              <p className="font-medium">{t("settings.integrations.whatsapp.tabEmbedded")}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {waEmbeddedConfigured
+                  ? t("settings.integrations.whatsapp.origin.embedded_signup")
+                  : t("settings.integrations.whatsapp.connectViaMetaUnavailable")}
+              </p>
+            </div>
+            <Button
+              variant="default"
+              disabled={!waEmbeddedConfigured}
+              onClick={() => {
+                window.location.href = "/api/oauth/whatsapp/start?return_to=/dashboard/account?tab=integrations";
+              }}
+            >
+              {t("settings.integrations.whatsapp.connectViaMeta")}
+            </Button>
+          </div>
+
+          <div className="text-xs uppercase tracking-wide text-muted-foreground pt-2">
+            {t("settings.integrations.whatsapp.tabBYO")}
+          </div>
+
           <div className="space-y-3">
             <div className="space-y-1.5">
               <Label className="text-sm">{t("settings.integrations.whatsapp.phoneNumberId")}</Label>
@@ -351,6 +398,30 @@ export function IntegrationsSection() {
               </div>
               <p className="text-xs text-muted-foreground">{t("settings.integrations.whatsapp.accessTokenHelp")}</p>
             </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm flex items-center gap-2">
+                {t("settings.integrations.whatsapp.appSecret")}
+                {waLoaded && waSettings && (
+                  waSettings.app_secret_set
+                    ? <Badge variant="default" className="text-xs">{t("settings.integrations.whatsapp.appSecretSet")}</Badge>
+                    : <Badge variant="secondary" className="text-xs">{t("settings.integrations.whatsapp.appSecretNotSet")}</Badge>
+                )}
+              </Label>
+              <Input
+                type="password"
+                value={waForm.app_secret}
+                onChange={(e) => setWaForm((prev) => ({ ...prev, app_secret: e.target.value }))}
+                placeholder={waSettings?.app_secret_set ? "•••••••• (set)" : "..."}
+              />
+              <p className="text-xs text-muted-foreground">{t("settings.integrations.whatsapp.appSecretHelp")}</p>
+            </div>
+
+            {waSettings?.needs_resave && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+                {t("settings.integrations.whatsapp.needsResave")}
+              </div>
+            )}
 
             {/* Read-only fields after save */}
             {waSettings?.webhook_verify_token && (

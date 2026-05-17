@@ -309,6 +309,7 @@ export const whatsappSettingsSchema = z.object({
   phone_number_id: z.string().min(1).max(100),
   waba_id: z.string().min(1).max(100),
   access_token: z.string().min(1).max(500).optional(),
+  app_secret: z.string().min(1).max(200).optional(),
   webhook_verify_token: z.string().min(1).max(100).optional(),
 });
 

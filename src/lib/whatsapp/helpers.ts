@@ -1,67 +1,75 @@
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import type { WhatsAppConfig } from "./client";
-
-interface WhatsAppSettings {
-  phone_number_id: string;
-  waba_id: string;
-  access_token: string;
-  webhook_verify_token: string;
-  is_connected?: boolean;
-}
+import {
+  getWhatsAppRuntimeConfig,
+  getWhatsAppSettingsByPhoneNumberId,
+  WhatsAppMigrationPlaintextError,
+} from "./store";
+import { logger } from "@/lib/logger";
 
 /**
- * Load WhatsApp config from team settings JSONB.
- * Returns null if not configured.
+ * Load WhatsApp config for a workspace. Decrypts the access token through
+ * `store.ts`. Returns null when no row exists; throws
+ * `WhatsAppMigrationPlaintextError` when the row is still in pre-migration
+ * plaintext (caller should surface a "re-save settings" hint).
  */
-export async function getWhatsAppConfig(teamId: string): Promise<(WhatsAppConfig & { webhookVerifyToken: string }) | null> {
-  const supabase = createSupabaseAdmin();
-  const { data: team } = await supabase
-    .from("teams")
-    .select("settings")
-    .eq("id", teamId)
-    .single();
-
-  const settings = team?.settings as Record<string, unknown> | null;
-  const wa = settings?.whatsapp as WhatsAppSettings | undefined;
-
-  if (!wa?.phone_number_id || !wa?.access_token) return null;
-
+export async function getWhatsAppConfig(
+  teamId: string,
+): Promise<(WhatsAppConfig & { webhookVerifyToken: string; appSecret: string | null }) | null> {
+  const cfg = await getWhatsAppRuntimeConfig(teamId);
+  if (!cfg) return null;
   return {
-    phoneNumberId: wa.phone_number_id,
-    accessToken: wa.access_token,
-    wabaId: wa.waba_id,
-    webhookVerifyToken: wa.webhook_verify_token,
+    phoneNumberId: cfg.phoneNumberId,
+    accessToken: cfg.accessToken,
+    wabaId: cfg.wabaId,
+    webhookVerifyToken: cfg.webhookVerifyToken,
+    appSecret: cfg.appSecret,
   };
 }
 
 /**
- * Find team by WhatsApp phone_number_id stored in settings.
- * Used by the webhook to route incoming messages.
+ * O(1) lookup by phone_number_id (UNIQUE index in migration 059) replaces
+ * the old full-team scan over `teams.settings`.
  */
-export async function findTeamByPhoneNumberId(phoneNumberId: string): Promise<{ teamId: string; accountId: string; webhookVerifyToken: string } | null> {
-  const supabase = createSupabaseAdmin();
-
-  // Search for team where settings->'whatsapp'->>'phone_number_id' matches
-  const { data: teams } = await supabase
-    .from("teams")
-    .select("id, owner_account_id, settings")
-    .is("deleted_at", null);
-
-  if (!teams) return null;
-
-  for (const team of teams) {
-    const settings = team.settings as Record<string, unknown> | null;
-    const wa = settings?.whatsapp as WhatsAppSettings | undefined;
-    if (wa?.phone_number_id === phoneNumberId) {
-      return {
-        teamId: team.id,
-        accountId: team.owner_account_id,
-        webhookVerifyToken: wa.webhook_verify_token,
-      };
+export async function findTeamByPhoneNumberId(
+  phoneNumberId: string,
+): Promise<{
+  teamId: string;
+  accountId: string;
+  webhookVerifyToken: string;
+  appSecret: string | null;
+  accessToken: string;
+} | null> {
+  const row = await getWhatsAppSettingsByPhoneNumberId(phoneNumberId);
+  if (!row) return null;
+  let accessToken: string;
+  let appSecret: string | null;
+  try {
+    const supabase = createSupabaseAdmin();
+    const { data: team } = await supabase
+      .from("teams")
+      .select("owner_account_id")
+      .eq("id", row.team_id)
+      .single();
+    if (!team) return null;
+    const cfg = await getWhatsAppRuntimeConfig(row.team_id);
+    if (!cfg) return null;
+    accessToken = cfg.accessToken;
+    appSecret = cfg.appSecret;
+    return {
+      teamId: row.team_id,
+      accountId: team.owner_account_id,
+      webhookVerifyToken: row.webhook_verify_token,
+      appSecret,
+      accessToken,
+    };
+  } catch (e) {
+    if (e instanceof WhatsAppMigrationPlaintextError) {
+      logger.warn("WhatsApp", `Row for phone_number_id ${phoneNumberId} is pre-migration plaintext — needs re-save`);
+      return null;
     }
+    throw e;
   }
-
-  return null;
 }
 
 /**

@@ -275,7 +275,18 @@
       "showToken": "Show",
       "hideToken": "Hide",
       "save": "Save",
-      "accessTokenRequired": "Access token is required"
+      "accessTokenRequired": "Access token is required",
+      "appSecret": "App Secret",
+      "appSecretHelp": "Meta App Secret from Meta App Dashboard > Settings > Basic. Used to verify webhook signatures.",
+      "appSecretSet": "Set",
+      "appSecretNotSet": "Not set",
+      "needsResave": "Settings were migrated from the legacy format. Re-save your access token to encrypt it.",
+      "origin.byo": "Bring-your-own-app",
+      "origin.embedded_signup": "Connected via Meta Embedded Signup",
+      "connectViaMeta": "Connect via Meta",
+      "connectViaMetaUnavailable": "Embedded Signup not configured on this server",
+      "tabBYO": "Bring your own app",
+      "tabEmbedded": "Embedded Signup (recommended)"
     },
     "google": {
       "title": "Google",
