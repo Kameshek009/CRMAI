@@ -3,6 +3,7 @@ import { withApiHandler } from "@/lib/crm/with-api-handler";
 import { isHubSpotConfigured } from "@/lib/importers/hubspot/oauth";
 import { isAmoCRMConfigured } from "@/lib/importers/amocrm/oauth";
 import { isBitrix24Configured } from "@/lib/importers/bitrix24/oauth";
+import { isSalesforceConfigured } from "@/lib/importers/salesforce/oauth";
 import { getOAuthConnection } from "@/lib/oauth/tokens";
 
 interface ProviderStatus {
@@ -22,10 +23,11 @@ interface ProviderStatus {
 export const GET = withApiHandler(
   { permission: { resource: "contacts", action: "read" }, logTag: "Importer" },
   async (_request, ctx) => {
-    const [hubspotConn, amocrmConn, bitrix24Conn] = await Promise.all([
+    const [hubspotConn, amocrmConn, bitrix24Conn, salesforceConn] = await Promise.all([
       getOAuthConnection(ctx.workspaceId, "hubspot"),
       getOAuthConnection(ctx.workspaceId, "amocrm"),
       getOAuthConnection(ctx.workspaceId, "bitrix24"),
+      getOAuthConnection(ctx.workspaceId, "salesforce"),
     ]);
 
     const data: ProviderStatus[] = [
@@ -56,10 +58,10 @@ export const GET = withApiHandler(
       {
         id: "salesforce",
         label: "Salesforce",
-        configured: false,
-        connected: false,
-        connected_at: null,
-        connection_metadata: null,
+        configured: isSalesforceConfigured(),
+        connected: Boolean(salesforceConn),
+        connected_at: (salesforceConn?.metadata?.connected_at as string) ?? null,
+        connection_metadata: salesforceConn?.metadata ?? null,
       },
     ];
 

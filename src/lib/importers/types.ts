@@ -13,7 +13,7 @@ export const SUPPORTED_IMPORTER_PROVIDERS: ImporterProviderId[] = [
   "hubspot",
   "amocrm",
   "bitrix24",
-  // salesforce coming next.
+  "salesforce",
 ];
 
 export type ImporterEntityType = "contacts" | "companies" | "leads" | "deals";
