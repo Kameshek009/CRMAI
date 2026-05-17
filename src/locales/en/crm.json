@@ -907,7 +907,8 @@
       "source": "Source",
       "status": "Status",
       "notes": "Notes",
-      "converted": "Converted"
+      "converted": "Converted",
+      "score": "Score"
     },
     "statuses": {
       "new": "New",

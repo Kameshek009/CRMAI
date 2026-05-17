@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft, ShieldCheck } from "lucide-react";
+import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft, ShieldCheck, Target } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
@@ -28,6 +28,7 @@ import { DataAccessSection } from "./sections/data-access-section";
 import { WebFormsSection } from "./sections/web-forms-section";
 import { SidebarSection } from "./sections/sidebar-section";
 import { PrivacySection } from "./sections/privacy-section";
+import { LeadScoringSection } from "./sections/lead-scoring-section";
 
 interface AccountContentProps {
   email: string;
@@ -54,6 +55,7 @@ const TEAM_NAV = [
   { id: "custom-fields", icon: Settings2 },
   { id: "lost-reasons", icon: XCircle },
   { id: "email-templates", icon: Mail },
+  { id: "lead-scoring", icon: Target },
   { id: "connections", icon: Link2 },
   { id: "export", icon: Download },
   { id: "integrations", icon: Plug },
@@ -69,7 +71,7 @@ const BILLING_NAV = [
 const VALID_TABS = [
   "profile", "appearance", "language", "notifications", "sidebar", "security", "login-history", "privacy",
   "team", "members", "roles", "currencies", "custom-fields",
-  "lost-reasons", "email-templates", "connections", "export", "integrations",
+  "lost-reasons", "email-templates", "lead-scoring", "connections", "export", "integrations",
   "audit-log", "data-access", "web-forms", "billing", "danger",
 ];
 
@@ -197,6 +199,9 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             </TabsContent>
             <TabsContent value="email-templates">
               <EmailTemplatesSection />
+            </TabsContent>
+            <TabsContent value="lead-scoring">
+              <LeadScoringSection />
             </TabsContent>
             <TabsContent value="connections">
               <ConnectionsSection />

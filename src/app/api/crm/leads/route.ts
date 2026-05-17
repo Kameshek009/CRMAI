@@ -4,6 +4,7 @@ import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { logAudit } from "@/lib/crm/audit";
 import { enqueueOrLog } from "@/lib/outbox/enqueue";
+import { recomputeLeadScore } from "@/lib/lead-scoring/recompute";
 import { z } from "zod";
 
 const createLeadSchema = z.object({
@@ -84,6 +85,9 @@ export const POST = withApiHandler(
       entityId: data.id,
       payload: { ...data, actor_account_id: ctx.accountId },
     });
+
+    // Non-blocking — scoring failure must not break a successful write.
+    await recomputeLeadScore(supabase, data);
 
     return NextResponse.json({ success: true, data });
   }

@@ -40,6 +40,9 @@ interface LeadDetail {
   converted_deal_id: string | null;
   created_at: string;
   metadata: Record<string, unknown> | null;
+  score: number;
+  score_breakdown: Array<{ rule_id: string; name: string; matched: boolean; contribution: number }> | null;
+  score_computed_at: string | null;
 }
 
 interface DealStage {
@@ -302,6 +305,47 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
           </CardContent>
         </Card>
       </div>
+
+      {lead.score_breakdown && lead.score_breakdown.length > 0 && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center justify-between">
+              <span>{t("crm.leads.fields.score")}</span>
+              <span
+                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-sm font-semibold ${
+                  lead.score >= 70
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                    : lead.score >= 40
+                      ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                      : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {lead.score} / 100
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1.5 text-sm">
+              {lead.score_breakdown.map((row) => (
+                <li
+                  key={row.rule_id}
+                  className={`flex items-center justify-between gap-3 ${row.matched ? "" : "text-muted-foreground"}`}
+                >
+                  <span className="truncate">{row.name}</span>
+                  <span className={`font-mono text-xs shrink-0 ${row.matched ? "" : "opacity-50"}`}>
+                    {row.matched ? (row.contribution >= 0 ? `+${row.contribution}` : row.contribution) : "—"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {lead.score_computed_at && (
+              <p className="text-xs text-muted-foreground mt-3">
+                Last computed <TimeAgo date={lead.score_computed_at} />
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Attachments */}
       <Card className="mt-6">

@@ -29,6 +29,7 @@ interface LeadData {
   status: string;
   converted_at: string | null;
   created_at: string;
+  score: number;
 }
 
 const PAGE_SIZE = 50;
@@ -65,6 +66,7 @@ export function LeadsContent() {
     { field: "first_name", label: t("crm.leads.sort.firstName") },
     { field: "email", label: t("crm.leads.sort.email") },
     { field: "organization", label: t("crm.leads.sort.organization") },
+    { field: "score", label: t("crm.leads.fields.score") },
   ], [t]);
 
   const [leads, setLeads] = useState<LeadData[]>([]);
@@ -252,6 +254,23 @@ export function LeadsContent() {
       key: "source",
       label: t("crm.leads.fields.source"),
       render: (l) => l.source || "\u2014",
+    },
+    {
+      key: "score",
+      label: t("crm.leads.fields.score"),
+      sortable: true,
+      render: (l) => {
+        if (!l.score) return <span className="text-muted-foreground">\u2014</span>;
+        const tone =
+          l.score >= 70 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+          : l.score >= 40 ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+          : "bg-muted text-muted-foreground";
+        return (
+          <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${tone}`}>
+            {l.score}
+          </span>
+        );
+      },
     },
     {
       key: "converted_at",

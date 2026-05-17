@@ -273,3 +273,189 @@ registry.registerPath({
     400: { description: "Invalid body", content: { "application/json": { schema: ErrorResponse } } },
   },
 });
+
+// ---------------------------------------------------------------------------
+// Lead scoring (Phase 2 wave A, feature 2)
+// ---------------------------------------------------------------------------
+
+const ScoringRule = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  condition: z.object({
+    field: z.string(),
+    operator: z.string(),
+    value: z.unknown().optional(),
+  }),
+  weight: z.number().int(),
+  is_active: z.boolean(),
+  sort_order: z.number().int(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/lead-scoring/rules",
+  summary: "List scoring rules for the caller's workspace",
+  tags: ["Lead Scoring"],
+  responses: {
+    200: {
+      description: "Rules in display order",
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.literal(true), data: z.array(ScoringRule) }),
+        },
+      },
+    },
+    401: { description: "Unauthorized", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/lead-scoring/rules",
+  summary: "Create a scoring rule",
+  description: "Single-condition rule. Combine multiple rules to express AND/OR logic.",
+  tags: ["Lead Scoring"],
+  request: {
+    body: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: z.object({
+            name: z.string().min(1).max(200),
+            description: z.string().max(2000).optional().nullable(),
+            condition: z.object({
+              field: z.string(),
+              operator: z.string(),
+              value: z.unknown().optional(),
+            }),
+            weight: z.number().int().min(-100).max(100),
+            is_active: z.boolean().optional(),
+            sort_order: z.number().int().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Created rule",
+      content: {
+        "application/json": { schema: z.object({ success: z.literal(true), data: ScoringRule }) },
+      },
+    },
+    400: { description: "Validation error", content: { "application/json": { schema: ErrorResponse } } },
+    401: { description: "Unauthorized", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});
+
+registry.registerPath({
+  method: "patch",
+  path: "/api/lead-scoring/rules/{id}",
+  summary: "Update a scoring rule",
+  tags: ["Lead Scoring"],
+  request: {
+    params: z.object({ id: z.string().uuid() }),
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            name: z.string().optional(),
+            description: z.string().nullable().optional(),
+            condition: z
+              .object({
+                field: z.string(),
+                operator: z.string(),
+                value: z.unknown().optional(),
+              })
+              .optional(),
+            weight: z.number().int().optional(),
+            is_active: z.boolean().optional(),
+            sort_order: z.number().int().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Updated rule",
+      content: {
+        "application/json": { schema: z.object({ success: z.literal(true), data: ScoringRule }) },
+      },
+    },
+    404: { description: "Rule not found", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/lead-scoring/rules/{id}",
+  summary: "Delete a scoring rule",
+  tags: ["Lead Scoring"],
+  request: {
+    params: z.object({ id: z.string().uuid() }),
+  },
+  responses: {
+    200: { description: "Deleted", content: { "application/json": { schema: SuccessResponse } } },
+    404: { description: "Rule not found", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/lead-scoring/rules/install-templates",
+  summary: "Install the predefined set of common scoring rules",
+  description:
+    "Idempotent: templates whose `name` already exists in the workspace are skipped.",
+  tags: ["Lead Scoring"],
+  responses: {
+    200: {
+      description: "Install report",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.literal(true),
+            inserted: z.number(),
+            skipped: z.number(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/lead-scoring/recompute",
+  summary: "Re-score one lead or every non-deleted, non-converted lead",
+  description:
+    "Body `{lead_id}` scores that single lead. Empty body recomputes everyone in the workspace.",
+  tags: ["Lead Scoring"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({ lead_id: z.string().uuid().optional() }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Recompute report",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.literal(true),
+            scored: z.number(),
+            score: z.number().optional(),
+          }),
+        },
+      },
+    },
+    404: { description: "Lead not found", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});

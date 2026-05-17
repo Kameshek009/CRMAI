@@ -4,6 +4,7 @@ import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit } from "@/lib/crm/audit";
 import { enqueueOrLog } from "@/lib/outbox/enqueue";
+import { recomputeLeadScore } from "@/lib/lead-scoring/recompute";
 import { z } from "zod";
 
 const updateLeadSchema = z.object({
@@ -88,6 +89,9 @@ export const PATCH = withApiHandler(
       entityId: id,
       payload: { ...data, actor_account_id: ctx.accountId },
     });
+
+    // Non-blocking — scoring failure must not break a successful write.
+    await recomputeLeadScore(supabase, data);
 
     return NextResponse.json({ success: true, data });
   }
