@@ -17,6 +17,9 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import { QuickFilters } from "@/components/frappe/quick-filters";
 import { useWorkspace } from "@/contexts/team-context";
 import { useRealtimeTable } from "@/lib/realtime/use-realtime-table";
+import { ImportWizard } from "@/components/crm/import-wizard";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 import type { ViewMode } from "@/types/crm";
 
 interface LeadData {
@@ -84,6 +87,7 @@ export function LeadsContent() {
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
 
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
@@ -293,7 +297,14 @@ export function LeadsContent() {
 
   return (
     <PageContainer>
-      <PageHeader title={t("crm.leads.title")} description={`${total}`} />
+      <PageHeader title={t("crm.leads.title")} description={`${total}`}>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
+            <Upload className="size-4 mr-1" />
+            {t("crm.viewControls.import")}
+          </Button>
+        </div>
+      </PageHeader>
 
       <ViewControls
         search={search}
@@ -391,6 +402,13 @@ export function LeadsContent() {
         variant="destructive"
         isLoading={isBulkLoading}
         onConfirm={handleBulkDelete}
+      />
+
+      <ImportWizard
+        entity="leads"
+        open={showImport}
+        onOpenChange={setShowImport}
+        onComplete={() => { pageRef.current = 1; fetchLeads(1, false); }}
       />
     </PageContainer>
   );
