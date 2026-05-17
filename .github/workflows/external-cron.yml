@@ -1,0 +1,54 @@
+name: External cron (Hobby Vercel)
+
+# Vercel Hobby plan rejects any cron expression that fires more than once
+# per day. The high-frequency jobs (dispatch-webhooks, sequence-processor)
+# live here instead and call the same API endpoints with Bearer CRON_SECRET.
+#
+# GitHub Actions' scheduler has a 5-minute floor (and may delay by a few
+# minutes under load). For dispatch-webhooks this means inbound events sit
+# in `outbox_events` up to ~6-7 minutes before delivery in the worst case;
+# the dispatcher itself processes a 50-event batch per call so a single
+# tick covers reasonable bursts.
+#
+# Secrets required (set via `gh secret set`):
+#   CRON_SECRET   — same value as Vercel env (matches the Bearer check)
+#   APP_URL       — https://nexxuscrm.com (no trailing slash)
+
+on:
+  schedule:
+    # Both jobs are idempotent — extra fires are cheap, missed fires
+    # auto-recover on the next tick.
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch outgoing webhooks
+        run: |
+          set -e
+          response=$(curl -fsS -o /tmp/dispatch.json -w "%{http_code}" \
+            -X GET "${APP_URL}/api/cron/dispatch-webhooks" \
+            -H "Authorization: Bearer ${CRON_SECRET}")
+          echo "dispatch-webhooks: HTTP $response"
+          cat /tmp/dispatch.json || true
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Run email sequence processor
+        run: |
+          set -e
+          response=$(curl -fsS -o /tmp/sequences.json -w "%{http_code}" \
+            -X GET "${APP_URL}/api/cron/sequence-processor" \
+            -H "Authorization: Bearer ${CRON_SECRET}")
+          echo "sequence-processor: HTTP $response"
+          cat /tmp/sequences.json || true
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
