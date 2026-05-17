@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { updateDealStageSchema } from "@/lib/crm/validation";
 import { logger } from "@/lib/logger";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 
 export const PATCH = withApiHandler(
   {
@@ -82,6 +83,27 @@ export const PATCH = withApiHandler(
         },
       });
     } catch (e) { logger.error("Deals", "Failed to log activity", e); }
+
+    const stageEventType = newStage.is_won
+      ? "deal.won"
+      : newStage.is_lost
+        ? "deal.lost"
+        : "deal.stage_changed";
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: stageEventType,
+      entityType: "deal",
+      entityId: id,
+      payload: {
+        deal_id: id,
+        from_stage_id: deal.stage_id,
+        to_stage_id: newStage.id,
+        value: deal.value,
+        status: updateData.status,
+        actor_account_id: ctx.accountId,
+      },
+    });
 
     return NextResponse.json({ success: true, data: updated });
   }

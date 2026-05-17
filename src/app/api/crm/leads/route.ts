@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { logAudit } from "@/lib/crm/audit";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 import { z } from "zod";
 
 const createLeadSchema = z.object({
@@ -74,6 +75,14 @@ export const POST = withApiHandler(
       entityType: "lead",
       entityId: data.id,
       action: "create",
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "lead.created",
+      entityType: "lead",
+      entityId: data.id,
+      payload: { ...data, actor_account_id: ctx.accountId },
     });
 
     return NextResponse.json({ success: true, data });

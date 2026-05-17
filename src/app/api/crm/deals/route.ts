@@ -7,6 +7,7 @@ import { createDealSchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
 import { runAutomations } from "@/lib/crm/automation-engine";
 import { logger } from "@/lib/logger";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 
 export const GET = withApiHandler(
   {
@@ -80,6 +81,14 @@ export const POST = withApiHandler(
       entityType: "deal",
       entityId: data.id,
       record: data,
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "deal.created",
+      entityType: "deal",
+      entityId: data.id,
+      payload: { ...data, actor_account_id: ctx.accountId },
     });
 
     return NextResponse.json({ success: true, data });

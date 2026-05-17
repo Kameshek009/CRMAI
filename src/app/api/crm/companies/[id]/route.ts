@@ -5,6 +5,7 @@ import { updateCompanySchema } from "@/lib/crm/validation";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 
 export const GET = withApiHandler(
   {
@@ -98,13 +99,22 @@ export const PATCH = withApiHandler(
       });
     } catch (e) { logger.error("Companies", "Failed to log activity", e); }
 
+    const changes = oldRecord ? computeChanges(oldRecord, body) : undefined;
     logAudit({
       teamId: ctx.workspaceId,
       accountId: ctx.accountId,
       entityType: "company",
       entityId: id,
       action: "update",
-      changes: oldRecord ? computeChanges(oldRecord, body) : undefined,
+      changes,
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "company.updated",
+      entityType: "company",
+      entityId: id,
+      payload: { ...data, changes, actor_account_id: ctx.accountId },
     });
 
     return NextResponse.json({ success: true, data });
@@ -154,6 +164,20 @@ export const DELETE = withApiHandler(
       entityType: "company",
       entityId: id,
       action: "delete",
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "company.trashed",
+      entityType: "company",
+      entityId: id,
+      payload: {
+        id,
+        team_id: ctx.workspaceId,
+        name: existing?.name ?? null,
+        deleted_at: new Date().toISOString(),
+        actor_account_id: ctx.accountId,
+      },
     });
 
     return NextResponse.json({ success: true });

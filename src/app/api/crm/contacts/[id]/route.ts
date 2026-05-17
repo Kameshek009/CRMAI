@@ -6,6 +6,7 @@ import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { runAutomations } from "@/lib/crm/automation-engine";
 import { logger } from "@/lib/logger";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 
 export const GET = withApiHandler(
   {
@@ -101,6 +102,14 @@ export const PATCH = withApiHandler(
       record: data,
     });
 
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "contact.updated",
+      entityType: "contact",
+      entityId: id,
+      payload: { ...data, changes, actor_account_id: ctx.accountId },
+    });
+
     return NextResponse.json({ success: true, data });
   }
 );
@@ -148,6 +157,21 @@ export const DELETE = withApiHandler(
       entityType: "contact",
       entityId: id,
       action: "delete",
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "contact.trashed",
+      entityType: "contact",
+      entityId: id,
+      payload: {
+        id,
+        team_id: ctx.workspaceId,
+        first_name: existing?.first_name ?? null,
+        last_name: existing?.last_name ?? null,
+        deleted_at: new Date().toISOString(),
+        actor_account_id: ctx.accountId,
+      },
     });
 
     return NextResponse.json({ success: true });

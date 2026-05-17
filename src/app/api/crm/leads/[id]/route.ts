@@ -3,6 +3,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { isValidUUID } from "@/lib/crm/helpers";
 import { logAudit } from "@/lib/crm/audit";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 import { z } from "zod";
 
 const updateLeadSchema = z.object({
@@ -80,6 +81,14 @@ export const PATCH = withApiHandler(
       action: "update",
     });
 
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "lead.updated",
+      entityType: "lead",
+      entityId: id,
+      payload: { ...data, actor_account_id: ctx.accountId },
+    });
+
     return NextResponse.json({ success: true, data });
   }
 );
@@ -96,6 +105,13 @@ export const DELETE = withApiHandler(
     }
 
     const supabase = createSupabaseAdmin();
+    const { data: existing } = await supabase
+      .from("leads")
+      .select("first_name, last_name, organization")
+      .eq("id", id)
+      .eq("team_id", ctx.workspaceId)
+      .maybeSingle();
+
     const { error: dbError } = await supabase
       .from("leads")
       .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: ctx.accountId })
@@ -110,6 +126,22 @@ export const DELETE = withApiHandler(
       entityType: "lead",
       entityId: id,
       action: "delete",
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "lead.trashed",
+      entityType: "lead",
+      entityId: id,
+      payload: {
+        id,
+        team_id: ctx.workspaceId,
+        first_name: existing?.first_name ?? null,
+        last_name: existing?.last_name ?? null,
+        organization: existing?.organization ?? null,
+        deleted_at: new Date().toISOString(),
+        actor_account_id: ctx.accountId,
+      },
     });
 
     return NextResponse.json({ success: true });

@@ -5,6 +5,7 @@ import { parseListParams, applyListQuery } from "@/lib/crm/query-builder";
 import { createCompanySchema } from "@/lib/crm/validation";
 import { logAudit } from "@/lib/crm/audit";
 import { logger } from "@/lib/logger";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 
 export const GET = withApiHandler(
   {
@@ -65,6 +66,14 @@ export const POST = withApiHandler(
       entityType: "company",
       entityId: data.id,
       action: "create",
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "company.created",
+      entityType: "company",
+      entityId: data.id,
+      payload: { ...data, actor_account_id: ctx.accountId },
     });
 
     return NextResponse.json({ success: true, data });

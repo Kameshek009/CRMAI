@@ -7,6 +7,7 @@ import { logAudit, computeChanges } from "@/lib/crm/audit";
 import { runAutomations } from "@/lib/crm/automation-engine";
 import { createNotification } from "@/lib/crm/notifications";
 import { logger } from "@/lib/logger";
+import { enqueueOrLog } from "@/lib/outbox/enqueue";
 
 export const GET = withApiHandler(
   {
@@ -127,6 +128,14 @@ export const PATCH = withApiHandler(
       record: data,
     });
 
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "deal.updated",
+      entityType: "deal",
+      entityId: id,
+      payload: { ...data, changes, actor_account_id: ctx.accountId },
+    });
+
     return NextResponse.json({ success: true, data });
   }
 );
@@ -176,6 +185,22 @@ export const DELETE = withApiHandler(
       entityType: "deal",
       entityId: id,
       action: "delete",
+    });
+
+    await enqueueOrLog(supabase, {
+      teamId: ctx.workspaceId,
+      eventType: "deal.trashed",
+      entityType: "deal",
+      entityId: id,
+      payload: {
+        id,
+        team_id: ctx.workspaceId,
+        title: existing?.title ?? null,
+        contact_id: existing?.contact_id ?? null,
+        company_id: existing?.company_id ?? null,
+        deleted_at: new Date().toISOString(),
+        actor_account_id: ctx.accountId,
+      },
     });
 
     return NextResponse.json({ success: true });

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 export interface OutboxEventInput {
   teamId: string;
@@ -35,4 +36,24 @@ export async function enqueueOutboxEvent(
 
   if (error || !data) return { error: error?.message ?? "insert_failed" };
   return { id: data.id };
+}
+
+/**
+ * Fire-and-forget wrapper around enqueueOutboxEvent. Logs failures and never
+ * throws, so the calling route handler can keep responding to the user even
+ * if the outbox insert hiccups. The dispatcher will deliver any successfully
+ * enqueued event; lost events are best-effort and accepted as a trade-off.
+ */
+export async function enqueueOrLog(
+  supabase: SupabaseClient,
+  input: OutboxEventInput,
+): Promise<void> {
+  try {
+    const res = await enqueueOutboxEvent(supabase, input);
+    if ("error" in res) {
+      logger.error("Outbox", `enqueue failed for ${input.eventType}`, res.error);
+    }
+  } catch (e) {
+    logger.error("Outbox", `enqueue threw for ${input.eventType}`, e);
+  }
 }
