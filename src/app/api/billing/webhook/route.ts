@@ -31,7 +31,7 @@ const relevantEvents = new Set([
 ]);
 
 export async function POST(request: NextRequest) {
-  const rlError = checkRateLimit(request, { limit: 100, keyPrefix: "webhook" });
+  const rlError = await checkRateLimit(request, { limit: 100, keyPrefix: "webhook" });
   if (rlError) return rlError;
 
   const body = await request.text();

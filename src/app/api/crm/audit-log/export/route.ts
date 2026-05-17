@@ -17,7 +17,7 @@ function escapeCSV(val: unknown): string {
 
 export async function GET(request: NextRequest) {
   try {
-    const rateLimited = checkRateLimit(request, { limit: 5, windowMs: 60_000 });
+    const rateLimited = await checkRateLimit(request, { limit: 5, windowMs: 60_000 });
     if (rateLimited) return rateLimited;
 
     const { context, error } = await getTeamContext();

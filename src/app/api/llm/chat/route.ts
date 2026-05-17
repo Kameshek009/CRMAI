@@ -64,7 +64,7 @@ const chatRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const rlError = checkRateLimit(request, { limit: 30, keyPrefix: "llm" });
+  const rlError = await checkRateLimit(request, { limit: 30, keyPrefix: "llm" });
   if (rlError) return rlError;
 
   try {

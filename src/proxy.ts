@@ -40,7 +40,7 @@ export default clerkMiddleware(async (auth, request) => {
   try {
     // Global API rate limit (120 req/min per IP)
     if (isApiRoute(request) && !isPublicRoute(request)) {
-      const rateLimited = checkRateLimit(request, { limit: 120, keyPrefix: "global" });
+      const rateLimited = await checkRateLimit(request, { limit: 120, keyPrefix: "global" });
       if (rateLimited) return rateLimited;
     }
 

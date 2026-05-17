@@ -5,7 +5,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { ENTITY_CONFIG, CHUNK_SIZE, rowToCsv } from "@/lib/crm/export-utils";
 
 export async function GET(request: NextRequest) {
-  const rlError = checkRateLimit(request, { limit: 5 });
+  const rlError = await checkRateLimit(request, { limit: 5 });
   if (rlError) return rlError;
 
   const { context, error } = await getWorkspaceContext();

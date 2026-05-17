@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
  * Verify JWT token from desktop app and return account info
  */
 export async function POST(request: NextRequest) {
-  const rlError = checkRateLimit(request, { limit: 10, keyPrefix: "auth" });
+  const rlError = await checkRateLimit(request, { limit: 10, keyPrefix: "auth" });
   if (rlError) return rlError;
 
   try {

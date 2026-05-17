@@ -60,7 +60,7 @@ function calculateBillableTokens(
 // ─────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const rlError = checkRateLimit(request, { limit: 20 });
+  const rlError = await checkRateLimit(request, { limit: 20 });
   if (rlError) return rlError;
 
   try {

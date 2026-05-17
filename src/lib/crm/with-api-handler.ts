@@ -262,7 +262,7 @@ export function withApiHandler<
     try {
       // ── 0a. Rate limiting (optional) ─────────────────────────────────
       if (options.rateLimit) {
-        const rateLimitResponse = checkRateLimit(request, options.rateLimit);
+        const rateLimitResponse = await checkRateLimit(request, options.rateLimit);
         if (rateLimitResponse) return rateLimitResponse;
       }
 
