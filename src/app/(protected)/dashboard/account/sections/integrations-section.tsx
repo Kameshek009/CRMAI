@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { useTranslation } from "@/lib/i18n";
 import { useWorkspace } from "@/contexts/team-context";
 import { useAccount } from "@/contexts/account-context";
 import { toast } from "sonner";
-import { Copy, Webhook, MessageSquare, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Copy, Webhook, MessageSquare, Eye, EyeOff, Loader2, CheckCircle2, XCircle, Mail } from "lucide-react";
 
 interface WhatsAppSettings {
   phone_number_id: string;
@@ -19,6 +20,16 @@ interface WhatsAppSettings {
   access_token_masked: string;
   webhook_verify_token: string;
   is_connected: boolean;
+}
+
+interface GoogleStatus {
+  configured: boolean;
+  connected: boolean;
+  provider_user_id?: string;
+  email?: string | null;
+  name?: string | null;
+  scopes?: string[];
+  connected_at?: string | null;
 }
 
 export function IntegrationsSection() {
@@ -37,6 +48,70 @@ export function IntegrationsSection() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [waLoaded, setWaLoaded] = useState(false);
+
+  // Google integration state
+  const [googleStatus, setGoogleStatus] = useState<GoogleStatus | null>(null);
+  const [googleLoaded, setGoogleLoaded] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const loadGoogleStatus = () => {
+    fetch("/api/oauth/google/status")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data) setGoogleStatus(json.data as GoogleStatus);
+      })
+      .catch(() => {})
+      .finally(() => setGoogleLoaded(true));
+  };
+
+  useEffect(() => {
+    loadGoogleStatus();
+  }, []);
+
+  // Toast on return from OAuth flow
+  useEffect(() => {
+    const status = searchParams.get("google_oauth");
+    if (!status) return;
+    if (status === "connected") {
+      toast.success(t("settings.integrations.google.connected"));
+    } else {
+      const msg = searchParams.get("google_oauth_message") || "";
+      toast.error(t("settings.integrations.google.connectFailed", { error: msg || "unknown" }));
+    }
+    // Clear the params so reload doesn't re-toast
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("google_oauth");
+    params.delete("google_oauth_message");
+    const next = params.toString();
+    router.replace(next ? `?${next}` : "?tab=integrations");
+    loadGoogleStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const handleConnectGoogle = () => {
+    setGoogleBusy(true);
+    window.location.href = "/api/oauth/google/start?return_to=/dashboard/account?tab=integrations";
+  };
+
+  const handleDisconnectGoogle = async () => {
+    setGoogleBusy(true);
+    try {
+      const res = await fetch("/api/oauth/google/disconnect", { method: "POST" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.integrations.google.disconnectSuccess"));
+        setGoogleStatus((prev) => prev ? { ...prev, connected: false, email: null, name: null } : prev);
+      } else {
+        toast.error(json.error || t("settings.integrations.google.disconnectFailed"));
+      }
+    } catch {
+      toast.error(t("settings.integrations.google.disconnectFailed"));
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/crm/whatsapp/settings")
@@ -168,6 +243,59 @@ export function IntegrationsSection() {
               </Button>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Google (Gmail + Calendar) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Mail className="size-4" />
+            {t("settings.integrations.google.title")}
+            {googleLoaded && googleStatus && (
+              googleStatus.connected
+                ? <Badge variant="default" className="text-xs gap-1"><CheckCircle2 className="size-3" />{t("settings.integrations.google.connected")}</Badge>
+                : <Badge variant="secondary" className="text-xs gap-1"><XCircle className="size-3" />{t("settings.integrations.google.notConnected")}</Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">{t("settings.integrations.google.description")}</p>
+          <p className="text-xs text-muted-foreground">{t("settings.integrations.google.scopesIncluded")}</p>
+
+          {googleStatus && !googleStatus.configured && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+              {t("settings.integrations.google.notConfigured")}
+            </div>
+          )}
+
+          {googleStatus?.connected && googleStatus.email && (
+            <div className="rounded-md border p-3 space-y-1">
+              <p className="text-sm">{t("settings.integrations.google.connectedAs", { email: googleStatus.email })}</p>
+              {googleStatus.connected_at && (
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.integrations.google.connectedSince", { date: new Date(googleStatus.connected_at).toLocaleString() })}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            {!googleStatus?.connected ? (
+              <Button
+                onClick={handleConnectGoogle}
+                disabled={googleBusy || Boolean(googleStatus && !googleStatus.configured)}
+              >
+                {googleBusy && <Loader2 className="size-4 mr-1.5 animate-spin" />}
+                {googleBusy ? t("settings.integrations.google.connecting") : t("settings.integrations.google.connect")}
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={handleDisconnectGoogle} disabled={googleBusy}>
+                {googleBusy && <Loader2 className="size-4 mr-1.5 animate-spin" />}
+                {googleBusy ? t("settings.integrations.google.disconnecting") : t("settings.integrations.google.disconnect")}
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 

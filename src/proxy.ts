@@ -16,6 +16,10 @@ const isPublicRoute = createRouteMatcher([
   "/api/billing_disabled/webhook",
   // Resend delivery webhook — verifies its own Svix signature
   "/api/webhooks/resend",
+  // Gmail inbox push — verifies its own Pub/Sub JWT
+  "/api/webhooks/google/gmail",
+  // Google Calendar push — verifies its own X-Goog-Channel-Token
+  "/api/webhooks/google/calendar",
   // Desktop app auth endpoints (use their own JWT validation)
   "/api/auth/desktop/(.*)",
   // Desktop sync endpoints (use their own JWT validation)

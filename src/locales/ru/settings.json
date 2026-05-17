@@ -276,6 +276,23 @@
       "hideToken": "Скрыть",
       "save": "Сохранить",
       "accessTokenRequired": "Необходимо указать токен доступа"
+    },
+    "google": {
+      "title": "Google",
+      "description": "Подключите Gmail и Google Calendar — мы будем подтягивать входящие письма и синхронизировать события календаря в этом рабочем пространстве.",
+      "connect": "Подключить Google",
+      "connecting": "Перенаправляем...",
+      "disconnect": "Отключить",
+      "disconnecting": "Отключаем...",
+      "connected": "Подключено",
+      "notConnected": "Не подключено",
+      "connectedAs": "Подключено как {email}",
+      "connectedSince": "С {date}",
+      "connectFailed": "Ошибка подключения: {error}",
+      "disconnectFailed": "Не удалось отключить",
+      "disconnectSuccess": "Google отключён",
+      "notConfigured": "Google OAuth не настроен на сервере. Задайте GOOGLE_OAUTH_CLIENT_ID и GOOGLE_OAUTH_CLIENT_SECRET.",
+      "scopesIncluded": "Чтение Gmail, метаданные Gmail, события Google Calendar"
     }
   },
   "groups": {

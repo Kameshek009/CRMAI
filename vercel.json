@@ -16,6 +16,14 @@
     {
       "path": "/api/cron/lead-scoring-recompute",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-gmail-watches",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-calendar-channels",
+      "schedule": "30 5 * * *"
     }
   ]
 }
