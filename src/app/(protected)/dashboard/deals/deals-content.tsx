@@ -17,6 +17,8 @@ import { QuickFilters } from "@/components/frappe/quick-filters";
 import { toast } from "sonner";
 import type { ViewMode } from "@/types/crm";
 import { useTranslation } from "@/lib/i18n";
+import { useWorkspace } from "@/contexts/team-context";
+import { useRealtimeTable } from "@/lib/realtime/use-realtime-table";
 
 // ============================================================================
 // Types
@@ -162,6 +164,13 @@ export function DealsContent() {
     return () => { abortRef.current?.abort(); };
   }, [fetchDeals]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
+
+  const { currentWorkspace } = useWorkspace();
+  useRealtimeTable({
+    table: "deals",
+    filterValue: currentWorkspace?.id,
+    onChange: () => fetchDeals(1, false),
+  });
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore || deals.length >= total) return;

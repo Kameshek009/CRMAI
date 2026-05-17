@@ -26,6 +26,7 @@ import { PrevNextNav } from "@/components/crm/prev-next-nav";
 import { ChangeHistory } from "@/components/crm/change-history";
 import { AttachmentGallery } from "@/components/crm/attachment-gallery";
 import { useTranslation } from "@/lib/i18n";
+import { useRealtimeTable } from "@/lib/realtime/use-realtime-table";
 import { format } from "date-fns";
 import type { Attachment } from "@/lib/supabase/storage";
 import type { Activity } from "@/types/crm";
@@ -110,6 +111,15 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
   const [activityTitle, setActivityTitle] = useState("");
   const [activityDesc, setActivityDesc] = useState("");
   const [isLoggingActivity, setIsLoggingActivity] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useRealtimeTable({
+    table: "deals",
+    filterColumn: "id",
+    filterValue: dealId,
+    events: ["UPDATE", "DELETE"],
+    onChange: () => setRefreshKey((k) => k + 1),
+  });
 
   useEffect(() => {
     const safeFetch = (url: string) =>
@@ -150,7 +160,7 @@ export function DealDetailContent({ dealId }: { dealId: string }) {
       if (showingsRes.success) setShowings(showingsRes.data);
       setIsLoading(false);
     });
-  }, [dealId]);
+  }, [dealId, refreshKey]);
 
   const updateField = useCallback(async (field: string, value: string) => {
     const res = await fetch(`/api/crm/deals/${dealId}`, {

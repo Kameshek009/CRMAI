@@ -21,6 +21,8 @@ import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import { useTranslation } from "@/lib/i18n";
 import { QuickFilters } from "@/components/frappe/quick-filters";
+import { useWorkspace } from "@/contexts/team-context";
+import { useRealtimeTable } from "@/lib/realtime/use-realtime-table";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -162,6 +164,13 @@ export function ContactsContent() {
     return () => { abortRef.current?.abort(); };
   }, [fetchContacts]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
+
+  const { currentWorkspace } = useWorkspace();
+  useRealtimeTable({
+    table: "contacts",
+    filterValue: currentWorkspace?.id,
+    onChange: () => fetchContacts(1, false),
+  });
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore || contacts.length >= total) return;

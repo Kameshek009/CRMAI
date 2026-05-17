@@ -26,6 +26,8 @@ import { toast } from "sonner";
 import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useFeatureLimitStore } from "@/stores/feature-limit-store";
 import { useTranslation } from "@/lib/i18n";
+import { useWorkspace } from "@/contexts/team-context";
+import { useRealtimeTable } from "@/lib/realtime/use-realtime-table";
 import type { ViewMode } from "@/types/crm";
 
 // ============================================================================
@@ -192,6 +194,13 @@ export function TasksContent() {
     fetchTasks(1, false);
   }, [fetchTasks]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
+
+  const { currentWorkspace } = useWorkspace();
+  useRealtimeTable({
+    table: "crm_tasks",
+    filterValue: currentWorkspace?.id,
+    onChange: () => fetchTasks(1, false),
+  });
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore || tasks.length >= total) return;

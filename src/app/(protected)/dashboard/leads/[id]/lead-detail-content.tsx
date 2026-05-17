@@ -18,6 +18,7 @@ import { ArrowLeft, Save, UserPlus, Handshake, Loader2 } from "lucide-react";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { AttachmentGallery } from "@/components/crm/attachment-gallery";
+import { useRealtimeTable } from "@/lib/realtime/use-realtime-table";
 import { toast } from "sonner";
 import type { Attachment } from "@/lib/supabase/storage";
 
@@ -91,6 +92,14 @@ export function LeadDetailContent({ leadId }: { leadId: string }) {
   }, [leadId, t]);
 
   useEffect(() => { fetchLead(); }, [fetchLead]);
+
+  useRealtimeTable({
+    table: "leads",
+    filterColumn: "id",
+    filterValue: leadId,
+    events: ["UPDATE", "DELETE"],
+    onChange: fetchLead,
+  });
 
   const handleSave = async () => {
     setIsSaving(true);

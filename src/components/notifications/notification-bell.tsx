@@ -12,6 +12,7 @@ import {
 import { useTranslation } from "@/lib/i18n";
 import { useWorkspace } from "@/contexts/team-context";
 import { supabase } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import { NotificationItem } from "./notification-item";
 
 interface Notification {
@@ -39,6 +40,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [accountId, setAccountId] = useState<string | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -53,37 +55,57 @@ export function NotificationBell() {
     }
   }, []);
 
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
-  /* eslint-enable react-hooks/set-state-in-effect */
+
+  // Resolve our account_id once so the realtime filter only delivers
+  // notifications meant for this user (not the whole team).
+  useEffect(() => {
+    fetch("/api/account/profile")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j?.success) setAccountId(j.data.id);
+      })
+      .catch(() => {});
+  }, []);
 
   // Realtime subscription
   useEffect(() => {
-    if (!currentWorkspace?.id) return;
+    if (!currentWorkspace?.id || !accountId) return;
 
     const channel = supabase
-      .channel("notifications-realtime")
+      .channel(`notifications-realtime:${accountId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "notifications",
+          filter: `account_id=eq.${accountId}`,
         },
         (payload) => {
           const newNotif = payload.new as Notification;
           setNotifications((prev) => [newNotif, ...prev].slice(0, 50));
           setUnreadCount((prev) => prev + 1);
+          // Only toast when the bell isn't open — otherwise the row is
+          // already visible inside the popover.
+          if (!open) {
+            toast.info(newNotif.title, {
+              description: newNotif.message ?? undefined,
+            });
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
-  }, [currentWorkspace?.id]);
+    // `open` intentionally omitted: re-subscribing every popover toggle
+    // would tear down the channel. We read it via closure instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentWorkspace?.id, accountId]);
 
   const handleMarkAllRead = async () => {
     try {

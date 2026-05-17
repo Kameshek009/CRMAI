@@ -15,6 +15,8 @@ import { handleApiError } from "@/lib/crm/handle-api-error";
 import { useTranslation } from "@/lib/i18n";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { QuickFilters } from "@/components/frappe/quick-filters";
+import { useWorkspace } from "@/contexts/team-context";
+import { useRealtimeTable } from "@/lib/realtime/use-realtime-table";
 import type { ViewMode } from "@/types/crm";
 
 interface LeadData {
@@ -124,6 +126,13 @@ export function LeadsContent() {
     return () => { abortRef.current?.abort(); };
   }, [fetchLeads]);
   useEffect(() => { setSelectedIds(new Set()); }, [search, activeFilters]);
+
+  const { currentWorkspace } = useWorkspace();
+  useRealtimeTable({
+    table: "leads",
+    filterValue: currentWorkspace?.id,
+    onChange: () => fetchLeads(1, false),
+  });
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore || leads.length >= total) return;
