@@ -2,6 +2,20 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 
+// Canonical host enforcement: traffic landing on the legacy Vercel-default
+// hostname (or any host listed in NEXXUS_REDIRECT_HOSTS) is 308'd to the
+// canonical host so:
+//   - SEO doesn't see duplicate content
+//   - OAuth state cookies are set on the same host the callback returns to
+//   - Webhooks (Pub/Sub, Meta) only need one URL registered
+// Set CANONICAL_HOST env to the bare host (no scheme), e.g. `nexxuscrm.com`.
+// Leave NEXXUS_REDIRECT_HOSTS empty to disable.
+const CANONICAL_HOST = process.env.CANONICAL_HOST?.trim() || null;
+const REDIRECT_HOSTS = (process.env.NEXXUS_REDIRECT_HOSTS || "")
+  .split(",")
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean);
+
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -46,6 +60,19 @@ const isBearerAuthRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, request) => {
   try {
+    // Canonical host redirect — runs BEFORE rate limit / auth so we bounce
+    // the user to the right host before any cookies are set.
+    if (CANONICAL_HOST && REDIRECT_HOSTS.length > 0) {
+      const host = request.headers.get("host")?.toLowerCase() ?? "";
+      if (host && REDIRECT_HOSTS.includes(host) && host !== CANONICAL_HOST) {
+        const url = new URL(request.url);
+        url.host = CANONICAL_HOST;
+        url.protocol = "https:";
+        url.port = "";
+        return NextResponse.redirect(url, 308);
+      }
+    }
+
     // Global API rate limit (120 req/min per IP)
     if (isApiRoute(request) && !isPublicRoute(request)) {
       const rateLimited = await checkRateLimit(request, { limit: 120, keyPrefix: "global" });
