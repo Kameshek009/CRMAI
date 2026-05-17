@@ -9,6 +9,15 @@ extendZodWithOpenApi(z);
 
 export const registry = new OpenAPIRegistry();
 
+// Security schemes — referenced by routes that accept API key authentication.
+registry.registerComponent("securitySchemes", "apiKey", {
+  type: "http",
+  scheme: "bearer",
+  bearerFormat: "Nexxus API key (nxk_live_*)",
+  description:
+    "Pass an API key as `Authorization: Bearer nxk_live_<token>`. Keys are created in Nexxus admin and carry scoped permissions (e.g. `contacts:read`). Required scopes are listed on each route.",
+});
+
 export function buildOpenAPIDocument() {
   const generator = new OpenApiGeneratorV31(registry.definitions);
   return generator.generateDocument({
