@@ -14,6 +14,8 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/billing_disabled/webhook",
+  // Resend delivery webhook — verifies its own Svix signature
+  "/api/webhooks/resend",
   // Desktop app auth endpoints (use their own JWT validation)
   "/api/auth/desktop/(.*)",
   // Desktop sync endpoints (use their own JWT validation)

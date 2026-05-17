@@ -4,6 +4,7 @@ import { withApiHandler, ApiError } from "@/lib/crm/with-api-handler";
 import { createEmailSchema } from "@/lib/crm/validation";
 import { parsePagination } from "@/lib/crm/helpers";
 import { logger } from "@/lib/logger";
+import { sendEmail } from "@/lib/email/send";
 
 export const GET = withApiHandler(
   {
@@ -45,6 +46,49 @@ export const POST = withApiHandler(
   },
   async (_request, ctx, { body }) => {
     const supabase = createSupabaseAdmin();
+
+    // Outbound: try to actually deliver via Resend. sendEmail() owns the
+    // INSERT into email_communications so we don't double-write the row.
+    if (body.direction === "outbound") {
+      const result = await sendEmail(supabase, {
+        teamId: ctx.workspaceId,
+        accountId: ctx.accountId,
+        contactId: body.contact_id ?? null,
+        dealId: body.deal_id ?? null,
+        from: body.from_email,
+        to: body.to_emails ?? [],
+        cc: body.cc_emails ?? undefined,
+        bcc: body.bcc_emails ?? undefined,
+        subject: body.subject ?? "(no subject)",
+        text: body.body_text ?? undefined,
+        html: body.body_html ?? undefined,
+      });
+
+      try {
+        await supabase.from("crm_activities").insert({
+          account_id: ctx.accountId,
+          team_id: ctx.workspaceId,
+          contact_id: body.contact_id || null,
+          deal_id: body.deal_id || null,
+          type: "email",
+          title: `Email: ${body.subject || "(no subject)"}`,
+          description: body.body_text?.slice(0, 200) || null,
+        });
+      } catch (e) { logger.error("Emails", "Failed to log activity", e); }
+
+      if (!result.ok) {
+        return NextResponse.json(
+          { success: false, error: result.error, data: result.id ? { id: result.id } : null },
+          { status: 502 },
+        );
+      }
+      return NextResponse.json({
+        success: true,
+        data: { id: result.id, provider_message_id: result.providerMessageId },
+      });
+    }
+
+    // Inbound: legacy path — just log the row, no provider interaction.
     const { data, error: dbError } = await supabase
       .from("email_communications")
       .insert({
@@ -57,7 +101,6 @@ export const POST = withApiHandler(
 
     if (dbError) throw new ApiError("Failed to create email", 500);
 
-    // Log activity
     try {
       await supabase.from("crm_activities").insert({
         account_id: ctx.accountId,
@@ -70,19 +113,17 @@ export const POST = withApiHandler(
       });
     } catch (e) { logger.error("Emails", "Failed to log activity", e); }
 
-    // Exit condition: inbound email exits active sequence enrollments
-    if (body.direction === "inbound") {
-      try {
-        const contactId = body.contact_id;
-        if (contactId) {
-          await supabase
-            .from("email_sequence_enrollments")
-            .update({ status: "exited_reply", updated_at: new Date().toISOString() })
-            .eq("status", "active")
-            .eq("contact_id", contactId);
-        }
-      } catch (e) { logger.error("Emails", "Failed to exit sequence enrollments", e); }
-    }
+    // Inbound email exits any active sequence enrollments for this contact.
+    try {
+      const contactId = body.contact_id;
+      if (contactId) {
+        await supabase
+          .from("email_sequence_enrollments")
+          .update({ status: "exited_reply", updated_at: new Date().toISOString() })
+          .eq("status", "active")
+          .eq("contact_id", contactId);
+      }
+    } catch (e) { logger.error("Emails", "Failed to exit sequence enrollments", e); }
 
     return NextResponse.json({ success: true, data });
   }

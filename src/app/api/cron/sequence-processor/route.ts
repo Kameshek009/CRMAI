@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { sendEmail } from "@/lib/email/send";
 
 /**
  * Cron endpoint: processes email sequence enrollments.
@@ -100,25 +101,40 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Log email (current system logs, doesn't actually send via SMTP)
-        await supabase.from("email_communications").insert({
-          team_id: teamId,
-          account_id: enrollment.enrolled_by,
-          contact_id: enrollment.contact_id || null,
-          from_email: process.env.SEQUENCE_FROM_EMAIL || "sequence@nexxuscrm.com",
-          to_emails: [toEmail],
+        // Real send via Resend. sendEmail owns the email_communications row;
+        // if it returns ok:false, the row is already marked 'failed' with a
+        // failure_reason, and we surface that into email_sequence_sends.
+        const sendResult = await sendEmail(supabase, {
+          teamId,
+          accountId: enrollment.enrolled_by,
+          contactId: enrollment.contact_id || null,
+          from: process.env.SEQUENCE_FROM_EMAIL,
+          to: [toEmail],
           subject: currentStep.subject,
-          body_text: currentStep.body,
-          direction: "outbound",
-          status: "sent",
+          text: currentStep.body,
+          tags: [
+            { name: "sequence_id", value: enrollment.sequence_id },
+            { name: "enrollment_id", value: enrollment.id },
+            { name: "step_id", value: currentStep.id },
+          ],
         });
 
-        // Record send
         await supabase.from("email_sequence_sends").insert({
           enrollment_id: enrollment.id,
           step_id: currentStep.id,
-          status: "sent",
+          status: sendResult.ok ? "sent" : "failed",
         });
+
+        // On send failure: don't advance the enrollment. The next cron tick
+        // will retry the same step. (No backoff yet — Resend hard failures
+        // typically need user intervention anyway.)
+        if (!sendResult.ok) {
+          logger.warn(
+            "SeqProcessor",
+            `Send failed for enrollment ${enrollment.id}: ${sendResult.error}`,
+          );
+          continue;
+        }
 
         // Advance to next step
         const nextStepIndex = enrollment.current_step + 1;
