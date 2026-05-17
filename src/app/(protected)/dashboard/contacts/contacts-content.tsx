@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/frappe/status-badge";
 import { EntityForm } from "@/components/crm/entity-form";
 import { getContactFields } from "@/lib/crm/field-definitions";
 import { ImportWizard } from "@/components/crm/import-wizard";
+import { LiveImportPanel } from "@/components/crm/live-import-panel";
 import { BulkActionBar } from "@/components/crm/bulk-action-bar";
 import { ConfirmDialog } from "@/components/crm/confirm-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -110,6 +111,7 @@ export function ContactsContent() {
   // Forms
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showLiveImport, setShowLiveImport] = useState(false);
 
   // Bulk
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -342,6 +344,10 @@ export function ContactsContent() {
     <PageContainer>
       <PageHeader title={t("crm.contacts.title")} description={`${total}`}>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowLiveImport(true)}>
+            <Upload className="size-4 mr-1" />
+            {t("crm.import.live.title")}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
             <Upload className="size-4 mr-1" />
             {t("crm.viewControls.import")}
@@ -477,6 +483,12 @@ export function ContactsContent() {
       <ImportWizard
         open={showImport}
         onOpenChange={setShowImport}
+        onComplete={() => { pageRef.current = 1; fetchContacts(1, false); }}
+      />
+
+      <LiveImportPanel
+        open={showLiveImport}
+        onOpenChange={setShowLiveImport}
         onComplete={() => { pageRef.current = 1; fetchContacts(1, false); }}
       />
 

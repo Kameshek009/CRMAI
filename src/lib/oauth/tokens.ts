@@ -8,7 +8,13 @@ import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { encryptToken, decryptToken } from "@/lib/api-auth/token-crypto";
 import { refreshAccessToken, expiresInToTimestamp } from "./google";
 
-export type OAuthProvider = "google" | "microsoft";
+export type OAuthProvider =
+  | "google"
+  | "microsoft"
+  | "hubspot"
+  | "amocrm"
+  | "bitrix24"
+  | "salesforce";
 
 export interface OAuthConnectionRow {
   id: string;

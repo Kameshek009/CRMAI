@@ -972,7 +972,27 @@
     "importCount": "Import {count} Contact(s)",
     "complete": "Import Complete",
     "completeDescription": "{imported} contacts and {companies} companies imported.",
-    "done": "Done"
+    "done": "Done",
+    "live": {
+      "title": "Live CRM import",
+      "description": "Connect a CRM you already use to pull contacts, companies, and deals straight into Nexxus.",
+      "connect": "Connect",
+      "import": "Import now",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "notConfigured": "Provider not configured on this server",
+      "willConnect": "Click Connect to authorise via OAuth",
+      "willImport": "Click Import to pull the latest contacts, companies, and deals",
+      "started": "Import started — polling for progress",
+      "startFailed": "Failed to start import",
+      "completed": "Import completed",
+      "failed": "Import failed",
+      "progressTitle": "Importing from {provider}",
+      "contacts": "Contacts",
+      "companies": "Companies",
+      "deals": "Deals",
+      "errors": "{count} errors logged — see details below"
+    }
   },
   "analytics": {
     "pageTitle": "Analytics",
