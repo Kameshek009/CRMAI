@@ -8,7 +8,7 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useWorkspace } from "@/contexts/team-context";
 import { useTranslation } from "@/lib/i18n";
 import { Logo } from "@/components/ui/logo";
-import { NexusBrandSidebar } from "@/components/nexus-brand";
+import { NexxusBrandSidebar } from "@/components/nexxus-brand";
 import { TeamSwitcher } from "@/components/team/team-switcher";
 import {
   Sidebar,
@@ -268,7 +268,7 @@ export function AppSidebar() {
                   <Logo size={20} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <NexusBrandSidebar />
+                  <NexxusBrandSidebar />
                   <span className="truncate text-xs text-muted-foreground">{t("nav.dashboard")}</span>
                 </div>
               </Link>

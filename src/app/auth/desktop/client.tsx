@@ -54,7 +54,7 @@ export default function DesktopAuthClient({
       }
 
       // Redirect to desktop app via deep link with tokens and account data
-      const callbackUrl = `serotonin://callback?access_token=${encodeURIComponent(data.access_token)}&refresh_token=${encodeURIComponent(data.refresh_token)}&expires_at=${encodeURIComponent(data.expires_at)}&state=${encodeURIComponent(state)}&account=${encodeURIComponent(JSON.stringify(data.account))}&user=${encodeURIComponent(JSON.stringify(data.user))}`;
+      const callbackUrl = `nexxus://callback?access_token=${encodeURIComponent(data.access_token)}&refresh_token=${encodeURIComponent(data.refresh_token)}&expires_at=${encodeURIComponent(data.expires_at)}&state=${encodeURIComponent(state)}&account=${encodeURIComponent(JSON.stringify(data.account))}&user=${encodeURIComponent(JSON.stringify(data.user))}`;
 
       // Try to open the deep link
       window.location.href = callbackUrl;
@@ -72,7 +72,7 @@ export default function DesktopAuthClient({
 
   const handleCancel = () => {
     // Redirect to desktop app with error
-    const callbackUrl = `serotonin://callback?error=access_denied&error_description=${encodeURIComponent("User cancelled authorization")}&state=${encodeURIComponent(state)}`;
+    const callbackUrl = `nexxus://callback?error=access_denied&error_description=${encodeURIComponent("User cancelled authorization")}&state=${encodeURIComponent(state)}`;
     window.location.href = callbackUrl;
   };
 

@@ -178,8 +178,8 @@ export async function generateDesktopTokens(
     JWT_SECRET,
     {
       expiresIn: ACCESS_TOKEN_EXPIRY,
-      issuer: "serotonin-dashboard",
-      audience: "serotonin-desktop",
+      issuer: "nexxus-dashboard",
+      audience: "nexxus-desktop",
     }
   );
 
@@ -268,8 +268,8 @@ export async function refreshDesktopToken(
     JWT_SECRET,
     {
       expiresIn: ACCESS_TOKEN_EXPIRY,
-      issuer: "serotonin-dashboard",
-      audience: "serotonin-desktop",
+      issuer: "nexxus-dashboard",
+      audience: "nexxus-desktop",
     }
   );
 
@@ -319,8 +319,8 @@ export function validateAccessToken(accessToken: string): {
 } | null {
   try {
     const decoded = jwt.verify(accessToken, JWT_SECRET, {
-      issuer: "serotonin-dashboard",
-      audience: "serotonin-desktop",
+      issuer: "nexxus-dashboard",
+      audience: "nexxus-desktop",
     }) as {
       sub: string;
       account_id: string;

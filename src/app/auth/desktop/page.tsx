@@ -9,10 +9,10 @@ import DesktopAuthClient from "./client";
  * This page is opened in the browser when the desktop app initiates login.
  *
  * Flow:
- * 1. Desktop opens: dashboard.serotonin.to/auth/desktop?state=xxx&device_name=xxx
+ * 1. Desktop opens: dashboard.nexxus.to/auth/desktop?state=xxx&device_name=xxx
  * 2. If not signed in, redirect to Clerk sign-in with return URL
  * 3. If signed in, show authorization confirmation
- * 4. On confirm, generate auth code and redirect to serotonin://callback?code=xxx&state=xxx
+ * 4. On confirm, generate auth code and redirect to nexxus://callback?code=xxx&state=xxx
  */
 export default async function DesktopAuthPage({
   searchParams,

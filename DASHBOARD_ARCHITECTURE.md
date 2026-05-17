@@ -1,12 +1,12 @@
-# Serotonin Dashboard - Architecture Documentation
+# Nexxus Dashboard - Architecture Documentation
 
-> Control center and billing gateway for the Serotonin AI Desktop Agent
+> Control center and billing gateway for the Nexxus AI Desktop Agent
 
 ---
 
 ## Overview
 
-The Serotonin Dashboard is a **Next.js web application** that provides:
+The Nexxus Dashboard is a **Next.js web application** that provides:
 - User authentication via Clerk OAuth
 - Subscription management and billing via Stripe
 - Token usage tracking and session history

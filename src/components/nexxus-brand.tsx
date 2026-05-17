@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const brandName = "Nexxus CRM";
 
-export function NexusBrandHeader() {
+export function NexxusBrandHeader() {
   return (
     <motion.div
       whileHover={{ scale: 1.03 }}
@@ -27,7 +27,7 @@ export function NexusBrandHeader() {
   );
 }
 
-export function NexusBrandSidebar() {
+export function NexxusBrandSidebar() {
   return (
     <span
       className="truncate font-semibold text-foreground"

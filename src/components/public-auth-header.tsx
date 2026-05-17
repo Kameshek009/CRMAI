@@ -7,7 +7,7 @@ import { ChevronDown, CheckSquare, BarChart2, LayoutGrid, Calendar, MessageCircl
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggleSlider } from "./theme-toggle-slider";
 import { LanguageToggle } from "./landing/language-toggle";
-import { NexusBrandHeader } from "./nexus-brand";
+import { NexxusBrandHeader } from "./nexxus-brand";
 import { useTranslation } from "@/lib/i18n";
 
 type ColumnItem = { label: string; href: string; icon: LucideIcon };
@@ -210,7 +210,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-background border-l border-border p-6 flex flex-col gap-6 overflow-y-auto"
           >
             <div className="flex items-center justify-between">
-              <NexusBrandHeader />
+              <NexxusBrandHeader />
               <button onClick={onClose} aria-label="Close menu" className="p-2 rounded-lg hover:bg-muted transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -283,7 +283,7 @@ export function PublicAuthHeader() {
         }`}
       >
         <div className="flex items-center gap-1">
-          <NexusBrandHeader />
+          <NexxusBrandHeader />
 
           <nav className="hidden md:flex items-center gap-0.5 ml-6">
             <MegaDropdown
