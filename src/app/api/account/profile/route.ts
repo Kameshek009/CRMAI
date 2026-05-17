@@ -3,6 +3,28 @@ import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 
 /**
+ * GET /api/account/profile
+ * Read the current user's account row (subset). Used by the Privacy section
+ * to display deletion status and last consent.
+ */
+export async function GET() {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+  const supabase = createSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("accounts")
+    .select("id, name, email, deletion_requested_at, cookie_consent")
+    .eq("clerk_user_id", userId)
+    .maybeSingle();
+  if (error || !data) {
+    return NextResponse.json({ success: false, error: "Account not found" }, { status: 404 });
+  }
+  return NextResponse.json({ success: true, data });
+}
+
+/**
  * PATCH /api/account/profile
  * Update the current user's display name
  */

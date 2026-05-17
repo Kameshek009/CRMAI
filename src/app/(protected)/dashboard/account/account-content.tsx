@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft } from "lucide-react";
+import { User, Palette, Globe, Bell, Lock, CreditCard, Users, Shield, Link2, Download, Plug, AlertTriangle, DollarSign, Settings2, XCircle, Mail, ScrollText, History, Eye, FileInput, PanelLeft, ShieldCheck } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { ProfileSection } from "./sections/profile-section";
 import { AppearanceSection } from "./sections/appearance-section";
@@ -27,6 +27,7 @@ import { LoginHistorySection } from "./sections/login-history-section";
 import { DataAccessSection } from "./sections/data-access-section";
 import { WebFormsSection } from "./sections/web-forms-section";
 import { SidebarSection } from "./sections/sidebar-section";
+import { PrivacySection } from "./sections/privacy-section";
 
 interface AccountContentProps {
   email: string;
@@ -42,6 +43,7 @@ const PERSONAL_NAV = [
   { id: "sidebar", icon: PanelLeft },
   { id: "security", icon: Lock },
   { id: "login-history", icon: History },
+  { id: "privacy", icon: ShieldCheck },
 ] as const;
 
 const TEAM_NAV = [
@@ -65,7 +67,7 @@ const BILLING_NAV = [
 ] as const;
 
 const VALID_TABS = [
-  "profile", "appearance", "language", "notifications", "sidebar", "security", "login-history",
+  "profile", "appearance", "language", "notifications", "sidebar", "security", "login-history", "privacy",
   "team", "members", "roles", "currencies", "custom-fields",
   "lost-reasons", "email-templates", "connections", "export", "integrations",
   "audit-log", "data-access", "web-forms", "billing", "danger",
@@ -171,6 +173,9 @@ export function AccountContent({ email, name, imageUrl }: AccountContentProps) {
             </TabsContent>
             <TabsContent value="login-history">
               <LoginHistorySection />
+            </TabsContent>
+            <TabsContent value="privacy">
+              <PrivacySection />
             </TabsContent>
             <TabsContent value="team">
               <TeamSection />

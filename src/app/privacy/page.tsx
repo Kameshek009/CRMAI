@@ -42,14 +42,14 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">5. Your Rights</h2>
             <p className="text-muted-foreground leading-relaxed">
-              You have the right to access, update, or delete your personal data at any time through your account settings. You can export your CRM data or request complete account deletion by contacting our support team.
+              You have the right to access, update, export, or delete your personal data at any time. Open <Link href="/dashboard/account?tab=privacy" className="underline underline-offset-2">Settings → Privacy &amp; GDPR</Link> to download a JSON copy of your data, manage cookie preferences, or schedule permanent account deletion. Deletion is final after a 30-day grace period during which you can cancel.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-3">6. Cookies</h2>
             <p className="text-muted-foreground leading-relaxed">
-              We use essential cookies for authentication and session management. We do not use third-party advertising cookies. Analytics cookies help us understand usage patterns to improve our service.
+              We use essential cookies for authentication and session management. Analytics and marketing cookies are off until you opt in via our cookie banner; you can review or change your choices any time from <Link href="/dashboard/account?tab=privacy" className="underline underline-offset-2">Settings → Privacy &amp; GDPR</Link>.
             </p>
           </section>
 

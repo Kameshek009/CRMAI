@@ -146,3 +146,130 @@ registry.registerPath({
     404: { description: "Contact not found", content: { "application/json": { schema: ErrorResponse } } },
   },
 });
+
+// ---------------------------------------------------------------------------
+// GDPR self-service (Phase 2 wave A, feature 1)
+// ---------------------------------------------------------------------------
+
+const SuccessResponse = z.object({ success: z.literal(true) });
+
+registry.registerPath({
+  method: "post",
+  path: "/api/account/export",
+  summary: "Download a full data export for the calling account",
+  description:
+    "Generates a JSON file containing all personal data and data from teams the account owns. Rate-limited to one successful export per 24 hours. Encrypted secrets are omitted.",
+  tags: ["GDPR"],
+  responses: {
+    200: {
+      description: "JSON file download (Content-Disposition: attachment)",
+      content: { "application/json": { schema: z.unknown() } },
+    },
+    401: { description: "Unauthorized", content: { "application/json": { schema: ErrorResponse } } },
+    404: { description: "Account not found", content: { "application/json": { schema: ErrorResponse } } },
+    429: { description: "Export already generated within last 24h", content: { "application/json": { schema: ErrorResponse } } },
+    500: { description: "Export failed", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/account/delete-request",
+  summary: "Schedule a permanent account deletion",
+  description:
+    "Marks the calling account for hard deletion after a 30-day grace period and deactivates it immediately. Refuses with 409 if the user is the sole owner of a team that still has other active members.",
+  tags: ["GDPR"],
+  responses: {
+    200: {
+      description: "Deletion scheduled",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.literal(true),
+            deletion_requested_at: z.string().datetime(),
+            grace_period_days: z.number(),
+          }),
+        },
+      },
+    },
+    401: { description: "Unauthorized", content: { "application/json": { schema: ErrorResponse } } },
+    404: { description: "Account not found", content: { "application/json": { schema: ErrorResponse } } },
+    409: {
+      description: "Already scheduled, or ownership transfer required",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.literal(false),
+            error: z.string(),
+            blocking_teams: z
+              .array(
+                z.object({
+                  team_id: z.string().uuid(),
+                  team_name: z.string(),
+                  other_active_members: z.number(),
+                }),
+              )
+              .optional(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/account/delete-cancel",
+  summary: "Cancel a pending account deletion",
+  description: "Clears the deletion request if the grace period has not yet expired.",
+  tags: ["GDPR"],
+  responses: {
+    200: { description: "Deletion cancelled", content: { "application/json": { schema: SuccessResponse } } },
+    400: { description: "No pending deletion", content: { "application/json": { schema: ErrorResponse } } },
+    401: { description: "Unauthorized", content: { "application/json": { schema: ErrorResponse } } },
+    404: { description: "Account not found", content: { "application/json": { schema: ErrorResponse } } },
+    410: { description: "Grace period expired", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/account/cookie-consent",
+  summary: "Record server-side cookie consent for the calling account",
+  description:
+    "Mirrors the client-side cookie into the account row so the controller has a server-side audit trail. Returns 204 for unauthenticated visitors.",
+  tags: ["GDPR"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            analytics: z.boolean(),
+            marketing: z.boolean(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Consent recorded",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.literal(true),
+            consent: z.object({
+              essential: z.literal(true),
+              analytics: z.boolean(),
+              marketing: z.boolean(),
+              ts: z.string().datetime(),
+              version: z.number(),
+            }),
+          }),
+        },
+      },
+    },
+    204: { description: "Unauthenticated — consent stays in cookie only" },
+    400: { description: "Invalid body", content: { "application/json": { schema: ErrorResponse } } },
+  },
+});
