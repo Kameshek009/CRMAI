@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/crm/with-api-handler";
 import { isHubSpotConfigured } from "@/lib/importers/hubspot/oauth";
 import { isAmoCRMConfigured } from "@/lib/importers/amocrm/oauth";
+import { isBitrix24Configured } from "@/lib/importers/bitrix24/oauth";
 import { getOAuthConnection } from "@/lib/oauth/tokens";
 
 interface ProviderStatus {
@@ -21,9 +22,10 @@ interface ProviderStatus {
 export const GET = withApiHandler(
   { permission: { resource: "contacts", action: "read" }, logTag: "Importer" },
   async (_request, ctx) => {
-    const [hubspotConn, amocrmConn] = await Promise.all([
+    const [hubspotConn, amocrmConn, bitrix24Conn] = await Promise.all([
       getOAuthConnection(ctx.workspaceId, "hubspot"),
       getOAuthConnection(ctx.workspaceId, "amocrm"),
+      getOAuthConnection(ctx.workspaceId, "bitrix24"),
     ]);
 
     const data: ProviderStatus[] = [
@@ -46,10 +48,10 @@ export const GET = withApiHandler(
       {
         id: "bitrix24",
         label: "Bitrix24",
-        configured: false,
-        connected: false,
-        connected_at: null,
-        connection_metadata: null,
+        configured: isBitrix24Configured(),
+        connected: Boolean(bitrix24Conn),
+        connected_at: (bitrix24Conn?.metadata?.connected_at as string) ?? null,
+        connection_metadata: bitrix24Conn?.metadata ?? null,
       },
       {
         id: "salesforce",

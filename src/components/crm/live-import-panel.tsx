@@ -95,6 +95,15 @@ export function LiveImportPanel({ open, onOpenChange, onComplete }: LiveImportPa
   }, [activeJob, onComplete, t]);
 
   const startConnect = (providerId: ProviderId) => {
+    if (providerId === "bitrix24") {
+      const portal = window.prompt(
+        "Enter your Bitrix24 portal domain (e.g. mycompany.bitrix24.ru):",
+      );
+      if (!portal) return;
+      const trimmed = portal.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+      window.location.href = `/api/oauth/importers/bitrix24/start?portal=${encodeURIComponent(trimmed)}&return_to=/dashboard/contacts`;
+      return;
+    }
     window.location.href = `/api/oauth/importers/${providerId}/start?return_to=/dashboard/contacts`;
   };
 
