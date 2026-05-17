@@ -304,6 +304,23 @@
       "disconnectSuccess": "Google disconnected",
       "notConfigured": "Google OAuth is not configured on this server. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET.",
       "scopesIncluded": "Gmail read, Gmail metadata, Calendar events"
+    },
+    "microsoft": {
+      "title": "Microsoft 365 (Outlook)",
+      "description": "Connect Outlook to pull inbound emails into this workspace.",
+      "connect": "Connect Microsoft",
+      "connecting": "Redirecting...",
+      "disconnect": "Disconnect",
+      "disconnecting": "Disconnecting...",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "connectedAs": "Connected as {email}",
+      "connectedSince": "Since {date}",
+      "connectFailed": "Connection failed: {error}",
+      "disconnectFailed": "Failed to disconnect",
+      "disconnectSuccess": "Microsoft disconnected",
+      "notConfigured": "Microsoft OAuth is not configured on this server. Set MICROSOFT_OAUTH_CLIENT_ID and MICROSOFT_OAUTH_CLIENT_SECRET.",
+      "scopesIncluded": "Mail read, Calendar read/write"
     }
   },
   "groups": {

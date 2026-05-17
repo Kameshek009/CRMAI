@@ -36,6 +36,16 @@ interface GoogleStatus {
   connected_at?: string | null;
 }
 
+interface MicrosoftStatus {
+  configured: boolean;
+  connected: boolean;
+  email?: string | null;
+  name?: string | null;
+  scopes?: string[];
+  connected_at?: string | null;
+  inbox_subscribed?: boolean;
+}
+
 export function IntegrationsSection() {
   const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
@@ -61,6 +71,66 @@ export function IntegrationsSection() {
   const [googleBusy, setGoogleBusy] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Microsoft integration state
+  const [microsoftStatus, setMicrosoftStatus] = useState<MicrosoftStatus | null>(null);
+  const [microsoftLoaded, setMicrosoftLoaded] = useState(false);
+  const [microsoftBusy, setMicrosoftBusy] = useState(false);
+
+  const loadMicrosoftStatus = () => {
+    fetch("/api/oauth/microsoft/status")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data) setMicrosoftStatus(json.data as MicrosoftStatus);
+      })
+      .catch(() => {})
+      .finally(() => setMicrosoftLoaded(true));
+  };
+
+  useEffect(() => {
+    loadMicrosoftStatus();
+  }, []);
+
+  useEffect(() => {
+    const status = searchParams.get("microsoft_oauth");
+    if (!status) return;
+    if (status === "connected") {
+      toast.success(t("settings.integrations.microsoft.connected"));
+    } else {
+      const msg = searchParams.get("microsoft_oauth_message") || "";
+      toast.error(t("settings.integrations.microsoft.connectFailed", { error: msg || "unknown" }));
+    }
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("microsoft_oauth");
+    params.delete("microsoft_oauth_message");
+    const next = params.toString();
+    router.replace(next ? `?${next}` : "?tab=integrations");
+    loadMicrosoftStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const handleConnectMicrosoft = () => {
+    setMicrosoftBusy(true);
+    window.location.href = "/api/oauth/microsoft/start?return_to=/dashboard/account?tab=integrations";
+  };
+
+  const handleDisconnectMicrosoft = async () => {
+    setMicrosoftBusy(true);
+    try {
+      const res = await fetch("/api/oauth/microsoft/disconnect", { method: "POST" });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(t("settings.integrations.microsoft.disconnectSuccess"));
+        setMicrosoftStatus((prev) => prev ? { ...prev, connected: false, email: null, name: null } : prev);
+      } else {
+        toast.error(json.error || t("settings.integrations.microsoft.disconnectFailed"));
+      }
+    } catch {
+      toast.error(t("settings.integrations.microsoft.disconnectFailed"));
+    } finally {
+      setMicrosoftBusy(false);
+    }
+  };
 
   const loadGoogleStatus = () => {
     fetch("/api/oauth/google/status")
@@ -316,6 +386,59 @@ export function IntegrationsSection() {
               <Button variant="outline" onClick={handleDisconnectGoogle} disabled={googleBusy}>
                 {googleBusy && <Loader2 className="size-4 mr-1.5 animate-spin" />}
                 {googleBusy ? t("settings.integrations.google.disconnecting") : t("settings.integrations.google.disconnect")}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Microsoft 365 (Outlook) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Mail className="size-4" />
+            {t("settings.integrations.microsoft.title")}
+            {microsoftLoaded && microsoftStatus && (
+              microsoftStatus.connected
+                ? <Badge variant="default" className="text-xs gap-1"><CheckCircle2 className="size-3" />{t("settings.integrations.microsoft.connected")}</Badge>
+                : <Badge variant="secondary" className="text-xs gap-1"><XCircle className="size-3" />{t("settings.integrations.microsoft.notConnected")}</Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">{t("settings.integrations.microsoft.description")}</p>
+          <p className="text-xs text-muted-foreground">{t("settings.integrations.microsoft.scopesIncluded")}</p>
+
+          {microsoftStatus && !microsoftStatus.configured && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+              {t("settings.integrations.microsoft.notConfigured")}
+            </div>
+          )}
+
+          {microsoftStatus?.connected && microsoftStatus.email && (
+            <div className="rounded-md border p-3 space-y-1">
+              <p className="text-sm">{t("settings.integrations.microsoft.connectedAs", { email: microsoftStatus.email })}</p>
+              {microsoftStatus.connected_at && (
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.integrations.microsoft.connectedSince", { date: new Date(microsoftStatus.connected_at).toLocaleString() })}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            {!microsoftStatus?.connected ? (
+              <Button
+                onClick={handleConnectMicrosoft}
+                disabled={microsoftBusy || Boolean(microsoftStatus && !microsoftStatus.configured)}
+              >
+                {microsoftBusy && <Loader2 className="size-4 mr-1.5 animate-spin" />}
+                {microsoftBusy ? t("settings.integrations.microsoft.connecting") : t("settings.integrations.microsoft.connect")}
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={handleDisconnectMicrosoft} disabled={microsoftBusy}>
+                {microsoftBusy && <Loader2 className="size-4 mr-1.5 animate-spin" />}
+                {microsoftBusy ? t("settings.integrations.microsoft.disconnecting") : t("settings.integrations.microsoft.disconnect")}
               </Button>
             )}
           </div>

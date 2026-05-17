@@ -304,6 +304,23 @@
       "disconnectSuccess": "Google отключён",
       "notConfigured": "Google OAuth не настроен на сервере. Задайте GOOGLE_OAUTH_CLIENT_ID и GOOGLE_OAUTH_CLIENT_SECRET.",
       "scopesIncluded": "Чтение Gmail, метаданные Gmail, события Google Calendar"
+    },
+    "microsoft": {
+      "title": "Microsoft 365 (Outlook)",
+      "description": "Подключите Outlook, чтобы входящие письма попадали в это рабочее пространство.",
+      "connect": "Подключить Microsoft",
+      "connecting": "Перенаправляем...",
+      "disconnect": "Отключить",
+      "disconnecting": "Отключаем...",
+      "connected": "Подключено",
+      "notConnected": "Не подключено",
+      "connectedAs": "Подключено как {email}",
+      "connectedSince": "С {date}",
+      "connectFailed": "Ошибка подключения: {error}",
+      "disconnectFailed": "Не удалось отключить",
+      "disconnectSuccess": "Microsoft отключён",
+      "notConfigured": "Microsoft OAuth не настроен на сервере. Задайте MICROSOFT_OAUTH_CLIENT_ID и MICROSOFT_OAUTH_CLIENT_SECRET.",
+      "scopesIncluded": "Чтение почты, чтение/запись календаря"
     }
   },
   "groups": {

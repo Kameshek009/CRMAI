@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/refresh-calendar-channels",
       "schedule": "30 5 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-msgraph-subscriptions",
+      "schedule": "0 6 * * *"
     }
   ]
 }

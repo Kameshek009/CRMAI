@@ -34,6 +34,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/google/gmail",
   // Google Calendar push — verifies its own X-Goog-Channel-Token
   "/api/webhooks/google/calendar",
+  // Microsoft Graph inbox push — handshake + per-subscription clientState
+  "/api/webhooks/microsoft/inbox",
   // Desktop app auth endpoints (use their own JWT validation)
   "/api/auth/desktop/(.*)",
   // Desktop sync endpoints (use their own JWT validation)

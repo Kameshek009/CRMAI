@@ -1,8 +1,12 @@
-# Inbox / Calendar setup — Google (Gmail + Calendar)
+# Inbox / Calendar setup — Google + Microsoft
 
-This guide walks through the external GCP work needed for the Phase 1
-Inbox/Calendar feature. Outlook is intentionally out of scope for the first
-shipment.
+This guide walks through the external work needed to enable Phase 1
+Inbox/Calendar:
+- **Google** (Gmail + Google Calendar) via GCP
+- **Microsoft** (Outlook inbox) via Entra ID
+
+Both can be enabled independently. Customers will see only the providers
+you've configured on the server.
 
 Estimated time: **45–75 minutes** for a brand-new GCP project.
 
@@ -177,7 +181,72 @@ authorize → callback dance is a browser redirect, not a server-to-server push.
 
 ---
 
-## 8. Troubleshooting
+## 8. Microsoft 365 (Outlook) setup
+
+Estimated time: **15-25 minutes** for a fresh Entra (Azure AD) app.
+
+### 8.1 Register an app in Microsoft Entra
+1. Open https://entra.microsoft.com → **Applications → App registrations → New registration**.
+2. Name: `Nexxus CRM`.
+3. Supported account types: **Accounts in any organizational directory and personal Microsoft accounts**
+   (this lets both Office 365 tenants and consumer outlook.com users connect).
+4. Redirect URI: **Web** → `https://nexxuscrm.com/api/oauth/microsoft/callback`.
+   Add `http://localhost:3000/api/oauth/microsoft/callback` for local dev as a second redirect.
+5. Click **Register**. Copy the **Application (client) ID** → set as `MICROSOFT_OAUTH_CLIENT_ID`.
+
+### 8.2 Generate a client secret
+1. **Certificates & secrets → New client secret** → expiration 24 months.
+2. Copy the **Value** (not the ID) → set as `MICROSOFT_OAUTH_CLIENT_SECRET`.
+   It's only visible once; if you miss it, generate a new one.
+
+### 8.3 API permissions
+**API permissions → Add a permission → Microsoft Graph → Delegated permissions**, add:
+- `openid`, `email`, `profile`, `offline_access`
+- `Mail.Read` (inbox)
+- `Calendars.ReadWrite` (calendar — for future calendar sync)
+
+Click **Grant admin consent for ...** if you're an org admin. End-user
+consent works without this; admin consent is only needed for org-wide
+deployments.
+
+### 8.4 Webhook (Graph subscriptions)
+Unlike Gmail, Microsoft Graph posts notifications directly to your HTTPS
+endpoint — no Pub/Sub topic needed. The deployment auto-creates
+subscriptions on user connect.
+
+Push URL (registered automatically): `${NEXT_PUBLIC_APP_URL}/api/webhooks/microsoft/inbox`
+
+Graph fires a one-time **validation request** when a subscription is
+created (GET with `?validationToken=xxx`); our route handler echoes the
+token as plain text within 10 seconds. If the validation fails (e.g. your
+deployment isn't reachable from the public internet), subscription
+creation is rejected and the OAuth flow still completes — the daily
+`refresh-msgraph-subscriptions` cron will retry once the URL becomes
+reachable.
+
+### 8.5 Verification checklist
+- [ ] `MICROSOFT_OAUTH_CLIENT_ID`, `MICROSOFT_OAUTH_CLIENT_SECRET`,
+      `NEXT_PUBLIC_APP_URL` set in production
+- [ ] Redirect URI registered exactly: `https://<app>/api/oauth/microsoft/callback`
+- [ ] Delegated scopes include `Mail.Read` + `offline_access`
+- [ ] Test user signs in via `/dashboard/account?tab=integrations`, sees
+      Connected state with their email
+- [ ] `oauth_tokens` row exists for `(team_id, provider='microsoft', provider_user_id=<id>)`
+- [ ] `metadata.outlook_inbox.subscription_id` present (subscription created)
+
+### 8.6 Common pitfalls
+- **`AADSTS50011: The reply URL specified in the request does not match`** —
+  the redirect URI in Entra must match `NEXT_PUBLIC_APP_URL/api/oauth/microsoft/callback`
+  byte-for-byte (scheme, trailing slash absence).
+- **Subscription validation fails** — Graph couldn't reach your webhook in
+  under 10 seconds. Common causes: cold-start latency on serverless,
+  upstream proxy/firewall, or a typo in `NEXT_PUBLIC_APP_URL`.
+- **`Invalid client secret`** — secret expired or was rotated; create a new
+  one in Entra and update Vercel env.
+
+---
+
+## 9. Troubleshooting
 
 - **`redirect_uri_mismatch`** at consent — the redirect URI in Cloud Console
   must match `NEXT_PUBLIC_APP_URL/api/oauth/google/callback` byte-for-byte,
