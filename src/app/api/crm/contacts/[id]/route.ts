@@ -10,6 +10,7 @@ import { logger } from "@/lib/logger";
 export const GET = withApiHandler(
   {
     permission: { resource: "contacts", action: "read" },
+    bearerScopes: ["contacts:read"],
     logTag: "Contacts",
   },
   async (_request, ctx, { routeParams }) => {
@@ -38,6 +39,7 @@ export const GET = withApiHandler(
 export const PATCH = withApiHandler(
   {
     permission: { resource: "contacts", action: "update" },
+    bearerScopes: ["contacts:update"],
     bodySchema: updateContactSchema,
     logTag: "Contacts",
   },

@@ -10,6 +10,7 @@ import { logger } from "@/lib/logger";
 export const GET = withApiHandler(
   {
     permission: { resource: "contacts", action: "read" },
+    bearerScopes: ["contacts:read"],
     logTag: "Contacts",
   },
   async (request, ctx) => {
@@ -36,6 +37,7 @@ export const GET = withApiHandler(
 export const POST = withApiHandler(
   {
     permission: { resource: "contacts", action: "create" },
+    bearerScopes: ["contacts:create"],
     featureLimit: "contacts",
     bodySchema: createContactSchema,
     logTag: "Contacts",

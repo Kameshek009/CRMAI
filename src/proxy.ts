@@ -59,6 +59,16 @@ export default clerkMiddleware(async (auth, request) => {
       }
     }
 
+    // Nexxus public API keys: any /api/* request with `Authorization: Bearer
+    // nxk_live_*` is handed off to the route handler (withApiHandler) which
+    // calls verifyBearerToken. Clerk session check is skipped here.
+    if (isApiRoute(request)) {
+      const authHeader = request.headers.get("Authorization");
+      if (authHeader?.startsWith("Bearer nxk_live_")) {
+        return;
+      }
+    }
+
     // Protect all other routes with Clerk session auth
     await auth.protect();
   } catch {

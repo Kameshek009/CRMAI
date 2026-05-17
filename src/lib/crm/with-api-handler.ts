@@ -134,7 +134,14 @@ import type { WorkspaceContext, WorkspacePermissions } from "@/types/team";
 import type { FeatureLimitKey } from "@/types";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { verifyBearerToken } from "@/lib/api-auth/bearer-token";
+import { buildApiKeyContext } from "@/lib/api-auth/api-key-context";
 import { z } from "zod";
+
+function looksLikeBearer(request: NextRequest): boolean {
+  const h = request.headers.get("Authorization");
+  return Boolean(h?.startsWith("Bearer nxk_live_"));
+}
 
 // ---------------------------------------------------------------------------
 // ApiError — throw this inside handlers for controlled error responses
@@ -198,6 +205,17 @@ export interface ApiHandlerOptions<
    * Prevents DoS via oversized payloads. Set to 0 to disable.
    */
   maxBodySize?: number;
+
+  /**
+   * Scopes required when the request is authenticated via API key
+   * (Authorization: Bearer nxk_live_*). Setting this opts the route in
+   * to public API access; absence means bearer requests are rejected with
+   * a Clerk-redirect from middleware, as before. Clerk-session requests
+   * continue to use the `permission` check above.
+   *
+   * Example: `bearerScopes: ["contacts:read"]`
+   */
+  bearerScopes?: readonly string[];
 }
 
 /**
@@ -278,9 +296,14 @@ export function withApiHandler<
         }
       }
 
-      // ── 0c. CSRF protection for mutating methods ───────────────────────
+      // ── 0c. Auth mode detection ───────────────────────────────────────
+      const useBearer = looksLikeBearer(request);
+
+      // ── 0d. CSRF protection for mutating methods ───────────────────────
+      // Skipped for bearer-authed requests — they are not browser-cookie
+      // auth, so the same-origin invariant does not apply.
       const method = request.method.toUpperCase();
-      if (["POST", "PATCH", "PUT", "DELETE"].includes(method)) {
+      if (!useBearer && ["POST", "PATCH", "PUT", "DELETE"].includes(method)) {
         const origin = request.headers.get("origin");
         if (origin) {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -301,18 +324,38 @@ export function withApiHandler<
       }
 
       // ── 1. Authentication & workspace resolution ──────────────────────
-      const { context, error: ctxError } = await getWorkspaceContext();
-      if (ctxError) return ctxError;
+      let context: WorkspaceContext;
+      if (useBearer) {
+        if (!options.bearerScopes) {
+          return NextResponse.json(
+            { success: false, error: "API key authentication is not enabled for this endpoint" },
+            { status: 401 },
+          );
+        }
+        const auth = await verifyBearerToken(request, { requireScopes: options.bearerScopes });
+        if (!auth.ok) {
+          const status = auth.reason === "insufficient_scope" ? 403 : 401;
+          return NextResponse.json(
+            { success: false, error: `API key: ${auth.reason}`, missing: "missing" in auth ? auth.missing : undefined },
+            { status },
+          );
+        }
+        context = await buildApiKeyContext(auth);
+      } else {
+        const { context: clerkCtx, error: ctxError } = await getWorkspaceContext();
+        if (ctxError) return ctxError;
+        context = clerkCtx;
 
-      // ── 2. Permission check (optional) ────────────────────────────────
-      if (options.permission) {
-        const permError = requirePermission(
-          context.permissions,
-          options.permission.resource,
-          options.permission.action,
-          context.isOwner,
-        );
-        if (permError) return permError;
+        // ── 2. Permission check (Clerk path only) ───────────────────────
+        if (options.permission) {
+          const permError = requirePermission(
+            context.permissions,
+            options.permission.resource,
+            options.permission.action,
+            context.isOwner,
+          );
+          if (permError) return permError;
+        }
       }
 
       // ── 3. Feature limit check (optional) ────────────────────────────

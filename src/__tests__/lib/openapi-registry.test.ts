@@ -53,4 +53,15 @@ describe("OpenAPI document", () => {
     expect(post.responses!["400"]).toBeDefined();
     expect(post.responses!["401"]).toBeDefined();
   });
+
+  it("declares per-route apiKey security with required scopes", () => {
+    const get = doc.paths!["/api/crm/contacts"]!.get!;
+    expect(get.security).toEqual([{ apiKey: ["contacts:read"] }]);
+
+    const post = doc.paths!["/api/crm/contacts"]!.post!;
+    expect(post.security).toEqual([{ apiKey: ["contacts:create"] }]);
+
+    const patch = doc.paths!["/api/crm/contacts/{id}"]!.patch!;
+    expect(patch.security).toEqual([{ apiKey: ["contacts:update"] }]);
+  });
 });

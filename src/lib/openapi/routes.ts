@@ -58,6 +58,7 @@ registry.registerPath({
   description:
     "Returns contacts for the caller's workspace. Supports pagination, search, and sorting via query params.",
   tags: ["Contacts"],
+  security: [{ apiKey: ["contacts:read"] }],
   request: {
     query: z.object({
       page: z.coerce.number().int().min(1).optional(),
@@ -83,6 +84,7 @@ registry.registerPath({
   description:
     "Creates a new contact in the caller's workspace. Triggers automations and writes an audit log entry.",
   tags: ["Contacts"],
+  security: [{ apiKey: ["contacts:create"] }],
   request: {
     body: {
       required: true,
@@ -106,6 +108,7 @@ registry.registerPath({
   path: "/api/crm/contacts/{id}",
   summary: "Get a contact by ID",
   tags: ["Contacts"],
+  security: [{ apiKey: ["contacts:read"] }],
   request: {
     params: z.object({ id: z.string().uuid() }),
   },
@@ -126,6 +129,7 @@ registry.registerPath({
   description:
     "Partial update. Only provided fields are changed; audit log records the diff.",
   tags: ["Contacts"],
+  security: [{ apiKey: ["contacts:update"] }],
   request: {
     params: z.object({ id: z.string().uuid() }),
     body: {
