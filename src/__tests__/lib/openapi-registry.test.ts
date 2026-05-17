@@ -1,9 +1,14 @@
-import { describe, it, expect } from "vitest";
-import { buildOpenAPIDocument } from "@/lib/openapi/registry";
-import "@/lib/openapi/routes";
+import { describe, it, expect, beforeAll } from "vitest";
+import { buildOpenAPIDocument, __resetOpenApiRegistry } from "@/lib/openapi/registry";
 
 describe("OpenAPI document", () => {
-  const doc = buildOpenAPIDocument();
+  // The registry is a module-level singleton, but tests in the same vitest
+  // worker can run after other suites that touch it; reset and rebuild once.
+  let doc: Awaited<ReturnType<typeof buildOpenAPIDocument>>;
+  beforeAll(async () => {
+    __resetOpenApiRegistry();
+    doc = await buildOpenAPIDocument();
+  });
 
   it("is OpenAPI 3.1.0", () => {
     expect(doc.openapi).toBe("3.1.0");
@@ -29,6 +34,13 @@ describe("OpenAPI document", () => {
     expect(doc.components?.schemas?.CreateContactRequest).toBeDefined();
     expect(doc.components?.schemas?.UpdateContactRequest).toBeDefined();
     expect(doc.components?.schemas?.ErrorResponse).toBeDefined();
+  });
+
+  it("declares the bearer apiKey security scheme", () => {
+    expect(doc.components?.securitySchemes?.apiKey).toMatchObject({
+      type: "http",
+      scheme: "bearer",
+    });
   });
 
   it("tags contacts endpoints with the Contacts tag", () => {

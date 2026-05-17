@@ -1,6 +1,12 @@
 import { z } from "zod";
-import { registry } from "./registry";
+import { getRegistry } from "./registry";
 import { createContactSchema, updateContactSchema } from "@/lib/crm/validation";
+
+// Registration runs at module load — but ONLY when this module is imported,
+// which happens inside `buildOpenAPIDocument()` after the registry has been
+// initialised. Tests and the API route both go through that entry point.
+
+const registry = getRegistry();
 
 const ErrorResponse = registry.register(
   "ErrorResponse",
@@ -49,7 +55,8 @@ registry.registerPath({
   method: "get",
   path: "/api/crm/contacts",
   summary: "List contacts",
-  description: "Returns contacts for the caller's workspace. Supports pagination, search, and sorting via query params.",
+  description:
+    "Returns contacts for the caller's workspace. Supports pagination, search, and sorting via query params.",
   tags: ["Contacts"],
   request: {
     query: z.object({
@@ -73,7 +80,8 @@ registry.registerPath({
   method: "post",
   path: "/api/crm/contacts",
   summary: "Create a contact",
-  description: "Creates a new contact in the caller's workspace. Triggers automations and writes an audit log entry.",
+  description:
+    "Creates a new contact in the caller's workspace. Triggers automations and writes an audit log entry.",
   tags: ["Contacts"],
   request: {
     body: {
@@ -115,7 +123,8 @@ registry.registerPath({
   method: "patch",
   path: "/api/crm/contacts/{id}",
   summary: "Update a contact",
-  description: "Partial update. Only provided fields are changed; audit log records the diff.",
+  description:
+    "Partial update. Only provided fields are changed; audit log records the diff.",
   tags: ["Contacts"],
   request: {
     params: z.object({ id: z.string().uuid() }),
