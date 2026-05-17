@@ -36,6 +36,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/google/calendar",
   // Microsoft Graph inbox push — handshake + per-subscription clientState
   "/api/webhooks/microsoft/inbox",
+  // Twilio voice status + TwiML — verifies its own X-Twilio-Signature
+  "/api/webhooks/twilio/(.*)",
   // Desktop app auth endpoints (use their own JWT validation)
   "/api/auth/desktop/(.*)",
   // Desktop sync endpoints (use their own JWT validation)
